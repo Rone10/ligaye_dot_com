@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, Menu } from 'lucide-react';
+import {  Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-
+import Link from 'next/link';
 const navItems = [
   { label: 'Find Jobs', href: '/jobs' },
   { label: 'Tenders', href: '/tenders' },
@@ -21,16 +21,16 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b container mx-auto bg-white">
       <div className=" w-full mx-auto flex h-16 items-center justify-between">
      
-        <a href="/" className="text-xl font-bold text-blue-600">Ligaye.com</a>
+        <Link href="/" className="text-xl font-bold text-blue-600">Ligaye.com</Link>
         <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
           {navItems.map((item) => (
-            <a
+            <Link
               key={item.href}
               href={item.href}
               className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="hidden md:flex items-center space-x-4">
