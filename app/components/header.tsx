@@ -18,7 +18,7 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b container mx-auto bg-white">
+    <header className="sticky top-0 z-50 w-full border-b container mx-auto bg-white px-1">
       <div className=" w-full mx-auto flex h-16 items-center justify-between">
      
         <Link href="/" className="text-xl font-bold text-blue-600">Ligaye.com</Link>
