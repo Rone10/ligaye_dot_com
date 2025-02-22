@@ -21,7 +21,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b container mx-auto bg-white">
       <div className=" w-full mx-auto flex h-16 items-center justify-between">
      
-        <a href="/" className="text-xl font-bold text-blue-600">JobBoard</a>
+        <a href="/" className="text-xl font-bold text-blue-600">Ligaye.com</a>
         <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
           {navItems.map((item) => (
             <a

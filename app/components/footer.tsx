@@ -22,9 +22,9 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Twitter, href: 'https://twitter.com/jobboard' },
-  { icon: Linkedin, href: 'https://linkedin.com/company/jobboard' },
-  { icon: Facebook, href: 'https://facebook.com/jobboard' },
+  { icon: Twitter, href: 'https://twitter.com/Ligaye.com' },
+  { icon: Linkedin, href: 'https://linkedin.com/company/Ligaye.com' },
+  { icon: Facebook, href: 'https://facebook.com/Ligaye.com' },
 ];
 
 export function Footer() {
@@ -33,7 +33,7 @@ export function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <a href="/" className="text-xl font-bold text-blue-600">JobBoard</a>
+            <a href="/" className="text-xl font-bold text-blue-600">Ligaye.com</a>
             <p className="mt-2 text-gray-600">Find your dream job today</p>
           </div>
 
@@ -85,7 +85,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t pt-8 text-center text-gray-600">
-          © 2025 JobBoard. All rights reserved.
+          © 2025 Ligaye.com. All rights reserved.
         </div>
       </div>
     </footer>

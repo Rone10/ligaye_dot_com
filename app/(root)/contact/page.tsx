@@ -155,8 +155,8 @@ export default function ContactPage() {
                   <Mail className="w-5 h-5 text-blue-600 mt-1" />
                   <div>
                     <h3 className="font-medium">Email</h3>
-                    <a href="mailto:info@jobboard.com" className="text-blue-600 hover:underline">
-                      info@jobboard.com
+                    <a href="mailto:info@Ligaye.com.com" className="text-blue-600 hover:underline">
+                      info@Ligaye.com.com
                     </a>
                   </div>
                 </div>
