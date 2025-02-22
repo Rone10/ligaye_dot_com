@@ -108,7 +108,7 @@ importers:
         specifier: 10.4.15
         version: 10.4.15(postcss@8.4.30)
       class-variance-authority:
-        specifier: ^0.7.0
+        specifier: ^0.7.1
         version: 0.7.1
       clsx:
         specifier: ^2.1.1
@@ -168,7 +168,7 @@ importers:
         specifier: ^1.5.0
         version: 1.7.4(react-dom@18.2.0(react@19.0.0))(react@19.0.0)
       tailwind-merge:
-        specifier: ^2.5.2
+        specifier: ^2.6.0
         version: 2.6.0
       tailwindcss:
         specifier: 3.3.3
