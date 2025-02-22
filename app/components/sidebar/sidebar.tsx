@@ -11,6 +11,7 @@ import {
   HelpCircle,
   LogOut
 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { SidebarItem } from './sidebar-item';
 import { UserInfo } from './user-info';
 
@@ -18,8 +19,7 @@ const sidebarItems = [
   {
     icon: Home,
     label: 'Dashboard',
-    href: '/candidate/dashboard',
-    active: true
+    href: '/candidate/dashboard'
   },
   {
     icon: FileText,
@@ -29,7 +29,7 @@ const sidebarItems = [
   {
     icon: Bookmark,
     label: 'Saved Jobs',
-    href: '/candidate/saved'
+    href: '/candidate/saved-jobs'
   },
   {
     icon: Search,
@@ -49,7 +49,28 @@ const sidebarItems = [
   }
 ] as const;
 
+const bottomItems = [
+  {
+    icon: Settings,
+    label: 'Settings',
+    href: '/settings'
+  },
+  {
+    icon: HelpCircle,
+    label: 'Help/Support',
+    href: '/support'
+  },
+  {
+    icon: LogOut,
+    label: 'Logout',
+    href: '/logout',
+    variant: 'danger' as const
+  }
+] as const;
+
 export function Sidebar() {
+  const pathname = usePathname();
+
   return (
     <aside className="fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200 hidden lg:flex lg:flex-col">
       {/* Logo */}
@@ -63,28 +84,23 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-1">
         {sidebarItems.map((item) => (
-          <SidebarItem key={item.label} {...item} />
+          <SidebarItem 
+            key={item.label} 
+            {...item} 
+            active={pathname === item.href}
+          />
         ))}
       </nav>
 
       {/* Bottom Items */}
       <div className="border-t p-4 space-y-1">
-        <SidebarItem 
-          icon={Settings}
-          label="Settings"
-          href="/settings"
-        />
-        <SidebarItem
-          icon={HelpCircle}
-          label="Help/Support"
-          href="/support"
-        />
-        <SidebarItem
-          icon={LogOut}
-          label="Logout"
-          href="/logout"
-          variant="danger"
-        />
+        {bottomItems.map((item) => (
+          <SidebarItem
+            key={item.label}
+            {...item}
+            active={pathname === item.href}
+          />
+        ))}
       </div>
     </aside>
   );

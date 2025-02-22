@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { BlogPost, BlogCategory } from '../types/blog';
+import { BlogPost, BlogCategory } from '../../types/blog';
 
 const mockPosts: BlogPost[] = [
   {
