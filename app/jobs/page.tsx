@@ -1,25 +1,26 @@
 import { Suspense } from 'react';
-import { Header } from './components/header';
-import { SearchSection } from './components/search-section';
-import { Filters } from './components/filters';
-import { JobCard } from './components/job-card';
+import { Header } from '@/app/components/header';
+import { SearchSection } from '@/app/components/search-section';
+import { Filters } from '@/app/components/filters';
+import { JobCard } from '@/app/components/job-card';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { SlidersHorizontal } from 'lucide-react';
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectTrigger, SelectValue, SelectItem, SelectContent } from '@/components/ui/select'
+import { JobPosting, JobType, WorkLocation, ExperienceLevel } from '@/app/types';
 
 // Mock data for demonstration
-const mockJobs = [
+const mockJobs: JobPosting[] = [
   {
     id: '1',
     title: 'Senior Frontend Developer',
     company: 'TechCorp',
     location: 'San Francisco, CA',
-    type: 'Full-Time',
-    workLocation: 'Remote',
-    experienceLevel: 'Senior',
+    type: 'Full-Time' as JobType,
+    workLocation: 'Remote' as WorkLocation,
+    experienceLevel: 'Senior' as ExperienceLevel,
     description: 'We are looking for a Senior Frontend Developer to join our team and help build amazing user experiences.',
     skills: ['React', 'TypeScript', 'Next.js', 'Tailwind'],
     salaryRange: { min: 120000, max: 180000 },
@@ -30,15 +31,15 @@ const mockJobs = [
     title: 'Full Stack Engineer',
     company: 'StartupX',
     location: 'New York, NY',
-    type: 'Full-Time',
-    workLocation: 'Hybrid',
-    experienceLevel: 'Mid',
+    type: 'Full-Time' as JobType,
+    workLocation: 'Hybrid' as WorkLocation,
+    experienceLevel: 'Mid' as ExperienceLevel,
     description: 'Join our fast-growing startup as a Full Stack Engineer and work on cutting-edge technologies.',
     skills: ['Node.js', 'React', 'PostgreSQL', 'AWS'],
     salaryRange: { min: 100000, max: 150000 },
     postedDate: new Date('2024-03-21'),
   },
-] as const;
+]
 
 function JobCardSkeleton() {
   return (
