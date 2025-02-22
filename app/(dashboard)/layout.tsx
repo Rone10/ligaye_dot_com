@@ -43,10 +43,10 @@ const candidateNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/candidate/dashboard', icon: LayoutDashboard },
   { label: 'Find Jobs', href: '/jobs', icon: Search },
   { label: 'My Applications', href: '/candidate/applications', icon: BookMarked },
-  { label: 'My Resume', href: '/candidate/resume', icon: GraduationCap },
-  { label: 'Saved Jobs', href: '/candidate/saved', icon: Heart },
+  { label: 'My Resume', href: '#', icon: GraduationCap },
+  { label: 'Saved Jobs', href: '#', icon: Heart },
   // { label: 'Messages', href: '/candidate/messages', icon: MessageSquare },
-  { label: 'Settings', href: '/candidate/settings', icon: Settings },
+  { label: 'Settings', href: '#', icon: Settings },
 ];
 
 export default function DashboardLayout({
