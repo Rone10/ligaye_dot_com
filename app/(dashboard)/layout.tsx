@@ -31,7 +31,7 @@ const employerNavItems: NavItem[] = [
   { label: 'Applicants', href: '/employer/applicants', icon: Users },
   { label: 'Company Profile', href: '/employer/company', icon: Building2 },
   { label: 'Tenders', href: '/employer/tenders', icon: FileSpreadsheet },
-  { label: 'Messages', href: '/employer/messages', icon: MessageSquare },
+  // { label: 'Messages', href: '/employer/messages', icon: MessageSquare },
   { label: 'Settings', href: '/employer/settings', icon: Settings },
 ];
 
@@ -41,7 +41,7 @@ const candidateNavItems: NavItem[] = [
   { label: 'My Applications', href: '/candidate/applications', icon: BookMarked },
   { label: 'My Resume', href: '/candidate/resume', icon: GraduationCap },
   { label: 'Saved Jobs', href: '/candidate/saved', icon: Heart },
-  { label: 'Messages', href: '/candidate/messages', icon: MessageSquare },
+  // { label: 'Messages', href: '/candidate/messages', icon: MessageSquare },
   { label: 'Settings', href: '/candidate/settings', icon: Settings },
 ];
 
