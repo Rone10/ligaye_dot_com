@@ -1,16 +1,11 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { MapPin } from 'lucide-react';
+import type { JobPosting } from '@/app/types';
 
-export function SimilarJobs({ jobs }: { jobs: any[] }) {
+export function SimilarJobs({ jobs }: { jobs: JobPosting[] }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.1 }}
-      className="bg-white rounded-lg border p-6"
-    >
+    <div className="bg-white rounded-lg border p-6">
       <h2 className="text-xl font-semibold mb-6">Similar Jobs</h2>
 
       <div className="space-y-4">
@@ -26,12 +21,12 @@ export function SimilarJobs({ jobs }: { jobs: any[] }) {
                   <MapPin className="w-4 h-4" />
                   <span>{job.location}</span>
                 </div>
-                <span>${job.salary.min.toLocaleString()} - ${job.salary.max.toLocaleString()}</span>
+                <span>${job.salaryRange.min.toLocaleString()} - ${job.salaryRange.max.toLocaleString()}</span>
               </div>
             </a>
           </div>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 }

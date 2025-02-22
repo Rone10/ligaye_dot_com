@@ -2,15 +2,11 @@
 
 import { Building2, MapPin, Clock, DollarSign, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
+import type { JobDetails } from '@/app/actions/jobs';
 
-export function JobHeader({ job }: { job: any }) {
+export function JobHeader({ job }: { job: JobDetails }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-lg border p-6"
-    >
+    <div className="bg-white rounded-lg border p-6">
       <div className="flex gap-4">
         <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
           <Building2 className="w-8 h-8 text-gray-400" />
@@ -34,7 +30,7 @@ export function JobHeader({ job }: { job: any }) {
             </div>
             <div className="flex items-center gap-1">
               <DollarSign className="w-4 h-4" />
-              <span>${job.salary.min.toLocaleString()} - ${job.salary.max.toLocaleString()}/year</span>
+              <span>${job.salaryRange.min.toLocaleString()} - ${job.salaryRange.max.toLocaleString()}/year</span>
             </div>
           </div>
         </div>
@@ -47,6 +43,6 @@ export function JobHeader({ job }: { job: any }) {
           Save Job
         </Button>
       </div>
-    </motion.div>
+    </div>
   );
 }

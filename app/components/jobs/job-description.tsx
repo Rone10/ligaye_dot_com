@@ -1,15 +1,10 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import type { JobDetails } from '@/app/actions/jobs';
 
-export function JobDescription({ job }: { job: any }) {
+export function JobDescription({ job }: { job: JobDetails }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
-      className="bg-white rounded-lg border p-6"
-    >
+    <div className="bg-white rounded-lg border p-6">
       <h2 className="text-xl font-semibold mb-4">Job Description</h2>
       <p className="text-gray-600 mb-6">{job.description}</p>
 
@@ -17,7 +12,7 @@ export function JobDescription({ job }: { job: any }) {
         <div>
           <h3 className="text-lg font-medium mb-3">Responsibilities:</h3>
           <ul className="list-disc list-inside space-y-2 text-gray-600">
-            {job.responsibilities.map((item: string, index: number) => (
+            {job.responsibilities.map((item, index) => (
               <li key={index}>{item}</li>
             ))}
           </ul>
@@ -26,12 +21,12 @@ export function JobDescription({ job }: { job: any }) {
         <div>
           <h3 className="text-lg font-medium mb-3">Requirements:</h3>
           <ul className="list-disc list-inside space-y-2 text-gray-600">
-            {job.requirements.map((item: string, index: number) => (
+            {job.requirements.map((item, index) => (
               <li key={index}>{item}</li>
             ))}
           </ul>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

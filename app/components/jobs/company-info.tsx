@@ -1,16 +1,11 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Globe, Linkedin } from 'lucide-react';
+import type { JobDetails } from '@/app/actions/jobs';
 
-export function CompanyInfo({ company }: { company: any }) {
+export function CompanyInfo({ company }: { company: JobDetails['company'] }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-      className="bg-white rounded-lg border p-6"
-    >
+    <div className="bg-white rounded-lg border p-6">
       <h2 className="text-xl font-semibold mb-4">About {company.name}</h2>
       <p className="text-gray-600 mb-6">{company.description}</p>
 
@@ -34,6 +29,6 @@ export function CompanyInfo({ company }: { company: any }) {
           LinkedIn
         </a>
       </div>
-    </motion.div>
+    </div>
   );
 }
