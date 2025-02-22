@@ -42,9 +42,13 @@ export async function generateStaticParams() {
 // Enable ISR with 1 hour revalidation
 export const revalidate = 3600;
 
-export default async function JobDetailsPage({ params }: Props) {
+interface Params {
+  params: Promise<{ id: string }>;
+}
+
+export default async function JobDetailsPage({ params }:   Params) {
   // Ensure params.id is awaited
-  const id = await Promise.resolve(params.id);
+  const {id} = await params;
   
   let jobDetails;
   let similarJobs;
