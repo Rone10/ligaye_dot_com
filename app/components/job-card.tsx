@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { JobPosting } from '@/app/types';
 import { formatDistanceToNow } from 'date-fns';
-
+import Link from 'next/link';
 interface JobCardProps {
   job: JobPosting;
   index: number;
@@ -23,7 +23,7 @@ export function JobCard({ job, index }: JobCardProps) {
       <div className="flex justify-between items-start">
         <div>
           <h3 className="text-xl font-semibold text-blue-600 hover:text-blue-700">
-            <a href="#">{job.title}</a>
+            <Link href={`/jobs/1`}>{job.title}</Link>
           </h3>
           <p className="text-gray-700 mt-1">{job.company}</p>
         </div>

@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { TenderType, TenderStatus, Tender } from '../types/tender';
+import { TenderType, TenderStatus, Tender } from '@/app/types/tender';
 
 // Mock data
 const mockTenders: Tender[] = [

@@ -16,7 +16,7 @@ export default function DashboardPage() {
       {/* Top Navigation */}
       <header className="bg-white border-b">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex-1 max-w-xl">
+          <div className="hidden md:block  max-w-xl mx-auto w-2/3 ">
             <div className="relative">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <Input
@@ -25,7 +25,7 @@ export default function DashboardPage() {
               />
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 ml-auto">
             <Bell className="h-5 w-5 text-gray-600" />
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
