@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 import { 
   createCandidateProfileAction, 
   createEmployerProfileAction 
-} from '../_actions'
+} from '../../actions/profile'
 
 // Step Components
 import { BasicProfileForm } from './BasicProfileForm'
