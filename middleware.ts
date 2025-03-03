@@ -1,8 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Define public routes that don't require authentication
-const publicRoutes = ['/sign-in', '/sign-up', '/reset-password', '/verify']
+// Define protected routes that require authentication
+const PROTECTED_ROUTES = ['/candidate', '/employer']
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -41,33 +41,63 @@ export async function middleware(request: NextRequest) {
     // Get the pathname of the request
     const pathname = request.nextUrl.pathname
 
-    // Check if the current route is public
-    const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
+    // Check if the route requires authentication (starts with /candidate or /employer)
+    const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route))
 
-    // If the user is not signed in and the route is not public, redirect to sign-in
-    if (!user && !isPublicRoute) {
+    // If the user is not signed in and trying to access a protected route
+    if (!user && isProtectedRoute) {
       const redirectUrl = new URL('/sign-in', request.url)
       // Add the original URL as a search parameter to redirect back after sign-in
       redirectUrl.searchParams.set('redirectedFrom', pathname)
       return NextResponse.redirect(redirectUrl)
     }
 
-    // If the user is signed in and trying to access auth pages, redirect to home
-    if (user && isPublicRoute) {
-      // check if the user is a candidate or an employer
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
+    // If the user is signed in
+    if (user) {
+      // Check if accessing sign-in/sign-up pages
+      if (pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up')) {
+        // Get their profile information
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
 
-      if (profile?.role === 'candidate') {
-        return NextResponse.redirect(new URL('/candidate/dashboard', request.url))
-      } else if (profile?.role === 'employer') {
-        return NextResponse.redirect(new URL('/employer/dashboard', request.url))
+        // Redirect based on their role
+        if (profile?.role === 'candidate') {
+          return NextResponse.redirect(new URL('/candidate/dashboard', request.url))
+        } else if (profile?.role === 'employer') {
+          return NextResponse.redirect(new URL('/employer/dashboard', request.url))
+        } else {
+          // No role yet, redirect to create profile
+          return NextResponse.redirect(new URL('/create-profile', request.url))
+        }
       }
 
-      return NextResponse.redirect(new URL('/onboarding', request.url))
+      // If they're trying to access role-specific areas
+      if (isProtectedRoute) {
+        // Get their profile to check role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
+
+        // If accessing candidate area but not a candidate
+        if (pathname.startsWith('/candidate') && profile?.role !== 'candidate') {
+          return NextResponse.redirect(new URL('/create-profile', request.url))
+        }
+
+        // If accessing employer area but not an employer
+        if (pathname.startsWith('/employer') && profile?.role !== 'employer') {
+          return NextResponse.redirect(new URL('/create-profile', request.url))
+        }
+
+        // If no role assigned yet, redirect to create profile
+        if (!profile?.role) {
+          return NextResponse.redirect(new URL('/create-profile', request.url))
+        }
+      }
     }
 
     return supabaseResponse

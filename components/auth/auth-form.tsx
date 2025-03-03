@@ -50,11 +50,24 @@ export function AuthForm({ type }: AuthFormProps) {
     setIsLoading(true)
     try {
       if (type === 'sign-in') {
-        const { error } = await supabase.auth.signInWithPassword(data)
+        const { data: { user }, error } = await supabase.auth.signInWithPassword(data)
         if (error) throw error
 
         console.log('sign in successful')
-        router.push('/dashboard')
+        // check if the user is a candidate or an employer
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user?.id)
+          .single()
+
+        if (profile?.role === 'candidate') {
+          router.push('/candidate/dashboard')
+        } else if (profile?.role === 'employer') {
+          router.push('/employer/dashboard')
+        }
+
+        router.push('/create-profile')
         router.refresh()
       } else {
         const { error } = await supabase.auth.signUp(data)
