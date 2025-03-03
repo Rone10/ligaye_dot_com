@@ -1,0 +1,9 @@
+---
+description: Best practices for form handling with React Hook Form
+globs: **/*.{tsx,jsx}
+alwaysApply: false
+---
+- Use the useForm hook for form state management and validation.
+- Implement custom validation rules using the validate prop.
+- Utilize the Controller component for controlled inputs.
+- Leverage the watch function for real-time form value monitoring.

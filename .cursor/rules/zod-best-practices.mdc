@@ -1,0 +1,9 @@
+---
+description: 
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+- Define schemas using Zod's type-safe API for runtime and compile-time validation.
+- Use Zod's infer utility to derive TypeScript types from schemas.
+- Implement custom validation logic using Zod's refine method.
+- Utilize Zod's superRefine for complex, asynchronous validation scenarios.

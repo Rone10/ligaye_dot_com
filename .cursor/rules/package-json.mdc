@@ -1,0 +1,6 @@
+---
+description: Do not directly update the package.json file
+globs: package.json
+alwaysApply: false
+---
+Do not directly alter [package.json](mdc:package.json) file wihtout first confirming with me. 

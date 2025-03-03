@@ -1,0 +1,9 @@
+---
+description: Best practices for data visualization with Recharts
+globs: **/*.{tsx,jsx}
+alwaysApply: false
+---
+- Use responsive containers for adaptive chart sizing.
+- Implement custom tooltips for enhanced user interaction.
+- Utilize Recharts' built-in animations for smooth transitions.
+- Optimize performance by using memoization for large datasets.

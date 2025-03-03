@@ -1,0 +1,9 @@
+---
+description: Best practices for using Drizzle ORM with PostgreSQL
+globs: 
+alwaysApply: false
+---
+- Define your database schema using Drizzle's type-safe schema definitions.
+- Use Drizzle's query builder for type-safe database operations.
+- Implement migrations using Drizzle Kit for version control.
+- Utilize Drizzle's relations feature for defining and querying relationships.

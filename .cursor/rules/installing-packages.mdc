@@ -1,0 +1,10 @@
+---
+description: Use pnpm as the package manager when installing packages
+globs: *.tsx, *.ts
+alwaysApply: false
+---
+When installing packages, use pnpm add {{package_name}}
+
+DO NOT USE npm to install packages in this project.
+
+When running the dev server, do not use npm, use pnpm run dev

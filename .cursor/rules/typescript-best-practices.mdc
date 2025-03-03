@@ -1,0 +1,9 @@
+---
+description: TypeScript coding standards and type safety guidelines
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+- Enable strict mode in your tsconfig.json for enhanced type checking.
+- Use type inference where possible to reduce unnecessary type annotations.
+- Leverage utility types like Partial, Readonly, and Pick for better type manipulation.
+- Implement custom type guards for runtime type checking and narrowing.
