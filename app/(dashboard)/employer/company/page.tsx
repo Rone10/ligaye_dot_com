@@ -30,22 +30,24 @@ import {
   Pencil,
   Users,
   Building2,
-  LucideIcon
+  LucideProps,
 } from 'lucide-react';
 import { getCompanyProfile, getCompanyStats } from '@/app/actions/employer/company';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { CompanyProfileData, CompanyStatData } from '@/app/actions/employer/company';
+import { useRouter } from 'next/navigation';
 
 // Map of icon names to components
-const iconMap: Record<string, LucideIcon> = {
-  Users: Users,
-  Building2: Building2,
-  MapPin: MapPin,
-  Clock: Clock,
+const iconMap: Record<string, React.ComponentType<LucideProps>> = {
+  Users,
+  Building2,
+  MapPin,
+  Clock,
 };
 
 export default function CompanyProfilePage() {
+  const router = useRouter();
   const [companyProfile, setCompanyProfile] = useState<CompanyProfileData | null>(null);
   const [companyStats, setCompanyStats] = useState<CompanyStatData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -121,6 +123,7 @@ export default function CompanyProfilePage() {
           <Button
             variant="outline"
             className="absolute top-4 right-4 bg-white"
+            onClick={() => router.push('/employer/company/edit')}
           >
             <Pencil className="w-4 h-4 mr-2" />
             Edit Profile

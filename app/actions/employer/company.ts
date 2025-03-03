@@ -1,8 +1,6 @@
 'use server';
 
-import { createServerClient } from '@supabase/ssr';
 import { getUser } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
 import { 
   getEmployerProfileByProfileId, 
   getEmployerProfileWithUserByProfileId,
@@ -61,25 +59,26 @@ export interface CompanyStatData {
   iconColor: string;
 }
 
+/**
+ * Get the current user's profile ID
+ */
+async function getCurrentUserProfileId() {
+  const user = await getUser();
+  
+  if (!user) {
+    return null;
+  }
+  
+  const profile = await getProfileByUserId(user.id);
+  return profile?.id || null;
+}
 
 /**
  * Get the current employer's company profile
  */
 export async function getCompanyProfile(): Promise<CompanyProfileData | null> {
-    const user = await getUser();
-    if (!user) {
-        return null;
-    }
-    
-  
-
-
   try {
-    const profile = await getProfileByUserId(user.id);
-    if (!profile) {
-        return null;
-    }
-    const profileId = profile.id;
+    const profileId = await getCurrentUserProfileId();
     
     if (!profileId) {
       return null;
@@ -160,31 +159,23 @@ export async function getCompanyProfile(): Promise<CompanyProfileData | null> {
  * Get the company stats
  */
 export async function getCompanyStats(): Promise<CompanyStatData[]> {
-    const user = await getUser();
-    if (!user) {
-        return [];
-    }
-    
-    try {
-    const profile = await getProfileByUserId(user.id);
-    if (!profile) {
-        return [];
-    }
-    const profileId = profile.id;
+  try {
+    const profileId = await getCurrentUserProfileId();
     
     if (!profileId) {
       return [];
     }
     
     const employerProfile = await getEmployerProfileByProfileId(profileId);
-    if (!employerProfile) {
-        return [];
-    }
-
-    // Get active jobs count
-    const activeJobsCount = await getEmployerActiveJobsCount(profileId);
     
-    // Return the stats with string identifiers for icons instead of components
+    if (!employerProfile) {
+      return [];
+    }
+    
+    // Get active jobs count
+    const activeJobsCount = await getEmployerActiveJobsCount(employerProfile.id);
+    
+    // Return the stats with real data where available
     return [
       {
         label: 'Company Size',
@@ -227,8 +218,9 @@ export async function getCompanyStats(): Promise<CompanyStatData[]> {
 export async function updateCompanyProfileAction(data: Partial<EmployerProfile>) {
   try {
     const user = await getUser();
+    
     if (!user) {
-        return { success: false, error: 'User not authenticated' };
+      return { success: false, error: 'User not authenticated' };
     }
     
     const profile = await getProfileByUserId(user.id);
