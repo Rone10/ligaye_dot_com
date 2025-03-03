@@ -109,7 +109,7 @@ export async function getJobs(userId: string) {
 export async function getJobLocations(userId: string) {
   const result = await db()
     .select({
-      name: sql<string>`(
+      locationName: sql<string>`(
         SELECT ${locations.town}
         FROM ${locations}
         WHERE ${locations.id} = ${jobs.locationId}
@@ -121,10 +121,12 @@ export async function getJobLocations(userId: string) {
         eq(jobs.employerId, userId),
         eq(jobs.deleted, false)
       )
-    )
-    .groupBy(sql`name`);
-
-  return result.map((item: { name: string }) => item.name).filter(Boolean);
+    );
+    
+  // Get unique location names and filter out nulls
+  type LocationResult = { locationName: string | null };
+  const locationNames = Array.from(new Set(result.map((r: LocationResult) => r.locationName))).filter(Boolean) as string[];
+  return locationNames;
 }
 
 // Update job status (active/inactive)
