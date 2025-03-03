@@ -1,6 +1,6 @@
 import { and, count, desc, eq, gt, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/db';
-import { applications, jobs, locations } from '@/lib/db/schema';
+import { applications, jobs, locations, profiles, employerProfiles, NewJob } from '@/lib/db/schema';
 
 // Get job stats for an employer
 export async function getJobStats(userId: string) {
@@ -149,4 +149,13 @@ export async function deleteJob(jobId: string) {
       updatedAt: new Date(),
     })
     .where(eq(jobs.id, jobId));
+}
+
+// Create a new job
+export async function createJob(jobData: Omit<NewJob, 'id' | 'createdAt' | 'updatedAt'>) {
+  
+  return await db()
+    .insert(jobs)
+    .values(jobData)
+    .returning({ id: jobs.id });
 } 

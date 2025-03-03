@@ -6,9 +6,13 @@ import {
   getJobs, 
   getJobLocations,
   updateJobStatus,
-  deleteJob
+  deleteJob,
+  createJob as dbCreateJob
 } from '@/lib/db/queries/employer/jobs';
 import { revalidatePath } from 'next/cache';
+import { eq } from 'drizzle-orm';
+import { db } from '@/lib/db/db';
+import { employerProfiles, NewJob, profiles } from '@/lib/db/schema';
 
 // Types for the jobs page
 export interface Job {
@@ -117,5 +121,106 @@ export async function removeJob(jobId: string): Promise<boolean> {
   } catch (error) {
     console.error('Error deleting job:', error);
     return false;
+  }
+}
+
+// Create a new job
+export async function createJob(formData: FormData): Promise<{ success: boolean; jobId?: string; error?: string }> {
+  try {
+    const user = await getUser();
+    if (!user) return { success: false, error: 'Not authorized' };
+
+    // check user profile id
+    const userProfile = await db()
+      .select()
+      .from(profiles)
+      .where(eq(profiles.userId, user.id))
+      .limit(1);
+
+    if (!userProfile || userProfile.length === 0) {
+      return { success: false, error: 'User profile not found' };
+    }
+
+    const profileId = userProfile[0].id;
+
+    // Get employer profile to get companyId
+    const employerProfile = await db()
+      .select()
+      .from(employerProfiles)
+      .where(eq(employerProfiles.profileId, profileId))
+      .limit(1);
+
+    if (!employerProfile || employerProfile.length === 0) {
+      return { success: false, error: 'Employer profile not found' };
+    }
+
+    const companyId = employerProfile[0].id;
+
+    // Process form data
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
+    const locationId = formData.get('locationId') as string || null;
+    const jobType = formData.get('jobType') as string;
+    const workLocation = formData.get('workLocation') as string;
+    const experienceLevel = formData.get('experienceLevel') as string;
+    const salaryFrequency = formData.get('salaryFrequency') as string;
+    const salaryRangeMin = formData.get('salaryRangeMin') ? parseInt(formData.get('salaryRangeMin') as string) : null;
+    const salaryRangeMax = formData.get('salaryRangeMax') ? parseInt(formData.get('salaryRangeMax') as string) : null;
+    const salaryCurrency = formData.get('salaryCurrency') as string || 'GMD';
+    
+    // Handle array fields
+    const educationRequirements = formData.getAll('educationRequirements') as string[];
+    const experienceRequirements = formData.getAll('experienceRequirements') as string[];
+    const benefits = formData.getAll('benefits') as string[];
+    const skillsRequired = formData.getAll('skillsRequired') as string[];
+    
+    // Handle date fields
+    const applicationDeadline = formData.get('applicationDeadline') ? new Date(formData.get('applicationDeadline') as string) : null;
+    
+    // Calculate expiry date (default to 30 days from now if not provided)
+    const expiresAt = formData.get('expiresAt') 
+      ? new Date(formData.get('expiresAt') as string) 
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+    
+    // Create slug from title
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    
+    // Create new job
+    const jobData = {
+      employerId: profileId,
+      companyId,
+      title,
+      description,
+      locationId,
+      jobType,
+      workLocation,
+      experienceLevel,
+      salaryFrequency,
+      salaryRangeMin,
+      salaryRangeMax,
+      salaryCurrency,
+      educationRequirements,
+      experienceRequirements,
+      benefits,
+      skillsRequired,
+      applicationDeadline,
+      expiresAt,
+      slug,
+      isActive: true,
+      deleted: false
+    };
+    
+    // Insert job into database
+    const result = await dbCreateJob(jobData as any);
+    
+    if (!result || result.length === 0) {
+      return { success: false, error: 'Failed to create job' };
+    }
+    
+    revalidatePath('/employer/jobs');
+    return { success: true, jobId: result[0].id };
+  } catch (error) {
+    console.error('Error creating job:', error);
+    return { success: false, error: 'An error occurred while creating the job' };
   }
 } 
