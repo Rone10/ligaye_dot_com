@@ -28,11 +28,80 @@ import {
   Instagram,
   Clock,
   Pencil,
+  Users,
+  Building2,
+  LucideIcon
 } from 'lucide-react';
-import { companyProfile, companyStats } from '@/app/actions/employer/company-mock-data';
+import { getCompanyProfile, getCompanyStats } from '@/app/actions/employer/company';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { CompanyProfileData, CompanyStatData } from '@/app/actions/employer/company';
+
+// Map of icon names to components
+const iconMap: Record<string, LucideIcon> = {
+  Users: Users,
+  Building2: Building2,
+  MapPin: MapPin,
+  Clock: Clock,
+};
 
 export default function CompanyProfilePage() {
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfileData | null>(null);
+  const [companyStats, setCompanyStats] = useState<CompanyStatData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true);
+        const [profileData, statsData] = await Promise.all([
+          getCompanyProfile(),
+          getCompanyStats()
+        ]);
+        
+        if (profileData) {
+          setCompanyProfile(profileData);
+        }
+        
+        if (statsData) {
+          setCompanyStats(statsData);
+        }
+      } catch (error) {
+        console.error('Error loading company data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading company profile...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!companyProfile) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Company Profile Not Found</h2>
+          <p className="mt-2 text-gray-600">
+            We couldn't find your company profile. Please contact support if you believe this is an error.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <motion.div
@@ -84,7 +153,8 @@ export default function CompanyProfilePage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {companyStats.map((stat, index) => {
-            const Icon = stat.icon;
+            // Get the icon component from the map using the string identifier
+            const IconComponent = iconMap[stat.icon] || Users; // Fallback to Users if not found
             return (
               <motion.div
                 key={index}
@@ -95,7 +165,7 @@ export default function CompanyProfilePage() {
               >
                 <div className="flex items-center gap-4">
                   <div className={`${stat.className} p-3 rounded-lg`}>
-                    <Icon className={`w-6 h-6 ${stat.iconColor}`} />
+                    <IconComponent className={`w-6 h-6 ${stat.iconColor}`} />
                   </div>
                   <div>
                     <div className="text-2xl font-semibold">{stat.value}</div>
@@ -125,7 +195,7 @@ export default function CompanyProfilePage() {
                 <div className="flex items-center gap-2 text-gray-600">
                   <Globe2 className="w-5 h-5" />
                   <a href={companyProfile.website} className="hover:text-blue-600">
-                    {companyProfile.website}
+                    {companyProfile.website || 'Not provided'}
                   </a>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">

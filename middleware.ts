@@ -74,6 +74,24 @@ export async function middleware(request: NextRequest) {
         }
       }
 
+      // Check if user with role is trying to access create-profile page
+      if (pathname === '/create-profile') {
+        // Get their profile information
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
+
+        // If they already have a role, redirect to their dashboard
+        if (profile?.role === 'candidate') {
+          return NextResponse.redirect(new URL('/candidate/dashboard', request.url))
+        } else if (profile?.role === 'employer') {
+          return NextResponse.redirect(new URL('/employer/dashboard', request.url))
+        }
+        // If no role, let them continue to create-profile
+      }
+
       // If they're trying to access role-specific areas
       if (isProtectedRoute) {
         // Get their profile to check role
@@ -85,12 +103,14 @@ export async function middleware(request: NextRequest) {
 
         // If accessing candidate area but not a candidate
         if (pathname.startsWith('/candidate') && profile?.role !== 'candidate') {
-          return NextResponse.redirect(new URL('/create-profile', request.url))
+          // Redirect employers to employer dashboard instead of create-profile
+          return NextResponse.redirect(new URL(profile?.role === 'employer' ? '/employer/dashboard' : '/create-profile', request.url))
         }
 
         // If accessing employer area but not an employer
         if (pathname.startsWith('/employer') && profile?.role !== 'employer') {
-          return NextResponse.redirect(new URL('/create-profile', request.url))
+          // Redirect candidates to candidate dashboard instead of create-profile
+          return NextResponse.redirect(new URL(profile?.role === 'candidate' ? '/candidate/dashboard' : '/create-profile', request.url))
         }
 
         // If no role assigned yet, redirect to create profile
