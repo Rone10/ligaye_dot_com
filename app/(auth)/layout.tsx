@@ -1,6 +1,6 @@
 // app/layout.tsx
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "@/app/globals.css";
 
