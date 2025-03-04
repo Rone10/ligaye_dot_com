@@ -60,7 +60,7 @@ const experienceLevelLabel = (value: string): string => {
   const level = experienceLevels.find(level => level.value === value);
   return level ? level.label : 'Not specified';
 };
-// comment
+
 const educationLevelLabel = (value: string): string => {
   const level = educationLevels.find(level => level.value === value);
   return level ? level.label : 'Not specified';
