@@ -13,9 +13,52 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations, InferInsertModel, InferModel } from 'drizzle-orm';
 
+
+// First, let's add the necessary new enums
+export const jobTypeEnum = pgEnum('job_type', [
+  'FULL_TIME', 
+  'PART_TIME', 
+  'PERMANENT', 
+  'FIXED_TERM_CONTRACT', 
+  'CASUAL',
+  'SEASONAL',
+  'FREELANCE',
+  'APPRENTICESHIP',
+  'INTERNSHIP'
+]); // Updated to match Indeed's job type options
+
+export const contractPeriodEnum = pgEnum('contract_period', ['DAYS', 'WEEKS', 'MONTHS', 'YEARS']);
+export const applicationMethodEnum = pgEnum('application_method', ['EMAIL', 'WEBSITE', 'PHONE', 'IN_PERSON']);
+export const scheduleTypeEnum = pgEnum('schedule_type', [
+  'MONDAY_TO_FRIDAY',
+  'WEEKENDS',
+  'EIGHT_HOUR_SHIFT',
+  'DAY_SHIFT',
+  'EVENING_SHIFT',
+  'NIGHT_SHIFT',
+  'MORNING_SHIFT',
+  'OVERTIME',
+  'ON_CALL'
+]);
+
+
+// Country enum for standardization
+export const countryEnum = pgEnum('country', [
+  'GAMBIA', 
+  'SENEGAL', 
+  'NIGERIA', 
+  'GHANA', 
+  'CANADA',
+  'USA',
+  'UK',
+  'OTHER'
+]);
+
+
+
 // Enums
 export const userRoleEnum = pgEnum('user_role', ['employer', 'candidate']);
-export const jobTypeEnum = pgEnum('job_type', ['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP', 'TEMPORARY']);
+// export const jobTypeEnum = pgEnum('job_type', ['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP', 'TEMPORARY']);
 export const workLocationEnum = pgEnum('work_location', ['REMOTE', 'HYBRID', 'ON_SITE']);
 export const salaryFrequencyEnum = pgEnum('salary_frequency', ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']);
 export const applicationStatusEnum = pgEnum('application_status', [
@@ -96,46 +139,172 @@ export const candidateProfiles = pgTable('candidate_profiles', {
   };
 });
 
+
+
+
+// Expanded locations table
+// export const locations = pgTable('locations', {
+//   id: uuid('id').primaryKey().defaultRandom(),
+  
+//   // Address components
+//   streetNumber: text('street_number'), // Building number (e.g., "103")
+//   streetName: text('street_name'), // Street name (e.g., "Broome Rd")
+//   streetAddress: text('street_address'), // Full street address (e.g., "103 Broome Rd")
+//   unit: text('unit'), // Apartment/unit/suite number
+//   neighborhood: text('neighborhood'), // Neighborhood or area within town
+  
+//   // City/Municipality information
+//   town: text('town'), // Town or city (e.g., "Brockville")
+  
+//   // Regional divisions
+//   district: text('district'), // District within region
+//   region: text('region').notNull(), // State/Province/Region (e.g., "ON")
+//   regionFull: text('region_full'), // Full name of region (e.g., "Ontario")
+  
+//   // Country information
+//   country: countryEnum('country').default('GAMBIA').notNull(), // Country code
+//   countryFull: text('country_full').default('The Gambia'), // Full country name
+  
+//   // Postal information
+//   postalCode: text('postal_code'), // ZIP/Postal code
+  
+//   // Geocoding for map functionality
+//   latitude: text('latitude'), // Decimal latitude coordinate
+//   longitude: text('longitude'), // Decimal longitude coordinate
+  
+//   // Location type
+//   locationType: text('location_type').default('IN_PERSON'), // In-person, remote, hybrid, etc.
+  
+//   // Display preferences
+//   displayOnJob: boolean('display_on_job').default(true), // Whether to show on job listing
+//   preciseLoc: boolean('precise_loc').default(true), // Whether to show precise location vs general area
+  
+//   // Metadata
+//   formattedAddress: text('formatted_address'), // Full formatted address
+//   placeId: text('place_id'), // For integration with mapping services
+//   deleted: boolean('deleted').default(false), // Soft delete pattern
+//   createdAt: timestamp('created_at').notNull().defaultNow(),
+//   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+// }, (table) => {
+//   return {
+//     // Indexes for common queries
+//     regionIdx: index('region_idx').on(table.region),
+//     townIdx: index('town_idx').on(table.town),
+//     countryIdx: index('country_idx').on(table.country),
+//     postalCodeIdx: index('postal_code_idx').on(table.postalCode),
+    
+//     // Geocoding index for location-based queries
+//     geoIdx: index('geo_idx').on(table.latitude, table.longitude),
+    
+//     // Full text search on address
+//     streetAddressIdx: index('street_address_idx').on(table.streetAddress),
+    
+//     // Combined queries
+//     townRegionIdx: index('town_region_idx').on(table.town, table.region),
+    
+//     // Soft delete index
+//     deletedIdx: index('location_deleted_idx').on(table.deleted)
+//   };
+// });
+
+// Location relations
+// export const locationRelations = relations(locations, ({ many }) => ({
+//   jobs: many(jobs)
+// }));
+
+
+
 // Locations (Structured for The Gambia)
 export const locations = pgTable('locations', {
   id: uuid('id').primaryKey().defaultRandom(),
   region: text('region').notNull(),
   district: text('district'),
   town: text('town'),
+  city: text('city'),
   deleted: boolean('deleted').default(false), // Soft delete pattern
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => {
   return {
     regionIdx: index('region_idx').on(table.region),
-    townIdx: index('town_idx').on(table.town)
+    townIdx: index('town_idx').on(table.town),
+    cityIdx: index('city_idx').on(table.city)
   };
 });
 
-// Jobs
+
+
+// Updated Jobs table
 export const jobs = pgTable('jobs', {
   id: uuid('id').primaryKey().defaultRandom(),
   employerId: uuid('employer_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
-  companyId: uuid('company_id').notNull().references(() => employerProfiles.id, { onDelete: 'cascade' }), // Reference to employerProfiles
+  companyId: uuid('company_id').notNull().references(() => employerProfiles.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
-  locationId: uuid('location_id').references(() => locations.id), // Foreign key to locations
+  locationId: uuid('location_id').references(() => locations.id),
+  
+  // Job posting language (from Indeed)
+  jobLanguage: text('job_language').default('English'), // New: Language the job post is written in
+  
+  // Number of openings (from Indeed)
+  numberOfOpenings: integer('number_of_openings').default(1), // New: Number of people to hire for this position
+  
+  // Display address option (from Indeed)
+  displayAddress: boolean('display_address').default(true), // New: Whether to show full address in job post
+  
+  // Core job details
   description: text('description').notNull(),
   educationRequirements: text('education_requirements').array().default([]),
   experienceRequirements: text('experience_requirements').array().default([]),
+  experienceLevel: experienceLevelEnum('experience_level').notNull(),
+  
+  // Language requirements (from Indeed)
+  languageRequirements: text('language_requirements').array(), // New: Required languages for the job
+  languageTrainingProvided: boolean('language_training_provided').default(false), // New: Whether language training is offered
+  
+  // Job type and schedule
+  jobType: jobTypeEnum('job_type').notNull(), // Updated enum with more options
+  workLocation: workLocationEnum('work_location').notNull(),
+  
+  // Schedule details (from Indeed)
+  schedule: scheduleTypeEnum('schedule').array(), // New: Work schedule options (Mon-Fri, weekends, etc)
+  expectedHours: integer('expected_hours'), // New: Hours per week
+  hoursType: text('hours_type').default('FIXED'), // New: Fixed or Maximum hours
+  
+  // Contract details for fixed-term contracts (from Indeed)
+  contractLength: integer('contract_length'), // New: Length of contract
+  contractPeriod: contractPeriodEnum('contract_period'), // New: Period unit (days, months, etc)
+  
+  // Start date (from Indeed)
+  plannedStartDate: timestamp('planned_start_date'), // New: Expected job start date
+  
+  // Salary information
   salaryRangeMin: integer('salary_range_min'),
   salaryRangeMax: integer('salary_range_max'),
   salaryCurrency: text('salary_currency').default('GMD'),
   salaryFrequency: salaryFrequencyEnum('salary_frequency').notNull(),
-  jobType: jobTypeEnum('job_type').notNull(),
-  workLocation: workLocationEnum('work_location').notNull(),
-  experienceLevel: experienceLevelEnum('experience_level').notNull(),
+  salaryDisplayType: text('salary_display_type').default('RANGE'), // New: How to show salary (range, fixed, etc)
+  
+  // Supplemental pay (from Indeed)
+  supplementalPay: text('supplemental_pay').array(), // New: Additional compensation types (overtime, bonuses, etc)
+  
+  // Benefits
   benefits: text('benefits').array(),
+  
+  // Skills and requirements
   skillsRequired: text('skills_required').array(), // Will be replaced with jobSkills
+  
+  // Application settings (from Indeed)
+  applicationMethod: applicationMethodEnum('application_method'), // New: How candidates should apply
+  applicationInstructions: text('application_instructions'), // New: Special instructions for applicants
+  resumeRequired: boolean('resume_required').default(false), // New: Whether resume is mandatory
+  allowCandidateContact: boolean('allow_candidate_contact').default(false), // New: Let candidates contact employer directly
+  applicationDeadline: timestamp('application_deadline'),
+  
+  // Job post metadata
   slug: text('slug'),
   isActive: boolean('is_active').default(true),
-  deleted: boolean('deleted').default(false), // Soft delete
+  deleted: boolean('deleted').default(false),
   expiresAt: timestamp('expires_at'),
-  applicationDeadline: timestamp('application_deadline'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => {
@@ -149,11 +318,58 @@ export const jobs = pgTable('jobs', {
     isActiveIdx: index('is_active_idx').on(table.isActive),
     deletedIdx: index('job_deleted_idx').on(table.deleted),
     applicationDeadlineIdx: index('application_deadline_idx').on(table.applicationDeadline),
+    plannedStartDateIdx: index('planned_start_date_idx').on(table.plannedStartDate), // New index for start date
     // Composite indexes for common filtering patterns
     jobTypeExpLevelIdx: index('job_type_exp_level_idx').on(table.jobType, table.experienceLevel),
     salaryRangeIdx: index('salary_range_idx').on(table.salaryRangeMin, table.salaryRangeMax)
   };
 });
+
+
+
+
+// // Jobs
+// export const jobs = pgTable('jobs', {
+//   id: uuid('id').primaryKey().defaultRandom(),
+//   employerId: uuid('employer_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+//   companyId: uuid('company_id').notNull().references(() => employerProfiles.id, { onDelete: 'cascade' }), // Reference to employerProfiles
+//   title: text('title').notNull(),
+//   locationId: uuid('location_id').references(() => locations.id), // Foreign key to locations
+//   description: text('description').notNull(),
+//   educationRequirements: text('education_requirements').array().default([]),
+//   experienceRequirements: text('experience_requirements').array().default([]),
+//   salaryRangeMin: integer('salary_range_min'),
+//   salaryRangeMax: integer('salary_range_max'),
+//   salaryCurrency: text('salary_currency').default('GMD'),
+//   salaryFrequency: salaryFrequencyEnum('salary_frequency').notNull(),
+//   jobType: jobTypeEnum('job_type').notNull(),
+//   workLocation: workLocationEnum('work_location').notNull(),
+//   experienceLevel: experienceLevelEnum('experience_level').notNull(),
+//   benefits: text('benefits').array(),
+//   skillsRequired: text('skills_required').array(), // Will be replaced with jobSkills
+//   slug: text('slug'),
+//   isActive: boolean('is_active').default(true),
+//   deleted: boolean('deleted').default(false), // Soft delete
+//   expiresAt: timestamp('expires_at'),
+//   applicationDeadline: timestamp('application_deadline'),
+//   createdAt: timestamp('created_at').notNull().defaultNow(),
+//   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+// }, (table) => {
+//   return {
+//     titleIdx: index('job_title_idx').on(table.title),
+//     employerIdIdx: index('employer_id_idx').on(table.employerId),
+//     companyIdIdx: index('company_id_idx').on(table.companyId),
+//     jobTypeIdx: index('job_type_idx').on(table.jobType),
+//     workLocationIdx: index('work_location_idx').on(table.workLocation),
+//     experienceLevelIdx: index('job_experience_level_idx').on(table.experienceLevel),
+//     isActiveIdx: index('is_active_idx').on(table.isActive),
+//     deletedIdx: index('job_deleted_idx').on(table.deleted),
+//     applicationDeadlineIdx: index('application_deadline_idx').on(table.applicationDeadline),
+//     // Composite indexes for common filtering patterns
+//     jobTypeExpLevelIdx: index('job_type_exp_level_idx').on(table.jobType, table.experienceLevel),
+//     salaryRangeIdx: index('salary_range_idx').on(table.salaryRangeMin, table.salaryRangeMax)
+//   };
+// });
 
 // Applications
 export const applications = pgTable('applications', {
@@ -323,6 +539,10 @@ export const tenderRelations = relations(tenders, ({ one }) => ({
   }),
 }));
 
+
+
+
+// Add new relationships to job table if needed
 export const jobRelations = relations(jobs, ({ many, one }) => ({
   skills: many(jobSkills),
   industries: many(jobIndustries),
@@ -336,6 +556,22 @@ export const jobRelations = relations(jobs, ({ many, one }) => ({
     references: [locations.id]
   })
 }));
+
+
+
+// export const jobRelations = relations(jobs, ({ many, one }) => ({
+//   skills: many(jobSkills),
+//   industries: many(jobIndustries),
+//   employer: one(employerProfiles, {
+//     fields: [jobs.employerId],
+//     references: [employerProfiles.profileId],
+//   }),
+//   applications: many(applications),
+//   location: one(locations, {
+//     fields: [jobs.locationId],
+//     references: [locations.id]
+//   })
+// }));
 
 export const skillsRelations = relations(skills, ({ many }) => ({
   jobs: many(jobSkills),

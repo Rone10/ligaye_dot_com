@@ -8,6 +8,13 @@
       "when": 1740987584399,
       "tag": "0000_open_unus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1741087427000,
+      "tag": "0001_heavy_golden_guardian",
+      "breakpoints": true
     }
   ]
 }
