@@ -31,7 +31,7 @@ interface NavItem {
 const employerNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/employer/dashboard', icon: LayoutDashboard },
   { label: 'My Jobs', href: '/employer/jobs', icon: Briefcase },
-  { label: 'Create Job', href: '/employer/jobs/create', icon: FileText },
+  { label: 'Post Job', href: '/employer/jobs/new', icon: FileText },
   { label: 'Applicants', href: '/employer/applicants', icon: Users },
   { label: 'Company Profile', href: '/employer/company', icon: Building2 },
   { label: 'Tenders', href: '/employer/tenders', icon: FileSpreadsheet },
