@@ -23,6 +23,29 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Experience level options
+const experienceLevels = [
+  { value: 'ENTRY_LEVEL', label: 'Entry level (0-1 years)' },
+  { value: 'JUNIOR', label: 'Junior (1-3 years)' },
+  { value: 'MID_LEVEL', label: 'Mid-level (3-5 years)' },
+  { value: 'SENIOR', label: 'Senior (5+ years)' },
+  { value: 'EXECUTIVE', label: 'Executive' },
+  { value: 'NOT_SPECIFIED', label: 'Not specified' },
+];
+
+// Education level options
+const educationLevels = [
+  { value: 'NONE', label: 'No formal education required' },
+  { value: 'PRIMARY', label: 'Primary education' },
+  { value: 'SECONDARY', label: 'Secondary education' },
+  { value: 'VOCATIONAL', label: 'Vocational training' },
+  { value: 'BACHELORS', label: 'Bachelor\'s degree' },
+  { value: 'MASTERS', label: 'Master\'s degree' },
+  { value: 'DOCTORATE', label: 'Doctorate degree' },
+  { value: 'CERTIFICATION', label: 'Professional certification' },
+  { value: 'NOT_SPECIFIED', label: 'Not specified' },
+];
+
 // Application method options
 const applicationMethods = [
   { value: 'PLATFORM', label: 'Apply through platform' },
@@ -31,6 +54,17 @@ const applicationMethods = [
   { value: 'CALL', label: 'Call to apply' },
   { value: 'IN_PERSON', label: 'Apply in person' },
 ];
+
+// Helper functions
+const experienceLevelLabel = (value: string): string => {
+  const level = experienceLevels.find(level => level.value === value);
+  return level ? level.label : 'Not specified';
+};
+
+const educationLevelLabel = (value: string): string => {
+  const level = educationLevels.find(level => level.value === value);
+  return level ? level.label : 'Not specified';
+};
 
 export function ReviewForm() {
   const { state, dispatch } = useJobForm();
@@ -96,7 +130,35 @@ export function ReviewForm() {
 
             <div>
               <h3 className="text-sm font-medium text-gray-500">Description Preview</h3>
-              <p className="text-base line-clamp-3">{formData.description || 'No description provided'}</p>
+              <div className="text-base description-preview" 
+                   dangerouslySetInnerHTML={{ __html: formData.description || 'No description provided' }}>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Experience Level</h3>
+                <p className="text-base">
+                  {formData.experienceLevel ? 
+                    experienceLevelLabel(formData.experienceLevel) : 
+                    'Not specified'}
+                </p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Education Requirements</h3>
+                <p className="text-base">
+                  {formData.educationRequirements ? 
+                    educationLevelLabel(formData.educationRequirements) : 
+                    'Not specified'}
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-gray-500">Experience Requirements</h3>
+              <p className="text-base whitespace-pre-line">
+                {formData.experienceRequirements || 'Not specified'}
+              </p>
             </div>
           </div>
         </section>
