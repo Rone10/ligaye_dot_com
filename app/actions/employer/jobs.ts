@@ -7,7 +7,8 @@ import {
   getJobLocations,
   updateJobStatus,
   deleteJob,
-  createJob as dbCreateJob
+  createJob as dbCreateJob,
+  getJob
 } from '@/lib/db/queries/employer/jobs';
 import { revalidatePath } from 'next/cache';
 import { eq } from 'drizzle-orm';
@@ -18,6 +19,7 @@ import { employerProfiles, NewJob, profiles } from '@/lib/db/schema';
 export interface Job {
   id: string;
   title: string;
+  description?: string;
   jobType: string;
   workLocation: string;
   locationName: string | null;
@@ -30,6 +32,9 @@ export interface Job {
   expiresAt: Date | null;
   createdAt: Date;
   applicantCount: number;
+  slug?: string;
+  skillsRequired?: string[];
+  benefits?: string[];
 }
 
 export interface JobStats {
@@ -222,5 +227,42 @@ export async function createJob(formData: FormData): Promise<{ success: boolean;
   } catch (error) {
     console.error('Error creating job:', error);
     return { success: false, error: 'An error occurred while creating the job' };
+  }
+}
+
+// Fetch a single job by ID
+export async function fetchJob(jobId: string): Promise<(Job & { 
+  description: string;
+  slug?: string;
+  skillsRequired?: string[];
+  benefits?: string[];
+}) | null> {
+  try {
+    const job = await getJob(jobId);
+    if (!job) return null;
+    
+    return {
+      id: job.id,
+      title: job.title,
+      description: job.description,
+      jobType: job.jobType,
+      workLocation: job.workLocation,
+      locationName: job.locationName,
+      salaryRangeMin: job.salaryRangeMin,
+      salaryRangeMax: job.salaryRangeMax,
+      salaryCurrency: job.salaryCurrency || 'GMD',
+      salaryFrequency: job.salaryFrequency,
+      experienceLevel: job.experienceLevel,
+      isActive: job.isActive === null ? false : job.isActive,
+      expiresAt: job.expiresAt,
+      createdAt: job.createdAt,
+      applicantCount: job.applicantCount || 0,
+      slug: job.slug || undefined,
+      skillsRequired: job.skillsRequired || [],
+      benefits: job.benefits || []
+    };
+  } catch (error) {
+    console.error('Error fetching job:', error);
+    return null;
   }
 } 

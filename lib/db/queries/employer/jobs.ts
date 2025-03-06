@@ -1,6 +1,7 @@
 import { and, count, desc, eq, gt, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/db';
 import { applications, jobs, locations, profiles, employerProfiles, NewJob } from '@/lib/db/schema';
+import { getUser } from '@/lib/supabase/server';
 
 // Get job stats for an employer
 export async function getJobStats(userId: string) {
@@ -158,4 +159,80 @@ export async function createJob(jobData: Omit<NewJob, 'id' | 'createdAt' | 'upda
     .insert(jobs)
     .values(jobData)
     .returning({ id: jobs.id });
+}
+
+export async function getJob(jobId: string) {
+  try {
+    // Get the current user ID from Supabase
+    const user = await getUser();
+    if (!user) return null;
+    
+    // Get the employer profile for the current user
+    const employer = await db()
+      .select({ id: employerProfiles.id })
+      .from(employerProfiles)
+      .where(eq(employerProfiles.profileId, user.id))
+      .limit(1);
+
+    if (!employer || employer.length === 0) return null;
+
+    // Get the job with related information
+    const result = await db()
+      .select({
+        id: jobs.id,
+        title: jobs.title,
+        description: jobs.description,
+        jobType: jobs.jobType,
+        workLocation: jobs.workLocation,
+        locationName: sql<string>`(
+          SELECT ${locations.town}
+          FROM ${locations}
+          WHERE ${locations.id} = ${jobs.locationId}
+        )`,
+        salaryRangeMin: jobs.salaryRangeMin,
+        salaryRangeMax: jobs.salaryRangeMax,
+        salaryCurrency: jobs.salaryCurrency,
+        salaryFrequency: jobs.salaryFrequency,
+        experienceLevel: jobs.experienceLevel,
+        isActive: jobs.isActive,
+        expiresAt: jobs.expiresAt,
+        createdAt: jobs.createdAt,
+        updatedAt: jobs.updatedAt,
+        employerId: jobs.employerId,
+        slug: jobs.slug,
+        skillsRequired: jobs.skillsRequired,
+        benefits: jobs.benefits
+      })
+      .from(jobs)
+      .where(
+        and(
+          eq(jobs.id, jobId),
+          eq(jobs.employerId, employer[0].id),
+          eq(jobs.deleted, false)
+        )
+      )
+      .limit(1);
+
+    if (!result || result.length === 0) return null;
+
+    // Get the applicant count for this job
+    const applicantsCount = await db()
+      .select({ count: count() })
+      .from(applications)
+      .where(
+        and(
+          eq(applications.jobId, jobId),
+          eq(applications.deleted, false)
+        )
+      );
+
+    // Combine the job details with the applicant count
+    return {
+      ...result[0],
+      applicantCount: applicantsCount[0]?.count || 0
+    };
+  } catch (error) {
+    console.error("Error getting job:", error);
+    return null;
+  }
 } 
