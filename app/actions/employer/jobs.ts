@@ -60,11 +60,23 @@ export async function fetchJobStats(): Promise<JobStats | null> {
 // Get all jobs for the current employer
 export async function fetchJobs(): Promise<Job[] | null> {
   try {
+    console.log("fetchJobs: Starting job fetch");
+    
     const user = await getUser();
+    console.log("fetchJobs: User auth result:", user ? "User authenticated" : "No user found");
+    
     if (!user) return null;
     
+    console.log("fetchJobs: Calling database getJobs with user ID:", user.id);
     const jobsData = await getJobs(user.id);
-    return jobsData.map(job => ({
+    console.log("fetchJobs: Database returned job count:", jobsData?.length || 0);
+    
+    if (!jobsData || jobsData.length === 0) {
+      console.log("fetchJobs: No jobs found in database");
+      return [];
+    }
+    
+    const mappedJobs = jobsData.map(job => ({
       id: job.id,
       title: job.title,
       jobType: job.jobType,
@@ -80,6 +92,9 @@ export async function fetchJobs(): Promise<Job[] | null> {
       createdAt: job.createdAt,
       applicantCount: job.applicantCount || 0
     }));
+    
+    console.log("fetchJobs: Returning mapped jobs, count:", mappedJobs.length);
+    return mappedJobs;
   } catch (error) {
     console.error('Error fetching jobs:', error);
     return null;
@@ -132,9 +147,16 @@ export async function removeJob(jobId: string): Promise<boolean> {
 // Create a new job
 export async function createJob(formData: FormData): Promise<{ success: boolean; jobId?: string; error?: string }> {
   try {
+    console.log("createJob Action: Starting job creation");
+    
     const user = await getUser();
-    if (!user) return { success: false, error: 'Not authorized' };
+    if (!user) {
+      console.log("createJob Action: No authenticated user");
+      return { success: false, error: 'Not authorized' };
+    }
 
+    console.log("createJob Action: Fetching user profile for user ID:", user.id);
+    
     // check user profile id
     const userProfile = await db()
       .select()
@@ -143,10 +165,12 @@ export async function createJob(formData: FormData): Promise<{ success: boolean;
       .limit(1);
 
     if (!userProfile || userProfile.length === 0) {
+      console.log("createJob Action: No user profile found");
       return { success: false, error: 'User profile not found' };
     }
 
     const profileId = userProfile[0].id;
+    console.log("createJob Action: Found profile ID:", profileId);
 
     // Get employer profile to get companyId
     const employerProfile = await db()
@@ -156,11 +180,13 @@ export async function createJob(formData: FormData): Promise<{ success: boolean;
       .limit(1);
 
     if (!employerProfile || employerProfile.length === 0) {
+      console.log("createJob Action: No employer profile found for profile ID:", profileId);
       return { success: false, error: 'Employer profile not found' };
     }
 
     const companyId = employerProfile[0].id;
-
+    console.log("createJob Action: Found company ID:", companyId);
+    
     // Process form data
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
@@ -173,7 +199,7 @@ export async function createJob(formData: FormData): Promise<{ success: boolean;
     const salaryRangeMax = formData.get('salaryRangeMax') ? parseInt(formData.get('salaryRangeMax') as string) : null;
     const salaryCurrency = formData.get('salaryCurrency') as string || 'GMD';
     
-    // Handle array fields
+    // Handle arrays
     const educationRequirements = formData.getAll('educationRequirements') as string[];
     const experienceRequirements = formData.getAll('experienceRequirements') as string[];
     const benefits = formData.getAll('benefits') as string[];
@@ -192,8 +218,8 @@ export async function createJob(formData: FormData): Promise<{ success: boolean;
     
     // Create new job
     const jobData = {
-      employerId: profileId,
-      companyId,
+      employerId: profileId,  // This should be the profile ID
+      companyId,              // This should be the employer profile ID
       title,
       description,
       locationId,
@@ -215,13 +241,17 @@ export async function createJob(formData: FormData): Promise<{ success: boolean;
       deleted: false
     };
     
+    console.log("createJob Action: Creating job with employer ID:", profileId, "and company ID:", companyId);
+    
     // Insert job into database
     const result = await dbCreateJob(jobData as any);
     
     if (!result || result.length === 0) {
+      console.log("createJob Action: Failed to create job");
       return { success: false, error: 'Failed to create job' };
     }
     
+    console.log("createJob Action: Job created successfully with ID:", result[0].id);
     revalidatePath('/employer/jobs');
     return { success: true, jobId: result[0].id };
   } catch (error) {

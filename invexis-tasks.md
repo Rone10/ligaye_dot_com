@@ -1,0 +1,381 @@
+- [ ] Below is a very detailed Markdown checklist for all 34 user stories outlined in the Invexis Product Requirements Document (PRD), as provided by the Senior Product Manager. Each user story is broken down into one-story-point tasks, designed to be small, manageable, and completable within a day or less by a competent AI Coding Agent. These tasks adhere to the INVEST criteria (Independent, Negotiable, Valuable, Estimable, Small, Testable) and include all necessary details for autonomous implementation, covering frontend, backend, database, security, testing, documentation, and non-functional requirements integrated into the Definition of Done (DoD) or acceptance criteria. The checklist is organized by epics, aligned with the release roadmap, and includes unchecked checkboxes for tracking progress.
+- [ ] **Invexis Development Checklist**
+- [ ] This checklist provides an exhaustive breakdown of all user stories into one-story-point tasks, ensuring that every detail required to implement the Invexis application is captured. Each task is granular, actionable, and designed for an AI Coding Agent to execute autonomously, enabling the creation of a fully functional inventory, sales, expense tracking, and reporting system for Gambian SMBs within the specified 6-month timeline.
+- [ ] **Table of Contents**
+    - [ ] **Epic 1: User Authentication and Role-Based Access** (#epic-1-user-authentication-and-role-based-access)
+        - [ ] **User Story 1: Registration** (#user-story-1-registration)
+        - [ ] **User Story 2: Email Verification** (#user-story-2-email-verification)
+        - [ ] **User Story 3: Login** (#user-story-3-login)
+        - [ ] **User Story 4: Invite User** (#user-story-4-invite-user)
+        - [ ] **User Story 5: Accept Invitation** (#user-story-5-accept-invitation)
+        - [ ] **User Story 6: Manage Roles** (#user-story-6-manage-roles)
+        - [ ] **User Story 7: Request Password Reset** (#user-story-7-request-password-reset)
+        - [ ] **User Story 8: Set New Password** (#user-story-8-set-new-password)
+    - [ ] **Epic 2: Multi-Tenancy** (#epic-2-multi-tenancy)
+        - [ ] **User Story 9: Data Isolation** (#user-story-9-data-isolation)
+    - [ ] **Epic 3: Inventory Management** (#epic-3-inventory-management)
+        - [ ] **User Story 10: Add Product** (#user-story-10-add-product)
+        - [ ] **User Story 11: Add Variants** (#user-story-11-add-variants)
+        - [ ] **User Story 12: Edit Product** (#user-story-12-edit-product)
+        - [ ] **User Story 13: Delete Product** (#user-story-13-delete-product)
+        - [ ] **User Story 14: Receive Stock** (#user-story-14-receive-stock)
+        - [ ] **User Story 15: Adjust Stock** (#user-story-15-adjust-stock)
+        - [ ] **User Story 16: View Inventory** (#user-story-16-view-inventory)
+    - [ ] **Epic 4: Sales Management** (#epic-4-sales-management)
+        - [ ] **User Story 17: Search Products** (#user-story-17-search-products)
+        - [ ] **User Story 18: Add to Cart** (#user-story-18-add-to-cart)
+        - [ ] **User Story 19: Remove from Cart** (#user-story-19-remove-from-cart)
+        - [ ] **User Story 20: Apply Discount** (#user-story-20-apply-discount)
+        - [ ] **User Story 21: Select Payment Method** (#user-story-21-select-payment-method)
+        - [ ] **User Story 22: Finalize Sale** (#user-story-22-finalize-sale)
+        - [ ] **User Story 23: View Sales History** (#user-story-23-view-sales-history)
+    - [ ] **Epic 5: Expense Tracking** (#epic-5-expense-tracking)
+        - [ ] **User Story 24: Log Expense** (#user-story-24-log-expense)
+        - [ ] **User Story 25: View Expenses** (#user-story-25-view-expenses)
+        - [ ] **User Story 26: Edit Expense** (#user-story-26-edit-expense)
+        - [ ] **User Story 27: Delete Expense** (#user-story-27-delete-expense)
+    - [ ] **Epic 6: Reporting** (#epic-6-reporting)
+        - [ ] **User Story 28: Inventory Report** (#user-story-28-inventory-report)
+        - [ ] **User Story 29: Low-Stock Report** (#user-story-29-low-stock-report)
+        - [ ] **User Story 30: Sales Report** (#user-story-30-sales-report)
+        - [ ] **User Story 31: Expense Report** (#user-story-31-expense-report)
+        - [ ] **User Story 32: Export Report** (#user-story-32-export-report)
+- [ ] **Epic 1: User Authentication and Role-Based Access**
+    - [ ] **User Story 1: Registration**
+        - [ ] Description: As a new user, I want to submit a registration form with my email, password, and business name so that I can create an account.
+        - [ ] Acceptance Criteria:
+            - [ ] Valid email, password (min 8 characters), and business name → account created, verification email sent.
+            - [ ] Invalid email → error message.
+            - [ ] Password < 8 characters → error message.
+            - [ ] Existing email → error message.
+        - [ ] Priority: High (Release 1)
+        - [ ] Design the registration form UI with labeled input fields for email, password, and business name, including a submit button.
+        - [ ] Style the form to be responsive (mobile and desktop) and accessible (e.g., high contrast, labels linked to inputs).
+        - [ ] Implement client-side validation: check email format using regex (e.g., [^@]+@[^.]+\..+).
+        - [ ] Implement client-side validation: ensure password is at least 8 characters with a mix of letters and numbers.
+        - [ ] Implement client-side validation: ensure business name is non-empty.
+        - [ ] Display specific error messages below each field for invalid email, short password, or empty business name.
+        - [ ] Create a backend API endpoint (POST /api/register) to receive registration data.
+        - [ ] In the backend, validate incoming JSON payload for required fields (email, password, business_name).
+        - [ ] Query the users table to check if the email already exists; return 409 Conflict with "Email already registered" if true.
+        - [ ] Hash the password using bcrypt with a salt rounds of 12.
+        - [ ] Insert a new record into the businesses table with name and auto-generated business_id.
+        - [ ] Insert a new record into the users table with user_id, email, password_hash, business_id, role ('owner'), and verified (false).
+        - [ ] Generate a unique verification token (e.g., UUID) and store it with an expiry (24 hours) in a verification_tokens table.
+        - [ ] Configure an email service (e.g., SendGrid) with API key and sender email in environment variables.
+        - [ ] Send a verification email with a link (e.g., https://app.invexis.com/verify?token=<token>) and a clear call-to-action.
+        - [ ] Return a 201 Created response with a success message ("Account created, please verify your email").
+        - [ ] Write unit tests for the endpoint: test successful registration, duplicate email, invalid payload.
+        - [ ] Write integration tests: simulate form submission, verify database updates, and email sending (mock email service).
+        - [ ] Update API documentation (e.g., OpenAPI spec) with endpoint details, request/response schemas, and error codes.
+        - [ ] Ensure page load time is under 2 seconds with mock data (test with Lighthouse).
+        - [ ] Verify WCAG 2.1 compliance: keyboard navigation, screen reader compatibility for form and errors.
+    - [ ] **User Story 2: Email Verification**
+        - [ ] Description: As a new user, I want to verify my email by clicking a link in the verification email so that I can activate my account.
+        - [ ] Acceptance Criteria:
+            - [ ] Click valid link → account activated, can log in.
+            - [ ] Invalid/expired link → error message.
+        - [ ] Priority: High (Release 1, depends on Registration)
+        - [ ] Create a backend endpoint (GET /api/verify) to handle verification requests with a token query parameter.
+        - [ ] Validate the presence of the token parameter; return 400 Bad Request if missing.
+        - [ ] Query the verification_tokens table to find the token and check if it’s unexpired (within 24 hours).
+        - [ ] If token is invalid or expired, return 400 Bad Request with "Invalid or expired verification link".
+        - [ ] Update the associated user’s record in the users table, setting verified to true.
+        - [ ] Delete the used token from the verification_tokens table to prevent reuse.
+        - [ ] Create a frontend confirmation page UI displaying "Account verified, please log in" with a login button.
+        - [ ] Redirect to the confirmation page with a success query param (e.g., /verify-success) on valid token.
+        - [ ] Display an error page with "Invalid or expired link" if the backend returns an error.
+        - [ ] Write unit tests for the endpoint: test valid token, expired token, invalid token.
+        - [ ] Write integration tests: simulate clicking a link, verify user status updates, and page redirection.
+        - [ ] Update API documentation with the verification endpoint and possible responses.
+        - [ ] Ensure verification page loads within 2 seconds and is WCAG 2.1 compliant.
+    - [ ] **User Story 3: Login**
+        - [ ] Description: As a registered user, I want to log in with my email and password so that I can access my business dashboard.
+        - [ ] Acceptance Criteria:
+            - [ ] Correct credentials → logged in, redirected to dashboard.
+            - [ ] Incorrect credentials → error message.
+        - [ ] Priority: High (Release 1, depends on Email Verification)
+        - [ ] Design the login form UI with email and password fields, a submit button, and a "Forgot Password" link.
+        - [ ] Implement client-side validation: ensure email and password are non-empty.
+        - [ ] Display a generic "Invalid email or password" error message on failed login attempts.
+        - [ ] Create a backend API endpoint (POST /api/login) to handle login requests.
+        - [ ] Validate incoming JSON payload for email and password fields.
+        - [ ] Query the users table by email; return 401 Unauthorized if not found or verified is false.
+        - [ ] Compare the provided password with the stored hash using bcrypt; return 401 if no match.
+        - [ ] Generate a JWT token with user_id, business_id, role, and a 24-hour expiry.
+        - [ ] Return the JWT in the response body (e.g., { "token": "..." }) with 200 OK.
+        - [ ] On the frontend, store the JWT securely in an HTTP-only cookie or local storage (with CSRF protection if using cookies).
+        - [ ] Redirect to the business dashboard route (e.g., /dashboard) on successful login.
+        - [ ] Create a basic dashboard page placeholder (to be detailed in later stories).
+        - [ ] Write unit tests for the endpoint: test successful login, wrong password, unverified user.
+        - [ ] Write integration tests: simulate login, verify token issuance, and redirection.
+        - [ ] Update API documentation with the login endpoint details.
+        - [ ] Ensure login page meets performance (under 2s) and accessibility standards.
+    - [ ] **User Story 4: Invite User**
+        - [ ] Description: As a business owner, I want to invite a new user by entering their email and selecting a role so that they can join my business.
+        - [ ] Acceptance Criteria:
+            - [ ] Logged in as owner, enter email and role → invitation email sent.
+        - [ ] Priority: Medium (Release 1)
+        - [ ] Create a user management section UI within the dashboard, accessible only to owners.
+        - [ ] Add an "Invite User" button that opens a form with email and role dropdown (options: 'staff').
+        - [ ] Implement client-side validation: validate email format and ensure role is selected.
+        - [ ] Create a backend endpoint (POST /api/invite) to handle invitation requests.
+        - [ ] Extract user_id and role from the JWT; return 403 Forbidden if not 'owner'.
+        - [ ] Validate incoming payload for email and role; return 400 if invalid.
+        - [ ] Check if the email exists in users with the same business_id; return 409 if already invited/registered.
+        - [ ] Generate a unique invitation token and store it with email, role, business_id, and 48-hour expiry in an invitations table.
+        - [ ] Send an invitation email with a link (e.g., https://app.invexis.com/accept-invite?token=<token>).
+        - [ ] Return 200 OK with "Invitation sent" message.
+        - [ ] Write unit tests: test successful invite, non-owner access, duplicate email.
+        - [ ] Write integration tests: simulate invitation, verify email sending and database update.
+        - [ ] Update API documentation with the invite endpoint.
+        - [ ] Ensure the form is accessible and loads quickly.
+    - [ ] **User Story 5: Accept Invitation**
+        - [ ] Description: As an invited user, I want to accept an invitation by setting my password so that I can join the business.
+        - [ ] Acceptance Criteria:
+            - [ ] Click invitation link, set valid password → account created, linked to business.
+        - [ ] Priority: Medium (Release 1, depends on Invite User)
+        - [ ] Create a frontend page for accepting invitations (e.g., /accept-invite) that parses the token from the URL.
+        - [ ] Display a password input form if the token is present; show an error if missing/invalid.
+        - [ ] Implement client-side validation: ensure password meets complexity requirements (8+ characters, mix of letters/numbers).
+        - [ ] Create a backend endpoint (POST /api/accept-invite) to process acceptance.
+        - [ ] Validate the token against the invitations table; return 400 if invalid or expired.
+        - [ ] Hash the provided password with bcrypt.
+        - [ ] Insert a new user into users with email, password_hash, business_id, and role from the invitation.
+        - [ ] Delete the invitation record to prevent reuse.
+        - [ ] Return 200 OK with "Account created" message.
+        - [ ] Redirect to the login page with a success message on the frontend.
+        - [ ] Write unit tests: test valid acceptance, expired token, invalid token.
+        - [ ] Write integration tests: simulate link click and form submission, verify user creation.
+        - [ ] Update API documentation with the accept-invite endpoint.
+        - [ ] Ensure the page meets performance and accessibility standards.
+    - [ ] **User Story 6: Manage Roles**
+        - [ ] Description: As a business owner, I want to view and manage the roles of users in my business so that I can control access.
+        - [ ] Acceptance Criteria:
+            - [ ] Logged in as owner → see user list with roles.
+            - [ ] Change role → permissions updated.
+        - [ ] Priority: Medium (Release 1)
+        - [ ] Add a "Manage Users" tab in the dashboard UI, visible only to owners.
+        - [ ] Fetch and display a table of users (email, role) for the current business_id from a backend endpoint.
+        - [ ] Create a backend endpoint (GET /api/users) to list users by business_id.
+        - [ ] Validate requester’s role as 'owner' via JWT; return 403 if not.
+        - [ ] Query users table, filtering by business_id, and return the list.
+        - [ ] Add a dropdown next to each user to select a new role (e.g., 'staff', 'owner').
+        - [ ] Create a backend endpoint (PATCH /api/users/:user_id/role) to update roles.
+        - [ ] Validate requester’s role and ensure user_id belongs to the same business_id.
+        - [ ] Update the role column in the users table.
+        - [ ] Return 200 OK with updated user details.
+        - [ ] Reflect role changes in the UI immediately after a successful update.
+        - [ ] Write unit tests for both endpoints: test listing, role update, unauthorized access.
+        - [ ] Write integration tests: simulate role change, verify database and UI updates.
+        - [ ] Update API documentation with user management endpoints.
+        - [ ] Ensure the page is accessible and performant.
+    - [ ] **User Story 7: Request Password Reset**
+        - [ ] Description: As a user, I want to request a password reset by entering my email so that I can recover my account.
+        - [ ] Acceptance Criteria:
+            - [ ] Click "Forgot Password", enter email → reset email sent.
+        - [ ] Priority: Medium (Release 1)
+        - [ ] Add a "Forgot Password" link below the login form UI.
+        - [ ] Create a password reset request form with an email field and submit button, shown on link click.
+        - [ ] Implement client-side validation: validate email format.
+        - [ ] Create a backend endpoint (POST /api/forgot-password) to handle reset requests.
+        - [ ] Validate incoming email; return 400 if invalid format.
+        - [ ] Query users table by email; silently return 200 OK if not found (security: no user enumeration).
+        - [ ] Generate a unique reset token and store it with user_id and 1-hour expiry in a reset_tokens table.
+        - [ ] Send a reset email with a link (e.g., https://app.invexis.com/reset-password?token=<token>).
+        - [ ] Return 200 OK with "Reset email sent" message.
+        - [ ] Display a success message on the frontend: "Check your email for reset instructions".
+        - [ ] Write unit tests: test valid email, non-existent email.
+        - [ ] Write integration tests: simulate request, verify email sending and token storage.
+        - [ ] Update API documentation with the forgot-password endpoint.
+        - [ ] Ensure the form meets accessibility and performance standards.
+    - [ ] **User Story 8: Set New Password**
+        - [ ] Description: As a user, I want to set a new password using the reset link so that I can log in again.
+        - [ ] Acceptance Criteria:
+            - [ ] Click reset link, enter new password → password updated, can log in.
+        - [ ] Priority: Medium (Release 1, depends on Request Password Reset)
+        - [ ] Create a frontend page for resetting passwords (e.g., /reset-password) that parses the token from the URL.
+        - [ ] Display a new password input form if the token is present; show an error if missing/invalid.
+        - [ ] Implement client-side validation: ensure new password meets complexity requirements.
+        - [ ] Create a backend endpoint (POST /api/reset-password) to process the reset.
+        - [ ] Validate the token against the reset_tokens table; return 400 if invalid or expired.
+        - [ ] Hash the new password with bcrypt.
+        - [ ] Update the user’s password_hash in the users table using the associated user_id.
+        - [ ] Delete the reset token to prevent reuse.
+        - [ ] Return 200 OK with "Password updated" message.
+        - [ ] Redirect to the login page with a success message on the frontend.
+        - [ ] Write unit tests: test valid reset, expired token, invalid token.
+        - [ ] Write integration tests: simulate link click and submission, verify password update.
+        - [ ] Update API documentation with the reset-password endpoint.
+        - [ ] Ensure the page meets performance and accessibility standards.
+- [ ] **Epic 2: Multi-Tenancy**
+    - [ ] **User Story 9: Data Isolation**
+        - [ ] Description: As a logged-in user, I want to see only my business’s data when accessing any feature so that my data remains private.
+        - [ ] Acceptance Criteria:
+            - [ ] Logged into business A → see only business A’s data.
+            - [ ] Attempt to access business B’s data → denied.
+        - [ ] Priority: High (Release 1)
+        - [ ] Define a business_id column in all relevant tables (users, products, sales, expenses, etc.).
+        - [ ] Implement row-level security (RLS) in the database to filter rows by business_id for all queries.
+        - [ ] Create a middleware function in the backend to extract business_id from the JWT on every authenticated request.
+        - [ ] Append business_id to all database queries automatically via the middleware or ORM configuration.
+        - [ ] Validate that requested resource IDs (e.g., product_id) match the user’s business_id in all endpoints; return 403 if mismatched.
+        - [ ] Write unit tests for the middleware: test correct business_id extraction, unauthorized access attempts.
+        - [ ] Write integration tests: simulate requests across multiple businesses, verify data isolation.
+        - [ ] Document the multi-tenancy implementation in the codebase and developer guide.
+        - [ ] Note: Specific UI tasks are covered in other stories; this focuses on backend enforcement.
+- [ ] **Epic 3: Inventory Management**
+    - [ ] **User Story 10: Add Product**
+        - [ ] Description: As a business owner, I want to add a new product with name, category, supplier, stock level, and price so that I can track it in my inventory.
+        - [ ] Acceptance Criteria:
+            - [ ] Enter valid details → product saved, visible in inventory.
+            - [ ] Invalid data (e.g., negative stock) → error message.
+            - [ ] Linked to my business_id.
+        - [ ] Priority: High (Release 2)
+        - [ ] Create an "Inventory" tab in the dashboard UI with an "Add Product" button.
+        - [ ] Design a product form with fields: name, category, supplier, stock_level (number), price (decimal).
+        - [ ] Implement client-side validation: ensure all fields are non-empty, stock_level ≥ 0, price > 0.
+        - [ ] Display error messages for invalid inputs (e.g., "Stock cannot be negative").
+        - [ ] Create a backend endpoint (POST /api/products) to add products.
+        - [ ] Validate incoming payload for all required fields and data types.
+        - [ ] Extract business_id from JWT and associate it with the product.
+        - [ ] Insert into products table: product_id, business_id, name, category, supplier, stock_level, price.
+        - [ ] Return 201 Created with the new product’s details.
+        - [ ] Refresh the inventory list UI to show the new product after successful submission.
+        - [ ] Write unit tests: test valid product, invalid stock/price, missing fields.
+        - [ ] Write integration tests: simulate form submission, verify database insertion and UI update.
+        - [ ] Update API documentation with the add-product endpoint.
+        - [ ] Ensure form accessibility and performance.
+    - [ ] **User Story 11: Add Variants**
+        - [ ] Description: As a business owner, I want to add variants to a product with individual stock levels and prices so that I can manage different options.
+        - [ ] Acceptance Criteria:
+            - [ ] Add variants (e.g., size S, M) with stock and price → saved with product.
+        - [ ] Priority: High (Release 2, depends on Add Product)
+        - [ ] Extend the product form UI to include a "Variants" section with an "Add Variant" button.
+        - [ ] Allow dynamic addition of variant rows with fields: variant_name (e.g., "Small"), stock_level, price.
+        - [ ] Implement client-side validation: ensure variant fields are non-empty, unique within the product, stock_level ≥ 0, price > 0.
+        - [ ] Create a product_variants table with columns: variant_id, product_id, variant_name, stock_level, price.
+        - [ ] Modify the POST /api/products endpoint to accept an optional variants array in the payload.
+        - [ ] Validate and insert each variant into product_variants after creating the product.
+        - [ ] Return the product with its variants in the response.
+        - [ ] Display variants under the product in the inventory list UI after submission.
+        - [ ] Write unit tests: test product with variants, duplicate variant names, invalid variant data.
+        - [ ] Write integration tests: simulate adding variants, verify storage and display.
+        - [ ] Update API documentation to include variants in the product endpoint.
+    - [ ] **User Story 12: Edit Product**
+        - [ ] Description: As a business owner, I want to edit an existing product’s details, including variants, so that I can update information.
+        - [ ] Acceptance Criteria:
+            - [ ] Select product, edit details/variants → changes reflected in inventory.
+        - [ ] Priority: Medium (Release 2, depends on Add Product)
+        - [ ] Add an "Edit" button next to each product in the inventory list UI.
+        - [ ] Open a pre-filled edit form with current product details and variants when "Edit" is clicked.
+        - [ ] Allow adding, editing, or removing variants in the form.
+        - [ ] Implement client-side validation identical to the add-product form.
+        - [ ] Create a backend endpoint (PATCH /api/products/:product_id) to update products.
+        - [ ] Validate product_id belongs to the user’s business_id; return 403 if not.
+        - [ ] Update products table with new values for provided fields.
+        - [ ] Handle variant updates: insert new variants, update existing ones, delete removed ones in product_variants.
+        - [ ] Return 200 OK with updated product and variants.
+        - [ ] Refresh the inventory list UI to reflect changes.
+        - [ ] Write unit tests: test partial updates, variant modifications, unauthorized access.
+        - [ ] Write integration tests: simulate edit, verify database and UI updates.
+        - [ ] Update API documentation with the edit-product endpoint.
+    - [ ] **User Story 13: Delete Product**
+        - [ ] Description: As a business owner, I want to delete a product after confirmation so that I can remove obsolete items.
+        - [ ] Acceptance Criteria:
+            - [ ] Select product, confirm delete → product and variants removed.
+        - [ ] Priority: Medium (Release 2, depends on Add Product)
+        - [ ] Add a "Delete" button next to each product in the inventory list UI.
+        - [ ] Show a confirmation dialog ("Are you sure?") when "Delete" is clicked.
+        - [ ] Create a backend endpoint (DELETE /api/products/:product_id) to delete products.
+        - [ ] Validate product_id belongs to the user’s business_id; return 403 if not.
+        - [ ] Delete associated rows from product_variants table.
+        - [ ] Delete the product from the products table.
+        - [ ] Return 204 No Content on success.
+        - [ ] Remove the product from the inventory list UI after deletion.
+        - [ ] Write unit tests: test successful deletion, unauthorized access.
+        - [ ] Write integration tests: simulate deletion, verify database and UI updates.
+        - [ ] Update API documentation with the delete-product endpoint.
+    - [ ] **User Story 14: Receive Stock**
+        - [ ] Description: As a business owner, I want to receive stock for a product variant to increase its stock level so that I can update availability.
+        - [ ] Acceptance Criteria:
+            - [ ] Click "Receive Stock", enter quantity → stock level increases.
+        - [ ] Priority: Medium (Release 2, depends on Add Variants)
+        - [ ] Add a "Receive Stock" button next to each variant in the product details UI.
+        - [ ] Open a form with a quantity field (positive integer) when clicked.
+        - [ ] Implement client-side validation: ensure quantity > 0.
+        - [ ] Create a backend endpoint (POST /api/variants/:variant_id/receive-stock) to update stock.
+        - [ ] Validate variant_id belongs to the user’s business_id via products join; return 403 if not.
+        - [ ] Increment stock_level by the provided quantity in product_variants.
+        - [ ] Return 200 OK with updated variant details.
+        - [ ] Update the variant’s stock display in the UI.
+        - [ ] Write unit tests: test stock increase, invalid variant, negative quantity.
+        - [ ] Write integration tests: simulate stock receipt, verify database and UI updates.
+        - [ ] Update API documentation with the receive-stock endpoint.
+    - [ ] **User Story 15: Adjust Stock**
+        - [ ] Description: As a business owner, I want to manually adjust a product variant’s stock level so that I can correct discrepancies.
+        - [ ] Acceptance Criteria:
+            - [ ] Click "Adjust Stock", enter new level → stock updates.
+        - [ ] Priority: Medium (Release 2, depends on Add Variants)
+        - [ ] Add an "Adjust Stock" button next to each variant in the product details UI.
+        - [ ] Open a form with a new_stock_level field (non-negative integer) when clicked.
+        - [ ] Implement client-side validation: ensure new_stock_level ≥ 0.
+        - [ ] Create a backend endpoint (PATCH /api/variants/:variant_id/stock) to adjust stock.
+        - [ ] Validate variant_id belongs to the user’s business_id; return 403 if not.
+        - [ ] Set stock_level to new_stock_level in product_variants.
+        - [ ] Return 200 OK with updated variant details.
+        - [ ] Update the variant’s stock display in the UI.
+        - [ ] Write unit tests: test stock adjustment, invalid variant, negative stock.
+        - [ ] Write integration tests: simulate adjustment, verify database and UI updates.
+        - [ ] Update API documentation with the adjust-stock endpoint.
+    - [ ] **User Story 16: View Inventory**
+        - [ ] Description: As a business owner, I want to view a list of all products, including variants and stock levels, so that I can monitor my inventory.
+        - [ ] Acceptance Criteria:
+            - [ ] On inventory page → see all products, variants, stock, filterable by name/category.
+        - [ ] Priority: High (Release 2)
+        - [ ] Design an inventory list UI with columns: name, category, supplier, stock_level, price, and expandable variants.
+        - [ ] Fetch data from a backend endpoint and display products with variants nested under each.
+        - [ ] Add filter inputs for name and category with real-time filtering on the frontend.
+        - [ ] Create a backend endpoint (GET /api/products) to list products.
+        - [ ] Query products and join with product_variants, filtering by business_id from JWT.
+        - [ ] Return a paginated response (e.g., 20 items per page) with total count for pagination.
+        - [ ] Implement pagination controls (e.g., next/previous buttons) in the UI.
+        - [ ] Write unit tests: test product listing, pagination, unauthorized access.
+        - [ ] Write integration tests: simulate page load, verify data display and filtering.
+        - [ ] Update API documentation with the list-products endpoint.
+        - [ ] Optimize query performance with indexing on business_id and name.
+        - [ ] Ensure list is accessible (e.g., table headers) and loads under 2 seconds.
+- [ ] **Epic 4: Sales Management**
+    - [ ] **User Story 17: Search Products**
+        - [ ] Description: As a staff member, I want to search for products by name or category to add to a sale so that I can process it quickly.
+        - [ ] Acceptance Criteria:
+            - [ ] Enter search term → see relevant products from my business.
+        - [ ] Priority: High (Release 3, depends on Add Product)
+        - [ ] Create a "Sales" tab in the dashboard UI with a search bar at the top.
+        - [ ] Implement real-time search: fetch results as the user types (debounced to 300ms).
+        - [ ] Display search results in a list with name, category, price, and an "Add to Cart" button.
+        - [ ] Create a backend endpoint (GET /api/products/search) with query params q (search term) and category.
+        - [ ] Query products and product_variants with a LIKE clause on name or exact match on category, filtered by business_id.
+        - [ ] Return matching products with variants in the response.
+        - [ ] Write unit tests: test search by name, category, empty results.
+        - [ ] Write integration tests: simulate search, verify results display.
+        - [ ] Update API documentation with the search endpoint.
+        - [ ] Optimize search with full-text indexing if needed for performance.
+    - [ ] **User Story 18: Add to Cart**
+        - [ ] Description: As a staff member, I want to add a product to the sale cart with a specified quantity so that I can build the transaction.
+        - [ ] Acceptance Criteria:
+            - [ ] Select product, enter quantity → appears in cart with total.
+            - [ ] Quantity exceeds stock → warning.
+        - [ ] Priority: High (Release 3)
+        - [ ] Add a cart section below the search UI, initially empty.
+        - [ ] In search results, add a quantity input (default 1) next to each "Add to Cart" button.
+        - [ ] Implement client-side validation: ensure quantity > 0 and ≤ stock_level.
+        - [ ] Display a warning ("Not enough stock") if quantity exceeds stock, disabling the button.
+        - [ ] Store cart state in memory (e.g., React state) with items: variant_id, name, quantity, price, total.
+        - [ ] Update the cart UI with a table showing items and a running total price.
+        - [ ] Write tests: test adding valid quantity, exceeding stock, UI updates.
+        - [ ] Ensure cart is accessible (e.g., readable by screen readers).
+    - [ ] **User Story 19: Remove from Cart**
+        - [ ] Description: As a staff member, I want to remove a product from the sale cart so that I can correct mistakes.
+        - [ ] Acceptance Criteria:
+            -

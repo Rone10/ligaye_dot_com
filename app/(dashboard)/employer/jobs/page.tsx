@@ -41,6 +41,7 @@ import {
 } from '@/app/actions/employer/jobs';
 import { jobFilters } from '@/app/actions/employer/job-filters';
 import { formatDistanceToNow } from 'date-fns';
+import Link from 'next/link';
 
 export default function EmployerJobsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,17 +63,24 @@ export default function EmployerJobsPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
+        console.log("Employer Jobs Page: Starting data fetch");
+        
         const [jobsData, statsData, locationsData] = await Promise.all([
           fetchJobs(),
           fetchJobStats(),
           fetchJobLocations(),
         ]);
 
+        console.log("Employer Jobs Page: Data fetch complete");
+        console.log("Employer Jobs Page: Jobs data:", jobsData ? `Found ${jobsData.length} jobs` : "No jobs data");
+        console.log("Employer Jobs Page: Stats data:", statsData || "No stats data");
+        console.log("Employer Jobs Page: Locations data:", locationsData ? `Found ${locationsData.length} locations` : "No locations data");
+
         if (jobsData) setJobs(jobsData);
         if (statsData) setStats(statsData);
         if (locationsData) setLocations(locationsData);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Employer Jobs Page: Error fetching data:', error);
       } finally {
         setLoading(false);
       }
@@ -327,8 +335,13 @@ export default function EmployerJobsPage() {
                 key={job.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-lg border p-6"
+                className="bg-white rounded-lg border p-6 relative group hover:shadow-md transition-shadow duration-200"
               >
+                {/* Clickable overlay that links to job details */}
+                <Link href={`/employer/jobs/${job.id}`} className="absolute inset-0 z-10 cursor-pointer" aria-label={`View details for ${job.title}`}>
+                  <span className="sr-only">View job details</span>
+                </Link>
+                
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
@@ -356,7 +369,7 @@ export default function EmployerJobsPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 z-20 relative">
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
@@ -370,16 +383,38 @@ export default function EmployerJobsPage() {
                     <div className="flex gap-2">
                       <Button 
                         variant="outline" 
-                        onClick={() => handleStatusUpdate(job.id, !job.isActive)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleStatusUpdate(job.id, !job.isActive);
+                        }}
+                        className="z-20 relative"
                       >
                         {job.isActive ? 'Pause' : 'Activate'}
                       </Button>
                       <Button 
                         variant="outline" 
-                        className="text-red-600 hover:text-red-700"
-                        onClick={() => handleDeleteJob(job.id)}
+                        className="text-red-600 hover:text-red-700 z-20 relative"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeleteJob(job.id);
+                        }}
                       >
                         Delete
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="z-20 relative"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        asChild
+                      >
+                        <Link href={`/employer/jobs/${job.id}`}>
+                          View Details
+                        </Link>
                       </Button>
                     </div>
                   </div>

@@ -12,9 +12,7 @@ import { formatCurrency } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 
 interface JobDetailsPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{id: string}>
 }
 
 const JOB_TYPES: Record<string, string> = {
@@ -76,7 +74,8 @@ async function deleteJob(formData: FormData) {
 }
 
 export default async function JobDetailsPage({ params }: JobDetailsPageProps) {
-  const job = await fetchJob(params.id);
+    const {id} = await params
+  const job = await fetchJob(id);
   
   if (!job) {
     notFound();
