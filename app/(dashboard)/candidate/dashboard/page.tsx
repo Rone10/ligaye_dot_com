@@ -10,6 +10,7 @@ import { ProfileCompleteness } from '../_components/profile-completeness';
 import { CareerTips } from '../_components/career-tips';
 import { getCandidateDashboardData } from '@/app/actions/candidate/dashboard';
 import { getCandidateProfile } from '@/app/actions/candidate/profile';
+import { getSavedJobs } from '@/app/actions/candidate/saved-jobs';
 
 // Loading component for Suspense fallback
 function DashboardLoadingSkeleton() {
@@ -70,7 +71,9 @@ function DashboardLoadingSkeleton() {
 // Server component to fetch dashboard data
 async function DashboardContent() {
   // Fetch necessary data for the dashboard
+  const dashboard = await getCandidateDashboardData();
   const profile = await getCandidateProfile();
+  const savedJobs = await getSavedJobs();
   
   // Extract candidate name from profile
   const candidateName = profile?.profile?.fullName || "Candidate";
@@ -84,14 +87,14 @@ async function DashboardContent() {
           <p className="text-muted-foreground">Here's an overview of your job search progress.</p>
         </div>
 
-        <ApplicationStatus />
-        <RecommendedJobs />
+        <ApplicationStatus stats={dashboard.stats} />
+        <RecommendedJobs jobs={dashboard.recommendedJobs} />
       </div>
 
       {/* Sidebar */}
       <div className="lg:w-80 space-y-6">
-        <SavedJobs />
-        <ProfileCompleteness />
+        <SavedJobs items={savedJobs.slice(0, 3)} />
+        <ProfileCompleteness candidateProfile={profile} />
         <CareerTips />
       </div>
     </div>

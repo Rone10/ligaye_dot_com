@@ -3,15 +3,60 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import Link from 'next/link';
 
-const profileSections = [
-  { name: 'Basic Information', completed: true },
-  { name: 'Work Experience', completed: true },
-  { name: 'Skills Assessment', completed: false },
-  { name: 'Portfolio', completed: false },
-];
+// Define the shape of the props
+type ProfileCompletenessProps = {
+  candidateProfile?: {
+    profile: {
+      id: string;
+      fullName: string;
+      email: string;
+      avatarUrl: string | null;
+      [key: string]: any;
+    };
+    candidateProfile: {
+      id: string;
+      title?: string | null;
+      skills?: string[] | null;
+      bio?: string | null;
+      experienceLevel?: string | null;
+      resumeUrl?: string | null;
+      [key: string]: any;
+    } | null;
+  };
+}
 
-export function ProfileCompleteness() {
+export function ProfileCompleteness({ candidateProfile }: ProfileCompletenessProps) {
+  // Calculate profile completeness and identify missing sections
+  const calculateProfileCompleteness = () => {
+    if (!candidateProfile?.candidateProfile) {
+      return { score: 25, sections: [
+        { name: 'Basic Information', completed: true },
+        { name: 'Work Experience', completed: false },
+        { name: 'Skills Assessment', completed: false },
+        { name: 'Resume', completed: false },
+      ]};
+    }
+
+    const profile = candidateProfile.profile;
+    const candidateData = candidateProfile.candidateProfile;
+    
+    const sections = [
+      { name: 'Basic Information', completed: !!profile.fullName },
+      { name: 'Professional Title', completed: !!candidateData?.title },
+      { name: 'Skills', completed: !!(candidateData?.skills && candidateData.skills.length > 0) },
+      { name: 'Resume', completed: !!candidateData?.resumeUrl },
+    ];
+    
+    const completedSections = sections.filter(s => s.completed).length;
+    const score = Math.round((completedSections / sections.length) * 100);
+    
+    return { score, sections };
+  };
+  
+  const { score, sections } = calculateProfileCompleteness();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -23,12 +68,12 @@ export function ProfileCompleteness() {
         <div>
           <div className="flex justify-between text-sm mb-2">
             <span>Overall Progress</span>
-            <span>75%</span>
+            <span>{score}%</span>
           </div>
-          <Progress value={75} className="h-2" />
+          <Progress value={score} className="h-2" />
         </div>
         <div className="space-y-3">
-          {profileSections.map((section, index) => (
+          {sections.map((section, index) => (
             <div key={index} className="flex items-center gap-2">
               <div className={`w-4 h-4 rounded-full ${
                 section.completed ? 'bg-green-500' : 'bg-gray-200'
@@ -37,7 +82,9 @@ export function ProfileCompleteness() {
             </div>
           ))}
         </div>
-        <Button className="w-full bg-blue-600">Complete Profile</Button>
+        <Button className="w-full bg-blue-600" asChild>
+          <Link href="/candidate/profile">Complete Profile</Link>
+        </Button>
       </div>
     </motion.div>
   );
