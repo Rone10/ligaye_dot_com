@@ -70,8 +70,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       formData.append("skills", values.skills)
       
       if (values.bio) formData.append("bio", values.bio)
-      if (values.linkedinUrl) formData.append("linkedinUrl", values.linkedinUrl)
-      if (values.githubUrl) formData.append("githubUrl", values.githubUrl)
+      
+      // Ensure linkedinUrl and githubUrl are always sent as strings (empty string if falsy)
+      formData.append("linkedinUrl", values.linkedinUrl || "")
+      formData.append("githubUrl", values.githubUrl || "")
       
       // Add resume file if selected
       if (resumeFile) formData.append("resume", resumeFile)
