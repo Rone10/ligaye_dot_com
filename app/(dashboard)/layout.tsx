@@ -42,7 +42,7 @@ const candidateNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/candidate/dashboard', icon: LayoutDashboard },
   { label: 'Find Jobs', href: '/jobs', icon: Search },
   { label: 'My Applications', href: '/candidate/applications', icon: BookMarked },
-  { label: 'My Resume', href: '/candidate/resume', icon: GraduationCap },
+  { label: 'My Profile', href: '/candidate/profile', icon: GraduationCap },
   { label: 'Saved Jobs', href: '/candidate/saved-jobs', icon: Heart },
   { label: 'Settings', href: '/candidate/settings', icon: Settings },
 ];

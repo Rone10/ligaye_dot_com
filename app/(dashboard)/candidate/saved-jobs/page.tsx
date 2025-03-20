@@ -1,124 +1,97 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import { MapPin, Building2, Clock, Trash2 } from 'lucide-react';
+import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { SavedJobCard } from '../_components/saved-job-card';
+import { getSavedJobs } from '@/app/actions/candidate/saved-jobs';
 
-const savedJobs = [
-  {
-    id: '1',
-    title: 'Senior Frontend Developer',
-    company: 'TechCorp Solutions',
-    location: 'San Francisco, CA',
-    type: 'Full-time',
-    description: 'Lead frontend development initiatives and mentor junior developers. Expert in React, TypeScript, and modern web technologies. 5+ years experience required.',
-    savedAt: '2 days ago',
-  },
-  {
-    id: '2',
-    title: 'UX/UI Designer',
-    company: 'Design Studio Inc.',
-    location: 'Remote',
-    type: 'Contract',
-    description: 'Create user-centered designs for web and mobile applications. Strong portfolio required with experience in Figma and design systems.',
-    savedAt: '5 days ago',
-  },
-];
-
-export default function SavedJobsPage() {
+// Loading component for Suspense fallback
+function SavedJobsLoadingSkeleton() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
-      >
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Saved Jobs</h1>
-          <p className="text-gray-600">Browse and manage your saved job listings</p>
+    <div className="space-y-6">
+      {Array(5).fill(0).map((_, i) => (
+        <div key={i} className="rounded-lg border p-6 space-y-4">
+          <div className="flex justify-between">
+            <div>
+              <Skeleton className="h-6 w-64" />
+              <Skeleton className="h-4 w-40 mt-2" />
+            </div>
+            <Skeleton className="h-8 w-28" />
+          </div>
+          <Skeleton className="h-4 w-full" />
+          <div className="flex justify-between">
+            <div className="flex gap-2">
+              <Skeleton className="h-8 w-20" />
+              <Skeleton className="h-8 w-20" />
+            </div>
+            <div className="flex gap-2">
+              <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-9 w-24" />
+            </div>
+          </div>
         </div>
+      ))}
+    </div>
+  );
+}
 
-        <div className="space-y-4">
-          {savedJobs.map((job) => (
-            <motion.div
-              key={job.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-lg border p-6 relative group"
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-4 top-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Trash2 className="h-5 w-5" />
-              </Button>
-
-              <div className="mb-4">
-                <a
-                  href={`/jobs/${job.id}`}
-                  className="text-lg font-medium text-blue-600 hover:underline"
-                >
-                  {job.title}
-                </a>
-                <div className="flex items-center gap-2 text-gray-600 mt-1">
-                  <Building2 className="h-4 w-4" />
-                  <span>{job.company}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{job.location}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{job.type}</span>
-                </div>
-              </div>
-
-              <p className="text-gray-600 mb-4">{job.description}</p>
-
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">
-                  Saved {job.savedAt}
-                </span>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  View Job
-                </Button>
-              </div>
-            </motion.div>
-          ))}
+// Server component to fetch saved jobs data
+async function SavedJobsContent() {
+  // Fetch candidate saved jobs
+  const savedJobs = await getSavedJobs();
+  
+  return (
+    <div className="space-y-4">
+      {savedJobs.length === 0 ? (
+        <div className="text-center py-12 border rounded-lg">
+          <h3 className="text-lg font-medium mb-2">No saved jobs found</h3>
+          <p className="text-muted-foreground mb-4">You haven't saved any jobs yet.</p>
+          <Button asChild className="mt-2">
+            <a href="/jobs">Browse Jobs</a>
+          </Button>
         </div>
-
-        <div className="flex items-center justify-between mt-8">
-          <div className="text-sm text-gray-600">
-            Showing 1 to 10 of 20 results
+      ) : (
+        savedJobs.map((savedJob) => (
+          <SavedJobCard 
+            key={savedJob.savedJob.id} 
+            savedJob={savedJob.savedJob}
+            job={savedJob.job}
+            employer={savedJob.employer}
+          />
+        ))
+      )}
+      
+      {savedJobs.length > 0 && (
+        <div className="flex justify-between items-center mt-8">
+          <div className="text-sm text-gray-500">
+            Showing {savedJobs.length} saved jobs
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              className="text-gray-600"
-              disabled
-            >
+            <Button variant="outline" size="sm" disabled>
               Previous
             </Button>
-            <Button variant="outline" className="bg-blue-600 text-white">
-              1
-            </Button>
-            <Button variant="outline" className="text-gray-600">
-              2
-            </Button>
-            <Button variant="outline" className="text-gray-600">
-              3
-            </Button>
-            <Button variant="outline" className="text-gray-600">
+            <Button variant="outline" size="sm">
               Next
             </Button>
           </div>
         </div>
-      </motion.div>
+      )}
+    </div>
+  );
+}
+
+export default function SavedJobsPage() {
+  return (
+    <div className="container py-6 max-w-4xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold mb-2">Saved Jobs</h1>
+        <p className="text-muted-foreground">
+          Jobs you've saved for later
+        </p>
+      </div>
+      
+      <Suspense fallback={<SavedJobsLoadingSkeleton />}>
+        <SavedJobsContent />
+      </Suspense>
     </div>
   );
 }

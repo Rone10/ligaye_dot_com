@@ -1,169 +1,128 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import { Search, Eye, XCircle } from 'lucide-react';
+import { Suspense } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ApplicationCard } from '../_components/application-card';
+import { getApplications } from '@/app/actions/candidate/applications';
 
-const applications = [
-  {
-    id: '1',
-    position: 'Senior Frontend Developer',
-    company: 'TechCorp Solutions',
-    location: 'San Francisco, CA',
-    appliedDate: 'Jan 15, 2025',
-    status: 'Interview Scheduled',
-  },
-  {
-    id: '2',
-    position: 'UX Designer',
-    company: 'Design Studio',
-    location: 'Remote',
-    appliedDate: 'Jan 12, 2025',
-    status: 'Pending Review',
-  },
-  {
-    id: '3',
-    position: 'Product Manager',
-    company: 'Tech Innovations',
-    location: 'New York, NY',
-    appliedDate: 'Jan 10, 2025',
-    status: 'Not Selected',
-  },
-];
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'Interview Scheduled':
-      return 'bg-yellow-50 text-yellow-800';
-    case 'Pending Review':
-      return 'bg-blue-50 text-blue-800';
-    case 'Not Selected':
-      return 'bg-red-50 text-red-800';
-    default:
-      return 'bg-gray-50 text-gray-800';
-  }
-};
-
-export default function ApplicationsPage() {
+// Loading component for Suspense fallback
+function ApplicationsLoadingSkeleton() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
-      >
-        <div>
-          <h1 className="text-2xl font-bold mb-2">My Applications</h1>
-          <p className="text-gray-600">Track and manage your job applications</p>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <Skeleton className="h-10 w-full sm:w-80" />
+        <div className="flex gap-2">
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
         </div>
+      </div>
+      
+      {Array(5).fill(0).map((_, i) => (
+        <div key={i} className="rounded-lg border p-6 space-y-4">
+          <div className="flex justify-between">
+            <div>
+              <Skeleton className="h-6 w-64" />
+              <Skeleton className="h-4 w-40 mt-2" />
+            </div>
+            <Skeleton className="h-8 w-28" />
+          </div>
+          <Skeleton className="h-4 w-full" />
+          <div className="flex justify-between">
+            <Skeleton className="h-8 w-20" />
+            <div className="flex gap-2">
+              <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-9 w-24" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search applications..."
-              className="pl-9"
+// Server component to fetch applications data
+async function ApplicationsContent() {
+  // Fetch candidate applications
+  const applications = await getApplications();
+  
+  return (
+    <>
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+        <Input
+          placeholder="Search applications..."
+          className="sm:max-w-xs"
+        />
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
+            All
+          </Badge>
+          <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
+            Pending
+          </Badge>
+          <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
+            Interview
+          </Badge>
+          <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
+            Rejected
+          </Badge>
+        </div>
+      </div>
+      
+      <div className="space-y-4">
+        {applications.length === 0 ? (
+          <div className="text-center py-12 border rounded-lg">
+            <h3 className="text-lg font-medium mb-2">No applications found</h3>
+            <p className="text-muted-foreground mb-4">You haven't applied for any jobs yet.</p>
+            <Button asChild className="mt-2">
+              <a href="/jobs">Browse Jobs</a>
+            </Button>
+          </div>
+        ) : (
+          applications.map((application) => (
+            <ApplicationCard 
+              key={application.application.id} 
+              application={application.application}
+              job={application.job}
+              employer={application.employer}
             />
-          </div>
-          <div className="flex gap-4">
-            <Select defaultValue="all">
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending Review</SelectItem>
-                <SelectItem value="interview">Interview Scheduled</SelectItem>
-                <SelectItem value="rejected">Not Selected</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select defaultValue="date">
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by Date" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="date">Sort by Date</SelectItem>
-                <SelectItem value="company">Sort by Company</SelectItem>
-                <SelectItem value="status">Sort by Status</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          {applications.map((application) => (
-            <motion.div
-              key={application.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-lg border p-6"
-            >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-lg font-semibold">{application.position}</h3>
-                  <p className="text-gray-600">
-                    {application.company} • {application.location}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Applied on {application.appliedDate}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Badge className={getStatusColor(application.status)}>
-                    {application.status}
-                  </Badge>
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="text-blue-600" size="sm">
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Application
-                    </Button>
-                    <Button variant="outline" className="text-red-600" size="sm">
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Withdraw
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between mt-8">
-          <div className="text-sm text-gray-600">
-            Showing 1 to 3 of 12 results
+          ))
+        )}
+      </div>
+      
+      {applications.length > 0 && (
+        <div className="flex justify-between items-center mt-8">
+          <div className="text-sm text-gray-500">
+            Showing {applications.length} applications
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              className="text-gray-600"
-              disabled
-            >
+            <Button variant="outline" size="sm" disabled>
               Previous
             </Button>
-            <Button variant="outline" className="bg-blue-600 text-white">
-              1
-            </Button>
-            <Button variant="outline" className="text-gray-600">
-              2
-            </Button>
-            <Button variant="outline" className="text-gray-600">
-              3
-            </Button>
-            <Button variant="outline" className="text-gray-600">
+            <Button variant="outline" size="sm">
               Next
             </Button>
           </div>
         </div>
-      </motion.div>
+      )}
+    </>
+  );
+}
+
+export default function ApplicationsPage() {
+  return (
+    <div className="container py-6 max-w-4xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold mb-2">My Applications</h1>
+        <p className="text-muted-foreground">
+          Track and manage your job applications
+        </p>
+      </div>
+      
+      <Suspense fallback={<ApplicationsLoadingSkeleton />}>
+        <ApplicationsContent />
+      </Suspense>
     </div>
   );
 }
