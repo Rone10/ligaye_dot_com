@@ -200,7 +200,7 @@ export default function EmployerJobsPage() {
             <p className="text-gray-600">Manage and track your job postings</p>
           </div>
           <Button className="bg-blue-600" asChild>
-            <a href="/employer/jobs/create">
+            <a href="/employer/jobs/new">
               <Plus className="w-4 h-4 mr-2" />
               Create New Job
             </a>
