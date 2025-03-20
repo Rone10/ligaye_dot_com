@@ -11,4 +11,16 @@ export const jobTypes = ['FULL_TIME', 'PART_TIME', 'CONTRACT', 'TEMPORARY', 'INT
 export const workLocations = ['ONSITE', 'REMOTE', 'HYBRID'];
 
 // Salary frequencies
-export const salaryFrequencies = ['HOURLY', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']; 
+export const salaryFrequencies = ['HOURLY', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'];
+
+// Application status map for display
+export const applicationStatusMap: Record<string, string> = {
+  PENDING: "Pending",
+  REVIEWING: "Under Review",
+  SHORTLISTED: "Shortlisted",
+  INTERVIEW_SCHEDULED: "Interview Scheduled",
+  INTERVIEWED: "Interviewed",
+  OFFER_EXTENDED: "Offer Extended",
+  HIRED: "Hired",
+  REJECTED: "Rejected"
+}; 
