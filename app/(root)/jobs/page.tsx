@@ -96,6 +96,8 @@ async function JobsContent({
     sort
   });
 
+  console.log("Skills from DB:", dbJobs.map(job => job.skills));
+
   // Map DB jobs to frontend JobPosting type
   const jobs: JobPosting[] = dbJobs.map(job => ({
     id: job.id,
@@ -106,7 +108,7 @@ async function JobsContent({
     workLocation: mapWorkLocationToFrontend(job.workLocation),
     experienceLevel: mapExperienceLevelToFrontend(job.experienceLevel),
     description: job.description,
-    skills: job.skills,
+    skills: job.skills || [],  // Ensure skills is always an array
     salaryRange: {
       min: job.salaryRange.min,
       max: job.salaryRange.max
@@ -185,13 +187,14 @@ async function JobsContent({
   );
 }
 
-export default function JobsPage({
+export default async function JobsPage({
   searchParams
 }: {
-  searchParams: { page?: string; sort?: string }
+  searchParams: Promise<{ page?: string; sort?: string }>
 }) {
-  const page = Number(searchParams.page) || 1;
-  const sortBy = searchParams.sort || 'recent';
+  const { page, sort } = await searchParams;
+  const pageNumber = Number(page) || 1;
+  const sortBy = sort || 'recent';
   
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gray-50">
@@ -228,7 +231,7 @@ export default function JobsPage({
                 <JobCardSkeleton />
               </div>
             }>
-              <JobsContent page={page} sortBy={sortBy} />
+              <JobsContent page={pageNumber} sortBy={sortBy} />
             </Suspense>
           </div>
         </div>
