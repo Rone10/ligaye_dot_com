@@ -6,8 +6,8 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/db';
 import { applications, jobs, candidateProfiles, profiles } from '@/lib/db/schema';
 import { z } from 'zod';
-import { getApplicationsByUserId, createApplication } from '@/lib/db/queries/candidates/applications';
-import crypto from 'crypto';
+import { getApplicationsByUserId, createApplication, hasAppliedToJob } from '@/lib/db/queries/candidates/applications';
+
 
 // Application validation schema
 const applicationSchema = z.object({
@@ -28,6 +28,18 @@ export async function getApplications() {
 }
 
 /**
+ * Check if the current user has already applied for a job
+ */
+export async function checkIfApplied(jobId: string) {
+  const user = await getUser();
+  if (!user) {
+    return false;
+  }
+  
+  return hasAppliedToJob(user.id, jobId);
+}
+
+/**
  * Apply to a job using form data
  */
 export async function applyToJob(formData: FormData) {
@@ -41,6 +53,12 @@ export async function applyToJob(formData: FormData) {
     coverLetter: formData.get('coverLetter'),
   });
   
+  // Check if user has already applied
+  const alreadyApplied = await hasAppliedToJob(user.id, validatedData.jobId);
+  if (alreadyApplied) {
+    return { success: false, error: 'You have already applied for this job' };
+  }
+  
   // Create the application
   await createApplication({
     // id: crypto.randomUUID(),
@@ -53,5 +71,6 @@ export async function applyToJob(formData: FormData) {
   });
   
   revalidatePath('/candidate/applications');
+  revalidatePath(`/jobs/${validatedData.jobId}`);
   return { success: true };
 }

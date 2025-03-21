@@ -46,3 +46,22 @@ export async function createApplication(data: NewApplication) {
     .values(data)
     .returning();
 }
+
+/**
+ * Check if a candidate has already applied for a specific job
+ */
+export async function hasAppliedToJob(candidateId: string, jobId: string) {
+  const result = await db()
+    .select({ id: applications.id })
+    .from(applications)
+    .where(
+      and(
+        eq(applications.candidateId, candidateId),
+        eq(applications.jobId, jobId),
+        eq(applications.deleted, false)
+      )
+    )
+    .limit(1);
+  
+  return result.length > 0;
+}

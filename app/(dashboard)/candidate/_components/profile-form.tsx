@@ -250,6 +250,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                     type="file"
                     accept=".pdf,.doc,.docx"
                     onChange={handleResumeChange}
+                    className="cursor-pointer bg-gray-100"
                   />
                   <p className="text-sm text-muted-foreground">
                     Accepted formats: PDF, DOC, DOCX (max 5MB)

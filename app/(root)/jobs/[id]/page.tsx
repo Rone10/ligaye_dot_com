@@ -7,6 +7,7 @@ import { SimilarJobs } from '@/app/components/jobs/similar-jobs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getJobById, getSimilarJobs } from '@/app/actions/jobs';
 import { notFound } from 'next/navigation';
+import { ApplySection } from './apply-section';
 
 function JobDetailsLoading() {
   return (
@@ -46,7 +47,7 @@ interface Params {
   params: Promise<{ id: string }>;
 }
 
-export default async function JobDetailsPage({ params }:   Params) {
+export default async function JobDetailsPage({ params }: Params) {
   // Ensure params.id is awaited
   const {id} = await params;
   
@@ -63,6 +64,9 @@ export default async function JobDetailsPage({ params }:   Params) {
     notFound();
   }
 
+  // Extract company name for the apply section
+  const companyName = jobDetails?.company?.name || 'this company';
+
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gray-50 py-8">
       <div className="container mx-auto px-4">
@@ -78,6 +82,7 @@ export default async function JobDetailsPage({ params }:   Params) {
             {/* Sidebar */}
             <div className="lg:w-1/3 space-y-6">
               <JobDetailsSidebar job={jobDetails} />
+              <ApplySection jobId={id} jobTitle={jobDetails.title} companyName={companyName} />
               <SimilarJobs jobs={similarJobs} />
             </div>
           </div>
