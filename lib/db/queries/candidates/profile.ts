@@ -47,7 +47,7 @@ export async function updateCandidateProfile(
  */
 export async function createCandidateProfile(
   data: NewCandidateProfile,
-  skillsData: Array<{skillId: string, proficiency?: string}> = []
+  skillsData: Array<{skillId: string}> = []
 ) {
   return await db().transaction(async (tx) => {
     // Create the profile
@@ -60,13 +60,12 @@ export async function createCandidateProfile(
     
     // Add skills
     if (skillsData && skillsData.length > 0) {
-      for (const { skillId, proficiency } of skillsData) {
+      for (const { skillId } of skillsData) {
         await tx
           .insert(candidateSkills)
           .values({
             candidateId,
-            skillId,
-            proficiencyLevel: proficiency || 'intermediate'
+            skillId
           })
           .onConflictDoNothing();
       }
@@ -91,14 +90,13 @@ export async function getCandidateWithSkills(candidateId: string) {
     throw new Error('Candidate not found');
   }
   
-  // Get skills with proficiency
+  // Get skills
   const candidateSkillsData = await db()
     .select({
       skill: {
         id: skills.id,
         name: skills.name
-      },
-      proficiency: candidateSkills.proficiencyLevel
+      }
     })
     .from(candidateSkills)
     .innerJoin(skills, eq(candidateSkills.skillId, skills.id))
@@ -106,8 +104,7 @@ export async function getCandidateWithSkills(candidateId: string) {
     
   const skillsList = candidateSkillsData.map(item => ({
     id: item.skill.id,
-    name: item.skill.name,
-    proficiency: item.proficiency
+    name: item.skill.name
   }));
   
   return {
@@ -121,7 +118,7 @@ export async function getCandidateWithSkills(candidateId: string) {
  */
 export async function updateCandidateSkills(
   candidateId: string, 
-  skillsData: Array<{skillId: string, proficiency?: string}>
+  skillsData: Array<{skillId: string}>
 ) {
   return await db().transaction(async (tx) => {
     // Delete existing skills
@@ -131,13 +128,12 @@ export async function updateCandidateSkills(
       
     // Add new skills
     if (skillsData && skillsData.length > 0) {
-      for (const { skillId, proficiency } of skillsData) {
+      for (const { skillId } of skillsData) {
         await tx
           .insert(candidateSkills)
           .values({
             candidateId,
-            skillId,
-            proficiencyLevel: proficiency || 'intermediate'
+            skillId
           })
           .onConflictDoNothing();
       }

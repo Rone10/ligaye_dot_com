@@ -476,7 +476,6 @@ export const candidateSkills = pgTable('candidate_skills', {
   id: uuid('id').primaryKey().defaultRandom(),
   candidateId: uuid('candidate_id').notNull().references(() => candidateProfiles.id, { onDelete: 'cascade' }),
   skillId: uuid('skill_id').notNull().references(() => skills.id, { onDelete: 'cascade' }),
-  proficiencyLevel: text('proficiency_level').default('intermediate'),
   deleted: boolean('deleted').default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 }, (table) => {

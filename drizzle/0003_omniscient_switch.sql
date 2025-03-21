@@ -1,0 +1,1 @@
+ALTER TABLE "candidate_skills" DROP COLUMN "proficiency_level";

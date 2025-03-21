@@ -22,6 +22,13 @@
       "when": 1742564214261,
       "tag": "0002_fast_ultimates",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1742568305454,
+      "tag": "0003_omniscient_switch",
+      "breakpoints": true
     }
   ]
 }

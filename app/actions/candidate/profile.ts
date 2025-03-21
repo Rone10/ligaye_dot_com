@@ -6,14 +6,13 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/db';
 import { candidateProfiles } from '@/lib/db/schema';
 import { z } from 'zod';
-import { getCandidateProfileByUserId, updateCandidateProfile, createCandidateProfile } from '@/lib/db/queries/candidates/profile';
+import { getCandidateProfileByUserId, updateCandidateProfile, createCandidateProfile, updateCandidateSkills, getCandidateWithSkills } from '@/lib/db/queries/candidates/profile';
 import { createClient } from '@/lib/supabase/server';
 
 // Create validation schema for profile updates
 const profileUpdateSchema = z.object({
   title: z.string().min(3).max(100),
   experienceLevel: z.enum(['Entry', 'Junior', 'Mid-Level', 'Senior', 'Director', 'Executive']),
-  skills: z.array(z.string()).min(1),
   bio: z.string().max(500).optional(),
   linkedinUrl: z.string().url().optional().or(z.literal('')),
   githubUrl: z.string().url().optional().or(z.literal('')),
@@ -28,7 +27,22 @@ export async function getCandidateProfile() {
     throw new Error('Not authenticated');
   }
   
-  return getCandidateProfileByUserId(user.id);
+  const profile = await getCandidateProfileByUserId(user.id);
+  
+  if (!profile?.candidateProfile?.id) {
+    return profile;
+  }
+  
+  // Get candidate with skills
+  const candidateWithSkills = await getCandidateWithSkills(profile.candidateProfile.id);
+  
+  return {
+    ...profile,
+    candidateProfile: {
+      ...profile.candidateProfile,
+      skills: candidateWithSkills.skills || []
+    }
+  };
 }
 
 /**
@@ -45,15 +59,27 @@ export async function updateProfile(formData: FormData) {
     throw new Error('Profile not found');
   }
   
-  // Parse skills - expect a comma-separated list from form
-  const skillsString = formData.get('skills') as string;
-  const skills = skillsString.split(',').map(s => s.trim()).filter(Boolean);
+  if (!profile.candidateProfile) {
+    throw new Error('Candidate profile not found');
+  }
+  
+  // Get the JSON string for skills from form data and parse it
+  const skillsJson = formData.get('skillsJson') as string;
+  let selectedSkills = [];
+  
+  try {
+    if (skillsJson) {
+      selectedSkills = JSON.parse(skillsJson);
+    }
+  } catch (error) {
+    console.error('Error parsing skills JSON:', error);
+    throw new Error('Invalid skills data format');
+  }
   
   // Validate and process the form data
   const validatedData = profileUpdateSchema.parse({
     title: formData.get('title'),
     experienceLevel: formData.get('experienceLevel'),
-    skills,
     bio: formData.get('bio'),
     linkedinUrl: formData.get('linkedinUrl'),
     githubUrl: formData.get('githubUrl'),
@@ -61,6 +87,16 @@ export async function updateProfile(formData: FormData) {
   
   // Update the profile
   await updateCandidateProfile(profile.profile.id, validatedData);
+  
+  // Update candidate skills if provided
+  if (selectedSkills.length > 0) {
+    await updateCandidateSkills(
+      profile.candidateProfile.id,
+      selectedSkills.map((skill: any) => ({
+        skillId: skill.id
+      }))
+    );
+  }
   
   // Handle resume upload if provided
   const resumeFile = formData.get('resume') as File;

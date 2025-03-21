@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { updateProfile } from "@/app/actions/candidate/profile"
 import { Separator } from "@/components/ui/separator"
+import { SkillsSelect } from "@/components/SkillsSelect"
 
 // Form schema matching the profileUpdateSchema in the server action
 const formSchema = z.object({
@@ -26,9 +27,6 @@ const formSchema = z.object({
   }),
   experienceLevel: z.enum(["Entry", "Junior", "Mid-Level", "Senior", "Director", "Executive"], {
     message: "Please select a valid experience level."
-  }),
-  skills: z.string().min(3, {
-    message: "Please enter at least one skill (comma separated)."
   }),
   bio: z.string().max(500, {
     message: "Bio must not exceed 500 characters."
@@ -45,6 +43,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [resumeFile, setResumeFile] = useState<File | null>(null)
+  const [selectedSkills, setSelectedSkills] = useState<Array<{id: string, name: string}>>([])
 
   // Initialize form with existing profile data
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,22 +51,59 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     defaultValues: {
       title: profile?.candidateProfile?.title || "",
       experienceLevel: profile?.candidateProfile?.experienceLevel || "Entry",
-      skills: profile?.candidateProfile?.skills?.join(", ") || "",
       bio: profile?.candidateProfile?.bio || "",
       linkedinUrl: profile?.candidateProfile?.linkedinUrl || "",
       githubUrl: profile?.candidateProfile?.githubUrl || "",
     },
   })
 
+  // Initialize skills from profile data
+  useEffect(() => {
+    console.log("Profile data:", profile);
+    
+    try {
+      if (profile?.candidateProfile?.skills) {
+        console.log("Skills from profile:", profile.candidateProfile.skills);
+        
+        // Ensure skills is an array before setting state
+        const skillsData = profile.candidateProfile.skills;
+        
+        // Double check that skillsData is definitely an array and each item has expected properties
+        let skills: Array<{id: string, name: string}> = [];
+        
+        if (Array.isArray(skillsData)) {
+          // Filter out any items that don't have an id or name
+          skills = skillsData.filter(skill => 
+            skill && typeof skill === 'object' && 'id' in skill && 'name' in skill
+          ) as Array<{id: string, name: string}>;
+        }
+          
+        console.log("Setting selected skills:", skills);
+        setSelectedSkills(skills);
+      } else {
+        // Initialize with empty array if no skills are found
+        setSelectedSkills([]);
+      }
+    } catch (error) {
+      console.error("Error processing skills data:", error);
+      setSelectedSkills([]);
+    }
+  }, [profile]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
-
+    
     try {
+      console.log("Submitting form with selected skills:", selectedSkills);
+      
       // Create FormData object for file upload
       const formData = new FormData()
       formData.append("title", values.title)
       formData.append("experienceLevel", values.experienceLevel)
-      formData.append("skills", values.skills)
+      
+      // Add skills as JSON string - ensure it's a valid array
+      const skillsToSubmit = Array.isArray(selectedSkills) ? selectedSkills : []
+      formData.append("skillsJson", JSON.stringify(skillsToSubmit))
       
       if (values.bio) formData.append("bio", values.bio)
       
@@ -101,6 +137,13 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   function handleResumeChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] || null
     setResumeFile(file)
+  }
+
+  // Handle skills change
+  function handleSkillsChange(skills: Array<{id: string, name: string}>) {
+    console.log("Skills changed:", skills);
+    // Ensure we always set an array, even if skills is undefined
+    setSelectedSkills(Array.isArray(skills) ? skills : []);
   }
 
   return (
@@ -164,25 +207,16 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="skills"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Skills</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="e.g. JavaScript, React, Node.js, TypeScript (comma separated)"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      List your skills separated by commas.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <FormItem>
+                <FormLabel>Skills</FormLabel>
+                <SkillsSelect 
+                  selectedSkills={selectedSkills} 
+                  onChange={handleSkillsChange}
+                />
+                <FormDescription>
+                  Select your professional skills.
+                </FormDescription>
+              </FormItem>
 
               <FormField
                 control={form.control}
