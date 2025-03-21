@@ -1,9 +1,9 @@
 'use client';
 
 import { MapPin } from 'lucide-react';
-import type { JobPosting } from '@/app/types';
+import type { JobListing } from '@/app/actions/jobs';
 
-export function SimilarJobs({ jobs }: { jobs: JobPosting[] }) {
+export function SimilarJobs({ jobs }: { jobs: JobListing[] }) {
   return (
     <div className="bg-white rounded-lg border p-6">
       <h2 className="text-xl font-semibold mb-6">Similar Jobs</h2>
@@ -15,7 +15,9 @@ export function SimilarJobs({ jobs }: { jobs: JobPosting[] }) {
               <h3 className="text-blue-600 group-hover:text-blue-700 font-medium">
                 {job.title}
               </h3>
-              <p className="text-gray-600 mt-1">{job.company}</p>
+              <p className="text-gray-600 mt-1">
+                {typeof job.company === 'string' ? job.company : job.company.name}
+              </p>
               <div className="flex items-center gap-4 mt-2 text-gray-500 text-sm">
                 <div className="flex items-center gap-1">
                   <MapPin className="w-4 h-4" />

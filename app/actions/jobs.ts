@@ -1,8 +1,20 @@
-'use server';
+'use server'
 
-import { JobPosting } from '@/app/types';
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+import { getUser } from '@/lib/supabase/server'
+import { 
+  createProfile, 
+  createCandidateProfile, 
+  createEmployerProfile 
+} from '@/lib/db/queries/profiles'
+import { experienceLevelEnum, jobTypeEnum, workLocationEnum } from '@/lib/db/schema'
+import { getJobs as fetchJobs, getJobById as fetchJobById, getSimilarJobs as fetchSimilarJobs } from '@/lib/db/queries/jobs'
 
-export interface JobDetails extends Omit<JobPosting, 'company'> {
+// Define new interface that matches what fetchJobById returns
+export interface JobDetails {
+  id: string;
+  title: string;
   company: {
     name: string;
     logo: string;
@@ -10,90 +22,106 @@ export interface JobDetails extends Omit<JobPosting, 'company'> {
     website: string;
     linkedin: string;
   };
+  location: string;
+  type: typeof jobTypeEnum.enumValues[number];
+  workLocation: typeof workLocationEnum.enumValues[number];
+  experienceLevel: typeof experienceLevelEnum.enumValues[number];
+  description: string;
+  skills: string[];
+  salaryRange: {
+    min: number;
+    max: number;
+    currency?: string | null;
+    frequency?: string | null;
+  };
+  postedDate: Date;
   responsibilities: string[];
   requirements: string[];
   education: string;
 }
 
-// Mock data that will be replaced with database queries later
-const mockJob: JobDetails = {
-  id: '1',
-  title: 'Senior Frontend Developer',
-  company: {
-    name: 'TechCorp Solutions',
-    logo: '/company-logo.png',
-    description: 'TechCorp Solutions is a leading software development company specializing in creating innovative web applications.',
-    website: 'https://techcorp.com',
-    linkedin: 'https://linkedin.com/company/techcorp',
-  },
-  location: 'New York, NY',
-  type: 'Full-Time',
-  workLocation: 'On-site',
-  experienceLevel: 'Senior',
-  description: 'We are seeking a talented Senior Frontend Developer to join our growing team...',
-  skills: ['React', 'TypeScript', 'Next.js'],
+// Simplified job type for listing results
+export interface JobListing {
+  id: string;
+  title: string;
+  company: string | { name: string };
+  location: string;
+  type: typeof jobTypeEnum.enumValues[number];
+  workLocation: typeof workLocationEnum.enumValues[number];
+  experienceLevel: typeof experienceLevelEnum.enumValues[number];
+  description: string;
+  skills: string[];
   salaryRange: {
-    min: 120000,
-    max: 150000,
-  },
-  postedDate: new Date('2024-03-20'),
-  responsibilities: [
-    'Lead the development of complex frontend applications',
-    'Mentor junior developers and provide technical guidance',
-    'Collaborate with UX designers and backend developers',
-  ],
-  requirements: [
-    '5+ years of experience in frontend development',
-    'Expert knowledge of React, TypeScript, and Next.js',
-    'Strong understanding of web performance optimization',
-  ],
-  education: 'Bachelor\'s degree in Computer Science or related field',
-};
-
-const mockSimilarJobs: JobPosting[] = [
-  {
-    id: '2',
-    title: 'Frontend Developer',
-    company: 'Tech StartUp Inc.',
-    location: 'New York, NY',
-    type: 'Full-Time',
-    workLocation: 'Remote',
-    experienceLevel: 'Mid',
-    description: 'Join our fast-growing startup as a Frontend Developer...',
-    skills: ['React', 'JavaScript', 'CSS'],
-    salaryRange: {
-      min: 90000,
-      max: 120000,
-    },
-    postedDate: new Date('2024-03-21'),
-  },
-  {
-    id: '3',
-    title: 'Senior React Developer',
-    company: 'Digital Solutions LLC',
-    location: 'San Francisco, CA',
-    type: 'Full-Time',
-    workLocation: 'Hybrid',
-    experienceLevel: 'Senior',
-    description: 'Looking for a Senior React Developer to join our team...',
-    skills: ['React', 'TypeScript', 'Redux'],
-    salaryRange: {
-      min: 130000,
-      max: 160000,
-    },
-    postedDate: new Date('2024-03-19'),
-  },
-];
-
-export async function getJobById(id: string): Promise<JobDetails> {
-  // TODO: Replace with database query
-  if (id === '1') {
-    return mockJob;
-  }
-  throw new Error('Job not found');
+    min: number;
+    max: number;
+    currency?: string | null;
+    frequency?: string | null;
+  };
+  postedDate: Date;
 }
 
-export async function getSimilarJobs(jobId: string): Promise<JobPosting[]> {
-  // TODO: Replace with database query to find similar jobs
-  return mockSimilarJobs;
+export interface JobFilter {
+  search?: string;
+  jobTypes?: string[];
+  workLocations?: string[];
+  experienceLevels?: string[];
+  salaryMin?: number;
+  salaryMax?: number;
+  postedAfter?: Date;
+}
+
+export interface JobSortOption {
+  field: 'createdAt' | 'salaryRangeMin' | 'title';
+  direction: 'asc' | 'desc';
+}
+
+export async function getJobs({
+  page = 1,
+  pageSize = 10,
+  filters = {},
+  sort = { field: 'createdAt', direction: 'desc' }
+}: {
+  page?: number;
+  pageSize?: number;
+  filters?: JobFilter;
+  sort?: JobSortOption;
+}) {
+  try {
+    // Use the database query function
+    const jobsData = await fetchJobs({ page, pageSize, filters, sort });
+    
+    return {
+      jobs: jobsData.jobs,
+      pagination: jobsData.pagination
+    };
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    return {
+      jobs: [],
+      pagination: {
+        total: 0,
+        pageCount: 0,
+        page,
+        pageSize
+      }
+    };
+  }
+}
+
+export async function getJobById(id: string): Promise<JobDetails> {
+  try {
+    return await fetchJobById(id) as JobDetails;
+  } catch (error) {
+    console.error('Error fetching job by ID:', error);
+    throw new Error('Job not found');
+  }
+}
+
+export async function getSimilarJobs(jobId: string): Promise<JobListing[]> {
+  try {
+    return await fetchSimilarJobs(jobId, 2) as JobListing[];
+  } catch (error) {
+    console.error('Error fetching similar jobs:', error);
+    return [];
+  }
 } 

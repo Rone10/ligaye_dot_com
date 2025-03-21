@@ -9,12 +9,14 @@ The candidate (job seeker) features allow users to create profiles, search for j
 ## Tech Stack for Candidate Features
 
 - **Frontend**: Next.js 15 App Router, React, TypeScript
+- **Backend**: Supabase, Drizzle ORM, Zod
 - **UI Components**: Shadcn UI, Radix UI, Tailwind CSS
 - **Animation**: Framer Motion
 - **Icons**: Lucide React
 - **State Management**: React Query for server state, Context API for global state
 - **URL State Management**: nuqs for URL search parameters
 - **Date Handling**: date-fns
+- **Package Manager**: pnpm
 
 ## Database Schema
 
