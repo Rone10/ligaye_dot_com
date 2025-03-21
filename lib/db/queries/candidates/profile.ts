@@ -5,7 +5,9 @@ import {
   profiles, 
   candidateProfiles,
   CandidateProfile,
-  NewCandidateProfile
+  NewCandidateProfile,
+  skills,
+  candidateSkills
 } from '@/lib/db/schema';
 import { eq, and, count, desc, sql, gt } from 'drizzle-orm';
 
@@ -44,10 +46,103 @@ export async function updateCandidateProfile(
  * Create a new candidate profile
  */
 export async function createCandidateProfile(
-  data: NewCandidateProfile
+  data: NewCandidateProfile,
+  skillsData: Array<{skillId: string, proficiency?: string}> = []
 ) {
-  return await db()
-    .insert(candidateProfiles)
-    .values(data)
-    .returning();
+  return await db().transaction(async (tx) => {
+    // Create the profile
+    const newProfile = await tx
+      .insert(candidateProfiles)
+      .values(data)
+      .returning();
+      
+    const candidateId = newProfile[0].id;
+    
+    // Add skills
+    if (skillsData && skillsData.length > 0) {
+      for (const { skillId, proficiency } of skillsData) {
+        await tx
+          .insert(candidateSkills)
+          .values({
+            candidateId,
+            skillId,
+            proficiencyLevel: proficiency || 'intermediate'
+          })
+          .onConflictDoNothing();
+      }
+    }
+    
+    return newProfile[0];
+  });
+}
+
+/**
+ * Get candidate with skills
+ */
+export async function getCandidateWithSkills(candidateId: string) {
+  // Get the candidate
+  const candidate = await db()
+    .select()
+    .from(candidateProfiles)
+    .where(eq(candidateProfiles.id, candidateId))
+    .limit(1);
+    
+  if (!candidate.length) {
+    throw new Error('Candidate not found');
+  }
+  
+  // Get skills with proficiency
+  const candidateSkillsData = await db()
+    .select({
+      skill: {
+        id: skills.id,
+        name: skills.name
+      },
+      proficiency: candidateSkills.proficiencyLevel
+    })
+    .from(candidateSkills)
+    .innerJoin(skills, eq(candidateSkills.skillId, skills.id))
+    .where(eq(candidateSkills.candidateId, candidateId));
+    
+  const skillsList = candidateSkillsData.map(item => ({
+    id: item.skill.id,
+    name: item.skill.name,
+    proficiency: item.proficiency
+  }));
+  
+  return {
+    ...candidate[0],
+    skills: skillsList
+  };
+}
+
+/**
+ * Update candidate skills
+ */
+export async function updateCandidateSkills(
+  candidateId: string, 
+  skillsData: Array<{skillId: string, proficiency?: string}>
+) {
+  return await db().transaction(async (tx) => {
+    // Delete existing skills
+    await tx
+      .delete(candidateSkills)
+      .where(eq(candidateSkills.candidateId, candidateId));
+      
+    // Add new skills
+    if (skillsData && skillsData.length > 0) {
+      for (const { skillId, proficiency } of skillsData) {
+        await tx
+          .insert(candidateSkills)
+          .values({
+            candidateId,
+            skillId,
+            proficiencyLevel: proficiency || 'intermediate'
+          })
+          .onConflictDoNothing();
+      }
+    }
+    
+    return { success: true };
+  });
 }

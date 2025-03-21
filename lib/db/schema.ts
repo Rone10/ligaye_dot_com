@@ -124,7 +124,7 @@ export const candidateProfiles = pgTable('candidate_profiles', {
   profileId: uuid('profile_id').notNull().unique().references(() => profiles.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   experienceLevel: experienceLevelEnum('experience_level').notNull(),
-  skills: text('skills').array(), // Will be replaced by a many-to-many relationship
+  skills: text('skills').array(), // @deprecated - Use candidateSkills junction table instead
   resumeUrl: text('resume_url'), // URL to Supabase Storage
   linkedinUrl: text('linkedin_url'),
   githubUrl: text('github_url'),
@@ -291,7 +291,7 @@ export const jobs = pgTable('jobs', {
   benefits: text('benefits').array(),
   
   // Skills and requirements
-  skillsRequired: text('skills_required').array(), // Will be replaced with jobSkills
+  skillsRequired: text('skills_required').array(), // @deprecated - Use jobSkills junction table instead
   
   // Application settings (from Indeed)
   applicationMethod: applicationMethodEnum('application_method'), // New: How candidates should apply
@@ -471,6 +471,22 @@ export const jobSkills = pgTable('job_skills', {
   };
 });
 
+// Candidate Skills (Junction Table)
+export const candidateSkills = pgTable('candidate_skills', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  candidateId: uuid('candidate_id').notNull().references(() => candidateProfiles.id, { onDelete: 'cascade' }),
+  skillId: uuid('skill_id').notNull().references(() => skills.id, { onDelete: 'cascade' }),
+  proficiencyLevel: text('proficiency_level').default('intermediate'),
+  deleted: boolean('deleted').default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    candidateIdIdx: index('candidate_skills_candidate_id_idx').on(table.candidateId),
+    skillIdIdx: index('candidate_skills_skill_id_idx').on(table.skillId),
+    uniqueCandidateSkill: uniqueIndex('candidate_skill_unique_idx').on(table.candidateId, table.skillId)
+  };
+});
+
 // Industries (Many-to-Many with Jobs) - Optional, but recommended
 export const industries = pgTable('industries', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -517,11 +533,12 @@ export const profilesRelations = relations(profiles, ({ many, one }) => ({
   savedJobs: many(savedJobs)
 }));
 
-export const candidateProfilesRelations = relations(candidateProfiles, ({ one }) => ({
+export const candidateProfilesRelations = relations(candidateProfiles, ({ one, many }) => ({
   profile: one(profiles, {
     fields: [candidateProfiles.profileId],
     references: [profiles.id],
-  })
+  }),
+  skills: many(candidateSkills)
 }));
 
 export const employerProfilesRelations = relations(employerProfiles, ({ one, many }) => ({
@@ -575,6 +592,7 @@ export const jobRelations = relations(jobs, ({ many, one }) => ({
 
 export const skillsRelations = relations(skills, ({ many }) => ({
   jobs: many(jobSkills),
+  candidates: many(candidateSkills)
 }));
 
 export const jobSkillsRelations = relations(jobSkills, ({ one }) => ({
@@ -600,6 +618,18 @@ export const jobIndustriesRelations = relations(jobIndustries, ({ one }) => ({
   industry: one(industries, {
     fields: [jobIndustries.industryId],
     references: [industries.id],
+  }),
+}));
+
+// Add candidateSkills relations
+export const candidateSkillsRelations = relations(candidateSkills, ({ one }) => ({
+  candidate: one(candidateProfiles, {
+    fields: [candidateSkills.candidateId],
+    references: [candidateProfiles.id],
+  }),
+  skill: one(skills, {
+    fields: [candidateSkills.skillId],
+    references: [skills.id],
   }),
 }));
 
@@ -645,6 +675,10 @@ export type NewSkill = InferInsertModel<typeof skills>;
 // Job Skill Types
 export type JobSkill = InferModel<typeof jobSkills>;
 export type NewJobSkill = InferInsertModel<typeof jobSkills>;
+
+// Candidate Skill Types
+export type CandidateSkill = InferModel<typeof candidateSkills>;
+export type NewCandidateSkill = InferInsertModel<typeof candidateSkills>;
 
 // Industry Types
 export type Industry = InferModel<typeof industries>;

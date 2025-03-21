@@ -445,3 +445,90 @@ export async function getSimilarJobs(jobId: string, limit = 2) {
     return [];
   }
 }
+
+// Create job with skills
+export async function createJob(jobData: any, skillIds: string[]) {
+  // Start a transaction
+  return await db().transaction(async (tx) => {
+    // Create the job
+    const newJob = await tx
+      .insert(jobs)
+      .values(jobData)
+      .returning();
+      
+    const jobId = newJob[0].id;
+    
+    // Add skills
+    if (skillIds && skillIds.length > 0) {
+      for (const skillId of skillIds) {
+        await tx
+          .insert(jobSkills)
+          .values({
+            jobId,
+            skillId
+          })
+          .onConflictDoNothing();
+      }
+    }
+    
+    return newJob[0];
+  });
+}
+
+// Get job with skills
+export async function getJobWithSkills(jobId: string) {
+  // Get the job
+  const job = await db()
+    .select()
+    .from(jobs)
+    .where(eq(jobs.id, jobId))
+    .limit(1);
+    
+  if (!job.length) {
+    throw new Error('Job not found');
+  }
+  
+  // Get skills
+  const jobSkillsData = await db()
+    .select({
+      skill: {
+        id: skills.id,
+        name: skills.name
+      }
+    })
+    .from(jobSkills)
+    .innerJoin(skills, eq(jobSkills.skillId, skills.id))
+    .where(eq(jobSkills.jobId, jobId));
+    
+  const skillsList = jobSkillsData.map(item => item.skill);
+  
+  return {
+    ...job[0],
+    skills: skillsList
+  };
+}
+
+// Update job skills
+export async function updateJobSkills(jobId: string, skillIds: string[]) {
+  return await db().transaction(async (tx) => {
+    // Delete existing skills
+    await tx
+      .delete(jobSkills)
+      .where(eq(jobSkills.jobId, jobId));
+      
+    // Add new skills
+    if (skillIds && skillIds.length > 0) {
+      for (const skillId of skillIds) {
+        await tx
+          .insert(jobSkills)
+          .values({
+            jobId,
+            skillId
+          })
+          .onConflictDoNothing();
+      }
+    }
+    
+    return { success: true };
+  });
+}
