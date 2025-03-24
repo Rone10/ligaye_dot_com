@@ -146,7 +146,7 @@ export default function EmployerDashboardPage() {
               <h2 className="text-lg font-semibold">Active Jobs</h2>
               <Button 
                 className="bg-blue-600"
-                onClick={() => router.push('/employer/jobs/create')}
+                onClick={() => router.push('/employer/jobs/new')}
               >
                 Create Job
               </Button>
