@@ -73,9 +73,14 @@ export function ApplicationCard({ application, job, employer }: ApplicationCardP
           {application.coverLetter && (
             <div className="mt-2">
               <h4 className="text-sm font-medium mb-1">Cover Letter</h4>
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {application.coverLetter}
-              </p>
+              <div 
+                className="text-sm text-muted-foreground line-clamp-2 prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ 
+                  __html: application.coverLetter
+                    .replace(/<[^>]*>/g, ' ')
+                    .substring(0, 120) + (application.coverLetter.length > 120 ? '...' : '') 
+                }}
+              />
             </div>
           )}
         </div>

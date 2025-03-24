@@ -224,8 +224,11 @@ async function ApplicationDetails({ id }: { id: string }) {
               
               <div className="space-y-2">
                 <h3 className="text-lg font-medium">Cover Letter</h3>
-                <div className="bg-muted/50 rounded-lg p-4 text-sm">
-                  <p className="whitespace-pre-wrap">{application.coverLetter}</p>
+                <div className="bg-muted/50 rounded-lg p-4 text-sm prose prose-sm max-w-none">
+                  <div
+                    dangerouslySetInnerHTML={{ __html: application.coverLetter }}
+                    className="whitespace-pre-wrap"
+                  />
                 </div>
               </div>
             </>
@@ -376,11 +379,19 @@ function formatDate(dateString: string | Date) {
   return format(date, "MMM d, yyyy")
 }
 
-export default function ApplicationPage({ params }: { params: { id: string } }) {
+interface Params {
+    params: Promise<{ id: string }>;
+  }
+
+
+export default async function ApplicationPage({ params }: Params) {
+  // Ensure params.id is awaited
+  const { id } = await params;
+  
   return (
     <div className="container py-6 max-w-4xl mx-auto">
       <Suspense fallback={<ApplicationDetailsSkeleton />}>
-        <ApplicationDetails id={params.id} />
+        <ApplicationDetails id={id} />
       </Suspense>
     </div>
   );

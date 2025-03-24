@@ -13,6 +13,11 @@ interface JobCardProps {
 }
 
 export function JobCard({ job, index }: JobCardProps) {
+  // Strip HTML tags for display in card
+  const stripHtml = (html: string) => {
+    return html.replace(/<[^>]*>/g, ' ').trim();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -47,7 +52,11 @@ export function JobCard({ job, index }: JobCardProps) {
         </div>
       </div>
 
-      <p className="text-gray-600 line-clamp-2">{job.description}</p>
+      <p className="text-gray-600 line-clamp-2">
+        {typeof job.description === 'string' && job.description.includes('<') 
+          ? stripHtml(job.description) 
+          : job.description}
+      </p>
 
       <div className="flex flex-wrap gap-2">
         {job.skills && job.skills.length > 0 ? (

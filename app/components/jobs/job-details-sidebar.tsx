@@ -17,7 +17,11 @@ export function JobDetailsSidebar({ job }: { job: JobDetails }) {
                 key={skill}
                 className="bg-blue-50 text-blue-600 hover:bg-blue-100"
               >
-                {skill}
+                {typeof skill === 'string' && skill.includes('<') ? (
+                  <span dangerouslySetInnerHTML={{ __html: skill }} />
+                ) : (
+                  skill
+                )}
               </Badge>
             ))}
           </div>
@@ -25,12 +29,24 @@ export function JobDetailsSidebar({ job }: { job: JobDetails }) {
 
         <div>
           <h3 className="text-sm font-medium mb-2">Experience Level</h3>
-          <p className="text-gray-600">{job.experienceLevel}</p>
+          <p className="text-gray-600">
+            {typeof job.experienceLevel === 'string' && job.experienceLevel.includes('<') ? (
+              <span dangerouslySetInnerHTML={{ __html: job.experienceLevel }} />
+            ) : (
+              job.experienceLevel
+            )}
+          </p>
         </div>
 
         <div>
           <h3 className="text-sm font-medium mb-2">Education</h3>
-          <p className="text-gray-600">{job.education}</p>
+          <p className="text-gray-600">
+            {typeof job.education === 'string' && job.education.includes('<') ? (
+              <span dangerouslySetInnerHTML={{ __html: job.education }} />
+            ) : (
+              job.education
+            )}
+          </p>
         </div>
       </div>
     </div>
