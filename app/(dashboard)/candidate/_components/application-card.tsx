@@ -44,7 +44,7 @@ export function ApplicationCard({ application, job, employer }: ApplicationCardP
             {job.jobType && (
               <div className="flex items-center gap-1">
                 <FileText className="h-3.5 w-3.5" />
-                <span>{job.jobType}</span>
+                <span>{job.jobType.replace(/_/g, ' ')}</span>
               </div>
             )}
             
