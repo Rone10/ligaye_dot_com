@@ -24,7 +24,18 @@ export async function getApplications() {
     throw new Error('Not authenticated');
   }
   
-  return getApplicationsByUserId(user.id);
+  // Get the user's profile ID
+  const userProfile = await db()
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, user.id))
+    .limit(1);
+  
+  if (!userProfile || userProfile.length === 0) {
+    return []; // Return empty array if no profile exists
+  }
+  
+  return getApplicationsByUserId(userProfile[0].id);
 }
 
 /**
