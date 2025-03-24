@@ -161,8 +161,8 @@ export function JobCard({
               ) : onApplyClick ? (
                 <span>Apply Now</span>
               ) : (
-                <Link href={`/jobs/${job.id}`}>
-                  View Job
+                <Link href={`/jobs/${job.id}/apply`}>
+                  Apply Now
                   <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                 </Link>
               )}

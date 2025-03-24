@@ -155,7 +155,7 @@ export function SavedJobCard({
             {hasApplied ? (
               <span>Applied</span>
             ) : (
-              <Link href={`/jobs/${job.id}`}>
+              <Link href={job.isActive ? `/jobs/${job.id}/apply` : `/jobs/${job.id}`}>
                 {job.isActive ? "Apply Now" : "View Job"}
                 <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
               </Link>

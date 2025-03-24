@@ -77,7 +77,8 @@ export function ApplySection({ jobId, jobTitle, companyName }: ApplySectionProps
       return;
     }
     
-    setShowForm(true);
+    // Navigate to the dedicated apply page
+    router.push(`/jobs/${jobId}/apply`);
   }
 
   if (isLoading) {

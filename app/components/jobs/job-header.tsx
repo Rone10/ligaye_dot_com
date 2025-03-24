@@ -3,6 +3,7 @@
 import { Building2, MapPin, Clock, DollarSign, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { JobDetails } from '@/app/actions/jobs';
+import Link from 'next/link';
 
 export function JobHeader({ job }: { job: JobDetails }) {
   return (
@@ -37,7 +38,9 @@ export function JobHeader({ job }: { job: JobDetails }) {
       </div>
 
       <div className="flex gap-3 mt-6">
-        <Button className="bg-blue-600 hover:bg-blue-700 px-8">Apply Now</Button>
+        <Button className="bg-blue-600 hover:bg-blue-700 px-8" asChild>
+          <Link href={`/jobs/${job.id}/apply`}>Apply Now</Link>
+        </Button>
         <Button variant="outline" className="gap-2">
           <Heart className="w-4 h-4" />
           Save Job
