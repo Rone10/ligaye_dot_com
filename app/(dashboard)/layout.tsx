@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import {
@@ -18,9 +18,12 @@ import {
   GraduationCap,
   Heart,
   Menu,
+  LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { useToast } from '@/hooks/use-toast';
+import { createClient } from '@/lib/supabase/client';
 
 interface NavItem {
   label: string;
@@ -53,11 +56,36 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Determine if we're in the employer section based on the URL path
   const isEmployer = pathname.startsWith('/employer');
   const navItems = isEmployer ? employerNavItems : candidateNavItems;
+
+  // Handle user logout
+  const handleLogout = async () => {
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      
+      router.push('/sign-in');
+      router.refresh();
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to log out",
+      });
+    }
+  };
 
   const SidebarContent = () => (
     <>
@@ -66,28 +94,42 @@ export default function DashboardLayout({
           {isEmployer ? 'Employer Portal' : 'Candidate Portal'}
         </h2>
       </div>
-      <nav className="p-4 space-y-2">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-          
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-50'
-              )}
-            >
-              <Icon className="w-5 h-5" />
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+      <div className="flex flex-col h-[calc(100vh-4rem)]">
+        <nav className="p-4 space-y-2 flex-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-blue-50 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-50'
+                )}
+              >
+                <Icon className="w-5 h-5" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+        
+        {/* Logout Button */}
+        <div className="p-4 border-t">
+          <Button
+            variant="ghost"
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-5 h-5" />
+            Logout
+          </Button>
+        </div>
+      </div>
     </>
   );
 
