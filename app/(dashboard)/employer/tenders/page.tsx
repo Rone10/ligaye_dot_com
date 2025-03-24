@@ -1,4 +1,12 @@
-// 'use client';
+'use client';
+
+export default function TendersPage() {
+  return (
+    <div>
+      <h1>This page is under construction</h1>
+    </div>
+  );
+}
 
 // import { useState } from 'react';
 // import { motion } from 'framer-motion';

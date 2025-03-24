@@ -18,7 +18,7 @@ type ProfileCompletenessProps = {
     candidateProfile: {
       id: string;
       title?: string | null;
-      skills?: string[] | null;
+      skills?: Array<{ id: string; name: string; }> | string[] | null;
       bio?: string | null;
       experienceLevel?: string | null;
       resumeUrl?: string | null;
