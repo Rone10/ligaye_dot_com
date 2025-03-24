@@ -12,7 +12,7 @@ import { getApplicationsByUserId, createApplication, hasAppliedToJob } from '@/l
 // Application validation schema
 const applicationSchema = z.object({
   jobId: z.string().uuid(),
-  coverLetter: z.string().max(1000).optional(),
+  coverLetter: z.string().max(1000).optional().nullable(),
 });
 
 /**
@@ -36,7 +36,18 @@ export async function checkIfApplied(jobId: string) {
     return false;
   }
   
-  return hasAppliedToJob(user.id, jobId);
+  // Get the user's profile ID
+  const userProfile = await db()
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, user.id))
+    .limit(1);
+  
+  if (!userProfile || userProfile.length === 0) {
+    return false; // No profile means they haven't applied
+  }
+  
+  return hasAppliedToJob(userProfile[0].id, jobId);
 }
 
 /**
@@ -53,16 +64,29 @@ export async function applyToJob(formData: FormData) {
     coverLetter: formData.get('coverLetter'),
   });
   
+  // Check if user has a profile in the database
+  const userProfile = await db()
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, user.id))
+    .limit(1);
+  
+  if (!userProfile || userProfile.length === 0) {
+    return { 
+      success: false, 
+      error: 'You need to complete your profile before applying for jobs' 
+    };
+  }
+  
   // Check if user has already applied
-  const alreadyApplied = await hasAppliedToJob(user.id, validatedData.jobId);
+  const alreadyApplied = await hasAppliedToJob(userProfile[0].id, validatedData.jobId);
   if (alreadyApplied) {
     return { success: false, error: 'You have already applied for this job' };
   }
   
   // Create the application
   await createApplication({
-    // id: crypto.randomUUID(),
-    candidateId: user.id,
+    candidateId: userProfile[0].id, // Use the profile ID, not the auth user ID
     jobId: validatedData.jobId,
     status: 'PENDING',
     coverLetter: validatedData.coverLetter,

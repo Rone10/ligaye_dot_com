@@ -21,7 +21,7 @@ export function ApplySection({ jobId, jobTitle, companyName }: ApplySectionProps
   const [isLoading, setIsLoading] = useState(true);
   const [hasApplied, setHasApplied] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isCandidate, setIsCandidate] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -41,14 +41,13 @@ export function ApplySection({ jobId, jobTitle, companyName }: ApplySectionProps
         
         setIsAuthenticated(true);
         
-        // Verify if the user has a candidate profile
-        // This is simplified - normally you'd check the user's profile type
-        // For now, we'll assume all authenticated users can be candidates
-        setIsCandidate(true);
-        
         // Check if user has already applied
         const alreadyApplied = await checkIfApplied(jobId);
         setHasApplied(alreadyApplied);
+        
+        // If they haven't applied but the check didn't throw a profile error,
+        // we can assume they have a profile
+        setHasProfile(true);
         
         setIsLoading(false);
       } catch (error) {
@@ -67,11 +66,11 @@ export function ApplySection({ jobId, jobTitle, companyName }: ApplySectionProps
       return;
     }
     
-    if (!isCandidate) {
-      // Prompt to create a candidate profile
+    if (!hasProfile) {
+      // Prompt to create a profile
       toast({
         title: 'Profile required',
-        description: 'Please complete your candidate profile before applying.',
+        description: 'Please complete your profile before applying.',
         variant: 'destructive',
       });
       router.push('/create-profile');

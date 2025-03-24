@@ -49,14 +49,16 @@ export async function createApplication(data: NewApplication) {
 
 /**
  * Check if a candidate has already applied for a specific job
+ * @param profileId The profile ID (not auth user ID)
+ * @param jobId The job ID
  */
-export async function hasAppliedToJob(candidateId: string, jobId: string) {
+export async function hasAppliedToJob(profileId: string, jobId: string) {
   const result = await db()
     .select({ id: applications.id })
     .from(applications)
     .where(
       and(
-        eq(applications.candidateId, candidateId),
+        eq(applications.candidateId, profileId),
         eq(applications.jobId, jobId),
         eq(applications.deleted, false)
       )
