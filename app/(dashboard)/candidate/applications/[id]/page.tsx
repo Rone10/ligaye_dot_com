@@ -224,10 +224,16 @@ async function ApplicationDetails({ id }: { id: string }) {
               
               <div className="space-y-2">
                 <h3 className="text-lg font-medium">Cover Letter</h3>
-                <div className="bg-muted/50 rounded-lg p-4 text-sm prose prose-sm max-w-none">
+                <div className="bg-muted/50 rounded-lg p-4 text-sm">
                   <div
-                    dangerouslySetInnerHTML={{ __html: application.coverLetter }}
-                    className="whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={{ 
+                      __html: application.coverLetter
+                        // Ensure double line breaks become proper paragraph breaks
+                        .replace(/<p>\s*<\/p>/g, '<div class="h-4"></div>')
+                        // Make sure <br><br> creates visible spacing
+                        .replace(/<br\s*\/?>\s*<br\s*\/?>/g, '<br class="block mb-4" />')
+                    }}
+                    className="prose prose-sm max-w-none prose-p:mb-4 prose-p:mt-4 [&>div.h-4]:my-4 [&>p:empty]:h-4 [&>p:empty]:block"
                   />
                 </div>
               </div>
