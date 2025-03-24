@@ -76,6 +76,7 @@ export function AuthForm({ type }: AuthFormProps) {
           title: 'Success',
           description: 'Please check your email to verify your account...',
         })
+        router.push('/sign-in')
       }
     } catch (error) {
       toast({
