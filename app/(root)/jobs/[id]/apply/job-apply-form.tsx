@@ -14,10 +14,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { TipTapEditor } from '@/components/tiptap-editor';
 
 const formSchema = z.object({
-  coverLetter: z.string().max(1000, {
-    message: 'Cover letter must be less than 1000 characters',
+  coverLetter: z.string().max(5000, {
+    message: 'Cover letter must be less than 5000 characters',
   }).optional(),
 });
 
@@ -127,10 +128,9 @@ export function JobApplyForm({ jobId, jobTitle }: JobApplyFormProps) {
             <FormItem>
               <FormLabel>Cover Letter (Optional)</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Tell the employer why you're a good fit for this position..."
-                  className="min-h-36 resize-y"
-                  {...field}
+                <TipTapEditor
+                  content={field.value || ''}
+                  onChange={field.onChange}
                 />
               </FormControl>
               <FormDescription>

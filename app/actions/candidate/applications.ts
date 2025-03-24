@@ -12,7 +12,7 @@ import { getApplicationsByUserId, createApplication, hasAppliedToJob } from '@/l
 // Application validation schema
 const applicationSchema = z.object({
   jobId: z.string().uuid(),
-  coverLetter: z.string().max(1000).optional().nullable(),
+  coverLetter: z.string().max(5000).optional().nullable(),
 });
 
 /**

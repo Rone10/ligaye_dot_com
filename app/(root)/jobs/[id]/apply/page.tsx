@@ -24,7 +24,13 @@ function ApplyPageSkeleton() {
         <Skeleton className="h-8 w-3/4" />
         <Skeleton className="h-6 w-full" />
         <Skeleton className="h-6 w-2/3" />
-        <Skeleton className="h-40 w-full" />
+        
+        {/* Editor skeleton */}
+        <div className="space-y-2">
+          <Skeleton className="h-10 w-full" /> {/* Toolbar */}
+          <Skeleton className="h-64 w-full" /> {/* Editor content area */}
+        </div>
+        
         <div className="flex justify-end gap-2">
           <Skeleton className="h-10 w-24" />
           <Skeleton className="h-10 w-32" />
@@ -60,7 +66,7 @@ async function ApplyPageContent({ id }: { id: string }) {
         <h1 className="text-2xl font-bold mb-2">
           Apply for {job.title}
         </h1>
-        <p className="text-muted-foreground mb-6">
+        <p className="text-muted-foreground mb-8">
           Complete your application for {job.title} at {companyName}
         </p>
         
@@ -70,19 +76,26 @@ async function ApplyPageContent({ id }: { id: string }) {
   );
 }
 
-export default async function ApplyPage({ params }: { params: { id: string } }) {
+interface Params {
+  params: Promise<{ id: string }>;
+}
+
+export default async function ApplyPage({ params }: Params) {
+  // Ensure params.id is awaited
+  const { id } = await params;
+  
   // Check authentication status
   const user = await getUser();
   
   // If not authenticated, redirect to login page
   if (!user) {
-    redirect(`/sign-in?redirect=/jobs/${params.id}/apply`);
+    redirect(`/sign-in?redirect=/jobs/${id}/apply`);
   }
   
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gray-50 py-8 px-4">
       <Suspense fallback={<ApplyPageSkeleton />}>
-        <ApplyPageContent id={params.id} />
+        <ApplyPageContent id={id} />
       </Suspense>
     </div>
   );
