@@ -17,7 +17,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen container mx-auto">
       {children}
       <Toaster />
     </div>
