@@ -12,7 +12,7 @@ import {
 } from '@/lib/db/queries/employer/jobs';
 import { revalidatePath } from 'next/cache';
 import { eq } from 'drizzle-orm';
-import { db } from '@/lib/db/db';
+import { db } from '@/lib/db';
 import { employerProfiles, NewJob, profiles } from '@/lib/db/schema';
 
 // Types for the jobs page

@@ -1,5 +1,5 @@
 import { and, count, desc, eq, sql } from 'drizzle-orm';
-import { db } from '@/lib/db/db';
+import { db } from '@/lib/db';
 import { applications, applicationStatusEnum, candidateProfiles, jobs, profiles } from '@/lib/db/schema';
 import { User } from '@supabase/supabase-js';
 

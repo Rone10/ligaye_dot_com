@@ -3,7 +3,7 @@
 import { getUser } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { eq } from 'drizzle-orm';
-import { db } from '@/lib/db/db';
+import { db } from '@/lib/db';
 import { savedJobs, candidateProfiles } from '@/lib/db/schema';
 import { getDashboardStats, getRecommendedJobs } from '@/lib/db/queries/candidates/dashboard';
 

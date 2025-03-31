@@ -1,6 +1,6 @@
 "use server"
 
-import { db } from "@/lib/db/db"
+import { db } from "@/lib/db"
 import { getUser } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { insertJob } from "@/lib/db/queries/employer/new_jobs"

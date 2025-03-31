@@ -260,7 +260,7 @@ async function ApplicationDetails({ id }: { id: string }) {
 
 // Helper function to fetch extended application data including job and employer details
 async function fetchExtendedApplicationData(applicationId: string): Promise<ApplicationData | null> {
-  const { db } = await import('@/lib/db/db');
+  const { db } = await import('@/lib/db');
   const { applications, jobs, employerProfiles, locations } = await import('@/lib/db/schema');
   const { eq } = await import('drizzle-orm');
   

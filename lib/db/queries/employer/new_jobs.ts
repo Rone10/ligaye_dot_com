@@ -1,6 +1,6 @@
 "use server"
 
-import { db } from "@/lib/db/db"
+import { db } from "@/lib/db"
 import { getUser } from "@/lib/supabase/server"
 import { jobs, jobSkills, jobIndustries } from "@/lib/db/schema"
 

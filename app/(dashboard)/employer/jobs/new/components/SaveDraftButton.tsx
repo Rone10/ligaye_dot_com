@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useJobForm } from "./JobFormProvider";
-import { db } from '@/lib/db/db';
+import { db } from '@/lib/db';
 
 export function SaveDraftButton() {
   const { state } = useJobForm();

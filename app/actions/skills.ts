@@ -1,6 +1,6 @@
 'use server'
 
-import { db } from '@/lib/db/db';
+import { db } from '@/lib/db';
 import { skills } from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
