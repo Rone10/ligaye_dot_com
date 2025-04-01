@@ -34,7 +34,7 @@ export default function AuthLayout({
       </div>
       
       {/* Toast notifications */}
-      <Toaster position="top-center" richColors />
+      {/* <Toaster position="top-center" richColors /> */}
     </div>
   )
 } 

@@ -16,13 +16,15 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { BriefcaseIcon, UserIcon } from 'lucide-react'
+import { BriefcaseIcon, CheckCircle2, MailIcon, UserIcon } from 'lucide-react'
+import { Controller } from 'react-hook-form'
 
 export function SignUpForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [formSuccess, setFormSuccess] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
   
   const {
     register,
@@ -74,14 +76,12 @@ export function SignUpForm() {
         return
       }
       
+      // Store email for the success message
+      setUserEmail(data.email)
+      
       // Handle success
       setFormSuccess(true)
       toast.success('Account created! Please check your email to verify your account.')
-      
-      // Redirect to verification page after a short delay
-      setTimeout(() => {
-        router.push('/sign-in')
-      }, 2000)
       
     } catch (error) {
       setFormError('An unexpected error occurred. Please try again.')
@@ -89,6 +89,54 @@ export function SignUpForm() {
     } finally {
       setIsLoading(false)
     }
+  }
+  
+  if (formSuccess) {
+    return (
+      <Card className="glass-card w-full max-w-md mx-auto shadow-level-2 animate-appear-zoom">
+        <CardHeader className="space-y-2">
+          <div className="flex justify-center">
+            <CheckCircle2 className="h-16 w-16 text-secondary-green mb-sm" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-center">Check Your Email</CardTitle>
+          <CardDescription className="text-center text-base">
+            We've sent a verification link to <span className="font-medium text-dark">{userEmail}</span>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-xl">
+          <div className="bg-muted/50 rounded-lg p-md space-y-md">
+            <div className="flex items-start">
+              <MailIcon className="h-5 w-5 text-primary-blue mt-[2px] mr-sm flex-shrink-0" />
+              <p className="text-sm text-gray-dark">
+                <span className="font-medium text-dark">Check your inbox:</span> Click the verification link in the email we just sent you.
+              </p>
+            </div>
+            <div className="flex items-start">
+              <CheckCircle2 className="h-5 w-5 text-primary-blue mt-[2px] mr-sm flex-shrink-0" />
+              <p className="text-sm text-gray-dark">
+                <span className="font-medium text-dark">Verify your account:</span> Your account must be verified before you can sign in.
+              </p>
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <Button 
+              type="button" 
+              className="button-primary w-full"
+              onClick={() => router.push('/sign-in')} 
+            >
+              Continue to Sign In
+            </Button>
+            <p className="mt-md text-sm text-gray-dark">
+              Didn't receive the email? Check your spam folder or{' '}
+              <Link href="/sign-up" className="text-primary-blue font-medium hover:underline">
+                try again
+              </Link>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
   
   return (
@@ -169,43 +217,50 @@ export function SignUpForm() {
           
           <div className="space-y-sm">
             <Label className="text-dark font-medium">Account Type</Label>
-            <RadioGroup 
-              defaultValue="candidate" 
-              className="grid grid-cols-2 gap-md pt-xs"
-              {...register('userRole')}
-            >
-              <div>
-                <RadioGroupItem
-                  value="candidate"
-                  id="candidate"
-                  className="peer sr-only"
-                  disabled={isLoading}
-                />
-                <Label
-                  htmlFor="candidate"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-md hover:bg-gray/10 hover:border-gray-dark transition-all duration-standard peer-data-[state=checked]:border-primary-blue [&:has([data-state=checked])]:border-primary-blue"
+            <Controller
+              name="userRole"
+              control={control}
+              render={({ field }) => (
+                <RadioGroup 
+                  defaultValue={field.value}
+                  className="grid grid-cols-2 gap-md pt-xs"
+                  onValueChange={field.onChange}
+                  value={field.value}
                 >
-                  <UserIcon className="mb-xs h-6 w-6 text-primary-blue" />
-                  <span className="text-base font-medium">Job Seeker</span>
-                </Label>
-              </div>
-              
-              <div>
-                <RadioGroupItem
-                  value="employer"
-                  id="employer"
-                  className="peer sr-only"
-                  disabled={isLoading}
-                />
-                <Label
-                  htmlFor="employer"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-md hover:bg-gray/10 hover:border-gray-dark transition-all duration-standard peer-data-[state=checked]:border-primary-blue [&:has([data-state=checked])]:border-primary-blue"
-                >
-                  <BriefcaseIcon className="mb-xs h-6 w-6 text-primary-blue" />
-                  <span className="text-base font-medium">Employer</span>
-                </Label>
-              </div>
-            </RadioGroup>
+                  <div>
+                    <RadioGroupItem
+                      value="candidate"
+                      id="candidate"
+                      className="peer sr-only"
+                      disabled={isLoading}
+                    />
+                    <Label
+                      htmlFor="candidate"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-md hover:bg-gray/10 hover:border-gray-dark transition-all duration-standard peer-data-[state=checked]:border-primary-blue [&:has([data-state=checked])]:border-primary-blue"
+                    >
+                      <UserIcon className="mb-xs h-6 w-6 text-primary-blue" />
+                      <span className="text-base font-medium">Job Seeker</span>
+                    </Label>
+                  </div>
+                  
+                  <div>
+                    <RadioGroupItem
+                      value="employer"
+                      id="employer"
+                      className="peer sr-only"
+                      disabled={isLoading}
+                    />
+                    <Label
+                      htmlFor="employer"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-md hover:bg-gray/10 hover:border-gray-dark transition-all duration-standard peer-data-[state=checked]:border-primary-blue [&:has([data-state=checked])]:border-primary-blue"
+                    >
+                      <BriefcaseIcon className="mb-xs h-6 w-6 text-primary-blue" />
+                      <span className="text-base font-medium">Employer</span>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              )}
+            />
             {errors.userRole && (
               <p className="text-sm text-destructive">{errors.userRole.message}</p>
             )}
