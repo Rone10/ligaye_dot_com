@@ -8,27 +8,28 @@ export const metadata: Metadata = {
 }
 
 interface VerifyPageProps {
-  searchParams: {
+  searchParams: Promise<{
     token_hash?: string
     type?: string
     error?: string
     error_description?: string
-  }
+  }>
 }
 
 export default async function VerifyPage({ searchParams }: VerifyPageProps) {
+  const { token_hash, type, error, error_description } = await searchParams
   // Check if this is a callback URL with token from Supabase Auth
-  const hasAuthParams = searchParams.token_hash && searchParams.type
+  const hasAuthParams = token_hash && type
 
   // Check for errors
-  const hasErrors = searchParams.error || searchParams.error_description
+  const hasErrors = error || error_description
 
   let status: 'success' | 'error' | 'pending' = 'pending'
   let message: string | undefined
 
   if (hasAuthParams) {
     // This page is being called as part of the email verification callback
-    if (searchParams.type === 'email_change' || searchParams.type === 'signup') {
+    if (type === 'email_change' || type === 'signup') {
       // For email verification, we can display success
       status = 'success'
       message = 'Your email has been successfully verified. You can now sign in to your account.'
@@ -48,7 +49,7 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
   } else if (hasErrors) {
     // Handle authentication errors
     status = 'error'
-    message = searchParams.error_description || 'Verification failed. Please try again or contact support.'
+    message = error_description || 'Verification failed. Please try again or contact support.'
   } else {
     // Default case - user navigated here directly
     status = 'pending'
