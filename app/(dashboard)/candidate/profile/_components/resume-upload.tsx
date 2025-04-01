@@ -61,10 +61,10 @@ export default function ResumeUpload({ resumeUrl, resumeFilename }: ResumeUpload
       return;
     }
 
-    // Check file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Check file size (max 1MB)
+    const maxSize = 1 * 1024 * 1024; // 1MB
     if (file.size > maxSize) {
-      toast.error("File size must be less than 5MB.");
+      toast.error("File size must be less than 1MB.");
       return;
     }
 

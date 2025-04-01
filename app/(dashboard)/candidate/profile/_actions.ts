@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getUser, createClient } from '@/lib/supabase/server';
-import { profiles } from '@/lib/db/schema';
+import { profiles, candidateProfiles } from '@/lib/db/schema';
 import { db } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { 
@@ -65,12 +65,32 @@ export async function updateBasicProfileInfo(formData: FormData) {
 // Resume upload action
 export async function handleResumeUpload(formData: FormData) {
   const user = await getUser();
-  if (!user || user.role !== 'candidate') {
+  if (!user) {
     throw new Error('Unauthorized');
   }
-  
+  // Check if user is a candidate
+  const profile = await db()
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, user.id))
+    .limit(1)
+    .then(res => res[0]);
+  if (!profile) {
+    throw new Error('Candidate profile not found');
+  }
+  // compare profile id with candidate profile id
+  const candidateProfileId = await db()
+    .select()
+    .from(candidateProfiles)
+    .where(eq(candidateProfiles.profileId, profile.id))
+    .limit(1)
+    .then(res => res[0]);
+  if (!candidateProfileId) {
+    throw new Error('Candidate profile not found');
+  }
   const resumeFile = formData.get('resume') as File;
   if (!resumeFile) {
+    // Throw error if file is missing to satisfy TypeScript's control flow
     throw new Error('No file provided');
   }
   
@@ -81,7 +101,10 @@ export async function handleResumeUpload(formData: FormData) {
     .from('resumes')
     .upload(fileName, resumeFile);
     
-  if (error) throw new Error('File upload failed');
+  if (error){
+    console.error('File upload failed:', error);
+    throw new Error('File upload failed');
+  }
   
   // Get public URL
   const { data: urlData } = supabase.storage
