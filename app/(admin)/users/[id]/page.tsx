@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getAdminUserProfileView, getAvailableSkills, getAllIndustries, getAllLocations } from "./_queries";
+import { ProfileTabs } from "./_components/ProfileTabs";
 
 interface PageProps {
   params: Promise<{id: string}>
@@ -69,26 +70,24 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
             </div>
             <div>
               <p className="text-sm text-gray-500">Status</p>
-              <p className={`font-medium ${userData.profile.deleted ? "text-red-600" : "text-green-600"}`}>
-                {userData.profile.deleted ? "Deleted" : "Active"}
-              </p>
+              <div className="flex items-center">
+                <span className={`font-medium ${userData.profile.deleted ? "text-red-600" : "text-green-600"}`}>
+                  {userData.profile.deleted ? "Deleted" : "Active"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
         
-        {/* Placeholder for tabs and role-specific content */}
-        <div className="mt-8 space-y-4">
-          <h2 className="text-xl font-semibold">
-            {userData.profile.role === "candidate" 
-              ? "Candidate Profile" 
-              : userData.profile.role === "employer" 
-                ? "Employer Profile" 
-                : "Admin Profile"}
-          </h2>
-          <p className="text-gray-500">
-            This section would contain the full profile management interface with tabs for editing
-            different sections of the user's profile.
-          </p>
+        {/* Profile management tabs */}
+        <div className="mt-8">
+          <ProfileTabs 
+            userData={userData} 
+            profileId={id} 
+            availableSkills={availableSkills} 
+            allIndustries={allIndustries} 
+            allLocations={allLocations} 
+          />
         </div>
       </div>
     </div>

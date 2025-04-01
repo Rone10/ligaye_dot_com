@@ -29,7 +29,9 @@ This App Flow Document outlines the user journeys, key interactions, and screen 
 - Views saved jobs in the dashboard under "Saved Jobs."
 **Notifications**
 - Receives email notifications for new job postings matching criteria and updates on application status.
+
 ## Employer Journey
+
 **Registration and Login**
 - User visits the homepage and clicks "Register."
 - Completes a registration form (company name, email, password, role: employer).
@@ -51,7 +53,9 @@ This App Flow Document outlines the user journeys, key interactions, and screen 
 - Updates application status (e.g., reviewed, shortlisted).
 **Analytics (Optional)**
 - Views performance metrics for job postings (views, applications, etc.).
+
 ## Admin Journey
+
 **Login**
 - Accesses the admin login page and enters credentials.
 - Redirected to the admin dashboard.
