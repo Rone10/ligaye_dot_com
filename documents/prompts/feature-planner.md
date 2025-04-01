@@ -92,24 +92,35 @@ Implement the user profile creation, management, and viewing features for Ligaye
     *   **Actions:** Call corresponding functions in `./_queries.ts` for DB updates and handle logo upload.
 *   **Tech Considerations:** Plan UI for selecting Industry and Location (dropdowns, search, etc.).
 
-**3. Admin User Profile View (e.g., `app/(admin)/users/[id]/`)**
+**3. Admin User Profile Management (e.g., `app/(admin)/users/[id]/`)**
 
-*   **Purpose:** Allow administrators to view the combined profile information for any user (Candidate or Employer). Corresponds to parts of "Admin Journey - User Management" in `app-flow.md`. This is primarily a **Read** operation from the admin perspective for this specific instruction (editing might be a separate feature).
+*   **Purpose:** Allow administrators with the 'admin' role to view and manage the combined profile information for any user (Candidate or Employer). Corresponds to parts of "Admin Journey - User Management" in `app-flow.md`. This includes full **CRUD** operations for admin users.
 *   **Target Route Slice:** `app/(admin)/users/[id]/` (assuming `[id]` is the `profileId` or `userId`).
 *   **Key Functionality:**
     *   Fetch and display comprehensive profile information for the user specified by the `[id]` route parameter.
     *   **Conditionally display data:** The view must adapt based on the user's `role` stored in the `profiles` table.
         *   If role is 'candidate', display common profile info (`profiles`) PLUS candidate-specific info (`candidateProfiles`, education, experience, skills list, resume link).
         *   If role is 'employer', display common profile info (`profiles`) PLUS employer-specific info (`employerProfiles`, industry, location, logo).
-    *   Consider displaying metadata like `createdAt`, `updatedAt`, potentially user status (active/deleted).
+    *   **Enable full CRUD operations:** Allow admins to create, read, update, and delete all aspects of user profiles.
+        *   Create new profiles or add missing profile components.
+        *   Update any field in the profile data structure.
+        *   Delete profile components or entire profiles (with appropriate safeguards).
+    *   Display metadata like `createdAt`, `updatedAt`, user status (active/deleted).
 *   **UI Structure:**
     *   `page.tsx`: Server Component responsible for:
         *   Reading the `id` from `params`.
         *   Calling a function in `./_queries.ts` (e.g., `getAdminUserProfileView(id)`) to fetch all necessary data based on the user's role.
-        *   Passing the fetched data to display components.
-    *   `_components/`: Components designed to render the combined profile view, potentially with conditional sections for candidate vs. employer data.
-*   **Data Flow (Read):** `page.tsx` -> `./_queries.ts` (`getAdminUserProfileView`) -> Database (joins between `profiles` and either `candidateProfiles` or `employerProfiles`, plus related tables as needed).
-*   **Tech Considerations:** The primary challenge is designing the `getAdminUserProfileView` query in `./_queries.ts` to efficiently fetch the correct data based on the role and structure it conveniently for the UI. No forms/mutations needed for this read-only view as specified here.
+        *   Passing the fetched data to display and edit components.
+    *   `_components/`: Components designed to render and edit the combined profile view, with conditional sections for candidate vs. employer data.
+    *   `_actions.ts`: Server Actions for all admin CRUD operations (e.g., `updateUserProfile`, `deleteEducationRecord`, `createEmployerProfile`).
+*   **Data Flow:**
+    *   **Read:** `page.tsx` -> `./_queries.ts` (`getAdminUserProfileView`) -> Database (joins between `profiles` and either `candidateProfiles` or `employerProfiles`, plus related tables as needed).
+    *   **Write:** Client form components submit data to Server Actions in `./_actions.ts` which handle all create, update, and delete operations.
+*   **Tech Considerations:** 
+    *   Design the `getAdminUserProfileView` query in `./_queries.ts` to efficiently fetch the correct data based on the role.
+    *   Implement proper validation and authorization checks to ensure only users with 'admin' role can perform these operations.
+    *   Create comprehensive forms with React Hook Form and Zod validation for all editable fields.
+    *   Include confirmation dialogs for destructive operations.
 
 
 `</user instructions>`
