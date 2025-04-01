@@ -11,12 +11,18 @@ const config: Config = {
   	extend: {
   		backgroundImage: {
   			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-  			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))'
+  			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+  			'gradient-bg': 'linear-gradient(135deg, #e9efff 0%, #f4f7ff 100%)',
   		},
   		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			'sm': '4px',
+  			'md': '10px',
+  			'lg': '16px',
+  			'xl': '20px',
+  			'full': '9999px',
+  			'shadcn-lg': 'var(--radius)',
+  			'shadcn-md': 'calc(var(--radius) - 2px)',
+  			'shadcn-sm': 'calc(var(--radius) - 4px)'
   		},
   		colors: {
   			border: 'hsl(var(--border))',
@@ -28,6 +34,15 @@ const config: Config = {
   				DEFAULT: 'hsl(var(--primary))',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
+  			'primary-blue': {
+  				DEFAULT: '#4a6cfa',
+  				light: '#7b90ff'
+  			},
+  			'secondary-green': '#05ce91',
+  			dark: '#1a1e2d',
+  			light: '#f8faff',
+  			gray: '#e1e5f2',
+  			'gray-dark': '#9aa3bc',
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
   				foreground: 'hsl(var(--secondary-foreground))'
@@ -70,6 +85,50 @@ const config: Config = {
   				ring: 'hsl(var(--sidebar-ring))'
   			}
   		},
+  		fontSize: {
+  			'xs': '12px',     // Extra Small
+  			'sm': '13px',     // Small
+  			'base': '15px',   // Medium
+  			'lg': '16px',     // Medium Large
+  			'xl': '18px',     // Large
+  			'2xl': '20px',    // Large Subheader
+  			'3xl': '24px',    // Header
+  		},
+  		fontWeight: {
+  			'normal': '400',
+  			'medium': '500',
+  			'semibold': '600',
+  			'bold': '700',
+  		},
+  		lineHeight: {
+  			'tight': '1.2',
+  			'normal': '1.5',
+  			'relaxed': '1.8',
+  		},
+  		spacing: {
+  			'xxs': '4px',
+  			'xs': '8px',
+  			'sm': '12px',
+  			'md': '16px',
+  			'lg': '20px',
+  			'xl': '25px',
+  			'2xl': '30px',
+  			'3xl': '40px',
+  			'4xl': '50px',
+  			'5xl': '60px',
+  		},
+  		boxShadow: {
+  			'level-1': 'var(--shadow-level-1)',
+  			'level-2': 'var(--shadow-level-2)',
+  			'level-3': 'var(--shadow-level-3)',
+  			'level-4': 'var(--shadow-level-4)',
+  			'focus': '0 0 0 3px rgba(74, 108, 250, 0.15)',
+  		},
+  		transitionDuration: {
+  			'fast': '150ms',
+  			'standard': '300ms',
+  			'slow': '500ms',
+  		},
   		keyframes: {
   			'accordion-down': {
   				from: {
@@ -111,8 +170,8 @@ const config: Config = {
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
-  			appear: 'appear 0.5s ease-out forwards',
-  			'appear-zoom': 'appear-zoom 0.5s ease-out forwards'
+  			appear: 'appear 0.3s ease-out forwards',
+  			'appear-zoom': 'appear-zoom 0.3s ease-out forwards'
   		}
   	}
   },

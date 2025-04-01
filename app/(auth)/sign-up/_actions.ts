@@ -23,6 +23,7 @@ export async function signUpUser(formData: FormData): Promise<SignUpActionResult
     lastName: formData.get('lastName'),
     email: formData.get('email'),
     password: formData.get('password'),
+    userRole: formData.get('userRole'),
   }
 
   // Validate form data
@@ -41,6 +42,7 @@ export async function signUpUser(formData: FormData): Promise<SignUpActionResult
         data: {
           first_name: validatedData.firstName,
           last_name: validatedData.lastName,
+          role: validatedData.userRole,
         },
       },
     })
@@ -67,7 +69,7 @@ export async function signUpUser(formData: FormData): Promise<SignUpActionResult
     const profileResult = await createUserProfile(
       authData.user.id,
       fullName,
-      'candidate' // Default role
+      validatedData.userRole // Use selected role
     )
     
     // Handle profile creation errors

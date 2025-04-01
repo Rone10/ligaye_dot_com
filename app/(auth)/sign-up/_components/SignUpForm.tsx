@@ -15,6 +15,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { BriefcaseIcon, UserIcon } from 'lucide-react'
 
 export function SignUpForm() {
   const router = useRouter()
@@ -27,6 +29,7 @@ export function SignUpForm() {
     handleSubmit,
     formState: { errors },
     setError,
+    control,
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -34,6 +37,7 @@ export function SignUpForm() {
       lastName: '',
       email: '',
       password: '',
+      userRole: 'candidate',
     },
   })
   
@@ -47,6 +51,7 @@ export function SignUpForm() {
       formData.append('lastName', data.lastName)
       formData.append('email', data.email)
       formData.append('password', data.password)
+      formData.append('userRole', data.userRole)
       
       const result = await signUpUser(formData)
       
@@ -87,84 +92,128 @@ export function SignUpForm() {
   }
   
   return (
-    <Card className="w-full max-w-md mx-auto bg-white/70 backdrop-blur-lg border border-gray/30 shadow-md">
+    <Card className="glass-card w-full max-w-md mx-auto shadow-level-2 animate-appear-zoom">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Sign Up</CardTitle>
-        <CardDescription className="text-center">
+        <CardTitle className="text-3xl font-bold text-center">Sign Up</CardTitle>
+        <CardDescription className="text-center text-gray-dark">
           Create an account to start using Ligaye.com
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-xl">
           {formError && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert variant="destructive" className="mb-lg">
               <AlertDescription>{formError}</AlertDescription>
             </Alert>
           )}
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+          <div className="grid grid-cols-2 gap-md">
+            <div className="space-y-xs">
+              <Label htmlFor="firstName" className="text-dark font-medium">First Name</Label>
               <Input
                 id="firstName"
                 placeholder="John"
                 {...register('firstName')}
                 disabled={isLoading}
-                className={errors.firstName ? 'border-red-300' : ''}
+                className={`input-field ${errors.firstName ? 'border-destructive' : ''}`}
               />
               {errors.firstName && (
-                <p className="text-sm text-red-500">{errors.firstName.message}</p>
+                <p className="text-sm text-destructive">{errors.firstName.message}</p>
               )}
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+            <div className="space-y-xs">
+              <Label htmlFor="lastName" className="text-dark font-medium">Last Name</Label>
               <Input
                 id="lastName"
                 placeholder="Doe"
                 {...register('lastName')}
                 disabled={isLoading}
-                className={errors.lastName ? 'border-red-300' : ''}
+                className={`input-field ${errors.lastName ? 'border-destructive' : ''}`}
               />
               {errors.lastName && (
-                <p className="text-sm text-red-500">{errors.lastName.message}</p>
+                <p className="text-sm text-destructive">{errors.lastName.message}</p>
               )}
             </div>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+          <div className="space-y-xs">
+            <Label htmlFor="email" className="text-dark font-medium">Email</Label>
             <Input
               id="email"
               type="email"
               placeholder="john.doe@example.com"
               {...register('email')}
               disabled={isLoading}
-              className={errors.email ? 'border-red-300' : ''}
+              className={`input-field ${errors.email ? 'border-destructive' : ''}`}
             />
             {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
+              <p className="text-sm text-destructive">{errors.email.message}</p>
             )}
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+          <div className="space-y-xs">
+            <Label htmlFor="password" className="text-dark font-medium">Password</Label>
             <Input
               id="password"
               type="password"
               placeholder="••••••••"
               {...register('password')}
               disabled={isLoading}
-              className={errors.password ? 'border-red-300' : ''}
+              className={`input-field ${errors.password ? 'border-destructive' : ''}`}
             />
             {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
+              <p className="text-sm text-destructive">{errors.password.message}</p>
+            )}
+          </div>
+          
+          <div className="space-y-sm">
+            <Label className="text-dark font-medium">Account Type</Label>
+            <RadioGroup 
+              defaultValue="candidate" 
+              className="grid grid-cols-2 gap-md pt-xs"
+              {...register('userRole')}
+            >
+              <div>
+                <RadioGroupItem
+                  value="candidate"
+                  id="candidate"
+                  className="peer sr-only"
+                  disabled={isLoading}
+                />
+                <Label
+                  htmlFor="candidate"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-md hover:bg-gray/10 hover:border-gray-dark transition-all duration-standard peer-data-[state=checked]:border-primary-blue [&:has([data-state=checked])]:border-primary-blue"
+                >
+                  <UserIcon className="mb-xs h-6 w-6 text-primary-blue" />
+                  <span className="text-base font-medium">Job Seeker</span>
+                </Label>
+              </div>
+              
+              <div>
+                <RadioGroupItem
+                  value="employer"
+                  id="employer"
+                  className="peer sr-only"
+                  disabled={isLoading}
+                />
+                <Label
+                  htmlFor="employer"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-md hover:bg-gray/10 hover:border-gray-dark transition-all duration-standard peer-data-[state=checked]:border-primary-blue [&:has([data-state=checked])]:border-primary-blue"
+                >
+                  <BriefcaseIcon className="mb-xs h-6 w-6 text-primary-blue" />
+                  <span className="text-base font-medium">Employer</span>
+                </Label>
+              </div>
+            </RadioGroup>
+            {errors.userRole && (
+              <p className="text-sm text-destructive">{errors.userRole.message}</p>
             )}
           </div>
           
           <Button 
             type="submit" 
-            className="w-full bg-primary-blue hover:bg-primary-blue-light"
+            className="button-primary w-full"
             disabled={isLoading}
           >
             {isLoading ? 'Creating account...' : 'Sign Up'}
@@ -174,7 +223,7 @@ export function SignUpForm() {
       <CardFooter className="flex justify-center">
         <p className="text-sm text-gray-dark">
           Already have an account?{' '}
-          <Link href="/sign-in" className="text-primary-blue hover:underline">
+          <Link href="/sign-in" className="text-primary-blue hover:underline font-medium">
             Sign In
           </Link>
         </p>

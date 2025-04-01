@@ -8,6 +8,9 @@ export const signUpSchema = z.object({
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
     .regex(/[0-9]/, "Password must contain at least one number"),
+  userRole: z.enum(['candidate', 'employer'], {
+    required_error: "Please select your account type",
+  }),
 })
 
 export type SignUpFormData = z.infer<typeof signUpSchema> 
