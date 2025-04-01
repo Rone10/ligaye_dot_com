@@ -18,7 +18,7 @@ import { relations, InferInsertModel, InferSelectModel } from 'drizzle-orm'; // 
 // --- Enums ---
 
 // Core Enums
-export const userRoleEnum = pgEnum('user_role', ['employer', 'candidate']);
+export const userRoleEnum = pgEnum('user_role', ['employer', 'candidate', 'admin']);
 export const workLocationEnum = pgEnum('work_location', ['REMOTE', 'HYBRID', 'ON_SITE']);
 export const salaryFrequencyEnum = pgEnum('salary_frequency', ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']);
 export const companySizeEnum = pgEnum('company_size', ['1-10', '11-50', '51-200', '201-500', '500+']);

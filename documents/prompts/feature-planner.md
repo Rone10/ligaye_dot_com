@@ -38,8 +38,6 @@ Please proceed with your analysis and implementation plan based on the following
 `<user instructions>`
 Implement the user profile creation, management, and viewing features for Ligaye.com, covering Candidates (Job Seekers) and Employers, as well as an Admin view for user management. Adhere strictly to the project's Vertical Slice Architecture (VSA), conventions documented in `base-knowledge.md`, and the database structure defined in `schema.ts`.
 
-**Note**: when a user signs up, their profile gets created upon successfully signing up. This process is handled in `app/(auth)/sign-up/_queries.ts`. 
-
 **General Requirements:**
 
 1.  **Architecture:** Implement each profile management/viewing feature as a distinct Vertical Slice within the appropriate route segment. All related components (`_components/`), actions (`_actions.ts`), queries (`_queries.ts`), and utilities (`_utils/`) must be co-located within their specific slice.
