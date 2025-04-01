@@ -36,74 +36,82 @@ Please proceed with your analysis and implementation plan based on the following
 
 
 `<user instructions>`
-**1. Overall Goal:**
-Implement the core user authentication flows (Sign Up, Sign In, Email Verification, Password Update, Password Reset) for the Ligaye.com platform. This implementation must strictly adhere to the project's architecture and conventions as detailed in `base-knowledge.md`.
+Implement the user profile creation, management, and viewing features for Ligaye.com, covering Candidates (Job Seekers) and Employers, as well as an Admin view for user management. Adhere strictly to the project's Vertical Slice Architecture (VSA), conventions documented in `base-knowledge.md`, and the database structure defined in `schema.ts`.
 
-**2. Core Requirements & Constraints:**
-*   **Architecture:** Utilize the granular Vertical Slice Architecture (VSA) defined in `base-knowledge.md`. All feature-specific code must reside within the relevant route segment under `app/(auth)/`. Use `_` prefixed folders (`_components`, `_actions`, `_queries`, `_utils`, `_hooks`) within each slice. **No `src/` directory.**
-*   **Authentication Provider:** Use Supabase Auth. Leverage the pre-configured Supabase clients (`lib/supabase/server.ts` for server-side/actions, `lib/supabase/client.ts` only if essential for client-side).
-*   **Mutations:** Use **Next.js Server Actions** defined in slice-specific `_actions.ts` files for all authentication operations (sign-up, sign-in, password changes, etc.). **Do not use API Routes (`route.ts`).**
-*   **Data Layer:** Database interactions (specifically creating the user profile record in the `profiles` table upon sign-up) must be performed via functions defined in the relevant slice's `_queries.ts` file, using the Drizzle ORM client (`await db()`) from `lib/db/index.ts` and types/schema from `lib/db/schema.ts`. Reference the provided `schema.ts` for table structure (note: `profiles` links via `userId` to Supabase auth user).
-*   **Forms & Validation:** Use React Hook Form (RHF) and Zod for all authentication forms. Place Zod schemas in slice-specific `_utils/validation.ts` files and the React Hook Form components (`'use client'`) in slice-specific `_components/` directories.
-*   **Styling & UI:** Use Tailwind CSS and leverage existing Shadcn UI components from `components/ui/` for form elements and layout. Follow the design principles, color palette, typography, spacing, and other UI specifications defined in `documents/style-guide.md` to ensure consistent styling throughout the authentication flows. This includes using the glassmorphic effects, proper elevation/shadow system, border radius values, and interactive states as specified in the style guide.
-*   **Routing:** Implement the features within the `app/(auth)/` route group.
-*   **Error Handling:** Implement robust error handling within Server Actions and queries. Return structured errors from Server Actions to be displayed in the client-side forms. Use Next.js `error.tsx` boundaries where appropriate.
-*   **Email:** Utilize the pre-configured Resend integration for any custom email sending if required (e.g., potentially for password reset notifications beyond Supabase defaults, although Supabase handles its own auth emails). Supabase handles the verification email send upon `signUp`.
+**Note**: when a user signs up, their profile gets created upon successfully signing up. This process is handled in `app/(auth)/sign-up/_queries.ts`. 
 
-**3. Specific Authentication Flows to Implement:**
+**General Requirements:**
 
-    **3.1. Sign Up:**
-    *   **Route:** `app/(auth)/sign-up/`
-    *   **VSA Slice:** Create necessary files within this directory (`page.tsx`, `_components/SignUpForm.tsx`, `_actions.ts`, `_queries.ts`, `_utils/validation.ts`).
-    *   **UI (`_components/SignUpForm.tsx`):** Client Component using RHF/Zod. Fields: First Name, Last Name, Email, Password. On submit, it must call the `signUpUser` Server Action. Display validation and action errors.
-    *   **Server Action (`_actions.ts` -> `signUpUser`):**
-        *   Accepts validated form data.
-        *   Uses server Supabase client.
-        *   Calls `supabase.auth.signUp()`.
-        *   **Transactionality Requirement:** If `signUp` is successful, immediately call a `createUserProfile` function (defined in `./_queries.ts`) to insert a corresponding record into the `profiles` table using the `userId` from the Supabase result, along with `fullName` and default `role` (likely 'candidate' initially, confirm default).
-        *   **Error Handling:** Handle errors from both `supabase.auth.signUp` and the `createUserProfile` database call. Provide clear, user-friendly error feedback to the form. Acknowledge that a true atomic transaction across Supabase Auth and the project DB isn't feasible; prioritize robust error checking and feedback for the two steps.
-        *   Redirects on success (e.g., to `/sign-in` or a "Check your email" page).
-    *   **Data Query (`_queries.ts` -> `createUserProfile`):**
-        *   Accepts user details (`userId`, `fullName`, `role`).
-        *   Uses Drizzle (`await db()`) to insert into the `profiles` table (`lib/db/schema.ts`).
+1.  **Architecture:** Implement each profile management/viewing feature as a distinct Vertical Slice within the appropriate route segment. All related components (`_components/`), actions (`_actions.ts`), queries (`_queries.ts`), and utilities (`_utils/`) must be co-located within their specific slice.
+2.  **Data:** Utilize the Drizzle ORM via functions defined in slice-specific `_queries.ts` files for all database interactions. Refer to `schema.ts` for table structures (`profiles`, `candidateProfiles`, `employerProfiles`, `education`, `experience`, `skills`, `candidateSkills`, `locations`, `industries`, etc.) and relationships.
+3.  **Technology:**
+    *   Use Server Actions (`_actions.ts`) for all data mutations (create, update, delete profile information, handle file uploads).
+    *   Use React Hook Form (RHF) and Zod (`_utils/validation.ts`) for all forms used in profile editing.
+    *   Leverage Shadcn UI components (`components/ui/`) for UI elements.
+    *   Handle file uploads (resumes, company logos) potentially using Supabase Storage, coordinating logic within Server Actions.
+4.  **Authentication Context:** Assume profile management routes are protected and the logged-in user's ID and role are accessible (e.g., via `getUser()` from `lib/supabase/server`).
 
-    **3.2. Sign In:**
-    *   **Route:** `app/(auth)/sign-in/`
-    *   **VSA Slice:** Create necessary files (`page.tsx`, `_components/SignInForm.tsx`, `_actions.ts`, `_utils/validation.ts`). A `_queries.ts` file is likely *not* needed for the core sign-in logic itself.
-    *   **UI (`_components/SignInForm.tsx`):** Client Component using RHF/Zod. Fields: Email, Password. On submit, calls the `signInUser` Server Action. Display errors.
-    *   **Server Action (`_actions.ts` -> `signInUser`):**
-        *   Accepts validated email/password.
-        *   Uses server Supabase client.
-        *   Calls `supabase.auth.signInWithPassword()`.
-        *   Handles errors (e.g., invalid credentials).
-        *   Redirects on success (e.g., to a relevant dashboard, potentially respecting a `redirectUrl` query parameter).
+**Specific Feature Implementations:**
 
-    **3.3. Verify Email:**
-    *   **Route:** `app/(auth)/verify/`
-    *   **VSA Slice:** Create necessary files (`page.tsx`, potentially `_actions.ts`, `_components/VerificationStatus.tsx`).
-    *   **Logic:** The `page.tsx` (likely a Server Component) should handle extracting the verification token (often passed via URL query params by Supabase). It may trigger a Server Action (`_actions.ts`) to call `supabase.auth.verifyOtp()`. Display success or failure feedback to the user using a component like `_components/VerificationStatus.tsx`. Potentially redirect on success.
+**1. Candidate Profile Management (e.g., `app/(dashboard)/candidate/profile/`)**
 
-    **3.4. Update Password (Logged-In User):**
-    *   **Route:** `app/(auth)/update-password/` (This route should be protected, assuming middleware handles that).
-    *   **VSA Slice:** Create necessary files (`page.tsx`, `_components/UpdatePasswordForm.tsx`, `_actions.ts`, `_utils/validation.ts`).
-    *   **UI (`_components/UpdatePasswordForm.tsx`):** Client Component using RHF/Zod. Fields: New Password, Confirm New Password (consider if current password is needed based on UX/security). Calls an `updatePassword` Server Action.
-    *   **Server Action (`_actions.ts` -> `updatePassword`):**
-        *   Accepts validated new password.
-        *   Uses server Supabase client and `getUser()` to ensure user is logged in.
-        *   Calls `supabase.auth.updateUser({ password: new_password })`.
-        *   Handles errors and provides success/failure feedback.
+*   **Purpose:** Allow logged-in users with the 'candidate' role to create, view, and update their professional profile. Corresponds to "Job Seeker Journey - Profile Creation" in `app-flow.md`.
+*   **Target Route Slice:** `app/(dashboard)/candidate/profile/` (or similar appropriate dashboard route).
+*   **Key Functionality:**
+    *   Display the candidate's current profile information fetched from `profiles`, `candidateProfiles`, and related tables (`education`, `experience`, `candidateSkills`).
+    *   Provide forms/interfaces to **Create, Read, Update, Delete (CRUD)** information for:
+        *   **Basic Info:** Full Name (from `profiles`), Title, Bio, LinkedIn/GitHub/Portfolio URLs (from `candidateProfiles`).
+        *   **Education:** Manage entries in the `education` table linked to the `candidateProfileId` (Institution, Degree, Field, Dates, Description).
+        *   **Experience:** Manage entries in the `experience` table linked to the `candidateProfileId` (Title, Company, Location, Dates, Current, Description).
+        *   **Skills:** Manage skills associated with the candidate via the `candidateSkills` junction table. This likely involves searching/selecting from the master `skills` table and updating the junction table records.
+        *   **Resume:** Upload/replace a resume file (stored via Supabase Storage, URL/filename stored in `candidateProfiles`).
+*   **UI Structure:**
+    *   `page.tsx`: Server Component to fetch initial profile data for the logged-in candidate using a function from `./_queries.ts`.
+    *   `_components/`: Contain Client Components (`'use client'`) for the main profile form and potentially sub-components/modals for managing repeatable sections like Education, Experience, and Skills.
+*   **Data Flow:**
+    *   **Read:** `page.tsx` calls `./_queries.ts` function (e.g., `getCandidateProfile(userId)`) which fetches data from `profiles`, `candidateProfiles`, `education`, `experience`, `candidateSkills` (joining with `skills`).
+    *   **Write:** Client form components submit data to Server Actions in `./_actions.ts` (e.g., `updateCandidateProfileDetails`, `addEducationRecord`, `deleteExperienceRecord`, `updateCandidateSkills`, `handleResumeUpload`).
+    *   **Actions:** Call corresponding functions in `./_queries.ts` for DB operations (insert/update/delete on relevant tables) and handle file uploads if necessary.
+*   **Tech Considerations:** Plan form structure (single large form vs. multiple sections), skill selection UI (e.g., multi-select searchable dropdown), and resume upload handling.
 
-    **3.5. Reset Password (Forgotten Password):**
-    *   **Stage 1: Request Reset**
-        *   **Route:** `app/(auth)/reset-password/`
-        *   **VSA Slice:** Create necessary files (`page.tsx`, `_components/RequestResetForm.tsx`, `_actions.ts`, `_utils/validation.ts`).
-        *   **UI (`_components/RequestResetForm.tsx`):** Client Component using RHF/Zod. Field: Email. Calls a `requestPasswordReset` Server Action.
-        *   **Server Action (`_actions.ts` -> `requestPasswordReset`):** Calls `supabase.auth.resetPasswordForEmail()` specifying the confirmation URL (e.g., `/auth/reset-password/confirm`). Provide feedback (e.g., "If an account exists, an email has been sent.").
-    *   **Stage 2: Confirm Reset**
-        *   **Route:** `app/(auth)/reset-password/confirm/` (or similar route targeted by the reset email link).
-        *   **VSA Slice:** Create necessary files (`page.tsx`, `_components/ConfirmResetForm.tsx`, `_actions.ts`, `_utils/validation.ts`).
-        *   **Logic:** Supabase client handles the token implicitly when the user navigates from the email link.
-        *   **UI (`_components/ConfirmResetForm.tsx`):** Client Component using RHF/Zod. Fields: New Password, Confirm New Password. Calls a `confirmPasswordReset` Server Action.
-        *   **Server Action (`_actions.ts` -> `confirmPasswordReset`):** Accepts validated new password. Uses server Supabase client. Calls `supabase.auth.updateUser({ password: new_password })`. Handles errors (e.g., expired token) and provides feedback/redirects on success (e.g., to sign-in page).
+**2. Employer Profile Management (e.g., `app/(dashboard)/employer/profile/`)**
+
+*   **Purpose:** Allow logged-in users with the 'employer' role to create, view, and update their company profile. Corresponds to "Employer Journey - Company Profile Creation" in `app-flow.md`.
+*   **Target Route Slice:** `app/(dashboard)/employer/profile/` (or similar appropriate dashboard route).
+*   **Key Functionality:**
+    *   Display the employer's current company profile information fetched from `profiles` and `employerProfiles`.
+    *   Provide forms/interfaces to **Create/Update** information for:
+        *   **Company Details:** Company Name, Company Size (enum), Description, Website (from `employerProfiles`).
+        *   **Industry:** Select an industry from the `industries` table (store `industryId` in `employerProfiles`).
+        *   **Location:** Define company location. Plan whether this uses the structured `locations` table (store `locationId`) or the free-text `hqAddressDisplay` field, or both. Consider a selection UI for regions/cities from `locations`.
+        *   **Company Logo:** Upload/replace a company logo (stored via Supabase Storage, URL stored in `employerProfiles`).
+*   **UI Structure:**
+    *   `page.tsx`: Server Component fetches initial profile data using `./_queries.ts`.
+    *   `_components/`: Client Component (`'use client'`) for the profile editing form.
+*   **Data Flow:**
+    *   **Read:** `page.tsx` calls `./_queries.ts` function (e.g., `getEmployerProfile(userId)`).
+    *   **Write:** Client form submits data to Server Actions in `./_actions.ts` (e.g., `updateEmployerProfileDetails`, `handleLogoUpload`).
+    *   **Actions:** Call corresponding functions in `./_queries.ts` for DB updates and handle logo upload.
+*   **Tech Considerations:** Plan UI for selecting Industry and Location (dropdowns, search, etc.).
+
+**3. Admin User Profile View (e.g., `app/(admin)/users/[id]/`)**
+
+*   **Purpose:** Allow administrators to view the combined profile information for any user (Candidate or Employer). Corresponds to parts of "Admin Journey - User Management" in `app-flow.md`. This is primarily a **Read** operation from the admin perspective for this specific instruction (editing might be a separate feature).
+*   **Target Route Slice:** `app/(admin)/users/[id]/` (assuming `[id]` is the `profileId` or `userId`).
+*   **Key Functionality:**
+    *   Fetch and display comprehensive profile information for the user specified by the `[id]` route parameter.
+    *   **Conditionally display data:** The view must adapt based on the user's `role` stored in the `profiles` table.
+        *   If role is 'candidate', display common profile info (`profiles`) PLUS candidate-specific info (`candidateProfiles`, education, experience, skills list, resume link).
+        *   If role is 'employer', display common profile info (`profiles`) PLUS employer-specific info (`employerProfiles`, industry, location, logo).
+    *   Consider displaying metadata like `createdAt`, `updatedAt`, potentially user status (active/deleted).
+*   **UI Structure:**
+    *   `page.tsx`: Server Component responsible for:
+        *   Reading the `id` from `params`.
+        *   Calling a function in `./_queries.ts` (e.g., `getAdminUserProfileView(id)`) to fetch all necessary data based on the user's role.
+        *   Passing the fetched data to display components.
+    *   `_components/`: Components designed to render the combined profile view, potentially with conditional sections for candidate vs. employer data.
+*   **Data Flow (Read):** `page.tsx` -> `./_queries.ts` (`getAdminUserProfileView`) -> Database (joins between `profiles` and either `candidateProfiles` or `employerProfiles`, plus related tables as needed).
+*   **Tech Considerations:** The primary challenge is designing the `getAdminUserProfileView` query in `./_queries.ts` to efficiently fetch the correct data based on the role and structure it conveniently for the UI. No forms/mutations needed for this read-only view as specified here.
+
 
 `</user instructions>`
