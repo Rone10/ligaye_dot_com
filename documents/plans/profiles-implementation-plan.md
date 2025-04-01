@@ -566,11 +566,23 @@ interface PageProps {
 
 export default async function AdminUserProfilePage({ params }: PageProps) {
   // Get logged-in admin user
-  const adminUser = await getUser();
+      const user = await getUser();
+    if (!user) {
+    throw new Error('Unauthorized');
+  }
   
-  // Handle unauthorized access
-  if (!adminUser || adminUser.role !== 'admin') {
-    redirect('/login');
+   // Check if user has a profile
+  const profile = await db()
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, user.id))
+    .limit(1)
+    .then(res => res[0]);
+  if (!profile) {
+    throw new Error('Profile not found');
+  }
+  if (profile.role !== 'admin'){
+    throw new Error('Access denied!');
   }
   
   // Get user ID from params
@@ -670,9 +682,23 @@ import { validateProfileData, validateCandidateProfileData, validateEmployerProf
 
 // Update basic profile information 
 export async function updateUserProfileAdmin(id: string, formData: FormData) {
-  const user = await getUser();
-  if (!user || user.role !== 'admin') {
+     const user = await getUser();
+    if (!user) {
     throw new Error('Unauthorized');
+  }
+  
+   // Check if user has a profile
+  const profile = await db()
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, user.id))
+    .limit(1)
+    .then(res => res[0]);
+  if (!profile) {
+    throw new Error('Profile not found');
+  }
+  if (profile.role !== 'admin'){
+    throw new Error('Access denied!');
   }
   
   // Extract and validate data
@@ -688,9 +714,23 @@ export async function updateUserProfileAdmin(id: string, formData: FormData) {
 
 // Conditional actions based on user role
 export async function updateUserRoleSpecificData(id: string, role: 'candidate' | 'employer', formData: FormData) {
-  const user = await getUser();
-  if (!user || user.role !== 'admin') {
+    const user = await getUser();
+    if (!user) {
     throw new Error('Unauthorized');
+  }
+  
+   // Check if user has a profile
+  const profile = await db()
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, user.id))
+    .limit(1)
+    .then(res => res[0]);
+  if (!profile) {
+    throw new Error('Profile not found');
+  }
+  if (profile.role !== 'admin'){
+    throw new Error('Access denied!');
   }
   
   const data = Object.fromEntries(formData.entries());
@@ -799,6 +839,20 @@ Each slice will implement its own form components using React Hook Form and Zod 
 3. Use tabs for organizing complex forms
 4. Implement proper validation using Zod schemas
 5. Show appropriate loading and error states
+6. Use React 19's `useActionState` for server action state management:
+   ```typescript
+   // @ts-ignore - useActionState is available in React 19 but TypeScript definitions may be outdated
+   import { useActionState } from 'react';
+   
+   // Initial state for form submission
+   const initialState = {
+     success: false,
+     message: undefined
+   };
+   
+   // Use useActionState to track server action state
+   const [state, formAction] = useActionState(updateProfileAction, initialState);
+   ```
 
 ## 5. Implementation Steps
 
