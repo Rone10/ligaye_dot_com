@@ -136,7 +136,7 @@
 *   **Page Props**: when accessing params in page.tsx components, refer the page-props.mdc rule in Cursor rules
 *   **Data Mutations:** Primarily use **Next.js Server Actions** defined within the specific route segment's slice (e.g., `app/transactions/new/_actions.ts`). These actions **must** import and call the necessary data mutation functions from their **sibling `_queries.ts` file**. API routes (`route.ts`) are **NOT** used for application database interactions.
 *   **Authentication:** Access the current logged-in user server-side via `const user  = await getUser()` imported from `import { getUser } from '@/lib/supabase/server';`. Do not destructure user, access it directly like so: `const user = await getUser()` For client-side Supabase interactions, helpers/client instances can be imported from `lib/supabase/client.ts`.
-*   **Styling:** Strictly use Tailwind CSS utility classes. Leverage the pre-installed Shadcn UI components available in `components/ui/`.
+*   **Styling & UI:** Use Tailwind CSS and leverage existing Shadcn UI components from `components/ui/` for form elements and layout. Follow the design principles, color palette, typography, spacing, and other UI specifications defined in `documents/style-guide.md` to ensure consistent styling throughout the project. This includes using the glassmorphic effects, proper elevation/shadow system, border radius values, and interactive states as specified in the style guide.
 *   **Component Naming:** PascalCase for React components.
 *   **File Naming:** Generally kebab-case (e.g., `transaction-card.tsx`). Use Next.js conventions where required (`page.tsx`, `layout.tsx`, etc.). Use `_actions.ts`, `_queries.ts`, and `_` prefixed folders (`_components/`, `_hooks/`, `_utils/`) within feature slices.
 *   **Error Handling:** Implement appropriate try/catch blocks within Server Actions and `_queries.ts` functions. Use Next.js `error.tsx` boundaries for route-level UI error handling. Return specific error states/objects from actions/queries where applicable for finer-grained client-side handling.
@@ -152,6 +152,24 @@
     *   Database interactions **must** occur via functions defined in `_queries.ts` files within feature slices, using the Drizzle ORM interface. Do not use the base Supabase client directly for table access.
     *   Assume all required Shadcn UI components are installed in `components/ui/` and ready for import.
     *   Remember to **`await db()`** when accessing the Drizzle client instance.
+*   **Page Props in Next.js 15:** When working with page.tsx components in Next.js 15, props are now returned as promises and must be awaited before usage. This is a significant change from previous versions:
+    ```tsx
+    // In page.tsx
+    interface PageProps {
+        params: Promise<{id: string}>
+    }
+    export default async function Page({ params }: PageProps) {
+      // CORRECT: Await the params.id before using it
+      const id = await params.id;
+      
+      // INCORRECT: This will not work as expected
+      // const id = params.id;
+      
+      // Use the awaited value in your component
+      return <YourComponent id={id} />;
+    }
+    ```
+    This applies to all props passed to page components, including `params`, `searchParams`, and any other props. Always remember to wrap them in a promise and await these values before using them in your component logic or passing them to child components.
 
 ---
 
