@@ -68,7 +68,7 @@ export async function handleResumeUpload(formData: FormData) {
   if (!user) {
     throw new Error('Unauthorized');
   }
-  // Check if user is a candidate
+  // Check if user has a profile
   const profile = await db()
     .select()
     .from(profiles)
@@ -76,7 +76,7 @@ export async function handleResumeUpload(formData: FormData) {
     .limit(1)
     .then(res => res[0]);
   if (!profile) {
-    throw new Error('Candidate profile not found');
+    throw new Error('Profile not found');
   }
   // compare profile id with candidate profile id
   const candidateProfileId = await db()

@@ -386,8 +386,30 @@ import { validateEmployerProfileData } from './_utils/validation';
 // Update employer profile
 export async function updateEmployerProfileDetails(formData: FormData) {
   const user = await getUser();
-  if (!user || user.role !== 'employer') {
+    if (!user) {
     throw new Error('Unauthorized');
+  }
+  
+   // Check if user has a profile
+  const profile = await db()
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, user.id))
+    .limit(1)
+    .then(res => res[0]);
+  if (!profile) {
+    throw new Error('Profile not found');
+  }
+
+  // Compare Profile ID with Employer ID 
+  const employerProfileId = await db()
+    .select()
+    .from(employerProfiles)
+    .where(eq(employerProfiles.profileId, profile.id))
+    .limit(1)
+    .then(res => res[0]);
+  if (!employerProfileId) {
+    throw new Error('Employer profile not found');
   }
   
   // Extract and validate data
@@ -406,9 +428,31 @@ export async function updateEmployerProfileDetails(formData: FormData) {
 
 // Logo upload action
 export async function handleLogoUpload(formData: FormData) {
-  const user = await getUser();
-  if (!user || user.role !== 'employer') {
+    const user = await getUser();
+    if (!user) {
     throw new Error('Unauthorized');
+  }
+  
+   // Check if user has a profile
+  const profile = await db()
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, user.id))
+    .limit(1)
+    .then(res => res[0]);
+  if (!profile) {
+    throw new Error('Profile not found');
+  }
+
+  // Compare Profile ID with Employer ID 
+  const employerProfileId = await db()
+    .select()
+    .from(employerProfiles)
+    .where(eq(employerProfiles.profileId, profile.id))
+    .limit(1)
+    .then(res => res[0]);
+  if (!employerProfileId) {
+    throw new Error('Employer profile not found');
   }
   
   const logoFile = formData.get('logo') as File;
