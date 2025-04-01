@@ -389,7 +389,7 @@ export async function updateCandidateSkillsAdmin(formData: FormData) {
   }
   
   // Get selected skill IDs
-  const selectedSkills = formData.getAll("skills[]").map(id => id.toString());
+  const selectedSkills = formData.getAll("skillIds").map(id => id.toString());
   
   // Update skills in database
   const result = await updateCandidateSkills(candidateProfileId, selectedSkills);
