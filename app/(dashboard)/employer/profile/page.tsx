@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/supabase/server';
-import { getEmployerProfile, getAllIndustries, getAllLocations } from './_queries';
+import { getEmployerProfile, getAllIndustries, getAllLocations, } from './_queries';
 import EmployerProfileForm from './_components/employer-profile-form';
 
 interface PageProps {
@@ -9,11 +9,19 @@ interface PageProps {
 
 export default async function EmployerProfilePage({ params }: PageProps) {
   // Get logged-in user
-  const user = await getUser();
-  
-  // Handle unauthorized access
+  const user = await getUser()
+
   if (!user) {
-    redirect('/login');
+    redirect('/login')
+  }
+  // TODO: check if user is admin then grant access otherwise redirect to employer profile page
+
+
+  // check if user is employer
+  const employerProfile = await getEmployerProfile(user.id)
+  
+  if (!employerProfile) {
+    redirect('/employer/jobs/')
   }
   
   // Fetch employer profile data
