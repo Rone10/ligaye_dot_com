@@ -1,5 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
 
@@ -18,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
+      <NuqsAdapter>{children}</NuqsAdapter>
         <Toaster  position="top-right" richColors />
       </body>
     </html>
