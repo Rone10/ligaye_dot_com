@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -45,6 +45,24 @@ const navItems = [
 export default function EmployerSidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const sidebarRef = useRef<HTMLDivElement>(null)
+  
+  // Close sidebar when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node) && isOpen) {
+        setIsOpen(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isOpen])
+  
+  // Close sidebar on route change
+  useEffect(() => {
+    setIsOpen(false)
+  }, [pathname])
   
   return (
     <>
@@ -52,25 +70,47 @@ export default function EmployerSidebar() {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-40 md:hidden"
+        className={`fixed top-4 left-4 z-50 md:hidden ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Open menu"
       >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        <Menu className="h-5 w-5" />
       </Button>
       
+      {/* Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      
       {/* Sidebar */}
-      <div className={`
-        fixed inset-y-0 left-0 z-30
-        w-64 bg-background/80 backdrop-blur-md
-        border-r border-[rgba(255,255,255,0.3)]
-        shadow-[0_8px_32px_rgba(31,38,135,0.1)]
-        transition-transform duration-300 ease-in-out
-        md:translate-x-0 md:static md:h-screen
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      <div 
+        ref={sidebarRef}
+        className={`
+          fixed inset-y-0 left-0 z-40
+          w-64 bg-background/95 backdrop-blur-md
+          border-r border-[rgba(255,255,255,0.3)]
+          shadow-[0_8px_32px_rgba(31,38,135,0.1)]
+          transition-all duration-300 ease-in-out
+          md:translate-x-0 md:static md:h-full md:min-h-screen
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
         <div className="flex flex-col h-full p-4">
-          <div className="py-6 px-2">
+          <div className="flex items-center justify-between py-6 px-2">
             <h2 className="text-xl font-bold text-[#1a1e2d]">Employer Dashboard</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden rounded-full hover:bg-[#4a6cfa]/10"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5 text-[#1a1e2d]" />
+            </Button>
           </div>
           
           <nav className="space-y-2 mt-6 flex-1">
@@ -81,7 +121,6 @@ export default function EmployerSidebar() {
                 <Link 
                   key={item.href}
                   href={item.href}
-                  onClick={() => setIsOpen(false)}
                   className={`
                     flex items-center px-4 py-3 text-sm
                     rounded-md transition-all duration-300
