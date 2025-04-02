@@ -37,7 +37,7 @@ const navItems = [
   },
   {
     name: 'Applicants',
-    href: '/employer/jobs',
+    href: '/employer/jobs/applicants',
     icon: Users
   }
 ]
