@@ -17,6 +17,7 @@ export default function useJobForm() {
       description: '',
       jobLanguage: 'English',
       numberOfOpenings: 1,
+      locationId: undefined,
       displayAddress: true,
       workLocation: 'ON_SITE' as typeof workLocationEnum.enumValues[number],
       educationRequirements: [],

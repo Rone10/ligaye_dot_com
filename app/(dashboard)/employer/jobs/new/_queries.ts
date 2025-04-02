@@ -8,7 +8,8 @@ import {
   jobSkills, 
   jobIndustries,
   skills,
-  industries
+  industries,
+  locations
 } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import type { NewJob, NewJobSkill, NewJobIndustry } from '@/lib/db/schema'
@@ -34,6 +35,25 @@ export async function getEmployerProfile(userId: string) {
   } catch (error) {
     console.error('Error getting employer profile:', error)
     return null
+  }
+}
+
+// Get all locations from database
+export async function getAllLocations() {
+  try {
+    return await db()
+      .select({
+        id: locations.id,
+        region: locations.region,
+        district: locations.district,
+        city: locations.city
+      })
+      .from(locations)
+      .where(eq(locations.deleted, false))
+      .orderBy(locations.region, locations.city)
+  } catch (error) {
+    console.error('Error fetching locations:', error)
+    return []
   }
 }
 

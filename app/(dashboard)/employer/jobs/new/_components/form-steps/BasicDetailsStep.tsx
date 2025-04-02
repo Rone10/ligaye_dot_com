@@ -25,12 +25,21 @@ import { Editor } from '@/components/RichTextEditor/editor'
 import { ArrowRight } from 'lucide-react'
 import { JobFormValues } from '../../_utils/validation'
 
+// Location interface based on the schema
+interface Location {
+  id: string;
+  region: string;
+  district?: string | null;
+  city?: string | null;
+}
+
 interface BasicDetailsStepProps {
   form: UseFormReturn<JobFormValues>
   onNext: () => void
+  locations: Location[]
 }
 
-export default function BasicDetailsStep({ form, onNext }: BasicDetailsStepProps) {
+export default function BasicDetailsStep({ form, onNext, locations }: BasicDetailsStepProps) {
   const handleNext = () => {
     const basicFieldsValid = form.trigger([
       'title',
@@ -38,6 +47,7 @@ export default function BasicDetailsStep({ form, onNext }: BasicDetailsStepProps
       'jobLanguage',
       'numberOfOpenings',
       'workLocation',
+      'locationId',
       'displayAddress'
     ])
     
@@ -47,6 +57,10 @@ export default function BasicDetailsStep({ form, onNext }: BasicDetailsStepProps
       }
     })
   }
+
+  // Get the current workLocation value to conditionally show locationId field
+  const workLocation = form.watch('workLocation')
+  const needsLocation = workLocation === 'ON_SITE' || workLocation === 'HYBRID'
   
   return (
     <div className="space-y-6">
@@ -165,6 +179,40 @@ export default function BasicDetailsStep({ form, onNext }: BasicDetailsStepProps
           </FormItem>
         )}
       />
+
+      {needsLocation && (
+        <FormField
+          control={form.control}
+          name="locationId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Job Location</FormLabel>
+              <Select 
+                value={field.value} 
+                onValueChange={field.onChange}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {locations.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.city ? `${location.city}, ${location.region}` : location.region}
+                      {location.district && ` (${location.district})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Select the location where this job will be based
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
       
       <FormField
         control={form.control}

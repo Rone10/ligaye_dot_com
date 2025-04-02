@@ -14,7 +14,19 @@ import RequirementsStep from './form-steps/RequirementsStep'
 import CompensationStep from './form-steps/CompensationStep'
 import PostingSettingsStep from './form-steps/PostingSettingsStep'
 
-export default function NewJobForm() {
+// Define Location interface
+interface Location {
+  id: string
+  region: string
+  district: string | null
+  city: string | null
+}
+
+interface NewJobFormProps {
+  locations: Location[]
+}
+
+export default function NewJobForm({ locations }: NewJobFormProps) {
   const router = useRouter()
   const { form, step, totalSteps, nextStep, prevStep, isSubmitting, setIsSubmitting } = useJobForm()
   const [error, setError] = useState<string | null>(null)
@@ -57,7 +69,7 @@ export default function NewJobForm() {
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {step === 1 && <BasicDetailsStep form={form} onNext={nextStep} />}
+          {step === 1 && <BasicDetailsStep form={form} onNext={nextStep} locations={locations} />}
           {step === 2 && <RequirementsStep form={form} onNext={nextStep} onPrevious={prevStep} />}
           {step === 3 && <CompensationStep form={form} onNext={nextStep} onPrevious={prevStep} />}
           {step === 4 && <PostingSettingsStep form={form} onPrevious={prevStep} isSubmitting={isSubmitting} />}
