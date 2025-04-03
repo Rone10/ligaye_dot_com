@@ -55,14 +55,51 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
   const parseJobDescription = (description: string) => {
     if (!description) return '';
     
-    // Simple HTML tag removal, preserving line breaks
-    return description
-      .replace(/<[^>]*>/g, '') // Remove all HTML tags
-      .replace(/&lt;/g, '<')    // Replace HTML entities
+    // Replace HTML entities first
+    let parsedText = description
+      .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&amp;/g, '&')
       .replace(/&quot;/g, '"')
-      .replace(/&apos;/g, "'");
+      .replace(/&apos;/g, "'")
+      .replace(/&nbsp;/g, ' ');
+    
+    // Replace paragraph tags with appropriate markup
+    parsedText = parsedText
+      .replace(/<p\s*[^>]*>/g, '<div class="mb-4">')
+      .replace(/<\/p>/g, '</div>')
+      .replace(/<br\s*\/?>/g, '<br />');
+    
+    // Handle headers with proper styling
+    parsedText = parsedText
+      .replace(/<h1\s*[^>]*>(.*?)<\/h1>/g, '<div class="text-3xl font-bold mb-4">$1</div>')
+      .replace(/<h2\s*[^>]*>(.*?)<\/h2>/g, '<div class="text-2xl font-bold mb-3">$1</div>')
+      .replace(/<h3\s*[^>]*>(.*?)<\/h3>/g, '<div class="text-xl font-bold mb-2">$1</div>')
+      .replace(/<h4\s*[^>]*>(.*?)<\/h4>/g, '<div class="text-lg font-semibold mb-2">$1</div>')
+      .replace(/<h5\s*[^>]*>(.*?)<\/h5>/g, '<div class="text-base font-semibold mb-1">$1</div>')
+      .replace(/<h6\s*[^>]*>(.*?)<\/h6>/g, '<div class="text-sm font-semibold mb-1">$1</div>');
+    
+    // Preserve text formatting
+    parsedText = parsedText
+      .replace(/<strong\s*[^>]*>(.*?)<\/strong>/g, '<span class="font-bold">$1</span>')
+      .replace(/<b\s*[^>]*>(.*?)<\/b>/g, '<span class="font-bold">$1</span>')
+      .replace(/<em\s*[^>]*>(.*?)<\/em>/g, '<span class="italic">$1</span>')
+      .replace(/<i\s*[^>]*>(.*?)<\/i>/g, '<span class="italic">$1</span>')
+      .replace(/<u\s*[^>]*>(.*?)<\/u>/g, '<span class="underline">$1</span>');
+    
+    // Handle lists
+    parsedText = parsedText
+      .replace(/<ul\s*[^>]*>/g, '<div class="pl-6 mb-4 space-y-1">')
+      .replace(/<\/ul>/g, '</div>')
+      .replace(/<ol\s*[^>]*>/g, '<div class="pl-6 mb-4 space-y-1 list-decimal">')
+      .replace(/<\/ol>/g, '</div>')
+      .replace(/<li\s*[^>]*>(.*?)<\/li>/g, '<div class="flex"><span class="mr-2">•</span><span>$1</span></div>');
+    
+    // Clean up any potentially unsafe tags while keeping our safe ones
+    const safeTagsRegex = /<(?!\/?(div|span|br)(?!\w)[^>]*>)([^>]*)>/g;
+    parsedText = parsedText.replace(safeTagsRegex, '');
+    
+    return parsedText;
   };
   
   return (
@@ -75,7 +112,10 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
           </CardHeader>
           <CardContent className="p-6">
             <div className="prose max-w-none">
-              <div className="whitespace-pre-wrap">{parseJobDescription(job.description)}</div>
+              <div 
+                className="text-gray-800" 
+                dangerouslySetInnerHTML={{ __html: parseJobDescription(job.description) }}
+              />
             </div>
           </CardContent>
         </Card>
@@ -184,8 +224,20 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
                 </div>
               </li>
               
-              {job.schedule && job.schedule.length > 0 && (
+              {job.workLocation && (
                 <li className="flex items-start p-4 bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                  <Globe className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="block font-medium text-[#1a1e2d]">Work Location</span>
+                    <span className="text-gray-600">
+                      {job.workLocation.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                    </span>
+                  </div>
+                </li>
+              )}
+              
+              {job.schedule && job.schedule.length > 0 && (
+                <li className="flex items-start p-4 hover:bg-blue-50/50 transition-colors">
                   <Clock className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                   <div>
                     <span className="block font-medium text-[#1a1e2d]">Schedule</span>
@@ -201,7 +253,7 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
               )}
               
               {job.expectedHours && (
-                <li className="flex items-start p-4 hover:bg-blue-50/50 transition-colors">
+                <li className="flex items-start p-4 bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
                   <Clock className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                   <div>
                     <span className="block font-medium text-[#1a1e2d]">Hours</span>
@@ -212,7 +264,7 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
                 </li>
               )}
               
-              <li className="flex items-start p-4 bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+              <li className="flex items-start p-4 hover:bg-blue-50/50 transition-colors">
                 <Banknote className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                 <div>
                   <span className="block font-medium text-[#1a1e2d]">Salary</span>
@@ -229,7 +281,7 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
               </li>
               
               {job.numberOfOpenings && (
-                <li className="flex items-start p-4 hover:bg-blue-50/50 transition-colors">
+                <li className="flex items-start p-4 bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
                   <Users className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                   <div>
                     <span className="block font-medium text-[#1a1e2d]">Openings</span>
@@ -241,7 +293,7 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
               )}
               
               {job.plannedStartDate && (
-                <li className="flex items-start p-4 bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                <li className="flex items-start p-4 hover:bg-blue-50/50 transition-colors">
                   <Calendar className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                   <div>
                     <span className="block font-medium text-[#1a1e2d]">Start Date</span>
@@ -273,12 +325,46 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
                 </div>
               </li>
               
+              {job.resumeRequired !== undefined && (
+                <li className="flex items-start p-4 hover:bg-purple-50/50 transition-colors">
+                  <User className="mr-3 h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="block font-medium text-[#1a1e2d]">Resume Required</span>
+                    <Badge variant={job.resumeRequired ? "default" : "secondary"} className={`mt-1 ${job.resumeRequired ? 'bg-purple-100 text-purple-800 hover:bg-purple-200' : ''}`}>
+                      {job.resumeRequired ? 'Yes' : 'No'}
+                    </Badge>
+                  </div>
+                </li>
+              )}
+              
+              {job.allowCandidateContact !== undefined && (
+                <li className="flex items-start p-4 bg-purple-50/30 hover:bg-purple-50/50 transition-colors">
+                  <User className="mr-3 h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="block font-medium text-[#1a1e2d]">Allow Candidate Contact</span>
+                    <Badge variant={job.allowCandidateContact ? "default" : "secondary"} className={`mt-1 ${job.allowCandidateContact ? 'bg-purple-100 text-purple-800 hover:bg-purple-200' : ''}`}>
+                      {job.allowCandidateContact ? 'Yes' : 'No'}
+                    </Badge>
+                  </div>
+                </li>
+              )}
+              
               {job.applicationDeadline && (
                 <li className="flex items-start p-4 hover:bg-purple-50/50 transition-colors">
                   <Calendar className="mr-3 h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <span className="block font-medium text-[#1a1e2d]">Application Deadline</span>
                     <span className="text-gray-600">{formatDate(job.applicationDeadline)}</span>
+                  </div>
+                </li>
+              )}
+              
+              {job.applicationInstructions && (
+                <li className="flex items-start p-4 bg-purple-50/30 hover:bg-purple-50/50 transition-colors">
+                  <User className="mr-3 h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="block font-medium text-[#1a1e2d]">Application Instructions</span>
+                    <div className="text-gray-600 mt-1 whitespace-pre-wrap">{job.applicationInstructions}</div>
                   </div>
                 </li>
               )}
@@ -302,39 +388,57 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
           </CardContent>
         </Card>
         
-        {/* Supplementary info */}
-        {(job.supplementalPay?.length > 0 || job.benefits?.length > 0) && (
-          <Card className="overflow-hidden shadow-[0_8px_32px_rgba(31,38,135,0.1)] bg-background/80 backdrop-blur-md border-[rgba(255,255,255,0.3)] rounded-2xl">
-            <CardHeader className="border-b bg-gray-50/50">
-              <CardTitle>Benefits & Pay</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ul className="divide-y">
-                {job.benefits && job.benefits.length > 0 && (
-                  <li className="p-4 hover:bg-green-50/30 transition-colors">
-                    <h3 className="font-medium mb-2 text-[#1a1e2d]">Benefits:</h3>
-                    <ul className="list-disc pl-5 space-y-1 text-gray-600">
-                      {job.benefits.map((benefit: string, index: number) => (
-                        <li key={index}>{benefit}</li>
-                      ))}
-                    </ul>
-                  </li>
-                )}
-                
-                {job.supplementalPay && job.supplementalPay.length > 0 && (
-                  <li className="p-4 bg-green-50/30 hover:bg-green-50/40 transition-colors">
-                    <h3 className="font-medium mb-2 text-[#1a1e2d]">Supplemental Pay:</h3>
-                    <ul className="list-disc pl-5 space-y-1 text-gray-600">
-                      {job.supplementalPay.map((pay: string, index: number) => (
-                        <li key={index}>{pay}</li>
-                      ))}
-                    </ul>
-                  </li>
-                )}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
+        {/* Benefits & Pay */}
+        <Card className="overflow-hidden shadow-[0_8px_32px_rgba(31,38,135,0.1)] bg-background/80 backdrop-blur-md border-[rgba(255,255,255,0.3)] rounded-2xl">
+          <CardHeader className="border-b bg-green-50/70">
+            <CardTitle className="flex items-center">
+              <Banknote className="mr-2 h-5 w-5 text-green-600" />
+              Benefits & Pay
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <ul className="divide-y">
+              {job.benefits && job.benefits.length > 0 && (
+                <li className="p-5 hover:bg-green-50/30 transition-colors">
+                  <h3 className="font-medium mb-3 text-[#1a1e2d] flex items-center">
+                    <Award className="mr-2 h-4 w-4 text-green-600" />
+                    Benefits
+                  </h3>
+                  <div className="flex flex-wrap gap-2 ml-1">
+                    {job.benefits.map((benefit: string, index: number) => (
+                      <Badge key={index} variant="outline" className="bg-green-50 text-green-700 border-green-200 py-1.5">
+                        {benefit}
+                      </Badge>
+                    ))}
+                  </div>
+                </li>
+              )}
+              
+              {job.supplementalPay && job.supplementalPay.length > 0 && (
+                <li className="p-5 bg-green-50/20 hover:bg-green-50/40 transition-colors">
+                  <h3 className="font-medium mb-3 text-[#1a1e2d] flex items-center">
+                    <Banknote className="mr-2 h-4 w-4 text-green-600" />
+                    Supplemental Pay
+                  </h3>
+                  <div className="flex flex-wrap gap-2 ml-1">
+                    {job.supplementalPay.map((pay: string, index: number) => (
+                      <Badge key={index} variant="outline" className="bg-green-50 text-green-700 border-green-200 py-1.5">
+                        {pay}
+                      </Badge>
+                    ))}
+                  </div>
+                </li>
+              )}
+              
+              {(!job.benefits || job.benefits.length === 0) && 
+               (!job.supplementalPay || job.supplementalPay.length === 0) && (
+                <li className="p-5 text-center text-gray-500 italic">
+                  No benefits or supplemental pay information provided
+                </li>
+              )}
+            </ul>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

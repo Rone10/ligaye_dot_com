@@ -141,6 +141,9 @@ export async function insertNewJob(
       // Process date fields to ensure they're valid Date objects
       const processedJobData = {
         ...jobData,
+        // Ensure benefits and supplementalPay are arrays or default to empty arrays
+        benefits: Array.isArray(jobData.benefits) ? jobData.benefits : [],
+        supplementalPay: Array.isArray(jobData.supplementalPay) ? jobData.supplementalPay : [],
         // Ensure all date fields are properly formatted as Date objects
         plannedStartDate: safeDate(jobData.plannedStartDate),
         applicationDeadline: safeDate(jobData.applicationDeadline),
