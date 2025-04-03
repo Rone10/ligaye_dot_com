@@ -97,24 +97,24 @@ export default function JobHeader({ job, applicationsCount }: JobHeaderProps) {
           </Badge>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3 text-sm text-[#9aa3bc]">
+        <div className="flex flex-wrap items-center gap-3 text-sm bg-gray-50/70 p-2.5 rounded-lg border border-gray-100 shadow-sm">
           {job.publishedAt && (
-            <div className="flex items-center">
-              <Calendar className="mr-1 h-4 w-4" />
-              <span>Posted: {formatDate(job.publishedAt)}</span>
+            <div className="flex items-center px-2.5 py-1 rounded-full bg-white border border-gray-200">
+              <Calendar className="mr-1.5 h-4 w-4 text-[#4a6cfa]" />
+              <span className="font-medium">Posted: {formatDate(job.publishedAt)}</span>
             </div>
           )}
           
           {job.expiresAt && (
-            <div className="flex items-center">
-              <Clock className="mr-1 h-4 w-4" />
-              <span>Expires: {formatDate(job.expiresAt)}</span>
+            <div className="flex items-center px-2.5 py-1 rounded-full bg-white border border-gray-200">
+              <Clock className="mr-1.5 h-4 w-4 text-[#4a6cfa]" />
+              <span className="font-medium">Expires: {formatDate(job.expiresAt)}</span>
             </div>
           )}
           
-          <div className="flex items-center">
-            <Users className="mr-1 h-4 w-4" />
-            <span>{applicationsCount} Applications</span>
+          <div className="flex items-center px-2.5 py-1 rounded-full bg-white border border-gray-200">
+            <Users className="mr-1.5 h-4 w-4 text-[#4a6cfa]" />
+            <span className="font-medium">{applicationsCount} Applications</span>
           </div>
         </div>
       </div>

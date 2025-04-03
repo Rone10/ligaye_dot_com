@@ -50,6 +50,20 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
     job.workLocation === 'REMOTE' ? 'Remote' : 
     job.workLocation === 'HYBRID' ? `Hybrid - ${formatLocation()}` : 
     formatLocation()
+    
+  // Parse HTML and extract text content
+  const parseJobDescription = (description: string) => {
+    if (!description) return '';
+    
+    // Simple HTML tag removal, preserving line breaks
+    return description
+      .replace(/<[^>]*>/g, '') // Remove all HTML tags
+      .replace(/&lt;/g, '<')    // Replace HTML entities
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'");
+  };
   
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -61,7 +75,7 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
           </CardHeader>
           <CardContent className="p-6">
             <div className="prose max-w-none">
-              <div className="whitespace-pre-wrap">{job.description}</div>
+              <div className="whitespace-pre-wrap">{parseJobDescription(job.description)}</div>
             </div>
           </CardContent>
         </Card>
@@ -76,7 +90,7 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
             {job.educationRequirements && job.educationRequirements.length > 0 && (
               <div className="py-4 first:pt-0 last:pb-0">
                 <h3 className="text-lg font-medium flex items-center mb-3">
-                  <GraduationCap className="mr-2 h-5 w-5 text-[#4a6cfa]" />
+                  <GraduationCap className="mr-2.5 h-5 w-5 text-[#4a6cfa]" />
                   Education
                 </h3>
                 <ul className="list-disc pl-10 space-y-1">
@@ -91,7 +105,7 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
             {job.experienceRequirements && job.experienceRequirements.length > 0 && (
               <div className="py-4 first:pt-0 last:pb-0">
                 <h3 className="text-lg font-medium flex items-center mb-3">
-                  <Briefcase className="mr-2 h-5 w-5 text-[#4a6cfa]" />
+                  <Briefcase className="mr-2.5 h-5 w-5 text-[#4a6cfa]" />
                   Experience
                 </h3>
                 {job.experienceLevel && (
@@ -111,12 +125,12 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
             {skills.length > 0 && (
               <div className="py-4 first:pt-0 last:pb-0">
                 <h3 className="text-lg font-medium flex items-center mb-3">
-                  <Award className="mr-2 h-5 w-5 text-[#4a6cfa]" />
+                  <Award className="mr-2.5 h-5 w-5 text-[#4a6cfa]" />
                   Skills
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {skills.map(skill => (
-                    <Badge key={skill.id} variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                    <Badge key={skill.id} variant="outline" className="bg-blue-50 text-blue-800 border-blue-200 py-1.5">
                       {skill.name}
                     </Badge>
                   ))}
@@ -128,7 +142,7 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
             {job.languageRequirements && job.languageRequirements.length > 0 && (
               <div className="py-4 first:pt-0 last:pb-0">
                 <h3 className="text-lg font-medium flex items-center mb-3">
-                  <Languages className="mr-2 h-5 w-5 text-[#4a6cfa]" />
+                  <Languages className="mr-2.5 h-5 w-5 text-[#4a6cfa]" />
                   Language Requirements
                 </h3>
                 <ul className="list-disc pl-10 space-y-1">
@@ -154,27 +168,27 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
           </CardHeader>
           <CardContent className="p-0">
             <ul className="divide-y">
-              <li className="flex items-start p-4">
-                <MapPin className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5" />
+              <li className="flex items-start p-4 bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                <MapPin className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                 <div>
-                  <span className="block font-medium">Location</span>
+                  <span className="block font-medium text-[#1a1e2d]">Location</span>
                   <span className="text-gray-600">{locationDisplay}</span>
                 </div>
               </li>
               
-              <li className="flex items-start p-4">
-                <Briefcase className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5" />
+              <li className="flex items-start p-4 hover:bg-blue-50/50 transition-colors">
+                <Briefcase className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                 <div>
-                  <span className="block font-medium">Job Type</span>
+                  <span className="block font-medium text-[#1a1e2d]">Job Type</span>
                   <span className="text-gray-600">{formatWorkType(job.jobType)}</span>
                 </div>
               </li>
               
               {job.schedule && job.schedule.length > 0 && (
-                <li className="flex items-start p-4">
-                  <Clock className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5" />
+                <li className="flex items-start p-4 bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                  <Clock className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                   <div>
-                    <span className="block font-medium">Schedule</span>
+                    <span className="block font-medium text-[#1a1e2d]">Schedule</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {job.schedule.map((schedule: string, index: number) => (
                         <Badge key={index} variant="outline" className="bg-gray-50">
@@ -187,10 +201,10 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
               )}
               
               {job.expectedHours && (
-                <li className="flex items-start p-4">
-                  <Clock className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5" />
+                <li className="flex items-start p-4 hover:bg-blue-50/50 transition-colors">
+                  <Clock className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                   <div>
-                    <span className="block font-medium">Hours</span>
+                    <span className="block font-medium text-[#1a1e2d]">Hours</span>
                     <span className="text-gray-600">
                       {job.expectedHours} hours {job.hoursType ? `(${job.hoursType.toLowerCase()})` : ''}
                     </span>
@@ -198,10 +212,10 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
                 </li>
               )}
               
-              <li className="flex items-start p-4">
-                <Banknote className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5" />
+              <li className="flex items-start p-4 bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                <Banknote className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                 <div>
-                  <span className="block font-medium">Salary</span>
+                  <span className="block font-medium text-[#1a1e2d]">Salary</span>
                   <span className="text-gray-600">
                     {formatSalary(
                       job.salaryRangeMin, 
@@ -215,10 +229,10 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
               </li>
               
               {job.numberOfOpenings && (
-                <li className="flex items-start p-4">
-                  <Users className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5" />
+                <li className="flex items-start p-4 hover:bg-blue-50/50 transition-colors">
+                  <Users className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                   <div>
-                    <span className="block font-medium">Openings</span>
+                    <span className="block font-medium text-[#1a1e2d]">Openings</span>
                     <span className="text-gray-600">
                       {job.numberOfOpenings} {job.numberOfOpenings === 1 ? 'position' : 'positions'}
                     </span>
@@ -227,10 +241,10 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
               )}
               
               {job.plannedStartDate && (
-                <li className="flex items-start p-4">
-                  <Calendar className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5" />
+                <li className="flex items-start p-4 bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                  <Calendar className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                   <div>
-                    <span className="block font-medium">Start Date</span>
+                    <span className="block font-medium text-[#1a1e2d]">Start Date</span>
                     <span className="text-gray-600">{formatDate(job.plannedStartDate)}</span>
                   </div>
                 </li>
@@ -246,10 +260,10 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
           </CardHeader>
           <CardContent className="p-0">
             <ul className="divide-y">
-              <li className="flex items-start p-4">
-                <Workflow className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5" />
+              <li className="flex items-start p-4 bg-purple-50/30 hover:bg-purple-50/50 transition-colors">
+                <Workflow className="mr-3 h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <span className="block font-medium">Apply Via</span>
+                  <span className="block font-medium text-[#1a1e2d]">Apply Via</span>
                   <span className="text-gray-600">
                     {job.applicationMethod === 'PLATFORM' ? 'Ligaye.com Platform' :
                      job.applicationMethod === 'EMAIL' ? `Email: ${job.applicationEmail}` :
@@ -260,23 +274,23 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
               </li>
               
               {job.applicationDeadline && (
-                <li className="flex items-start p-4">
-                  <Calendar className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5" />
+                <li className="flex items-start p-4 hover:bg-purple-50/50 transition-colors">
+                  <Calendar className="mr-3 h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <span className="block font-medium">Application Deadline</span>
+                    <span className="block font-medium text-[#1a1e2d]">Application Deadline</span>
                     <span className="text-gray-600">{formatDate(job.applicationDeadline)}</span>
                   </div>
                 </li>
               )}
               
               {industries.length > 0 && (
-                <li className="flex items-start p-4">
-                  <Building className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5" />
+                <li className="flex items-start p-4 bg-purple-50/30 hover:bg-purple-50/50 transition-colors">
+                  <Building className="mr-3 h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <span className="block font-medium">Industries</span>
+                    <span className="block font-medium text-[#1a1e2d]">Industries</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {industries.map(industry => (
-                        <Badge key={industry.id} variant="outline" className="bg-gray-50">
+                        <Badge key={industry.id} variant="outline" className="bg-purple-50 text-purple-800 border-purple-200 py-1">
                           {industry.name}
                         </Badge>
                       ))}
@@ -297,9 +311,9 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
             <CardContent className="p-0">
               <ul className="divide-y">
                 {job.benefits && job.benefits.length > 0 && (
-                  <li className="p-4">
-                    <h3 className="font-medium mb-2">Benefits:</h3>
-                    <ul className="list-disc pl-5 space-y-1">
+                  <li className="p-4 hover:bg-green-50/30 transition-colors">
+                    <h3 className="font-medium mb-2 text-[#1a1e2d]">Benefits:</h3>
+                    <ul className="list-disc pl-5 space-y-1 text-gray-600">
                       {job.benefits.map((benefit: string, index: number) => (
                         <li key={index}>{benefit}</li>
                       ))}
@@ -308,9 +322,9 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
                 )}
                 
                 {job.supplementalPay && job.supplementalPay.length > 0 && (
-                  <li className="p-4">
-                    <h3 className="font-medium mb-2">Supplemental Pay:</h3>
-                    <ul className="list-disc pl-5 space-y-1">
+                  <li className="p-4 bg-green-50/30 hover:bg-green-50/40 transition-colors">
+                    <h3 className="font-medium mb-2 text-[#1a1e2d]">Supplemental Pay:</h3>
+                    <ul className="list-disc pl-5 space-y-1 text-gray-600">
                       {job.supplementalPay.map((pay: string, index: number) => (
                         <li key={index}>{pay}</li>
                       ))}
