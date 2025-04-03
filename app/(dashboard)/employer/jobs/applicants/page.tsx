@@ -262,7 +262,7 @@ export default function EmployerApplicationsPage() {
         {/* Enhanced search and filters section */}
         <div className="p-4">
           <div className="flex flex-col md:flex-row gap-3">
-            <form className="relative flex-1 w-full" action="/employer/jobs/applicants" method="GET">
+            <form className="relative  flex-1 w-full" action="/employer/jobs/applicants" method="GET">
               <input type="hidden" name="status" value={filters.status} />
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 text-gray-400" />
