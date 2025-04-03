@@ -200,6 +200,9 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
+      drizzle-kit:
+        specifier: ^0.30.5
+        version: 0.30.5
       drizzle-orm:
         specifier: ^0.40.0
         version: 0.40.0(gel@2.0.0)(kysely@0.27.5)(postgres@3.4.5)
@@ -275,6 +278,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.3.3)
+      tsx:
+        specifier: ^4.19.3
+        version: 4.19.3
       typescript:
         specifier: 5.2.2
         version: 5.2.2
@@ -287,13 +293,6 @@ importers:
       zod:
         specifier: ^3.24.2
         version: 3.24.2
-    devDependencies:
-      drizzle-kit:
-        specifier: ^0.30.5
-        version: 0.30.5
-      tsx:
-        specifier: ^4.19.3
-        version: 4.19.3
 
 packages:
 
