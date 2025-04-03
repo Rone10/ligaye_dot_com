@@ -1,57 +1,64 @@
-import { notFound } from 'next/navigation';
-import { getPageDataAction } from './_actions';
-import { EditJobForm } from './_components/EditJobForm';
-import { Suspense } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { getUser } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import EditJobForm from './_components/EditJobForm'
+import { 
+  getEmployerProfile, 
+  getAllLocations, 
+  getJobById,
+  checkJobOwnership,
+  getJobSkills,
+  getJobIndustries
+} from './_queries'
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
+export default async function EditJobPage({ params }: { params: Promise<{ id: string }> }) {
+  // Get job ID from params
+  const { id: jobId } = await params
+  
+  // Fetch current user
+  const user = await getUser()
 
-function EditJobFormSkeleton() {
-  return (
-    <div className="space-y-8">
-      <Skeleton className="h-10 w-3/4" />
-      <Skeleton className="h-32 w-full" />
-      <Skeleton className="h-10 w-1/4" />
-      <Skeleton className="h-10 w-1/2" />
-      <Skeleton className="h-10 w-24" />
-    </div>
-  );
-}
-
-export default async function EditJobPage({ params }: PageProps) {
-  console.log('--- EditJobPage Start ---');
-  const jobId = (await params).id;
-  console.log('Job ID from params:', jobId);
-
-  // Call the server action to get page data and perform authorization
-  const { job, formData, error } = await getPageDataAction(jobId);
-
-  // Check if the action returned an error (unauthorized, not found, etc.)
-  if (error || !job || !formData) {
-    console.log(`Action returned error or missing data: ${error || 'Data missing'}. Triggering 404.`);
-    notFound();
+  if (!user) {
+    redirect('/sign-in')
   }
 
-  console.log('Action successful. Fetched Job:', { id: job.id, title: job.title });
-  console.log('Action successful. Fetched FormData:', { locations: !!formData.locations, industries: !!formData.industries, skills: !!formData.skills });
-
-  // Destructure form data - ensured not null by the check above
-  const { locations, industries, skills } = formData;
-
-  console.log('--- Rendering EditJobForm ---');
+  // Check if user is employer
+  const employerProfile = await getEmployerProfile(user.id)
+  
+  if (!employerProfile) {
+    redirect('/employer/profile')
+  }
+  
+  // Get the job to edit
+  const job = await getJobById(jobId)
+  
+  if (!job) {
+    redirect('/employer/jobs?error=job-not-found')
+  }
+  
+  // Check if the job belongs to this employer
+  const isOwner = await checkJobOwnership(jobId, employerProfile.id)
+  
+  if (!isOwner) {
+    redirect('/employer/jobs?error=unauthorized')
+  }
+  
+  // Fetch locations for the job posting form
+  const locations = await getAllLocations()
+  
+  // Fetch job skills and industries
+  const jobSkills = await getJobSkills(jobId)
+  const jobIndustries = await getJobIndustries(jobId)
+  
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold mb-6">Edit Job Posting</h1>
-      <Suspense fallback={<EditJobFormSkeleton />}>
-        <EditJobForm
-          job={job}
-          locations={locations}
-          industries={industries}
-          skills={skills}
-        />
-      </Suspense>
+    <div className="container max-w-4xl py-10 mx-auto">
+      <h1 className="text-2xl md:text-3xl font-semibold mb-2 text-[#1a1e2d]">Edit Job</h1>
+      <p className="text-[#9aa3bc] mb-8">Update your job posting</p>
+      <EditJobForm 
+        job={job} 
+        jobSkills={jobSkills} 
+        jobIndustries={jobIndustries} 
+        locations={locations} 
+      />
     </div>
-  );
+  )
 } 

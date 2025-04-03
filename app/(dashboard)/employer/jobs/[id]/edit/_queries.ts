@@ -1,261 +1,302 @@
-'use server';
+'use server'
 
-import { db } from '@/lib/db';
-import {
-  jobs,
-  locations,
-  industries,
-  skills,
-  jobSkills,
-  jobIndustries,
-  employerProfiles,
+import { db } from '@/lib/db'
+import { 
   profiles,
-  type Job, // Import base type
-  type Location,
-  type Industry,
-  type Skill,
-} from '@/lib/db/schema';
-import { and, eq, desc, inArray } from 'drizzle-orm';
-import { unstable_noStore as noStore } from 'next/cache';
-import { alias } from 'drizzle-orm/pg-core';
+  employerProfiles, 
+  jobs, 
+  jobSkills, 
+  jobIndustries,
+  skills,
+  industries,
+  locations
+} from '@/lib/db/schema'
+import { eq, and, inArray } from 'drizzle-orm'
+import type { NewJob, NewJobSkill, NewJobIndustry, Job } from '@/lib/db/schema'
 
-// --- Type Definitions ---
-
-// Type for the data needed by the form dropdowns/selectors
-export interface JobFormData {
-  locations: Pick<Location, 'id' | 'region' | 'city'>[];
-  industries: Pick<Industry, 'id' | 'name'>[];
-  skills: Pick<Skill, 'id' | 'name'>[];
-}
-
-// Type for the job data needed specifically for the edit form
-// Includes base job fields plus IDs of related skills and industries
-export type JobForEditing = Omit<Job, 'createdAt' | 'updatedAt' | 'publishedAt' | 'expiresAt' | 'slug'> & {
-  skillIds: string[];
-  industryIds: string[];
-};
-
-// --- Query Functions ---
-
-/**
- * Fetches the job details for editing, ensuring the requesting user owns the job.
- */
-export async function getJobForEditing(jobId: string, authUserId: string): Promise<JobForEditing | null> {
-  noStore();
-  console.log(`Fetching job ${jobId} for editing by auth user ${authUserId}`);
-
+// Get employer profile for a user
+export async function getEmployerProfile(userId: string) {
   try {
-    // Need to verify that the authUserId corresponds to the employer who owns the job.
-    // profiles.userId (auth) -> profiles.id -> employerProfiles.profileId -> employerProfiles.id -> jobs.companyId
-
-    const jobData = await db().query.jobs.findFirst({
-      where: eq(jobs.id, jobId),
-      with: {
-        // Eager load related skill and industry IDs
-        jobSkills: { columns: { skillId: true } },
-        jobIndustries: { columns: { industryId: true } },
-        // Load company profile to check ownership link
-        company: {
-          columns: { id: true },
-          with: {
-            profile: { // Link employer profile back to base profile
-              columns: { userId: true } // Get the auth user ID
-            }
-          }
-        }
-      }
-    });
-
-    if (!jobData) {
-      console.log(`Job ${jobId} not found.`);
-      return null;
-    }
-
-    // Ownership check: Ensure the job's company profile links back to the authenticated user
-    if (jobData.company?.profile?.userId !== authUserId) {
-      console.warn(`Ownership check failed: Job ${jobId} owner (${jobData.company?.profile?.userId}) does not match requesting user (${authUserId}).`);
-      return null;
-    }
-
-    // Map the fetched data to the JobForEditing type
-    const jobForEditing: JobForEditing = {
-      ...jobData,
-      // Extract just the IDs from the loaded relations
-      skillIds: jobData.jobSkills.map(js => js.skillId),
-      industryIds: jobData.jobIndustries.map(ji => ji.industryId),
-    };
-
-    // Remove relational data included by `with` that isn't part of JobForEditing type
-    delete (jobForEditing as any).jobSkills;
-    delete (jobForEditing as any).jobIndustries;
-    delete (jobForEditing as any).company;
-
-    console.log(`Successfully fetched job ${jobId} for editing.`);
-    return jobForEditing;
-
+    const result = await db()
+      .select()
+      .from(employerProfiles)
+      .innerJoin(
+        profiles, 
+        and(
+          eq(profiles.id, employerProfiles.profileId),
+          eq(profiles.userId, userId),
+          eq(profiles.deleted, false)
+        )
+      )
+      .where(eq(employerProfiles.deleted, false))
+      .limit(1)
+    
+    return result.length > 0 ? result[0].employer_profiles : null
   } catch (error) {
-    console.error(`Error fetching job ${jobId} for editing:`, error);
-    // Optionally re-throw or handle specific errors
-    throw new Error('Failed to fetch job details for editing.');
+    console.error('Error getting employer profile:', error)
+    return null
   }
 }
 
-/**
- * Fetches static data required for the job editing form (e.g., dropdown options).
- */
-export async function getFormData(): Promise<JobFormData> {
-  noStore();
-  console.log('Fetching form data (locations, industries, skills)');
-
+// Get job by ID
+export async function getJobById(jobId: string) {
   try {
-    const [locationsData, industriesData, skillsData] = await Promise.all([
-      db().select({
-        id: locations.id,
-        region: locations.region,
-        city: locations.city
-      }).from(locations).where(eq(locations.deleted, false)).orderBy(locations.region, locations.city),
+    const result = await db()
+      .select()
+      .from(jobs)
+      .where(and(
+        eq(jobs.id, jobId),
+        eq(jobs.status, 'ACTIVE') // Only get active jobs
+      ))
+      .limit(1)
+    
+    return result.length > 0 ? result[0] : null
+  } catch (error) {
+    console.error('Error getting job:', error)
+    return null
+  }
+}
 
-      db().select({
-        id: industries.id,
-        name: industries.name
-      }).from(industries).where(eq(industries.deleted, false)).orderBy(industries.name),
+// Check if job belongs to employer
+export async function checkJobOwnership(jobId: string, employerProfileId: string) {
+  try {
+    const result = await db()
+      .select({
+        id: jobs.id
+      })
+      .from(jobs)
+      .where(and(
+        eq(jobs.id, jobId),
+        eq(jobs.companyId, employerProfileId)
+      ))
+      .limit(1)
+    
+    return result.length > 0
+  } catch (error) {
+    console.error('Error checking job ownership:', error)
+    return false
+  }
+}
 
-      db().select({
+// Get job skills
+export async function getJobSkills(jobId: string) {
+  try {
+    const result = await db()
+      .select({
         id: skills.id,
         name: skills.name
-      }).from(skills).where(eq(skills.deleted, false)).orderBy(skills.name)
-    ]);
-
-    console.log('Successfully fetched form data.');
-    return {
-      locations: locationsData,
-      industries: industriesData,
-      skills: skillsData
-    };
+      })
+      .from(jobSkills)
+      .innerJoin(skills, eq(jobSkills.skillId, skills.id))
+      .where(and(
+        eq(jobSkills.jobId, jobId),
+        eq(jobSkills.deleted, false)
+      ))
+    
+    return result
   } catch (error) {
-    console.error('Error fetching form data:', error);
-    throw new Error('Failed to fetch form data.');
+    console.error('Error getting job skills:', error)
+    return []
   }
 }
 
-/**
- * Updates the job in the database, including related skills and industries.
- * Ensures the user owns the job they are trying to update.
- */
-// Define the expected shape of the update data (adjust based on your Zod schema in EditJobForm)
-// This should include fields from the `jobs` table plus `skillIds` and `industryIds` arrays
-// Make sure all fields from the form are included here
-type UpdateJobData = Partial<Omit<Job, 'id' | 'companyId' | 'createdAt' | 'updatedAt' | 'slug' | 'publishedAt' | 'expiresAt'>> & {
-  skillIds?: string[];
-  industryIds?: string[];
-};
-
-export async function updateJobQuery(jobId: string, data: UpdateJobData, authUserId: string): Promise<void> {
-  console.log(`Executing updateJobQuery for job ${jobId} by auth user ${authUserId}`);
-  // console.log('Data received for update:', data); // Be careful logging sensitive data
-
+// Get job industries
+export async function getJobIndustries(jobId: string) {
   try {
-    await db().transaction(async (tx) => {
-      // 1. Verify Ownership Again (Defense in Depth)
-      const jobOwnerCheck = await tx.query.jobs.findFirst({
-        columns: { id: true },
-        where: eq(jobs.id, jobId),
-        with: {
-          company: {
-            columns: { id: true },
-            with: {
-              profile: { columns: { userId: true } }
-            }
+    const result = await db()
+      .select({
+        id: industries.id,
+        name: industries.name
+      })
+      .from(jobIndustries)
+      .innerJoin(industries, eq(jobIndustries.industryId, industries.id))
+      .where(and(
+        eq(jobIndustries.jobId, jobId),
+        eq(jobIndustries.deleted, false)
+      ))
+    
+    return result
+  } catch (error) {
+    console.error('Error getting job industries:', error)
+    return []
+  }
+}
+
+// Get all locations from database
+export async function getAllLocations() {
+  try {
+    return await db()
+      .select({
+        id: locations.id,
+        region: locations.region,
+        district: locations.district,
+        city: locations.city
+      })
+      .from(locations)
+      .where(eq(locations.deleted, false))
+      .orderBy(locations.region, locations.city)
+  } catch (error) {
+    console.error('Error fetching locations:', error)
+    return []
+  }
+}
+
+// Get all skills from database
+export async function getAllSkills() {
+  try {
+    return await db()
+      .select({
+        id: skills.id,
+        name: skills.name
+      })
+      .from(skills)
+      .where(eq(skills.deleted, false))
+      .orderBy(skills.name)
+  } catch (error) {
+    console.error('Error fetching skills:', error)
+    return []
+  }
+}
+
+// Get all industries from database
+export async function getAllIndustries() {
+  try {
+    return await db()
+      .select({
+        id: industries.id,
+        name: industries.name
+      })
+      .from(industries)
+      .where(eq(industries.deleted, false))
+      .orderBy(industries.name)
+  } catch (error) {
+    console.error('Error fetching industries:', error)
+    return []
+  }
+}
+
+// Update job with related skills and industries
+export async function updateJob(
+  jobId: string,
+  jobData: Partial<Job>,
+  skillIds: string[],
+  industryIds: string[]
+) {
+  try {
+    return await db().transaction(async (tx) => {
+      // Helper function to safely parse dates
+      const safeDate = (value: any): Date | undefined => {
+        if (!value) return undefined
+        
+        try {
+          if (value instanceof Date) {
+            // Verify it's a valid date by trying to convert to ISO string
+            value.toISOString()
+            return value
           }
+          
+          // If it's a string, try to create a new Date
+          const date = new Date(value)
+          // Validate the date is valid
+          date.toISOString()
+          return date
+        } catch (error) {
+          console.warn('Invalid date value:', value)
+          return undefined
         }
-      });
-
-      if (!jobOwnerCheck || jobOwnerCheck.company?.profile?.userId !== authUserId) {
-        console.warn(`Update rejected: Job ${jobId} not found or ownership check failed for user ${authUserId}.`);
-        throw new Error('Unauthorized or job not found.');
       }
-
-      console.log(`Ownership verified for job ${jobId}. Proceeding with update.`);
-
-      // 2. Separate Job Data from Relation IDs
-      const { skillIds: newSkillIds = [], industryIds: newIndustryIds = [], ...jobUpdateData } = data;
-
-      // 3. Update main Job Table
-      if (Object.keys(jobUpdateData).length > 0) {
-        await tx.update(jobs)
-          .set({ ...jobUpdateData, updatedAt: new Date() })
-          .where(eq(jobs.id, jobId));
-        console.log(`Updated main job table for ${jobId}`);
+      
+      // Process date fields to ensure they're valid Date objects
+      const processedJobData = {
+        ...jobData,
+        // Ensure all date fields are properly formatted as Date objects
+        plannedStartDate: safeDate(jobData.plannedStartDate),
+        applicationDeadline: safeDate(jobData.applicationDeadline),
+        updatedAt: new Date()
       }
-
-      // --- 4. Update Job Skills (Handle Add/Remove) ---
-      const currentJobSkills = await tx.select({ skillId: jobSkills.skillId })
+      
+      // Update the job
+      await tx
+        .update(jobs)
+        .set(processedJobData)
+        .where(eq(jobs.id, jobId))
+      
+      // Get current skills
+      const currentSkills = await tx
+        .select({ id: jobSkills.id, skillId: jobSkills.skillId })
         .from(jobSkills)
-        .where(and(eq(jobSkills.jobId, jobId), eq(jobSkills.deleted, false)));
-      const currentSkillIds = currentJobSkills.map(js => js.skillId);
-
-      const skillsToAdd = newSkillIds.filter(id => !currentSkillIds.includes(id));
-      const skillsToRemove = currentSkillIds.filter(id => !newSkillIds.includes(id));
-
+        .where(and(
+          eq(jobSkills.jobId, jobId),
+          eq(jobSkills.deleted, false)
+        ))
+      
+      const currentSkillIds = currentSkills.map(skill => skill.skillId)
+      const skillsToAdd = skillIds.filter(id => !currentSkillIds.includes(id))
+      const skillsToRemove = currentSkills.filter(skill => !skillIds.includes(skill.skillId))
+      
       // Add new skills
       if (skillsToAdd.length > 0) {
-        await tx.insert(jobSkills).values(skillsToAdd.map(skillId => ({
-          jobId: jobId,
-          skillId: skillId,
-          // createdAt will default
-        })));
-        console.log(`Added ${skillsToAdd.length} skills to job ${jobId}`);
+        const jobSkillsData = skillsToAdd.map(skillId => ({
+          jobId,
+          skillId,
+          deleted: false
+        }))
+        
+        await tx
+          .insert(jobSkills)
+          .values(jobSkillsData)
       }
-
-      // Soft-delete removed skills
+      
+      // Remove skills by marking as deleted
       if (skillsToRemove.length > 0) {
-        await tx.update(jobSkills)
+        const skillIdsToRemove = skillsToRemove.map(skill => skill.id)
+        
+        await tx
+          .update(jobSkills)
           .set({ deleted: true })
-          .where(and(
-            eq(jobSkills.jobId, jobId),
-            inArray(jobSkills.skillId, skillsToRemove)
-          ));
-        console.log(`Soft-deleted ${skillsToRemove.length} skills from job ${jobId}`);
+          .where(inArray(jobSkills.id, skillIdsToRemove))
       }
-
-      // --- 5. Update Job Industries (Handle Add/Remove) ---
-      const currentJobIndustries = await tx.select({ industryId: jobIndustries.industryId })
+      
+      // Get current industries
+      const currentIndustries = await tx
+        .select({ id: jobIndustries.id, industryId: jobIndustries.industryId })
         .from(jobIndustries)
-        .where(and(eq(jobIndustries.jobId, jobId), eq(jobIndustries.deleted, false)));
-      const currentIndustryIds = currentJobIndustries.map(ji => ji.industryId);
-
-      const industriesToAdd = newIndustryIds.filter(id => !currentIndustryIds.includes(id));
-      const industriesToRemove = currentIndustryIds.filter(id => !newIndustryIds.includes(id));
-
+        .where(and(
+          eq(jobIndustries.jobId, jobId),
+          eq(jobIndustries.deleted, false)
+        ))
+      
+      const currentIndustryIds = currentIndustries.map(industry => industry.industryId)
+      const industriesToAdd = industryIds.filter(id => !currentIndustryIds.includes(id))
+      const industriesToRemove = currentIndustries.filter(industry => !industryIds.includes(industry.industryId))
+      
       // Add new industries
       if (industriesToAdd.length > 0) {
-        await tx.insert(jobIndustries).values(industriesToAdd.map(industryId => ({
-          jobId: jobId,
-          industryId: industryId,
-        })));
-        console.log(`Added ${industriesToAdd.length} industries to job ${jobId}`);
+        const jobIndustriesData = industriesToAdd.map(industryId => ({
+          jobId,
+          industryId,
+          deleted: false
+        }))
+        
+        await tx
+          .insert(jobIndustries)
+          .values(jobIndustriesData)
       }
-
-      // Soft-delete removed industries
+      
+      // Remove industries by marking as deleted
       if (industriesToRemove.length > 0) {
-        await tx.update(jobIndustries)
+        const industryIdsToRemove = industriesToRemove.map(industry => industry.id)
+        
+        await tx
+          .update(jobIndustries)
           .set({ deleted: true })
-          .where(and(
-            eq(jobIndustries.jobId, jobId),
-            inArray(jobIndustries.industryId, industriesToRemove)
-          ));
-        console.log(`Soft-deleted ${industriesToRemove.length} industries from job ${jobId}`);
+          .where(inArray(jobIndustries.id, industryIdsToRemove))
       }
-
-      console.log(`Transaction successful for updating job ${jobId}.`);
-    }); // End transaction
-
+      
+      return { id: jobId }
+    })
   } catch (error) {
-    console.error(`Error updating job ${jobId} in transaction:`, error);
-    // Throw a more specific error or the original error
-    if (error instanceof Error && error.message === 'Unauthorized or job not found.') {
-        throw error; // Re-throw authorization error
-    }
-    throw new Error(`Failed to update job ${jobId}.`);
+    console.error('Error updating job:', error)
+    throw error
   }
 } 

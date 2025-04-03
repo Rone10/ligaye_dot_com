@@ -1,171 +1,93 @@
-'use client';
+'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { useState, useTransition } from 'react';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from 'sonner'; // Using sonner for notifications
-import { Loader2 } from 'lucide-react';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Form } from '@/components/ui/form'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { AlertCircle, ArrowLeft, ArrowRight } from 'lucide-react'
+import useJobForm from '../_hooks/useJobForm'
+import { updateJobPosting } from '../_actions'
+import BasicDetailsStep from './form-steps/BasicDetailsStep'
+import RequirementsStep from './form-steps/RequirementsStep'
+import CompensationStep from './form-steps/CompensationStep'
+import PostingSettingsStep from './form-steps/PostingSettingsStep'
+import type { Job } from '@/lib/db/schema'
 
-// TODO: Import the actual server action and types
-// import { updateJobAction } from '../_actions';
-// import type { JobForEditing, FormData } from '../_queries'; // Assuming types are defined there
-
-// Placeholder types - replace with imports
-type JobForEditing = any;
-type FormDataProps = { locations: any[], industries: any[], skills: any[] };
-
-// Define the Zod schema for form validation.
-// This should mirror the schema in _actions.ts initially.
-// TODO: Extract this to a shared `_utils/validation.ts` file within this route segment.
-const editJobFormSchema = z.object({
-  // Basic Info
-  title: z.string().min(5, { message: 'Job title must be at least 5 characters long.' }).max(100),
-  description: z.string().min(20, { message: 'Description must be at least 20 characters long.' }),
-  // ... Add all other fields from the `jobs` schema that should be editable
-  // E.g., locationId, workLocation, jobType, experienceLevel, salary info, etc.
-  // Ensure types match the database schema (string, number, enum, array etc.)
-  locationId: z.string().uuid().optional().nullable(), // Example: Optional location selection
-  // Add more fields here...
-});
-
-interface EditJobFormProps {
-  job: JobForEditing;
-  locations: FormDataProps['locations'];
-  industries: FormDataProps['industries'];
-  skills: FormDataProps['skills'];
+// Define Location interface
+interface Location {
+  id: string
+  region: string
+  district: string | null
+  city: string | null
 }
 
-export function EditJobForm({ job, locations, industries, skills }: EditJobFormProps) {
-  const [isPending, startTransition] = useTransition();
-  const [serverError, setServerError] = useState<string | null>(null);
+interface EditJobFormProps {
+  job: Job
+  jobSkills: { id: string; name: string }[]
+  jobIndustries: { id: string; name: string }[]
+  locations: Location[]
+}
 
-  // 1. Define your form.
-  const form = useForm<z.infer<typeof editJobFormSchema>>({
-    resolver: zodResolver(editJobFormSchema),
-    defaultValues: {
-      title: job?.title || '',
-      description: job?.description || '',
-      locationId: job?.locationId || null,
-      // ... map other `job` fields to form defaults
-    },
-  });
-
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof editJobFormSchema>) {
-    setServerError(null);
-    startTransition(async () => {
-      try {
-        console.log('Form submitted with values:', values);
-        // Placeholder for calling the server action
-        // const result = await updateJobAction(job.id, values);
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate server action
-        const result: { error?: string } | void = values.title.toLowerCase().includes('fail')
-            ? { error: 'Simulated action failure based on title.' }
-            : undefined;
-
-        if (result?.error) {
-          setServerError(result.error);
-          toast.error('Failed to update job', { description: result.error });
-        } else {
-          toast.success('Job updated successfully!');
-          // Optionally reset form or navigate, depending on desired UX
-          // form.reset(); // Reset form fields after successful submission
-        }
-      } catch (error: any) {
-        console.error('Error calling server action:', error);
-        const errorMessage = error.message || 'An unexpected error occurred.';
-        setServerError(errorMessage);
-        toast.error('Error updating job', { description: errorMessage });
+export default function EditJobForm({ job, jobSkills, jobIndustries, locations }: EditJobFormProps) {
+  const router = useRouter()
+  const { form, step, totalSteps, nextStep, prevStep, isSubmitting, setIsSubmitting } = useJobForm(job, jobSkills, jobIndustries)
+  const [error, setError] = useState<string | null>(null)
+  
+  const onSubmit = async (data: any) => {
+    try {
+      setIsSubmitting(true)
+      setError(null)
+      
+      const result = await updateJobPosting(job.id, data)
+      
+      if (result.error) {
+        setError(result.error)
+        return
       }
-    });
+      
+      // Redirect back to job details page after successful update
+      router.push(`/employer/jobs/${job.id}`)
+      router.refresh()
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.')
+      console.error(err)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
-
+  
   return (
-    <Card className="w-full max-w-3xl mx-auto">
-      <CardHeader>
-        <CardTitle>Edit Job Details</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* Basic Info Section */}          
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Job Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Senior Frontend Developer" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    A clear and concise title for the job.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Job Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Provide a detailed description of the role, responsibilities, and requirements..."
-                      className="min-h-[150px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Use markdown for formatting if needed.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* TODO: Add fields for all other editable properties */}
-            {/* Example: Location Select */}
-            {/* <FormField control={form.control} name="locationId" render={...} /> */}
-            {/* Example: Work Location Radio Group */}
-            {/* <FormField control={form.control} name="workLocation" render={...} /> */}
-            {/* Example: Job Type Select */}
-            {/* <FormField control={form.control} name="jobType" render={...} /> */}
-            {/* Example: Skills Multi-Select/Tags Input */}
-            {/* <FormField control={form.control} name="skillIds" render={...} /> */}
-            {/* ... etc. for all fields in the schema ... */}
-
-            {serverError && (
-              <p className="text-sm font-medium text-destructive">{serverError}</p>
-            )}
-
-            <Button type="submit" disabled={isPending} className="w-full md:w-auto">
-              {isPending ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
-              ) : (
-                'Save Changes'
-              )}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
+    <Card className="p-6 shadow-[0_8px_32px_rgba(31,38,135,0.1)] bg-background/80 backdrop-blur-md border-[rgba(255,255,255,0.3)] rounded-2xl">
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {step === 1 && <BasicDetailsStep form={form} onNext={nextStep} locations={locations} />}
+          {step === 2 && <RequirementsStep form={form} onNext={nextStep} onPrevious={prevStep} />}
+          {step === 3 && <CompensationStep form={form} onNext={nextStep} onPrevious={prevStep} />}
+          {step === 4 && <PostingSettingsStep form={form} onPrevious={prevStep} isSubmitting={isSubmitting} isEditing={true} />}
+          
+          <div className="pt-4">
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Step {step} of {totalSteps}</span>
+              <span>{Math.round((step / totalSteps) * 100)}% complete</span>
+            </div>
+            <div className="mt-2 h-2 w-full bg-secondary rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[#4a6cfa] transition-all duration-300" 
+                style={{ width: `${(step / totalSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        </form>
+      </Form>
     </Card>
-  );
+  )
 } 
