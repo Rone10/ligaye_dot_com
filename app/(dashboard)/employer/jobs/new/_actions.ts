@@ -6,21 +6,15 @@ import { getUser } from '@/lib/supabase/server'
 import { jobFormSchema } from './_utils/validation'
 import { 
   getEmployerProfile, 
-  insertNewJob 
+  insertNewJob,
+  calculateExpiryDate
 } from './_queries'
 import { db } from '@/lib/db'
-import { profiles, employerProfiles } from '@/lib/db/schema'
-import { jobStatusEnum } from '@/lib/db/schema'
+import { profiles, employerProfiles, jobStatusEnum, payments, jobs } from '@/lib/db/schema'
 import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
-
-// Helper to calculate expiresAt based on duration
-function calculateExpiryDate(durationMonths: number): Date {
-  const expiryDate = new Date()
-  expiryDate.setMonth(expiryDate.getMonth() + durationMonths)
-  return expiryDate
-}
+import { createStripeCheckoutSession } from '@/lib/stripe/stripe-actions'
 
 export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) {
   try {
@@ -59,7 +53,7 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
     }
     
     // Calculate expiry date based on duration
-    const expiresAt = calculateExpiryDate(validatedData.jobDuration)
+    const expiresAt = await calculateExpiryDate(validatedData.jobDuration)
     
     // Determine initial job status based on payment method
     const initialStatus = validatedData.paymentMethod === 'cash' 
@@ -88,15 +82,55 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
       validatedData.industryIds
     )
     
+    // Calculate payment amount (simple example: $50 per month)
+    const paymentAmount = validatedData.jobDuration * 5000 // $50 in cents per month
+    
     // Handle payment method
     if (validatedData.paymentMethod === 'stripe') {
-      // In a real app, we would create a Stripe payment session
-      // Mock for demo purposes
-      const stripePaymentUrl = `/employer/stripe-mock?jobId=${newJob.id}&amount=${validatedData.jobDuration * 100}`
-      return { jobId: newJob.id, paymentUrl: stripePaymentUrl }
+      try {
+        // Create a Stripe checkout session
+        const { sessionUrl } = await createStripeCheckoutSession({
+          jobId: newJob.id,
+          employerProfileId: result.employerProfileId,
+          paymentAmount,
+          currency: 'USD',
+          jobTitle: validatedData.title,
+          jobDuration: validatedData.jobDuration,
+          userId: user.id
+        });
+        
+        // Return the Stripe checkout URL for client-side redirect
+        return { jobId: newJob.id, paymentUrl: sessionUrl };
+      } catch (stripeError) {
+        console.error('Error creating Stripe checkout session:', stripeError);
+        
+        // If Stripe session creation fails, default to DRAFT status
+        await db()
+          .update(jobs)
+          .set({ status: 'DRAFT' })
+          .where(eq(jobs.id, newJob.id));
+          
+        return { error: 'Failed to create payment session. Your job has been saved as a draft.' };
+      }
     } else {
-      // Cash payment
-      // In a real app, we might create a payment record with 'pending' status
+      // Cash payment - create a payment record with 'pending' status
+      await db().insert(payments).values({
+        jobId: newJob.id,
+        employerProfileId: result.employerProfileId,
+        amount: paymentAmount,
+        currency: 'USD',
+        method: 'cash',
+        status: 'pending',
+        transactionId: null,
+        metadata: JSON.stringify({
+          jobTitle: validatedData.title,
+          duration: validatedData.jobDuration,
+          createdBy: user.id
+        }),
+        deleted: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
       
       // Redirect to job listing with pending status
       revalidatePath('/employer/jobs')

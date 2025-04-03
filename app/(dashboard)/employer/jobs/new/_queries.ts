@@ -91,6 +91,23 @@ export async function getAllIndustries() {
   }
 }
 
+// Helper to calculate expiresAt based on duration
+export async function calculateExpiryDate(durationMonths: number): Promise<Date> {
+  try {
+    const expiryDate = new Date()
+    expiryDate.setMonth(expiryDate.getMonth() + durationMonths)
+    // Validate date by checking if it can be converted to ISO string
+    expiryDate.toISOString()
+    return expiryDate
+  } catch (error) {
+    console.error('Invalid expiry date calculation:', error)
+    // Return a safe default (1 month from now)
+    const safeDate = new Date()
+    safeDate.setDate(safeDate.getDate() + 30)
+    return safeDate
+  }
+}
+
 // Insert a new job with related skills and industries
 export async function insertNewJob(
   jobData: Omit<NewJob, 'id' | 'createdAt' | 'updatedAt'>,
@@ -98,19 +115,52 @@ export async function insertNewJob(
   industryIds: string[]
 ) {
   try {
-    // Using a transaction to ensure all related records are created
     return await db().transaction(async (tx) => {
-      // Insert the job
+      // Helper function to safely parse dates
+      const safeDate = (value: any): Date | undefined => {
+        if (!value) return undefined
+        
+        try {
+          if (value instanceof Date) {
+            // Verify it's a valid date by trying to convert to ISO string
+            value.toISOString()
+            return value
+          }
+          
+          // If it's a string, try to create a new Date
+          const date = new Date(value)
+          // Validate the date is valid
+          date.toISOString()
+          return date
+        } catch (error) {
+          console.warn('Invalid date value:', value)
+          return undefined
+        }
+      }
+      
+      // Process date fields to ensure they're valid Date objects
+      const processedJobData = {
+        ...jobData,
+        // Ensure all date fields are properly formatted as Date objects
+        plannedStartDate: safeDate(jobData.plannedStartDate),
+        applicationDeadline: safeDate(jobData.applicationDeadline),
+        expiresAt: safeDate(jobData.expiresAt),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+      
+      // Insert the job first
       const [newJob] = await tx
         .insert(jobs)
-        .values(jobData)
-        .returning()
+        .values(processedJobData)
+        .returning({ id: jobs.id })
       
       // Insert job skills
       if (skillIds.length > 0) {
         const jobSkillsData: Omit<NewJobSkill, 'id' | 'createdAt'>[] = skillIds.map(skillId => ({
           jobId: newJob.id,
-          skillId
+          skillId,
+          deleted: false
         }))
         
         await tx
@@ -122,7 +172,8 @@ export async function insertNewJob(
       if (industryIds.length > 0) {
         const jobIndustriesData: Omit<NewJobIndustry, 'id' | 'createdAt' | 'updatedAt'>[] = industryIds.map(industryId => ({
           jobId: newJob.id,
-          industryId
+          industryId,
+          deleted: false
         }))
         
         await tx

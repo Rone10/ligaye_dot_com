@@ -7,7 +7,7 @@ export default async function NewJobPage() {
   const user = await getUser()
 
   if (!user) {
-    redirect('/login')
+    redirect('/sign-in')
   }
 
   // check if user is employer
