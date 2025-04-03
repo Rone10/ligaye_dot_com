@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { getEmployerDashboardData } from './_actions';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+export const dynamic = 'force-dynamic';
+
 export default async function EmployerDashboard() {
   const { data, error } = await getEmployerDashboardData();
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, ChangeEvent } from 'react'
+import { useState, useEffect, ChangeEvent, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getEmployerApplications, getApplicationCounts } from './_queries'
@@ -70,12 +70,12 @@ export default function EmployerApplicationsPage() {
     withdrawn: 0
   })
   
-  // Parse filters from search params
-  const filters = {
+  // Parse filters from search params and memoize to prevent unnecessary rerenders
+  const filters = useMemo(() => ({
     status: searchParams.get('status') || 'ALL',
     searchTerm: searchParams.get('q') || '',
     sort: (searchParams.get('sort') as 'newest' | 'oldest') || 'newest'
-  }
+  }), [searchParams]);
   
   useEffect(() => {
     async function checkAuth() {
@@ -130,7 +130,7 @@ export default function EmployerApplicationsPage() {
     }
     
     checkAuth()
-  }, [filters.status, filters.searchTerm, filters.sort, router, supabase])
+  }, [filters.status, filters.searchTerm, filters.sort, router, supabase, filters])
   
   const handleSortChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const newParams = new URLSearchParams(searchParams.toString())

@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Payments - Admin Dashboard',
   description: 'Review and manage payment transactions',
