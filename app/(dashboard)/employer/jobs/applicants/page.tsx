@@ -159,83 +159,169 @@ export default function EmployerApplicationsPage() {
         <p className="text-[#9aa3bc] mt-1">Manage and track candidates applying to your job postings</p>
       </div>
       
-      {/* Improved tabs with better styling */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-        <div className="overflow-x-auto">
-          <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
-            <Link href="/employer/jobs/applicants" 
-                className={`px-4 py-2 ${filters.status === 'ALL' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'} rounded-lg transition whitespace-nowrap`}>
-              All ({counts.all})
-            </Link>
-            <Link href="/employer/jobs/applicants?status=APPLIED" 
-                className={`px-4 py-2 ${filters.status === 'APPLIED' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'} rounded-lg transition whitespace-nowrap`}>
-              Applied ({counts.applied})
-            </Link>
-            <Link href="/employer/jobs/applicants?status=REVIEWING" 
-                className={`px-4 py-2 ${filters.status === 'REVIEWING' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'} rounded-lg transition whitespace-nowrap`}>
-              Reviewing ({counts.reviewing})
-            </Link>
-            <Link href="/employer/jobs/applicants?status=SHORTLISTED" 
-                className={`px-4 py-2 ${filters.status === 'SHORTLISTED' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'} rounded-lg transition whitespace-nowrap`}>
-              Shortlisted ({counts.shortlisted})
-            </Link>
-            <Link href="/employer/jobs/applicants?status=INTERVIEW_SCHEDULED" 
-                className={`px-4 py-2 ${filters.status === 'INTERVIEW_SCHEDULED' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'} rounded-lg transition whitespace-nowrap`}>
-              Interview ({counts.interview})
-            </Link>
-            <Link href="/employer/jobs/applicants?status=INTERVIEWED" 
-                className={`px-4 py-2 ${filters.status === 'INTERVIEWED' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'} rounded-lg transition whitespace-nowrap`}>
-              Interviewed ({counts.interviewed})
-            </Link>
-            <Link href="/employer/jobs/applicants?status=OFFER_EXTENDED" 
-                className={`px-4 py-2 ${filters.status === 'OFFER_EXTENDED' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'} rounded-lg transition whitespace-nowrap`}>
-              Offered ({counts.offered})
-            </Link>
-            <Link href="/employer/jobs/applicants?status=HIRED" 
-                className={`px-4 py-2 ${filters.status === 'HIRED' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'} rounded-lg transition whitespace-nowrap`}>
-              Hired ({counts.hired})
-            </Link>
-            <Link href="/employer/jobs/applicants?status=REJECTED" 
-                className={`px-4 py-2 ${filters.status === 'REJECTED' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'} rounded-lg transition whitespace-nowrap`}>
-              Rejected ({counts.rejected})
-            </Link>
-            <Link href="/employer/jobs/applicants?status=WITHDRAWN" 
-                className={`px-4 py-2 ${filters.status === 'WITHDRAWN' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'} rounded-lg transition whitespace-nowrap`}>
-              Withdrawn ({counts.withdrawn})
-            </Link>
+      {/* Redesigned filter section with better styling */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+        {/* Status tabs with scrollable container */}
+        <div className="border-b border-gray-100">
+          <div className="px-4 py-3">
+            <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
+              <Link href="/employer/jobs/applicants" 
+                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                    filters.status === 'ALL' 
+                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                  }`}>
+                <span>All</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.all}</span>
+              </Link>
+              <Link href="/employer/jobs/applicants?status=APPLIED" 
+                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                    filters.status === 'APPLIED' 
+                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                  }`}>
+                <span>Applied</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.applied}</span>
+              </Link>
+              <Link href="/employer/jobs/applicants?status=REVIEWING" 
+                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                    filters.status === 'REVIEWING' 
+                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                  }`}>
+                <span>Reviewing</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.reviewing}</span>
+              </Link>
+              <Link href="/employer/jobs/applicants?status=SHORTLISTED" 
+                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                    filters.status === 'SHORTLISTED' 
+                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                  }`}>
+                <span>Shortlisted</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.shortlisted}</span>
+              </Link>
+              <Link href="/employer/jobs/applicants?status=INTERVIEW_SCHEDULED" 
+                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                    filters.status === 'INTERVIEW_SCHEDULED' 
+                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                  }`}>
+                <span>Interview</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.interview}</span>
+              </Link>
+              <Link href="/employer/jobs/applicants?status=INTERVIEWED" 
+                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                    filters.status === 'INTERVIEWED' 
+                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                  }`}>
+                <span>Interviewed</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.interviewed}</span>
+              </Link>
+              <Link href="/employer/jobs/applicants?status=OFFER_EXTENDED" 
+                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                    filters.status === 'OFFER_EXTENDED' 
+                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                  }`}>
+                <span>Offered</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.offered}</span>
+              </Link>
+              <Link href="/employer/jobs/applicants?status=HIRED" 
+                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                    filters.status === 'HIRED' 
+                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                  }`}>
+                <span>Hired</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.hired}</span>
+              </Link>
+              <Link href="/employer/jobs/applicants?status=REJECTED" 
+                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                    filters.status === 'REJECTED' 
+                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                  }`}>
+                <span>Rejected</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.rejected}</span>
+              </Link>
+              <Link href="/employer/jobs/applicants?status=WITHDRAWN" 
+                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                    filters.status === 'WITHDRAWN' 
+                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                  }`}>
+                <span>Withdrawn</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.withdrawn}</span>
+              </Link>
+            </div>
           </div>
         </div>
         
-        {/* Enhanced search with sort dropdown */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <form className="relative flex-1" action="/employer/jobs/applicants" method="GET">
-            <input type="hidden" name="status" value={filters.status} />
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
+        {/* Enhanced search and filters section */}
+        <div className="p-4">
+          <div className="flex flex-col md:flex-row gap-3">
+            <form className="relative flex-1 w-full" action="/employer/jobs/applicants" method="GET">
+              <input type="hidden" name="status" value={filters.status} />
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400" />
+              </div>
+              <Input 
+                type="text" 
+                name="q"
+                defaultValue={filters.searchTerm}
+                placeholder="Search by job title or candidate name" 
+                className="pl-10 h-10 border border-gray-200 rounded-lg w-full focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-0"
+              />
+              <input type="hidden" name="sort" value={filters.sort} />
+              <Button 
+                type="submit" 
+                size="sm"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
+              >
+                Search
+              </Button>
+            </form>
+            
+            <div className="w-full md:w-40 flex items-center">
+              <select 
+                className="h-10 rounded-lg border border-gray-200 px-3 py-2 bg-white w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                onChange={handleSortChange}
+                value={filters.sort}
+              >
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+              </select>
             </div>
-            <Input 
-              type="text" 
-              name="q"
-              defaultValue={filters.searchTerm}
-              placeholder="Search by job title or candidate name" 
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <input type="hidden" name="sort" value={filters.sort} />
-            <Button type="submit" className="absolute right-1 top-1 bottom-1 px-3 bg-blue-600">
-              Search
-            </Button>
-          </form>
-          
-          <div className="min-w-[150px]">
-            <select 
-              className="rounded-lg border border-gray-300 px-4 py-2 bg-white w-full h-10"
-              onChange={handleSortChange}
-              value={filters.sort}
-            >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
           </div>
+
+          {/* Current filter indicators */}
+          {(filters.status !== 'ALL' || filters.searchTerm) && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {filters.status !== 'ALL' && (
+                <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-700 border border-blue-100">
+                  <span>Status: {filters.status.replace('_', ' ').toLowerCase()}</span>
+                  <Link href={`/employer/jobs/applicants${filters.searchTerm ? `?q=${filters.searchTerm}` : ''}`}>
+                    <span className="ml-1 p-0.5 rounded-full hover:bg-blue-100 cursor-pointer">×</span>
+                  </Link>
+                </div>
+              )}
+              {filters.searchTerm && (
+                <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-700 border border-blue-100">
+                  <span>Search: {filters.searchTerm}</span>
+                  <Link href={`/employer/jobs/applicants${filters.status !== 'ALL' ? `?status=${filters.status}` : ''}`}>
+                    <span className="ml-1 p-0.5 rounded-full hover:bg-blue-100 cursor-pointer">×</span>
+                  </Link>
+                </div>
+              )}
+              <Link href="/employer/jobs/applicants">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors">
+                  Clear all filters
+                </span>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
       
@@ -245,16 +331,16 @@ export default function EmployerApplicationsPage() {
           <ApplicationsDataTable applications={applications} />
         ) : (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
-            <div className="mx-auto w-16 h-16 mb-4 text-gray-300">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="mx-auto w-16 h-16 mb-4 text-gray-300 flex items-center justify-center bg-gray-50 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-1">No applications found</h3>
-            <p className="text-gray-500 mb-5">No applications match your current filters.</p>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">No applications found</h3>
+            <p className="text-gray-500 mb-5 max-w-md mx-auto">No applications match your current filters. Try adjusting your search criteria.</p>
             <Link href="/employer/jobs/applicants">
-              <Button variant="outline" className="px-4 py-2 text-sm">
-                Clear filters
+              <Button variant="outline" className="px-4 py-2 text-sm font-medium border-gray-200 hover:bg-gray-50">
+                Clear all filters
               </Button>
             </Link>
           </div>
