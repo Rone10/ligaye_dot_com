@@ -19,7 +19,7 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
   const user = await getUser()
   
   if (!user) {
-    redirect('/login')
+    redirect('/sign-in')
   }
   
   // Parse filters from search params

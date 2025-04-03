@@ -10,7 +10,7 @@ export default async function EmployerDashboardLayout({
   const user = await getUser()
   
   if (!user) {
-    redirect('/login')
+    redirect('/sign-in')
   }
   
   return (

@@ -82,7 +82,7 @@ export default function EmployerApplicationsPage() {
       const { data } = await supabase.auth.getSession()
       
       if (!data.session) {
-        router.push('/login')
+        router.push('/sign-in')
         return
       }
       

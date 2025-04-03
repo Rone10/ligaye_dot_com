@@ -204,7 +204,7 @@ export default function LandingPage() {
               <Link href="/sign-up">
                 <Button size="lg" className="button-primary w-full sm:w-auto">Create an Account</Button>
               </Link>
-              <Link href="/login">
+              <Link href="/sign-in">
                 <Button size="lg" variant="outline" className="button-secondary w-full sm:w-auto">Sign In</Button>
               </Link>
             </div>

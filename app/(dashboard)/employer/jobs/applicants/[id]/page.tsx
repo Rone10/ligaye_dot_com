@@ -23,7 +23,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const user = await getUser()
   
   if (!user) {
-    redirect('/login')
+    redirect('/sign-in')
   }
   
   const { application, error } = await getApplicationById(applicationId)

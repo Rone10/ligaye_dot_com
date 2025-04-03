@@ -89,7 +89,7 @@ export default function Navbar({ user }: NavbarProps) {
             </div>
           ) : (
             <>
-              <Link href="/login" className="text-dark font-medium hover:text-primary-blue transition-colors hidden md:block">
+              <Link href="/sign-in" className="text-dark font-medium hover:text-primary-blue transition-colors hidden md:block">
                 Sign In
               </Link>
               <Link href="/sign-up">
@@ -163,7 +163,7 @@ export default function Navbar({ user }: NavbarProps) {
               ) : (
                 <>
                   <Link 
-                    href="/login" 
+                    href="/sign-in" 
                     className="w-full text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
                     onClick={() => setMobileMenuOpen(false)}
                   >
