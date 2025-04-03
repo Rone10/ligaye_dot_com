@@ -12,9 +12,12 @@ import {
   Users, 
   Menu, 
   X,
-  LogOut
+  LogOut,
+  User
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const navItems = [
   {
@@ -46,9 +49,50 @@ const navItems = [
 
 export default function EmployerSidebar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [userData, setUserData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const pathname = usePathname()
   const router = useRouter()
   const sidebarRef = useRef<HTMLDivElement>(null)
+  
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        setUserData(user)
+        console.log('user', user)
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchUserData()
+  }, [])
+  
+  // Get user name and initials for avatar
+  const userName = userData?.user_metadata?.first_name || 
+                   userData?.user_metadata?.name || 
+                   userData?.email?.split('@')[0] || 
+                   'Employer'
+  
+  const userEmail = userData?.email || ''
+  
+  const getInitials = () => {
+    if (!userName) return 'EM'
+    
+    // you can the user's initials from the user's first name and last name
+    const initials = userData?.user_metadata?.first_name?.charAt(0) + userData?.user_metadata?.last_name?.charAt(0)
+
+
+    const names = userName.split(' ')
+    // if (names.length === 1) return names[0].substring(0, 2).toUpperCase()
+    // return (names[0][0] + names[names.length - 1][0]).toUpperCase()
+    return initials
+  }
   
   // Close sidebar when clicking outside
   useEffect(() => {
@@ -109,8 +153,9 @@ export default function EmployerSidebar() {
         `}
       >
         <div className="flex flex-col h-full p-4">
-          <div className="flex items-center justify-between py-6 px-2">
-            <h2 className="text-xl font-bold text-[#1a1e2d]">Employer Dashboard</h2>
+          {/* Title & mobile close button */}
+          <div className="flex items-center justify-between py-2 px-2">
+            <h2 className="text-xl font-bold text-[#1a1e2d]">Employer Portal</h2>
             <Button
               variant="ghost"
               size="icon"
@@ -122,7 +167,34 @@ export default function EmployerSidebar() {
             </Button>
           </div>
           
-          <nav className="space-y-2 mt-6 flex-1">
+          {/* User profile section */}
+          <div className="mt-4 mb-6 p-4 rounded-lg bg-[#4a6cfa]/5 border border-[#4a6cfa]/10">
+            {loading ? (
+              <div className="flex items-center space-x-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-10 w-10 border-2 border-[#4a6cfa]/20">
+                  <AvatarImage src={userData?.user_metadata?.avatar_url || ''} />
+                  <AvatarFallback className="bg-[#4a6cfa]/10 text-[#4a6cfa]">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium text-[#1a1e2d] line-clamp-1">{userName}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-1">{userEmail}</p>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Navigation */}
+          <nav className="space-y-2 flex-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href
               
@@ -146,6 +218,7 @@ export default function EmployerSidebar() {
             })}
           </nav>
           
+          {/* Logout button */}
           <div className="mt-auto pt-4 border-t border-[rgba(0,0,0,0.1)]">
             <Button
               variant="outline"
