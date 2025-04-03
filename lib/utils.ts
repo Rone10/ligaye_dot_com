@@ -27,3 +27,19 @@ export function formatCurrency(amount: number | null | undefined, currency: stri
     return `${currency} ${amount.toLocaleString()}`;
   }
 }
+
+/**
+ * Get initials from a full name
+ * @param name - The full name to extract initials from
+ * @returns The initials (1-2 characters)
+ */
+export function getInitials(name: string): string {
+  if (!name) return '';
+  
+  const parts = name.split(' ').filter(Boolean);
+  
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
