@@ -237,7 +237,7 @@ export function ExperienceManager({ experience, candidateProfileId, profileId }:
             <DialogHeader>
               <DialogTitle>Add Work Experience</DialogTitle>
               <DialogDescription>
-                Add a new work experience record to this candidate's profile.
+                Add a new work experience record to this candidate&apos;s profile.
               </DialogDescription>
             </DialogHeader>
             

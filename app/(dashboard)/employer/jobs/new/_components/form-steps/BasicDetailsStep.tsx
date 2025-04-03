@@ -76,7 +76,7 @@ export default function BasicDetailsStep({ form, onNext, locations }: BasicDetai
               <Input placeholder="e.g. Senior Software Engineer" {...field} />
             </FormControl>
             <FormDescription>
-              The title of the job position you're hiring for
+              The title of the job position you&apos;re hiring for
             </FormDescription>
             <FormMessage />
           </FormItem>

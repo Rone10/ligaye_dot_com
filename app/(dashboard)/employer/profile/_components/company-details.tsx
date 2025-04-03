@@ -119,7 +119,7 @@ export default function CompanyDetails({ form }: CompanyDetailsProps) {
               />
             </FormControl>
             <FormDescription>
-              Your company's official website address.
+              Your company&apos;s official website address.
             </FormDescription>
             <FormMessage />
           </FormItem>

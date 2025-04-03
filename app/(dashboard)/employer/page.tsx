@@ -85,7 +85,7 @@ export default async function EmployerDashboard() {
             </span>
           </h1>
           <p className="mt-3 max-w-lg text-white/80">
-            Manage your job postings, review applications, and grow your team with Ligaye's comprehensive employer tools.
+            Manage your job postings, review applications, and grow your team with Ligaye&apos;s comprehensive employer tools.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/employer/jobs/new">
@@ -196,7 +196,7 @@ export default async function EmployerDashboard() {
               </div>
             ) : (
               <div className="text-center text-muted-foreground py-4">
-                You haven't posted any jobs yet.
+                You haven&apos;t posted any jobs yet.
               </div>
             )}
           </CardContent>

@@ -336,7 +336,7 @@ export default function PostingSettingsStep({ form, onPrevious, isSubmitting }: 
               </RadioGroup>
             </FormControl>
             <FormDescription>
-              Select how you'd like to pay for this job posting
+              Select how you&apos;d like to pay for this job posting
             </FormDescription>
             <FormMessage />
           </FormItem>

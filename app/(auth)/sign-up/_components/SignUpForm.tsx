@@ -100,7 +100,7 @@ export function SignUpForm() {
           </div>
           <CardTitle className="text-2xl font-bold text-center">Check Your Email</CardTitle>
           <CardDescription className="text-center text-base">
-            We've sent a verification link to <span className="font-medium text-dark">{userEmail}</span>
+            We&apos;ve sent a verification link to <span className="font-medium text-dark">{userEmail}</span>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-xl">
@@ -128,7 +128,7 @@ export function SignUpForm() {
               Continue to Sign In
             </Button>
             <p className="mt-md text-sm text-gray-dark">
-              Didn't receive the email? Check your spam folder or{' '}
+              Didn&apos;t receive the email? Check your spam folder or{' '}
               <Link href="/sign-up" className="text-primary-blue font-medium hover:underline">
                 try again
               </Link>

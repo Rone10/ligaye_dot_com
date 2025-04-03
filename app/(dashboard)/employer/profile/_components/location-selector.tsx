@@ -76,7 +76,7 @@ export default function LocationSelector({ form, locations }: LocationSelectorPr
               </Select>
               <Input type="hidden" name="locationId" value={field.value || ""} />
               <FormDescription>
-                Select the location of your company's main office.
+                Select the location of your company&apos;s main office.
               </FormDescription>
               <FormMessage />
             </FormItem>

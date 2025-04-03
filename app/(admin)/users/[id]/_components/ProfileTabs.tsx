@@ -126,7 +126,7 @@ export function ProfileTabs({
           <TabsContent value="jobs" className="space-y-6">
             <h3 className="text-lg font-semibold">Job Postings</h3>
             <p className="text-gray-500">
-              This section would show the employer's job postings with options to edit, delete, or
+              This section would show the employer&apos;s job postings with options to edit, delete, or
               manage applications for each job.
             </p>
             {/* Job listings component would go here */}

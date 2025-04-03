@@ -72,7 +72,7 @@ export default function ExperienceSection({ experience, candidateProfileId }: Ex
       {candidateProfileId && experience.length === 0 && (
         <div className="bg-muted/40 rounded-lg p-6 text-center">
           <p className="text-sm text-muted-foreground">
-            You haven't added any work experience yet. Click "Add Experience" to get started.
+            You haven&apos;t added any work experience yet. Click &quot;Add Experience&quot; to get started.
           </p>
         </div>
       )}

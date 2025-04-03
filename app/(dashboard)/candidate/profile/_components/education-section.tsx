@@ -71,7 +71,7 @@ export default function EducationSection({ education, candidateProfileId }: Educ
       {candidateProfileId && education.length === 0 && (
         <div className="bg-muted/40 rounded-lg p-6 text-center">
           <p className="text-sm text-muted-foreground">
-            You haven't added any education details yet. Click "Add Education" to get started.
+            You haven&apos;t added any education details yet. Click &quot;Add Education&quot; to get started.
           </p>
         </div>
       )}

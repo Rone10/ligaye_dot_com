@@ -83,7 +83,7 @@ export function RequestResetForm() {
           </div>
           <CardTitle className="text-2xl font-bold text-center">Check Your Email</CardTitle>
           <CardDescription className="text-center">
-            If an account exists with that email, we've sent password reset instructions.
+            If an account exists with that email, we&apos;ve sent password reset instructions.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
@@ -100,7 +100,7 @@ export function RequestResetForm() {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">Reset Password</CardTitle>
         <CardDescription className="text-center">
-          Enter your email address and we'll send you a password reset link
+          Enter your email address and we&apos;ll send you a password reset link
         </CardDescription>
       </CardHeader>
       <CardContent>

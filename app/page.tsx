@@ -45,7 +45,7 @@ export default function LandingPage() {
         <div className="flex flex-col md:flex-row gap-10 md:gap-16 items-center">
           <div className="flex-1 space-y-6 animate-appear">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-dark">
-              Gambia's Premier <span className="text-primary-blue">Job Board</span>
+              Gambia&apos;s Premier <span className="text-primary-blue">Job Board</span>
             </h1>
             <p className="text-lg text-gray-dark max-w-xl">
               Connecting talented professionals with opportunities across Gambia. Find your dream job or hire the perfect candidate today.
@@ -198,7 +198,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto relative z-10">
           <div className="glass-card p-8 md:p-12 text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-dark mb-4">Ready to Take the Next Step?</h2>
-            <p className="text-gray-dark mb-8 max-w-2xl mx-auto">Whether you're looking for your next opportunity or seeking talented professionals, Ligaye.com has you covered.</p>
+            <p className="text-gray-dark mb-8 max-w-2xl mx-auto">Whether you&apos;re looking for your next opportunity or seeking talented professionals, Ligaye.com has you covered.</p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/sign-up">
@@ -218,7 +218,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h3 className="text-xl font-semibold mb-4">Ligaye.com</h3>
-              <p className="text-gray-300">Gambia's Premier Job Board</p>
+              <p className="text-gray-300">Gambia&apos;s Premier Job Board</p>
             </div>
             
             <div>

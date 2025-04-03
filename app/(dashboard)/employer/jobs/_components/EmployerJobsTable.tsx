@@ -109,7 +109,7 @@ export default function EmployerJobsTable({ jobs }: EmployerJobsTableProps) {
           <FileText className="h-12 w-12 text-[#9aa3bc] mb-4" />
           <h3 className="text-xl font-medium text-[#1a1e2d] mb-2">No job postings found</h3>
           <p className="text-[#9aa3bc] text-center max-w-md mb-6">
-            You haven't created any job postings matching the current filters yet.
+            You haven&apos;t created any job postings matching the current filters yet.
           </p>
           <Button asChild className="bg-[#4a6cfa] hover:bg-[#7b90ff]">
             <Link href="/employer/jobs/new">Post a Job</Link>

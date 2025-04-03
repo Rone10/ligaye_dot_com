@@ -231,7 +231,7 @@ export function EducationManager({ education, candidateProfileId, profileId }: E
             <DialogHeader>
               <DialogTitle>Add Education</DialogTitle>
               <DialogDescription>
-                Add a new education record to this candidate's profile.
+                Add a new education record to this candidate&apos;s profile.
               </DialogDescription>
             </DialogHeader>
             

@@ -182,7 +182,7 @@ export default function UsersTable({ users }: UsersTableProps) {
             <DialogTitle>Confirm Delete User</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete the profile for <strong>{userToDelete?.fullName}</strong>? 
-              This will mark the profile as deleted but won't remove it from the database.
+              This will mark the profile as deleted but won&apos;t remove it from the database.
             </DialogDescription>
           </DialogHeader>
           <form action={handleDelete}>
