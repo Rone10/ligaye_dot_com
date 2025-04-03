@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { 
   Menu, 
@@ -12,8 +12,10 @@ import {
   CreditCard, 
   Settings, 
   FileText, 
-  Building2
+  Building2,
+  LogOut
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
   {
@@ -51,6 +53,7 @@ const navItems = [
 export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
   const sidebarRef = useRef<HTMLDivElement>(null)
   
   // Close sidebar when clicking outside on mobile
@@ -75,6 +78,12 @@ export default function AdminSidebar() {
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
+  
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/')
+  }
   
   return (
     <>
@@ -148,6 +157,17 @@ export default function AdminSidebar() {
               )
             })}
           </nav>
+          
+          <div className="mt-auto pt-4 border-t border-border/50">
+            <Button
+              variant="outline"
+              className="w-full justify-start text-foreground hover:bg-primary/10 hover:text-primary"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-5 w-5 mr-3" />
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
     </>

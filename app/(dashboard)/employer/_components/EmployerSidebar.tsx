@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { 
   LayoutDashboard, 
@@ -11,8 +11,10 @@ import {
   Building2, 
   Users, 
   Menu, 
-  X 
+  X,
+  LogOut
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
   {
@@ -45,6 +47,7 @@ const navItems = [
 export default function EmployerSidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
   const sidebarRef = useRef<HTMLDivElement>(null)
   
   // Close sidebar when clicking outside
@@ -63,6 +66,12 @@ export default function EmployerSidebar() {
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
+  
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/')
+  }
   
   return (
     <>
@@ -136,6 +145,17 @@ export default function EmployerSidebar() {
               )
             })}
           </nav>
+          
+          <div className="mt-auto pt-4 border-t border-[rgba(0,0,0,0.1)]">
+            <Button
+              variant="outline"
+              className="w-full justify-start text-[#1a1e2d] hover:bg-[#4a6cfa]/10 hover:text-[#4a6cfa]"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-5 w-5 mr-3" />
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
     </>

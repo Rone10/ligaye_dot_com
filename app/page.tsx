@@ -3,117 +3,43 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BriefcaseIcon, Building2, Menu, Search, User, Users, X } from 'lucide-react';
+import { ArrowRight, BriefcaseIcon, Building2, Search, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
-
+import Navbar from '@/components/Navbar';
+import { createClient } from '@/lib/supabase/client';
+import { useState, useEffect } from 'react';
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Check if user is logged in on the client side
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkUser();
+  }, []);
+
+  if (loading) {
+    // TODO: Add a loading spinner
+
+    
+    return <div className='flex justify-center items-center h-screen container mx-auto'>Loading...</div>;
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Navbar */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 backdrop-blur-md bg-white/70">
-        <div className="flex h-16 items-center justify-between px-4 md:px-8 max-w-7xl mx-auto">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-2">
-              <BriefcaseIcon className="h-6 w-6 text-primary-blue" />
-              <span className="font-bold text-xl text-dark">Ligaye.com</span>
-            </Link>
-          </div>
-          
-          {/* Navigation - Centered */}
-          <nav className="hidden md:flex items-center justify-center">
-            <div className="flex space-x-6">
-              <Link href="/jobs" className="text-gray-dark hover:text-dark transition-colors font-medium">
-                Find Jobs
-              </Link>
-              <Link href="/companies" className="text-gray-dark hover:text-dark transition-colors font-medium">
-                Companies
-              </Link>
-              <Link href="/tenders" className="text-gray-dark hover:text-dark transition-colors font-medium">
-                Tenders
-              </Link>
-              <Link href="/pricing" className="text-gray-dark hover:text-dark transition-colors font-medium">
-                Pricing
-              </Link>
-            </div>
-          </nav>
-          
-          {/* Auth Buttons */}
-          <div className="flex items-center gap-4">
-            <Link href="/sign-in" className="text-dark font-medium hover:text-primary-blue transition-colors hidden md:block">
-              Sign In
-            </Link>
-            <Link href="/sign-up">
-              <Button variant="default" size="sm" className="hidden md:flex">
-                Create Account
-              </Button>
-            </Link>
-            <button 
-              className="md:hidden text-dark hover:text-primary-blue transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-        
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white/95 backdrop-blur-sm shadow-level-2 py-4 px-4 animate-appear">
-            <nav className="flex flex-col space-y-4">
-              <Link 
-                href="/jobs" 
-                className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Find Jobs
-              </Link>
-              <Link 
-                href="/companies" 
-                className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Companies
-              </Link>
-              <Link 
-                href="/tenders" 
-                className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Tenders
-              </Link>
-              <Link 
-                href="/pricing" 
-                className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Pricing
-              </Link>
-              <div className="border-t border-gray/30 pt-4 mt-2 flex flex-col space-y-3">
-                <Link 
-                  href="/sign-in" 
-                  className="w-full text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Sign In
-                </Link>
-                <Link 
-                  href="/sign-up"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Button variant="default" className="w-full">
-                    Create Account
-                  </Button>
-                </Link>
-              </div>
-            </nav>
-          </div>
-        )}
-      </header>
-
+    <>
+    <Navbar user={user} />
+    <div className="flex flex-col">
       {/* Hero Section */}
       <main className="flex-1 pt-16 md:pt-32 pb-16 px-4 md:px-8 max-w-7xl mx-auto w-full">
         <div className="flex flex-col md:flex-row gap-10 md:gap-16 items-center">
@@ -278,7 +204,7 @@ export default function LandingPage() {
               <Link href="/sign-up">
                 <Button size="lg" className="button-primary w-full sm:w-auto">Create an Account</Button>
               </Link>
-              <Link href="/sign-in">
+              <Link href="/login">
                 <Button size="lg" variant="outline" className="button-secondary w-full sm:w-auto">Sign In</Button>
               </Link>
             </div>
@@ -329,5 +255,6 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+    </>
   );
 } 
