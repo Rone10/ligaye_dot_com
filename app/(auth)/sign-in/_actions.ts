@@ -5,6 +5,9 @@ import { redirect } from 'next/navigation'
 import { signInSchema } from './_utils/validation'
 import { z } from 'zod'
 import type { AuthUser } from '@supabase/supabase-js'
+import { db } from '@/lib/db'
+import { profiles, candidateProfiles, employerProfiles } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 export type SignInActionResult = {
   success: boolean;
@@ -15,29 +18,25 @@ export type SignInActionResult = {
 /**
  * Server action for user sign-in
  * This action validates the form data, authenticates the user with Supabase Auth,
- * and redirects them to their respective profile page based on their role.
+ * checks for profile existence, and redirects them to the appropriate page
+ * (dashboard or profile creation).
  */
 export async function signInUser(formData: FormData): Promise<SignInActionResult> {
-  let authUser: AuthUser | null = null; // Variable to hold user data outside try block
+  let authUser: AuthUser | null = null;
 
+  // --- Authentication Logic (inside try...catch) ---
   try {
-    // Extract and validate form data
     const data = {
       email: formData.get('email'),
       password: formData.get('password'),
     }
     const validatedData = signInSchema.parse(data)
-
-    // Create Supabase client
     const supabase = await createClient()
-
-    // Attempt to sign in the user with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email: validatedData.email,
       password: validatedData.password,
     })
 
-    // Handle Supabase Auth errors
     if (authError) {
       console.error('Supabase Auth error:', authError)
       return {
@@ -45,75 +44,96 @@ export async function signInUser(formData: FormData): Promise<SignInActionResult
         error: 'Invalid email or password. Please try again.'
       }
     }
-
-    // Ensure user was authenticated and store it
     if (!authData.user) {
       return {
         success: false,
         error: 'Failed to authenticate user.'
       }
     }
-    authUser = authData.user; // Assign user data here
-
-    // NOTE: We no longer return { success: true } from within the try block
-
+    authUser = authData.user
   } catch (error) {
-    // Handle validation errors
     if (error instanceof z.ZodError) {
-      const fieldErrors: { [key: string]: string[] } = {};
-
+      const fieldErrors: { [key: string]: string[] } = {}
       error.errors.forEach((issue) => {
-        const field = issue.path.join('.');
-        if (!fieldErrors[field]) {
-          fieldErrors[field] = [];
-        }
-        (fieldErrors[field] as string[]).push(issue.message);
-      });
-
+        const field = issue.path.join('.')
+        if (!fieldErrors[field]) fieldErrors[field] = []
+        fieldErrors[field].push(issue.message)
+      })
       return {
         success: false,
         fieldErrors
-      };
+      }
     }
-
-    // Handle other unexpected errors during validation/auth
     console.error('Sign-in validation/auth error:', error)
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred during sign-in setup';
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred during sign-in setup'
     return {
       success: false,
       error: errorMessage
-    };
+    }
   }
 
-  // --- Redirection logic moved outside the try...catch block ---
+  // --- Profile Check & Redirection Logic (outside try...catch) ---
 
-  // Check if we successfully got the user data
   if (!authUser) {
-    // This should technically not be reached if the try block succeeded without returning
-    // But it guards against potential logic errors.
-    console.error('Sign-in error: Auth user data missing after try block.');
-    return { 
-      success: false, 
-      error: 'An internal error occurred during sign-in. Please try again.' 
-    };
+    console.error('Sign-in error: Auth user data missing after try block.')
+    return {
+      success: false,
+      error: 'An internal error occurred during sign-in. Please try again.'
+    }
   }
 
-  // Redirect based on role stored in Supabase Auth user_metadata
+  const userId = authUser.id; // This is the Supabase Auth User ID
   const userRole = authUser.user_metadata?.role;
-  // console.log('userRole', userRole) // Keep console log if needed for debugging
+  let redirectPath = '/' // Default fallback
 
-  if (userRole === 'candidate') {
-    redirect('/candidate/profile');
-  } else if (userRole === 'employer') {
-    redirect('/employer/profile');
-  } else {
-    // Handle missing/unexpected role in metadata or redirect to a default dashboard
-    console.warn(
-      `Role not found in user_metadata for user ID: ${authUser.id}. Redirecting to home.`
-    );
-    redirect('/'); // Redirect to home page as a fallback
+  try {
+    const database = await db();
+
+    // 1. Find the base profile using the Supabase Auth User ID
+    const baseProfile = await database.query.profiles.findFirst({
+      where: eq(profiles.userId, userId),
+      columns: { id: true } // We need the profiles.id
+    });
+
+    if (!baseProfile) {
+      // This should not happen if signup creates a base profile correctly
+      console.error(`Base profile not found for userId: ${userId}. Redirecting to home.`);
+      redirectPath = '/'
+    } else {
+      const profileId = baseProfile.id; // The ID from the profiles table
+
+      // 2. Check for specific profile existence based on role
+      if (userRole === 'candidate') {
+        const existingSpecificProfile = await database.query.candidateProfiles.findFirst({
+          // Assuming the FK column in candidateProfiles is named 'profileId'
+          where: eq(candidateProfiles.profileId, profileId),
+        });
+        redirectPath = existingSpecificProfile ? '/candidate' : '/candidate/profile';
+      } else if (userRole === 'employer') {
+        const existingSpecificProfile = await database.query.employerProfiles.findFirst({
+          // Assuming the FK column in employerProfiles is named 'profileId'
+          where: eq(employerProfiles.profileId, profileId),
+        });
+        redirectPath = existingSpecificProfile ? '/employer' : '/employer/profile';
+      } else {
+        console.warn(`Unknown role ('${userRole}') found for userId: ${userId}. Redirecting to home.`);
+        redirectPath = '/'
+      }
+    }
+  } catch (dbError) {
+    console.error(`Database error during profile check for userId ${userId} (Role: ${userRole}):`, dbError);
+    // Fallback strategy: Redirect to profile page, as we don't know if it exists
+    if (userRole === 'candidate') {
+      redirectPath = '/candidate/profile';
+    } else if (userRole === 'employer') {
+      redirectPath = '/employer/profile';
+    } else {
+      redirectPath = '/' // Fallback to home if role is unknown
+    }
   }
 
-  // Note: Because redirect() throws, code below this point in the successful path won't execute,
-  // so we don't need to explicitly return a success object here.
+  // Perform the redirect
+  redirect(redirectPath);
+
+  // This part is unreachable because redirect() throws
 } 
