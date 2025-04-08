@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { VerificationStatus } from './_components/VerificationStatus'
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Verify Email - Ligaye.com',
@@ -29,10 +30,14 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
 
   if (hasAuthParams) {
     // This page is being called as part of the email verification callback
-    if (type === 'email_change' || type === 'signup') {
-      // For email verification, we can display success
+    if (type === 'email_change') {
+      // For email change, we can display success
       status = 'success'
-      message = 'Your email has been successfully verified. You can now sign in to your account.'
+      message = 'Your email has been successfully updated.'
+    } else if (type === 'signup') {
+      // For signup verification, redirect to sign-in
+      // No need to set status/message here as we are redirecting
+      redirect('/sign-in?message=Email verified successfully. Please sign in.')
     } else {
       // If we're receiving other types of callbacks, we need to check session
       const supabase = await createClient()
