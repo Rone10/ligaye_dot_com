@@ -9,6 +9,7 @@ import { employerProfileSchema } from '../_utils/validation';
 import { updateEmployerProfileDetails } from '../_actions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form } from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
 import CompanyDetails from './company-details';
 import IndustrySelector from './industry-selector';
 import LocationSelector from './location-selector';
@@ -26,6 +27,9 @@ interface EmployerProfileFormProps {
   locations: Location[];
 }
 
+// Define tab order
+const tabOrder: string[] = ['details', 'industry', 'location', 'logo'];
+
 // Initial state for form submission
 const initialState = {
   success: false,
@@ -37,7 +41,7 @@ export default function EmployerProfileForm({
   industries,
   locations 
 }: EmployerProfileFormProps) {
-  const [activeTab, setActiveTab] = useState('details');
+  const [activeTab, setActiveTab] = useState(tabOrder[0]); // Use tabOrder for initial state
   
   // Use useActionState to track server action state
   const [state, formAction] = useActionState(updateEmployerProfileDetails, initialState);
@@ -54,6 +58,22 @@ export default function EmployerProfileForm({
       hqAddressDisplay: initialData?.employerProfile?.hqAddressDisplay || '',
     },
   });
+
+  const currentTabIndex = tabOrder.indexOf(activeTab);
+  const isFirstTab = currentTabIndex === 0;
+  const isLastTab = currentTabIndex === tabOrder.length - 1;
+
+  function goToNextTab() {
+    if (!isLastTab) {
+      setActiveTab(tabOrder[currentTabIndex + 1]);
+    }
+  }
+
+  function goToPreviousTab() {
+    if (!isFirstTab) {
+      setActiveTab(tabOrder[currentTabIndex - 1]);
+    }
+  }
 
   return (
     <div>
@@ -114,17 +134,28 @@ export default function EmployerProfileForm({
             </TabsContent>
           </Tabs>
           
-          {state.message && !state.success && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md">
-              {state.message}
-            </div>
-          )}
-          
-          {state.message && state.success && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 text-green-600 rounded-md">
-              {state.message}
-            </div>
-          )}
+          {/* Navigation and Save Buttons */}
+          <div className="mt-8 flex justify-between items-center">
+            <Button 
+              type="button" // Prevent form submission
+              variant="outline"
+              onClick={goToPreviousTab}
+              disabled={isFirstTab}
+              className={isFirstTab ? 'invisible' : 'bg-blue-100'} // Hide instead of just disabling for layout consistency
+            >
+              Previous
+            </Button>
+            
+            <Button 
+              type="button" // Prevent form submission
+              variant="ghost"
+              onClick={goToNextTab}
+              disabled={isLastTab}
+              className={isLastTab ? 'invisible' : 'bg-blue-100'} // Hide instead of just disabling for layout consistency
+            >
+              Next
+            </Button>
+          </div>
         </form>
       </Form>
     </div>
