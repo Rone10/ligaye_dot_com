@@ -72,8 +72,22 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
       slug
     }
     
-    // Remove payment-specific fields
-    const { jobDuration, paymentMethod, skillIds, industryIds, ...jobDataToInsert } = jobData
+    // Remove payment-specific fields and convert array fields to strings
+    const { 
+      jobDuration, 
+      paymentMethod, 
+      skillIds, 
+      industryIds, 
+      educationRequirements, 
+      experienceRequirements, 
+      ...baseJobData 
+    } = jobData
+    
+    const jobDataToInsert = {
+      ...baseJobData,
+      educationRequirements: educationRequirements.join('\n'), // Join array elements with newline
+      experienceRequirements: experienceRequirements.join('\n') // Join array elements with newline
+    };
     
     // Insert the job (and related records)
     const newJob = await insertNewJob(
@@ -134,7 +148,7 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
       
       // Redirect to job listing with pending status
       revalidatePath('/employer/jobs')
-      return { jobId: newJob.id, status: 'pending' }
+      return { jobId: newJob.id, status: 'PENDING_PAYMENT' }
     }
   } catch (error) {
     console.error('Error creating job posting:', error)

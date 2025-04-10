@@ -137,9 +137,9 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
                   className="prose max-w-none"
                   dangerouslySetInnerHTML={{ __html: parseJobDescription(job.educationRequirementsRichText) }}
                 />
-              ) : job.educationRequirements && job.educationRequirements.length > 0 ? (
+              ) : typeof job.educationRequirements === 'string' && job.educationRequirements.trim() ? (
                 <ul className="list-disc pl-10 space-y-1">
-                  {job.educationRequirements.map((item: string, index: number) => (
+                  {job.educationRequirements.split('\n').filter((item: string) => item.trim()).map((item: string, index: number) => (
                     <li key={index}>{item}</li>
                   ))}
                 </ul>
@@ -164,9 +164,9 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
                   className="prose max-w-none"
                   dangerouslySetInnerHTML={{ __html: parseJobDescription(job.experienceRequirementsRichText) }}
                 />
-              ) : job.experienceRequirements && job.experienceRequirements.length > 0 ? (
+              ) : typeof job.experienceRequirements === 'string' && job.experienceRequirements.trim() ? (
                 <ul className="list-disc pl-10 space-y-1">
-                  {job.experienceRequirements.map((item: string, index: number) => (
+                  {job.experienceRequirements.split('\n').filter((item: string) => item.trim()).map((item: string, index: number) => (
                     <li key={index}>{item}</li>
                   ))}
                 </ul>

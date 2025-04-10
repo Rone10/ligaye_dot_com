@@ -43,9 +43,10 @@ export default function NewJobForm({ locations }: NewJobFormProps) {
         return
       }
       
-      if (result.paymentUrl) {
-        // For Stripe, redirect to payment URL
-        window.location.href = result.paymentUrl
+      if (result.status) {
+        // If status is returned, payment is pending/being processed
+        // Redirect to jobs page with status filter
+        router.push('/employer/jobs?status=PENDING_PAYMENT')
       } else {
         // For Cash payment, redirect to confirmation page
         router.push('/employer/jobs?status=pending')
