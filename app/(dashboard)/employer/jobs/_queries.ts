@@ -56,7 +56,9 @@ export async function getEmployerJobs(filter: JobListingFilter = {}) {
           eq(jobs.status, 'EXPIRED')
         ))
       } else {
-        queryCondition = and(queryCondition, eq(jobs.status, filter.status as any))
+        // Map UI status 'pending' to DB status 'PENDING_PAYMENT'
+        const dbStatus = filter.status === 'pending' ? 'PENDING_PAYMENT' : filter.status;
+        queryCondition = and(queryCondition, eq(jobs.status, dbStatus as any))
       }
     } else {
       // Default filter to exclude deleted jobs
