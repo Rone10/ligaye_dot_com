@@ -57,7 +57,7 @@ export default function LandingPage() {
                   Find Jobs <Search className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/sign-up">
+              <Link href="/employer/jobs/new">
                 <Button size="lg" variant="outline" className="button-secondary gap-2 w-full sm:w-auto">
                   Post a Job <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -171,7 +171,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-semibold mb-2">For Employers</h3>
               <p className="text-gray-dark mb-4">Post job openings, manage applications, and find the perfect candidates for your company. Easy payment options via Stripe or cash.</p>
-              <Link href="/sign-up" className="text-primary-blue font-medium hover:underline inline-flex items-center">
+              <Link href="/employer/jobs/new" className="text-primary-blue font-medium hover:underline inline-flex items-center">
                 Post a Job <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </div>
@@ -233,7 +233,7 @@ export default function LandingPage() {
             <div>
               <h4 className="text-lg font-medium mb-3">For Employers</h4>
               <ul className="space-y-2">
-                <li><Link href="/post-job" className="text-gray-300 hover:text-white">Post a Job</Link></li>
+                <li><Link href="/employer/jobs/new" className="text-gray-300 hover:text-white">Post a Job</Link></li>
                 <li><Link href="/pricing" className="text-gray-300 hover:text-white">Pricing</Link></li>
                 <li><Link href="/resources" className="text-gray-300 hover:text-white">Resources</Link></li>
               </ul>

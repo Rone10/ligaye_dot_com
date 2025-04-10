@@ -49,7 +49,7 @@ export default function LocationSelector({ form, locations }: LocationSelectorPr
           name="locationId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Location</FormLabel>
+              <FormLabel>Locationss</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
                 value={field.value || ""}
@@ -67,7 +67,7 @@ export default function LocationSelector({ form, locations }: LocationSelectorPr
                       </div>
                       {locs.map((location) => (
                         <SelectItem key={location.id} value={location.id}>
-                          {location.city ? `${location.city}, ${location.district || ''}` : location.district}
+                          {location.city ? `${location.city}, ${location.region || ''}` : location.district}
                         </SelectItem>
                       ))}
                     </div>

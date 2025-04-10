@@ -48,8 +48,8 @@ export const jobFormSchema = z.object({
   plannedStartDate: z.coerce.date().optional(),
   
   // Salary
-  salaryRangeMin: z.coerce.number().int().min(0).optional(),
-  salaryRangeMax: z.coerce.number().int().min(0).optional(),
+  salaryRangeMin: z.coerce.number().nonnegative().optional(),
+  salaryRangeMax: z.coerce.number().nonnegative().optional(),
   salaryCurrency: z.string().default("GMD"),
   salaryFrequency: z.enum(salaryFrequencyEnum.enumValues).optional(),
   salaryDisplayType: z.enum(salaryDisplayTypeEnum.enumValues).default("NEGOTIABLE"),

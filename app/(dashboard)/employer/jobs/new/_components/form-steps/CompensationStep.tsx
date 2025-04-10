@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { 
@@ -33,6 +33,45 @@ interface CompensationStepProps {
 export default function CompensationStep({ form, onNext, onPrevious }: CompensationStepProps) {
   const [tempBenefit, setTempBenefit] = useState('')
   const [tempSupplementalPay, setTempSupplementalPay] = useState('')
+  const [formattedMinSalary, setFormattedMinSalary] = useState('')
+  const [formattedMaxSalary, setFormattedMaxSalary] = useState('')
+  
+  // Format number with commas
+  const formatNumberWithCommas = (value: string): string => {
+    // Remove existing commas and other non-digit characters except decimal point
+    const cleanValue = value.replace(/[^0-9.]/g, '')
+    
+    // Check if it's a valid number
+    if (!cleanValue || isNaN(Number(cleanValue))) return ''
+    
+    // Split by decimal point
+    const parts = cleanValue.split('.')
+    
+    // Format the whole number part with commas
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    
+    // Return with or without decimal part
+    return parts.length > 1 ? `${parts[0]}.${parts[1]}` : parts[0]
+  }
+  
+  // Parse formatted value back to number
+  const parseFormattedValue = (formattedValue: string): number => {
+    return parseFloat(formattedValue.replace(/,/g, ''))
+  }
+  
+  // Initialize formatted values when component mounts or form values change
+  useEffect(() => {
+    const minSalary = form.getValues('salaryRangeMin')
+    const maxSalary = form.getValues('salaryRangeMax')
+    
+    if (minSalary !== undefined) {
+      setFormattedMinSalary(formatNumberWithCommas(String(minSalary)))
+    }
+    
+    if (maxSalary !== undefined) {
+      setFormattedMaxSalary(formatNumberWithCommas(String(maxSalary)))
+    }
+  }, [form])
   
   const handleAddBenefit = () => {
     if (tempBenefit.trim()) {
@@ -122,11 +161,21 @@ export default function CompensationStep({ form, onNext, onPrevious }: Compensat
                   </FormLabel>
                   <FormControl>
                     <Input 
-                      type="number" 
-                      placeholder="e.g. 30000" 
-                      {...field} 
-                      onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
-                      value={field.value === undefined ? '' : field.value}
+                      type="text" 
+                      placeholder="e.g. 30,000" 
+                      className="no-spin-buttons"
+                      value={formattedMinSalary}
+                      onChange={(e) => {
+                        const formatted = formatNumberWithCommas(e.target.value)
+                        setFormattedMinSalary(formatted)
+                        
+                        if (formatted) {
+                          const numericValue = parseFormattedValue(formatted)
+                          field.onChange(numericValue)
+                        } else {
+                          field.onChange(undefined)
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -149,11 +198,21 @@ export default function CompensationStep({ form, onNext, onPrevious }: Compensat
                   </FormLabel>
                   <FormControl>
                     <Input 
-                      type="number" 
-                      placeholder="e.g. 50000" 
-                      {...field} 
-                      onChange={(e) => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value))}
-                      value={field.value === undefined ? '' : field.value}
+                      type="text" 
+                      placeholder="e.g. 50,000" 
+                      className="no-spin-buttons"
+                      value={formattedMaxSalary}
+                      onChange={(e) => {
+                        const formatted = formatNumberWithCommas(e.target.value)
+                        setFormattedMaxSalary(formatted)
+                        
+                        if (formatted) {
+                          const numericValue = parseFormattedValue(formatted)
+                          field.onChange(numericValue)
+                        } else {
+                          field.onChange(undefined)
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -317,6 +376,19 @@ export default function CompensationStep({ form, onNext, onPrevious }: Compensat
           Next <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
+
+      <style jsx global>{`
+        input[type=number].no-spin-buttons::-webkit-outer-spin-button,
+        input[type=number].no-spin-buttons::-webkit-inner-spin-button {
+          -webkit-appearance: none !important;
+          margin: 0 !important;
+        }
+        
+        input[type=number].no-spin-buttons {
+          -moz-appearance: textfield !important;
+          appearance: textfield !important;
+        }
+      `}</style>
     </div>
   )
 } 
