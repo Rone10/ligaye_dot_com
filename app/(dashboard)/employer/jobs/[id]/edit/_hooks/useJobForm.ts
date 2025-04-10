@@ -7,6 +7,18 @@ import { JobFormValues, jobFormSchema } from '../_utils/validation'
 import { workLocationEnum } from '@/lib/db/schema'
 import type { Job } from '@/lib/db/schema'
 
+// Helper to safely parse JSON string into an array
+const safeJsonParse = (jsonString: string | null | undefined): string[] => {
+  if (!jsonString) return []
+  try {
+    const parsed = JSON.parse(jsonString)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (error) {
+    console.error('Failed to parse JSON string:', error)
+    return []
+  }
+}
+
 export default function useJobForm(job?: Job, jobSkills?: {id: string, name: string}[], jobIndustries?: {id: string, name: string}[]) {
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -24,8 +36,8 @@ export default function useJobForm(job?: Job, jobSkills?: {id: string, name: str
     locationId: nullToUndefined(job.locationId),
     displayAddress: job.displayAddress ?? true,
     workLocation: job.workLocation as typeof workLocationEnum.enumValues[number],
-    educationRequirements: job.educationRequirements || [],
-    experienceRequirements: job.experienceRequirements || [],
+    educationRequirements: safeJsonParse(job.educationRequirements),
+    experienceRequirements: safeJsonParse(job.experienceRequirements),
     experienceLevel: nullToUndefined(job.experienceLevel),
     languageRequirements: job.languageRequirements || [],
     languageTrainingProvided: job.languageTrainingProvided ?? false,

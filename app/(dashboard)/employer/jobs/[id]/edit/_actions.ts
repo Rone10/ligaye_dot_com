@@ -39,10 +39,17 @@ export async function updateJobPosting(jobId: string, formData: z.infer<typeof j
     // Extract data needed for job update
     const { skillIds, industryIds, ...jobDataToUpdate } = validatedData
     
+    // Prepare data for update, converting arrays to JSON strings
+    const dataToUpdate = {
+      ...jobDataToUpdate,
+      educationRequirements: JSON.stringify(validatedData.educationRequirements),
+      experienceRequirements: JSON.stringify(validatedData.experienceRequirements),
+    };
+
     // Update the job (and related records)
     await updateJob(
       jobId, 
-      jobDataToUpdate, 
+      dataToUpdate, 
       validatedData.skillIds, 
       validatedData.industryIds
     )
