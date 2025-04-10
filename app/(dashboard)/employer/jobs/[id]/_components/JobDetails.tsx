@@ -127,39 +127,53 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
           </CardHeader>
           <CardContent className="p-6 divide-y">
             {/* Education */}
-            {job.educationRequirements && job.educationRequirements.length > 0 && (
-              <div className="py-4 first:pt-0 last:pb-0">
-                <h3 className="text-lg font-medium flex items-center mb-3">
-                  <GraduationCap className="mr-2.5 h-5 w-5 text-[#4a6cfa]" />
-                  Education
-                </h3>
+            <div className="py-4 first:pt-0 last:pb-0">
+              <h3 className="text-lg font-medium flex items-center mb-3">
+                <GraduationCap className="mr-2.5 h-5 w-5 text-[#4a6cfa]" />
+                Education
+              </h3>
+              {job.educationRequirementsRichText ? (
+                <div 
+                  className="prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: parseJobDescription(job.educationRequirementsRichText) }}
+                />
+              ) : job.educationRequirements && job.educationRequirements.length > 0 ? (
                 <ul className="list-disc pl-10 space-y-1">
                   {job.educationRequirements.map((item: string, index: number) => (
                     <li key={index}>{item}</li>
                   ))}
                 </ul>
-              </div>
-            )}
+              ) : (
+                <p className="text-gray-500">No specific education requirements specified</p>
+              )}
+            </div>
             
             {/* Experience */}
-            {job.experienceRequirements && job.experienceRequirements.length > 0 && (
-              <div className="py-4 first:pt-0 last:pb-0">
-                <h3 className="text-lg font-medium flex items-center mb-3">
-                  <Briefcase className="mr-2.5 h-5 w-5 text-[#4a6cfa]" />
-                  Experience
-                </h3>
-                {job.experienceLevel && (
-                  <p className="mb-2">
-                    <span className="font-medium">Level:</span> {job.experienceLevel.replace(/_/g, ' ')}
-                  </p>
-                )}
+            <div className="py-4 first:pt-0 last:pb-0">
+              <h3 className="text-lg font-medium flex items-center mb-3">
+                <Briefcase className="mr-2.5 h-5 w-5 text-[#4a6cfa]" />
+                Experience
+              </h3>
+              {job.experienceLevel && (
+                <p className="mb-2">
+                  <span className="font-medium">Level:</span> {job.experienceLevel.replace(/_/g, ' ')}
+                </p>
+              )}
+              {job.experienceRequirementsRichText ? (
+                <div 
+                  className="prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: parseJobDescription(job.experienceRequirementsRichText) }}
+                />
+              ) : job.experienceRequirements && job.experienceRequirements.length > 0 ? (
                 <ul className="list-disc pl-10 space-y-1">
                   {job.experienceRequirements.map((item: string, index: number) => (
                     <li key={index}>{item}</li>
                   ))}
                 </ul>
-              </div>
-            )}
+              ) : (
+                <p className="text-gray-500">No specific experience requirements specified</p>
+              )}
+            </div>
             
             {/* Skills */}
             {skills.length > 0 && (

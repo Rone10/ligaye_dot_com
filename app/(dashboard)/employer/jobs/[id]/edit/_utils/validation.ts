@@ -28,6 +28,8 @@ export const jobFormSchema = z.object({
   // Requirements
   educationRequirements: textArrayValidator,
   experienceRequirements: textArrayValidator,
+  educationRequirementsRichText: z.string().default(''),
+  experienceRequirementsRichText: z.string().default(''),
   experienceLevel: z.enum(experienceLevelEnum.enumValues).optional(),
   
   // Language

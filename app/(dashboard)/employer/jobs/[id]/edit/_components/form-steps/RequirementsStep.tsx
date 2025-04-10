@@ -39,6 +39,7 @@ import { ArrowLeft, ArrowRight, Plus, X, ChevronsUpDown, Check } from 'lucide-re
 import { JobFormValues } from '../../_utils/validation'
 import { cn } from '@/lib/utils'
 import { getAllSkills, getAllIndustries } from '../../_queries'
+import { Editor } from '@/components/RichTextEditor/editor'
 
 interface RequirementsStepProps {
   form: UseFormReturn<JobFormValues>
@@ -87,35 +88,7 @@ export default function RequirementsStep({ form, onNext, onPrevious }: Requireme
     fetchData();
   }, []);
   
-  const [tempEducation, setTempEducation] = useState('')
-  const [tempExperience, setTempExperience] = useState('')
   const [tempLanguage, setTempLanguage] = useState('')
-  
-  const handleAddEducation = () => {
-    if (tempEducation.trim()) {
-      const current = form.getValues('educationRequirements') || []
-      form.setValue('educationRequirements', [...current, tempEducation.trim()])
-      setTempEducation('')
-    }
-  }
-  
-  const handleRemoveEducation = (index: number) => {
-    const current = form.getValues('educationRequirements') || []
-    form.setValue('educationRequirements', current.filter((_, i) => i !== index))
-  }
-  
-  const handleAddExperience = () => {
-    if (tempExperience.trim()) {
-      const current = form.getValues('experienceRequirements') || []
-      form.setValue('experienceRequirements', [...current, tempExperience.trim()])
-      setTempExperience('')
-    }
-  }
-  
-  const handleRemoveExperience = (index: number) => {
-    const current = form.getValues('experienceRequirements') || []
-    form.setValue('experienceRequirements', current.filter((_, i) => i !== index))
-  }
   
   const handleAddLanguage = () => {
     if (tempLanguage.trim()) {
@@ -135,7 +108,9 @@ export default function RequirementsStep({ form, onNext, onPrevious }: Requireme
     const requirementsFieldsValid = form.trigger([
       'experienceLevel',
       'skillIds',
-      'industryIds'
+      'industryIds',
+      'educationRequirementsRichText',
+      'experienceRequirementsRichText'
     ])
     
     requirementsFieldsValid.then(isValid => {
@@ -182,83 +157,45 @@ export default function RequirementsStep({ form, onNext, onPrevious }: Requireme
         />
       </div>
       
-      <div className="space-y-4">
-        <FormLabel>Education Requirements</FormLabel>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {form.watch('educationRequirements')?.map((education, index) => (
-            <Badge key={index} variant="secondary" className="flex items-center gap-1">
-              {education}
-              <X 
-                className="h-3 w-3 cursor-pointer" 
-                onClick={() => handleRemoveEducation(index)} 
+      <FormField
+        control={form.control}
+        name="educationRequirementsRichText"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Education Requirements</FormLabel>
+            <FormControl>
+              <Editor
+                value={field.value}
+                onChange={field.onChange}
               />
-            </Badge>
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <Input 
-            value={tempEducation} 
-            onChange={(e) => setTempEducation(e.target.value)}
-            placeholder="e.g. Bachelor's degree in Computer Science" 
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                handleAddEducation()
-              }
-            }}
-          />
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="icon"
-            onClick={handleAddEducation}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-        <FormDescription>
-          Add educational qualifications required for this role
-        </FormDescription>
-      </div>
+            </FormControl>
+            <FormDescription>
+              Describe the educational qualifications required for this role
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       
-      <div className="space-y-4">
-        <FormLabel>Experience Requirements</FormLabel>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {form.watch('experienceRequirements')?.map((experience, index) => (
-            <Badge key={index} variant="secondary" className="flex items-center gap-1">
-              {experience}
-              <X 
-                className="h-3 w-3 cursor-pointer" 
-                onClick={() => handleRemoveExperience(index)} 
+      <FormField
+        control={form.control}
+        name="experienceRequirementsRichText"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Experience Requirements</FormLabel>
+            <FormControl>
+              <Editor
+                value={field.value}
+                onChange={field.onChange}
               />
-            </Badge>
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <Input 
-            value={tempExperience} 
-            onChange={(e) => setTempExperience(e.target.value)}
-            placeholder="e.g. 2 years of React development" 
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                handleAddExperience()
-              }
-            }}
-          />
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="icon"
-            onClick={handleAddExperience}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-        <FormDescription>
-          Add specific experience requirements for this role
-        </FormDescription>
-      </div>
+            </FormControl>
+            <FormDescription>
+              Describe the experience requirements for this role
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       
       <FormField
         control={form.control}

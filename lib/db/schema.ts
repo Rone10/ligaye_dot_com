@@ -11,7 +11,8 @@ import {
   index,
   unique,
   uniqueIndex,
-  foreignKey // Ensure foreignKey is imported if needed for explicit constraints, though references implies it.
+  foreignKey,
+  real
 } from 'drizzle-orm/pg-core';
 import { relations, InferInsertModel, InferSelectModel } from 'drizzle-orm'; // Use InferSelectModel for select types
 
@@ -230,8 +231,8 @@ export const jobs = pgTable('jobs', {
   displayAddress: boolean('display_address').default(true), // Show specific address tied to locationId if ON_SITE/HYBRID?
 
   // Requirements
-  educationRequirements: text('education_requirements').array().default([]), // Free text for now, could normalize later
-  experienceRequirements: text('experience_requirements').array().default([]), // Free text
+  educationRequirements: text('education_requirements').notNull().default(''), // Free text
+  experienceRequirements: text('experience_requirements').notNull().default(''), // Free text
   experienceLevel: experienceLevelEnum('experience_level'), // Nullable? Or default to Entry? Consider if always required.
 
   // Language requirements
@@ -253,8 +254,8 @@ export const jobs = pgTable('jobs', {
 
   // Salary - Add CHECK constraint possibility
   // CHECK (salaryRangeMax >= salaryRangeMin)
-  salaryRangeMin: integer('salary_range_min'),
-  salaryRangeMax: integer('salary_range_max'),
+  salaryRangeMin: real('salary_range_min'),
+  salaryRangeMax: real('salary_range_max'),
   salaryCurrency: text('salary_currency').default('GMD').notNull(),
   salaryFrequency: salaryFrequencyEnum('salary_frequency'), // Nullable if salary not specified
   salaryDisplayType: salaryDisplayTypeEnum('salary_display_type').default('NEGOTIABLE'), // Default to Negotiable

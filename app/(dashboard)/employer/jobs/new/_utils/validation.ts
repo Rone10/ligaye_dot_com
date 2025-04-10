@@ -28,6 +28,8 @@ export const jobFormSchema = z.object({
   // Requirements
   educationRequirements: textArrayValidator,
   experienceRequirements: textArrayValidator,
+  educationRequirementsRichText: z.string().default(''),
+  experienceRequirementsRichText: z.string().default(''),
   experienceLevel: z.enum(experienceLevelEnum.enumValues).optional(),
   
   // Language
@@ -48,8 +50,14 @@ export const jobFormSchema = z.object({
   plannedStartDate: z.coerce.date().optional(),
   
   // Salary
-  salaryRangeMin: z.coerce.number().nonnegative().optional(),
-  salaryRangeMax: z.coerce.number().nonnegative().optional(),
+  salaryRangeMin: z.union([
+    z.string().transform(val => val ? parseFloat(val) : undefined),
+    z.number()
+  ]).optional(),
+  salaryRangeMax: z.union([
+    z.string().transform(val => val ? parseFloat(val) : undefined),
+    z.number()
+  ]).optional(),
   salaryCurrency: z.string().default("GMD"),
   salaryFrequency: z.enum(salaryFrequencyEnum.enumValues).optional(),
   salaryDisplayType: z.enum(salaryDisplayTypeEnum.enumValues).default("NEGOTIABLE"),
