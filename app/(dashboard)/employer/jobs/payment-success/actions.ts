@@ -1,61 +1,56 @@
 'use server'
 
+import { redirect } from 'next/navigation'
 import { handleSuccessfulPayment } from '@/lib/stripe/stripe-actions'
+import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { jobs, payments } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 
 export async function processPayment(sessionId: string) {
   try {
-    // Enhanced logging
-    console.log(`Processing payment for session ID: ${sessionId}`)
+    if (!sessionId) {
+      return { success: false, error: 'No session ID provided' }
+    }
     
-    // First check if payment record exists
+    // Find the payment record to get the job ID
     const paymentRecord = await db()
-      .select()
+      .select({
+        id: payments.id,
+        jobId: payments.jobId,
+      })
       .from(payments)
-      .where(eq(payments.transactionId, sessionId))
+      .where(and(
+        eq(payments.transactionId, sessionId),
+        eq(payments.method, 'stripe'),
+        eq(payments.deleted, false)
+      ))
       .limit(1)
       .then(res => res[0])
     
     if (!paymentRecord) {
-      console.error(`Payment record not found for session ID: ${sessionId}`)
       return { success: false, error: 'Payment record not found' }
     }
     
-    if (!paymentRecord.jobId) {
-      console.error(`Job ID is missing in payment record for session ID: ${sessionId}`)
-      return { success: false, error: 'Job ID is missing in payment record' }
-    }
+    // Process the payment
+    await handleSuccessfulPayment(sessionId)
     
-    console.log(`Found payment record for session ID: ${sessionId}, job ID: ${paymentRecord.jobId}`)
+    // Revalidate paths
+    revalidatePath('/employer/jobs')
     
-    // Now check job status
-    const jobRecord = await db()
-      .select({ id: jobs.id, status: jobs.status })
-      .from(jobs)
-      .where(eq(jobs.id, paymentRecord.jobId))
-      .limit(1)
-      .then(res => res[0])
-    
-    if (!jobRecord) {
-      console.error(`Job record not found for payment with session ID: ${sessionId}`)
-      return { success: false, error: 'Job record not found' }
-    }
-    
-    console.log(`Current job status: ${jobRecord.status}`)
-    
-    // Process the payment if job is not already ACTIVE
-    if (jobRecord.status !== 'ACTIVE') {
-      await handleSuccessfulPayment(sessionId)
-      console.log(`Payment successfully processed for session ID: ${sessionId}`)
-      return { success: true }
-    } else {
-      console.log(`Job is already active for session ID: ${sessionId}`)
-      return { success: true, message: 'Job is already active' }
+    // Return success with job ID
+    return { 
+      success: true, 
+      message: 'Payment processed successfully',
+      jobId: paymentRecord.jobId
     }
   } catch (error) {
     console.error('Error processing payment:', error)
+    
+    if (error instanceof Error) {
+      return { success: false, error: error.message }
+    }
+    
     return { success: false, error: 'Failed to process payment' }
   }
 } 

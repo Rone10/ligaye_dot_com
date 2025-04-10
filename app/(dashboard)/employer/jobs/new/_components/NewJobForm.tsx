@@ -35,27 +35,39 @@ export default function NewJobForm({ locations }: NewJobFormProps) {
   const [createdJobId, setCreatedJobId] = useState<string | null>(null)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'failed'>('pending')
+  const [paymentDetails, setPaymentDetails] = useState<{sessionId?: string, jobId?: string} | null>(null)
   
   // Listen for messages from the Stripe window
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // Make sure the message is from a trusted source
-      // You can add additional validation if needed
+      console.log('[Form Debug] Received message:', event.data);
       
-      if (event.data && event.data.type === 'PAYMENT_SUCCESS') {
-        console.log('[Form Debug] Received payment success message:', event.data);
+      // Make sure the message is from a trusted source
+      if (typeof event.data === 'object' && event.data) {
+        // Handle payment success message
+        if (event.data.type === 'PAYMENT_SUCCESS') {
+          console.log('[Form Debug] Received payment success message:', event.data);
+          
+          // Store payment details
+          setPaymentDetails({
+            sessionId: event.data.sessionId,
+            jobId: event.data.jobId
+          });
+          
+          // Update payment status
+          setPaymentStatus('success');
+        }
         
-        // Hide the payment modal
-        setShowPaymentModal(false);
-        
-        // Update payment status
-        setPaymentStatus('success');
-        
-        // Refresh the jobs list to show the updated job status
-        setTimeout(() => {
-          router.push('/employer/jobs');
-          router.refresh();
-        }, 500);
+        // Handle window closing message
+        if (event.data.type === 'PAYMENT_SUCCESS_CLOSING') {
+          console.log('[Form Debug] Payment window is closing, updating UI');
+          
+          // Ensure modal remains open to show success state
+          setTimeout(() => {
+            // Display success state
+            setPaymentStatus('success');
+          }, 500);
+        }
       }
     };
     
@@ -66,7 +78,20 @@ export default function NewJobForm({ locations }: NewJobFormProps) {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [router]);
+  }, []);
+  
+  // Auto-redirect after successful payment if modal is closed
+  useEffect(() => {
+    if (paymentStatus === 'success' && !showPaymentModal) {
+      // Delay navigation to ensure UI updates are visible
+      const timer = setTimeout(() => {
+        router.push('/employer/jobs');
+        router.refresh();
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [paymentStatus, showPaymentModal, router]);
   
   // If stripeUrl is set, submit the form to redirect to Stripe
   useEffect(() => {
@@ -103,11 +128,21 @@ export default function NewJobForm({ locations }: NewJobFormProps) {
       setPaymentStatus('pending');
       
       // Open in a new window (not tab) with a reference the parent can use
-      const stripeWindow = window.open(stripeUrl, 'stripeCheckout', 'width=1000,height=800');
+      const stripeWindow = window.open(
+        stripeUrl, 
+        'stripeCheckout', 
+        'width=1000,height=800,top=100,left=100,resizable=yes,scrollbars=yes'
+      );
       
       // If window is blocked by popup blocker, fallback to redirect
       if (!stripeWindow) {
+        console.log('[Form Debug] Popup blocked, falling back to redirect');
         window.location.href = stripeUrl;
+      } else {
+        console.log('[Form Debug] Opened Stripe window successfully');
+        
+        // Focus the new window
+        stripeWindow.focus();
       }
     }
   };
@@ -183,13 +218,33 @@ export default function NewJobForm({ locations }: NewJobFormProps) {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full">
             <h3 className="text-xl font-semibold mb-4">Complete Your Payment</h3>
-            <p className="mb-4">Your job has been created successfully, but payment is required to publish it.</p>
             
             {paymentStatus === 'success' ? (
-              <div className="bg-green-50 text-green-700 p-4 rounded-md mb-4">
-                <p className="font-medium">Payment successful! Your job is now active.</p>
-              </div>
-            ) : null}
+              <>
+                <div className="flex items-center justify-center mb-6">
+                  <div className="rounded-full bg-green-100 p-3">
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className="h-12 w-12 text-green-600" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M5 13l4 4L19 7" 
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <h4 className="text-lg font-medium text-center mb-2">Payment Successful!</h4>
+                <p className="text-center mb-6">Your job posting has been activated and is now live.</p>
+              </>
+            ) : (
+              <p className="mb-4">Your job has been created successfully, but payment is required to publish it.</p>
+            )}
             
             <div className="flex flex-col gap-3 mt-6">
               {paymentStatus !== 'success' && (

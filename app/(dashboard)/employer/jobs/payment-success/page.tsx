@@ -33,35 +33,58 @@ export default function PaymentSuccessPage() {
             // First, try to refresh the parent window (the one that opened this)
             if (window.opener) {
               try {
-                // Send a message to the parent window to refresh
-                window.opener.postMessage({ type: 'PAYMENT_SUCCESS', sessionId }, '*')
+                // Send a detailed message to the parent window
+                window.opener.postMessage({
+                  type: 'PAYMENT_SUCCESS',
+                  sessionId,
+                  jobId: result.jobId,
+                  timestamp: new Date().toISOString()
+                }, '*');
+                
+                console.log('Sent success message to parent window');
+                
+                // Start countdown to auto-close
+                const timer = setInterval(() => {
+                  setCountdown((prev) => {
+                    if (prev <= 1) {
+                      clearInterval(timer)
+                      
+                      // Final confirmation message to parent before closing
+                      try {
+                        window.opener.postMessage({
+                          type: 'PAYMENT_SUCCESS_CLOSING',
+                          sessionId
+                        }, '*');
+                      } catch (e) {
+                        console.error('Error sending final message to parent:', e);
+                      }
+                      
+                      // Force close the window after countdown
+                      window.close()
+                      
+                      // If window doesn't close (e.g., it wasn't opened via window.open)
+                      // redirect to jobs page
+                      setTimeout(() => {
+                        router.push('/employer/jobs')
+                      }, 500)
+                      return 0
+                    }
+                    return prev - 1
+                  })
+                }, 1000)
+                
+                return () => clearInterval(timer)
               } catch (e) {
-                console.error('Error sending message to parent window:', e)
+                console.error('Error communicating with parent window:', e);
+                setIsProcessing(false);
               }
-              
-              // Start countdown to auto-close
-              const timer = setInterval(() => {
-                setCountdown((prev) => {
-                  if (prev <= 1) {
-                    clearInterval(timer)
-                    // Close the window after countdown
-                    window.close()
-                    // If window doesn't close (e.g., it wasn't opened via window.open)
-                    // redirect to jobs page
-                    setTimeout(() => {
-                      router.push('/employer/jobs')
-                    }, 500)
-                    return 0
-                  }
-                  return prev - 1
-                })
-              }, 1000)
-              
-              return () => clearInterval(timer)
+            } else {
+              // No opener, just show success
+              setIsProcessing(false);
             }
+          } else {
+            setIsProcessing(false);
           }
-          
-          setIsProcessing(false)
         } catch (err) {
           console.error('Error in payment confirmation:', err)
           setError('There was an error processing your payment. Please contact support.')
@@ -75,6 +98,32 @@ export default function PaymentSuccessPage() {
       setIsProcessing(false)
     }
   }, [sessionId, autoClose, router])
+
+  // Add a script to ensure window closes if browser blocks auto-close
+  useEffect(() => {
+    if (autoClose && !isProcessing && !error) {
+      // Create script element for window-close behavior
+      const script = document.createElement('script');
+      script.textContent = `
+        // Try to close after a short delay
+        setTimeout(() => {
+          try {
+            if (window.opener) {
+              window.opener.focus();
+            }
+            window.close();
+          } catch (e) {
+            console.error('Failed to auto-close window:', e);
+          }
+        }, ${countdown * 1000 + 500});
+      `;
+      document.body.appendChild(script);
+      
+      return () => {
+        document.body.removeChild(script);
+      };
+    }
+  }, [autoClose, isProcessing, error, countdown]);
 
   return (
     <DashboardShell>
