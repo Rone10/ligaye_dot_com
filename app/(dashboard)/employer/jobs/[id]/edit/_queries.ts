@@ -44,10 +44,7 @@ export async function getJobById(jobId: string) {
     const result = await db()
       .select()
       .from(jobs)
-      .where(and(
-        eq(jobs.id, jobId),
-        eq(jobs.status, 'ACTIVE') // Only get active jobs
-      ))
+      .where(eq(jobs.id, jobId))
       .limit(1)
     
     return result.length > 0 ? result[0] : null
