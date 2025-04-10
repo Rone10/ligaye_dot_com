@@ -13,8 +13,10 @@ export default function PaymentSuccessPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
+  const autoClose = searchParams.get('auto_close') === 'true'
   const [isProcessing, setIsProcessing] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [countdown, setCountdown] = useState(5)
 
   useEffect(() => {
     // Process the payment if session_id is present
@@ -26,6 +28,37 @@ export default function PaymentSuccessPage() {
           
           if (!result.success) {
             setError(result.error || 'There was an error processing your payment. Please contact support.')
+          } else if (autoClose) {
+            // If auto-close is enabled and payment was successful
+            // First, try to refresh the parent window (the one that opened this)
+            if (window.opener) {
+              try {
+                // Send a message to the parent window to refresh
+                window.opener.postMessage({ type: 'PAYMENT_SUCCESS', sessionId }, '*')
+              } catch (e) {
+                console.error('Error sending message to parent window:', e)
+              }
+              
+              // Start countdown to auto-close
+              const timer = setInterval(() => {
+                setCountdown((prev) => {
+                  if (prev <= 1) {
+                    clearInterval(timer)
+                    // Close the window after countdown
+                    window.close()
+                    // If window doesn't close (e.g., it wasn't opened via window.open)
+                    // redirect to jobs page
+                    setTimeout(() => {
+                      router.push('/employer/jobs')
+                    }, 500)
+                    return 0
+                  }
+                  return prev - 1
+                })
+              }, 1000)
+              
+              return () => clearInterval(timer)
+            }
           }
           
           setIsProcessing(false)
@@ -41,7 +74,7 @@ export default function PaymentSuccessPage() {
       setError('No payment session found. Please contact support if your job posting is not active.')
       setIsProcessing(false)
     }
-  }, [sessionId])
+  }, [sessionId, autoClose, router])
 
   return (
     <DashboardShell>
@@ -86,7 +119,9 @@ export default function PaymentSuccessPage() {
               ? 'Please wait while we confirm your payment...'
               : error
               ? error
-              : 'Your job posting has been successfully activated.'}
+              : autoClose 
+                ? `Your job posting has been activated. This window will close in ${countdown} seconds.`
+                : 'Your job posting has been successfully activated.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -99,20 +134,30 @@ export default function PaymentSuccessPage() {
           )}
         </CardContent>
         <CardFooter className="flex justify-center">
-          <Button
-            onClick={() => router.push('/employer/jobs')}
-            className="gap-2"
-            disabled={isProcessing}
-          >
-            {isProcessing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                Go to My Jobs
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </Button>
+          {autoClose ? (
+            <Button
+              onClick={() => window.close()}
+              className="gap-2"
+              disabled={isProcessing}
+            >
+              Close Window Now
+            </Button>
+          ) : (
+            <Button
+              onClick={() => router.push('/employer/jobs')}
+              className="gap-2"
+              disabled={isProcessing}
+            >
+              {isProcessing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  Go to My Jobs
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </DashboardShell>

@@ -27,9 +27,14 @@ export async function createStripeCheckoutSession({
   userId,
 }: CreateCheckoutSessionParams) {
   try {
-    // Create the success and cancel URLs
-    const successUrl = `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/employer/jobs/payment-success?session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/employer/jobs/payment-cancel?job_id=${jobId}`;
+    // Build the base URL
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    
+    // Create the success URL that will close the window after processing
+    const successUrl = `${baseUrl}/employer/jobs/payment-success?session_id={CHECKOUT_SESSION_ID}&auto_close=true`;
+    
+    // The cancel URL remains the same
+    const cancelUrl = `${baseUrl}/employer/jobs/payment-cancel?job_id=${jobId}`;
 
     // Create the Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -54,6 +59,7 @@ export async function createStripeCheckoutSession({
         jobId,
         employerProfileId,
         type: 'job_posting',
+        originUrl: baseUrl,
       },
     });
 

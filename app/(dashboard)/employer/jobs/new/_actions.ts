@@ -21,6 +21,10 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
     // Validate form data
     const validatedData = jobFormSchema.parse(formData)
     
+    // Log payment info for debugging
+    console.log('[Action Debug] Payment Method:', validatedData.paymentMethod);
+    console.log('[Action Debug] Job Duration:', validatedData.jobDuration);
+    
     // Get the current user
     const user = await getUser()
     if (!user) {
@@ -53,12 +57,16 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
     }
     
     // Calculate expiry date based on duration
+    console.log('[Action Debug] Job Duration:', validatedData.jobDuration);
     const expiresAt = await calculateExpiryDate(validatedData.jobDuration)
+    console.log('[Action Debug] Calculated expiresAt:', expiresAt);
     
     // Determine initial job status based on payment method
     const initialStatus = validatedData.paymentMethod === 'cash' 
       ? jobStatusEnum.enumValues[1] // 'PENDING_PAYMENT'
       : jobStatusEnum.enumValues[0] // 'DRAFT'
+    
+    console.log('[Action Debug] Initial job status:', initialStatus);
     
     // Generate a simple slug
     const slug = `${validatedData.title.toLowerCase().replace(/\s+/g, '-')}-${uuidv4().slice(0, 8)}`
@@ -83,10 +91,15 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
       ...baseJobData 
     } = jobData
     
+    // Log the array fields for debugging
+    console.log('[Action Debug] Education Requirements (type):', typeof educationRequirements, Array.isArray(educationRequirements));
+    console.log('[Action Debug] Experience Requirements (type):', typeof experienceRequirements, Array.isArray(experienceRequirements));
+    
+    // Convert arrays to strings properly based on schema requirement
     const jobDataToInsert = {
       ...baseJobData,
-      educationRequirements: educationRequirements.join('\n'), // Join array elements with newline
-      experienceRequirements: experienceRequirements.join('\n') // Join array elements with newline
+      educationRequirements: Array.isArray(educationRequirements) ? educationRequirements.join('\n') : '',
+      experienceRequirements: Array.isArray(experienceRequirements) ? experienceRequirements.join('\n') : ''
     };
     
     // Insert the job (and related records)
@@ -96,14 +109,18 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
       validatedData.industryIds
     )
     
+    console.log('[Action Debug] New job created with ID:', newJob.id);
+    
     // Calculate payment amount (simple example: $50 per month)
     const paymentAmount = validatedData.jobDuration * 5000 // $50 in cents per month
+    console.log('[Action Debug] Calculated paymentAmount (cents):', paymentAmount);
     
     // Handle payment method
     if (validatedData.paymentMethod === 'stripe') {
       try {
         // Create a Stripe checkout session
-        const { sessionUrl } = await createStripeCheckoutSession({
+        console.log('[Action Debug] Creating Stripe checkout session...');
+        const stripeResult = await createStripeCheckoutSession({
           jobId: newJob.id,
           employerProfileId: result.employerProfileId,
           paymentAmount,
@@ -113,10 +130,35 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
           userId: user.id
         });
         
-        // Return the Stripe checkout URL for client-side redirect
-        return { jobId: newJob.id, paymentUrl: sessionUrl };
+        const sessionUrl = stripeResult.sessionUrl;
+        const sessionId = stripeResult.sessionId || '';
+        
+        console.log('[Action Debug] Stripe session URL created:', sessionUrl ? 'URL received' : 'NO URL RECEIVED');
+        console.log('[Action Debug] Session ID:', sessionId);
+        console.log('[Action Debug] Actual URL (partial for security):', sessionUrl ? `${sessionUrl.substring(0, 30)}...` : 'none');
+        
+        // Create a specific response object for Stripe payments with a job ID and direct URL
+        const stripeResponse = {
+          success: true,
+          jobId: newJob.id,
+          paymentUrl: sessionUrl,
+          paymentMethod: 'stripe'
+        };
+        
+        console.log('[Action Debug] Final response object:', JSON.stringify(stripeResponse, null, 2));
+        
+        // Return the response with URL
+        return stripeResponse;
       } catch (stripeError) {
-        console.error('Error creating Stripe checkout session:', stripeError);
+        console.error('[Action Debug] Entered CATCH block for Stripe session creation.');
+        console.error('[Action Debug] Error creating Stripe checkout session:', stripeError);
+        
+        // Log structure of the error if possible
+        if (stripeError instanceof Error) {
+          console.error('[Action Debug] Stripe Error Name:', stripeError.name);
+          console.error('[Action Debug] Stripe Error Message:', stripeError.message);
+          console.error('[Action Debug] Stripe Error Stack:', stripeError.stack);
+        }
         
         // If Stripe session creation fails, default to DRAFT status
         await db()
@@ -151,8 +193,9 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
       return { jobId: newJob.id, status: 'PENDING_PAYMENT' }
     }
   } catch (error) {
-    console.error('Error creating job posting:', error)
+    console.error('[Action Debug] Error creating job posting:', error)
     if (error instanceof z.ZodError) {
+      console.error('[Action Debug] ZodError details:', JSON.stringify(error.format(), null, 2));
       return { error: 'Invalid form data. Please check your entries.' }
     }
     return { error: 'Failed to create job posting. Please try again.' }
