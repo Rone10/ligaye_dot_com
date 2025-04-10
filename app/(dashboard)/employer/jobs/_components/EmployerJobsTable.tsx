@@ -171,14 +171,14 @@ export default function EmployerJobsTable({ jobs }: EmployerJobsTableProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link href={`/jobs/${job.id}`}>
+                        <Link href={`/employer/jobs/${job.id}`}>
                           <Eye className="mr-2 h-4 w-4" /> View
                         </Link>
                       </DropdownMenuItem>
                       {job.status !== 'DELETED' && (
                         <>
                           <DropdownMenuItem asChild>
-                            <Link href={`/employer/jobs/edit/${job.id}`}>
+                            <Link href={`/employer/jobs/${job.id}/edit`}>
                               <Edit className="mr-2 h-4 w-4" /> Edit
                             </Link>
                           </DropdownMenuItem>
@@ -186,6 +186,7 @@ export default function EmployerJobsTable({ jobs }: EmployerJobsTableProps) {
                             <Copy className="mr-2 h-4 w-4" /> Duplicate
                           </DropdownMenuItem>
                           <DropdownMenuItem>
+                            
                             <Trash className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </>
