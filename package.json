@@ -9,7 +9,8 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "email:dev": "email dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -41,6 +42,8 @@
     "@radix-ui/react-toggle": "^1.1.2",
     "@radix-ui/react-toggle-group": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.8",
+    "@react-email/components": "0.0.36",
+    "@react-email/img": "0.0.11",
     "@shadcn/ui": "^0.0.4",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.49.1",
@@ -109,5 +112,6 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "react-email": "4.0.7"
   }
 }
