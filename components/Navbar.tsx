@@ -3,9 +3,16 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { Poppins } from 'next/font/google';
 import { Button } from '@/components/ui/button';
 import { BriefcaseIcon, Menu, Search, User, X, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+
+const poppins = Poppins({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 interface NavbarProps {
   user: any | null;
@@ -46,7 +53,7 @@ export default function Navbar({ user }: NavbarProps) {
         <div className="flex items-center">
           <Link href="/" className="flex items-center gap-2">
             <BriefcaseIcon className="h-6 w-6 text-primary-blue" />
-            <span className="font-bold text-xl text-dark">Ligaye.com</span>
+            <span className={`${poppins.className} font-bold text-xl text-[#0041A2]`}>Ligaye.com</span>
           </Link>
         </div>
         
