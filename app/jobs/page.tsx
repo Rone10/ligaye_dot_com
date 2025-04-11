@@ -90,7 +90,7 @@ export default async function JobsPage({ searchParams }: PageProps) {
                 <div className="mt-4 flex justify-between items-center">
                   <div className="text-gray-700">Published: {job.publishedAt?.toLocaleDateString()}</div>
                   <a 
-                    href={`/jobs/${job.slug || job.id}`} 
+                    href={`/jobs/${job.id}`} 
                     className="text-blue-600 hover:text-blue-800 font-medium"
                   >
                     View Details →
