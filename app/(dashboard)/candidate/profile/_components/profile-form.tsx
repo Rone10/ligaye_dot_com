@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import BasicInfoSection from './basic-info-section';
@@ -12,10 +12,18 @@ import { CandidateProfileData } from '../_queries';
 
 interface ProfileFormProps {
   initialData?: CandidateProfileData;
+  defaultTab?: string;
 }
 
-export default function ProfileForm({ initialData }: ProfileFormProps) {
-  const [activeTab, setActiveTab] = useState('basic');
+export default function ProfileForm({ initialData, defaultTab }: ProfileFormProps) {
+  const [activeTab, setActiveTab] = useState(defaultTab || 'basic');
+
+  // Update active tab when defaultTab changes
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab]);
 
   return (
     <Card className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">

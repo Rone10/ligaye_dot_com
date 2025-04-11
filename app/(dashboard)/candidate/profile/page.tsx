@@ -4,10 +4,13 @@ import { getCandidateProfile } from './_queries';
 import ProfileForm from './_components/profile-form';
 
 interface PageProps {
-  params: Promise<{}>
+  params: Promise<{}>;
+  searchParams: Promise<{
+    tab?: string;
+  }>;
 }
 
-export default async function CandidateProfilePage({ params }: PageProps) {
+export default async function CandidateProfilePage({ params, searchParams }: PageProps) {
   // Get logged-in user
   const user = await getUser();
   
@@ -15,6 +18,9 @@ export default async function CandidateProfilePage({ params }: PageProps) {
   if (!user) {
     redirect('/sign-in');
   }
+  
+  // Get tab from search params
+  const { tab } = await searchParams;
   
   // Fetch candidate profile data
   const profileData = await getCandidateProfile(user.id);
@@ -31,9 +37,9 @@ export default async function CandidateProfilePage({ params }: PageProps) {
         </div>
         
         {hasProfile ? (
-          <ProfileForm initialData={profileData} />
+          <ProfileForm initialData={profileData} defaultTab={tab} />
         ) : (
-          <ProfileForm />
+          <ProfileForm defaultTab={tab} />
         )}
       </div>
     </div>

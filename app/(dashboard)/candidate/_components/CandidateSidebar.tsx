@@ -42,7 +42,7 @@ const navItems = [
   },
   {
     name: 'My Resume',
-    href: '/candidate/resume',
+    href: '/candidate/profile?tab=resume',
     icon: FileText
   },
   {
