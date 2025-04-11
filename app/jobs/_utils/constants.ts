@@ -72,9 +72,12 @@ export const experienceLevelOptions = Object.entries(experienceLevelLabels).map(
 
 // Format currency value
 export function formatCurrency(amount: number, currency: string = 'GMD'): string {
+  // Ensure currency is not empty, default to GMD
+  const currencyCode = currency && currency.trim() ? currency : 'GMD';
+  
   return new Intl.NumberFormat('en-GM', {
     style: 'currency',
-    currency,
+    currency: currencyCode,
     maximumFractionDigits: 0
   }).format(amount);
 }

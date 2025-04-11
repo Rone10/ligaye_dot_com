@@ -126,17 +126,11 @@ export default function JobDetails({ job, location, skills = [], industries = []
                 <GraduationCap className="mr-2.5 h-5 w-5 text-[#4a6cfa]" />
                 Education
               </h3>
-              {job.educationRequirementsRichText ? (
+              {job.educationRequirements ? (
                 <div 
                   className="prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: parseJobDescription(job.educationRequirementsRichText) }}
+                  dangerouslySetInnerHTML={{ __html: parseJobDescription(job.educationRequirements) }}
                 />
-              ) : typeof job.educationRequirements === 'string' && job.educationRequirements.trim() ? (
-                <ul className="list-disc pl-10 space-y-1">
-                  {job.educationRequirements.split('\n').filter((item: string) => item.trim()).map((item: string, index: number) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
               ) : (
                 <p className="text-gray-500">No specific education requirements specified</p>
               )}
@@ -153,17 +147,11 @@ export default function JobDetails({ job, location, skills = [], industries = []
                   <span className="font-medium">Level:</span> {job.experienceLevel.replace(/_/g, ' ')}
                 </p>
               )}
-              {job.experienceRequirementsRichText ? (
+              {job.experienceRequirements ? (
                 <div 
                   className="prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: parseJobDescription(job.experienceRequirementsRichText) }}
+                  dangerouslySetInnerHTML={{ __html: parseJobDescription(job.experienceRequirements) }}
                 />
-              ) : typeof job.experienceRequirements === 'string' && job.experienceRequirements.trim() ? (
-                <ul className="list-disc pl-10 space-y-1">
-                  {job.experienceRequirements.split('\n').filter((item: string) => item.trim()).map((item: string, index: number) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
               ) : (
                 <p className="text-gray-500">No specific experience requirements specified</p>
               )}
@@ -357,20 +345,23 @@ export default function JobDetails({ job, location, skills = [], industries = []
                 </li>
               )}
               
-              {job.salaryDisplayType !== 'NONE' && (
+              {job.salaryRangeMin || job.salaryRangeMax ? (
                 <li className="flex items-start p-4 bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
                   <Banknote className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                   <div>
                     <span className="block font-medium text-[#1a1e2d]">Salary</span>
                     <span className="text-gray-600">
-                      {job.salaryDisplayType === 'RANGE' && `${job.salaryCurrency} ${job.salaryRangeMin?.toLocaleString()} - ${job.salaryRangeMax?.toLocaleString()} ${job.salaryFrequency?.toLowerCase() || 'per year'}`}
-                      {job.salaryDisplayType === 'STARTING_AT' && `Starting at ${job.salaryCurrency} ${job.salaryRangeMin?.toLocaleString()} ${job.salaryFrequency?.toLowerCase() || 'per year'}`}
-                      {job.salaryDisplayType === 'UP_TO' && `Up to ${job.salaryCurrency} ${job.salaryRangeMax?.toLocaleString()} ${job.salaryFrequency?.toLowerCase() || 'per year'}`}
-                      {job.salaryDisplayType === 'EXACT' && `${job.salaryCurrency} ${job.salaryRangeMin?.toLocaleString()} ${job.salaryFrequency?.toLowerCase() || 'per year'}`}
+                      {job.salaryDisplayType === 'RANGE' && `${job.salaryCurrency || 'GMD'} ${job.salaryRangeMin?.toLocaleString()} - ${job.salaryRangeMax?.toLocaleString()} ${job.salaryFrequency?.toLowerCase() || 'per year'}`}
+                      {job.salaryDisplayType === 'FIXED' && `${job.salaryCurrency || 'GMD'} ${job.salaryRangeMin?.toLocaleString()}/${job.salaryFrequency?.toLowerCase() || 'per year'}`}
+                      {job.salaryDisplayType === 'STARTING_AMOUNT' && `Starting at ${job.salaryCurrency || 'GMD'} ${job.salaryRangeMin?.toLocaleString()}/${job.salaryFrequency?.toLowerCase() || 'per year'}`}
+                      {job.salaryDisplayType === 'MAXIMUM_AMOUNT' && `Up to ${job.salaryCurrency || 'GMD'} ${job.salaryRangeMax?.toLocaleString()}/${job.salaryFrequency?.toLowerCase() || 'per year'}`}
+                      {job.salaryDisplayType === 'NEGOTIABLE' && 'Salary Negotiable'}
+                      {job.salaryDisplayType === 'NULL' && `${job.salaryCurrency || 'GMD'} ${job.salaryRangeMin?.toLocaleString()}/${job.salaryFrequency?.toLowerCase() || 'per year'}`}
+                      {!job.salaryDisplayType && `${job.salaryCurrency || 'GMD'} ${job.salaryRangeMin?.toLocaleString() || ''} ${job.salaryRangeMax ? `- ${job.salaryRangeMax?.toLocaleString()}` : ''} ${job.salaryFrequency?.toLowerCase() || 'per month'}`}
                     </span>
                   </div>
                 </li>
-              )}
+              ) : null}
             </ul>
           </CardContent>
         </Card>

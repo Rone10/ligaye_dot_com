@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Calendar, Clock, MapPin, Building, Briefcase, DollarSign, User } from 'lucide-react'
+import { Calendar, Clock, MapPin, Building, Briefcase, User, BookmarkPlus } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatSalaryDisplay, jobTypeLabels, workLocationLabels, experienceLevelLabels } from '../../_utils/constants'
@@ -67,10 +67,17 @@ export default function JobHeader({ job }: JobHeaderProps) {
         <div className="flex gap-3 mt-4 md:mt-0">
           <a
             href="#apply"
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
           >
             Apply Now
           </a>
+          <Button 
+            variant="outline" 
+            className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-md border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 whitespace-nowrap h-auto"
+          >
+            <BookmarkPlus className="h-4 w-4 text-[#4a6cfa] mr-2" />
+            <span>Save Job</span>
+          </Button>
         </div>
       </div>
       
@@ -98,12 +105,14 @@ export default function JobHeader({ job }: JobHeaderProps) {
         
         {(job.salaryRangeMin || job.salaryRangeMax) && (
           <div className="flex items-center px-2.5 py-1 rounded-full bg-white border border-gray-200">
-            <DollarSign className="mr-1.5 h-4 w-4 text-[#4a6cfa]" />
+            <div className="bg-blue-100 text-blue-800 rounded-full h-5 w-auto px-1.5 text-xs font-bold flex items-center justify-center mr-1.5">
+              {job.salaryCurrency || 'GMD'}
+            </div>
             <span className="font-medium">
               {formatSalaryDisplay({
                 min: job.salaryRangeMin,
                 max: job.salaryRangeMax,
-                currency: job.salaryCurrency,
+                currency: job.salaryCurrency || 'GMD',
                 frequency: job.salaryFrequency,
                 displayType: job.salaryDisplayType
               })}
