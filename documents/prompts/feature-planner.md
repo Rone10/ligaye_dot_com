@@ -37,85 +37,75 @@ Please proceed with your analysis and implementation plan based on the following
 
 `<user instructions>`
 
-Implement the Job Posting feature for employers on the Ligaye.com platform. This includes creating a job posting form, handling the submission process with payment options (Stripe/Cash), and providing a basic view for employers to see their own postings. Additionally, implement the main sidebar navigation for the employer dashboard section. Adhere strictly to the project's VSA, conventions (`base-knowledge.md`), schema (`schema.ts`), style guide (`style-guide.md`), and specific technical requirements below.
+Implement the core job discovery features for Ligaye.com, including listing jobs, providing search and filtering capabilities, and displaying detailed job information. Ensure the implementation strictly follows the project's VSA, conventions (`base-knowledge.md`), database schema (`schema.ts`), and specific technical requirements outlined below.
 
 **General Requirements:**
 
-1.  **Architecture:** Implement using the granular Vertical Slice Architecture (VSA).
-    *   The Employer Dashboard Sidebar logic belongs in `app/(dashboard)/employer/layout.tsx`.
-    *   The Job Posting Form resides in its own slice: `app/(dashboard)/employer/jobs/new/`.
-    *   The list of employer's job postings resides in its slice: `app/(dashboard)/employer/jobs/`.
-    *   Ensure co-location of components (`_components/`), actions (`_actions.ts`), queries (`_queries.ts`), validation (`_utils/validation.ts`), and hooks (`_hooks/`) within their respective feature slices.
-2.  **Data:** Use Drizzle ORM via functions in slice-specific `_queries.ts` files for all interactions with `jobs`, `payments`, `jobSkills`, `jobIndustries`, `locations`, `skills`, `industries`, etc. Refer to `schema.ts` for table structures and relationships.
+1.  **Architecture:** Implement using the granular Vertical Slice Architecture (VSA). Code related to the job listing/filtering will reside primarily in `app/jobs/`, while code for the job detail view will be in `app/jobs/[id]/` (using `id` from the `jobs` table for the route parameter is preferred). Ensure co-location of components (`_components/`), queries (`_queries.ts`), hooks (`_hooks/`), etc., within their respective slices.
+2.  **Data:** Use Drizzle ORM via functions in slice-specific `_queries.ts` for all data fetching from the `jobs` table and related tables (`employerProfiles`, `locations`, `skills` via `jobSkills`, etc.). Queries should only return non-deleted (`deleted=false` or appropriate `status`) and active/published (`status='ACTIVE'`, `expiresAt` > now) jobs unless specifically for admin views (which is not part of this feature).
 3.  **Technology:**
-    *   **Forms:** Use React Hook Form (RHF) and Zod (`_utils/validation.ts`) for the job posting form.
-    *   **Rich Text Editor:** Use the pre-configured Syncfusion Rich Text Editor component imported from `@/components/RichTextEditor/editor` for the job `description` field, following the example usage provided.
-    *   **Mutations:** Use Server Actions (`_actions.ts`) for handling form submissions, creating job records, initiating payment flows, and potentially updating job statuses post-payment.
-    *   **UI:** Implement UI using Shadcn UI components (`components/ui/`). Strictly adhere to `style-guide.md` for appearance, including glassmorphism and shadows where appropriate.
-    *   **Responsiveness:** Ensure the sidebar, forms, and job lists are fully responsive and optimized for mobile devices.
+    *   **URL State Management:** Utilize `nuqs` for managing search and filter parameters in the URL on the job listing page (`app/jobs/`). The relevant client-side component(s) will use `nuqs` hooks (likely defined in `app/jobs/_hooks/`) to read/write filter state to the URL. 
+    *   **UI:** Implement UI elements using Shadcn UI components (`components/ui/`). Adhere strictly to the visual guidelines specified in `style-guide.md` (glassmorphism, shadows, elevation).
+    *   **Responsiveness:** All components, especially the job list, job cards, filters, and detail page layout, **must** be fully responsive and optimized for mobile devices.
+    *   Server Actions (`_actions.ts`) are likely *not* the primary mechanism here, as this is mainly data fetching, but could be used if any interactive elements require server mutations (e.g., a "quick apply" directly from the list - though the main flow goes to the detail page).
+
+4. **Statement Management API (`nuqs`)**
+- We'll be using nuqs for the URL state management in this feature for filtering the jobs listing page. 
+- the package has already been installed and configured properly.
+- you can read about how to implement it in `documents/nuqs-docs.md`.
 
 **Specific Feature Implementations:**
 
-**1. Employer Dashboard Sidebar (`app/(dashboard)/employer/layout.tsx`)**
+**1. Job Listing & Filtering Page (`app/jobs/`)**
 
-*   **Purpose:** Provide consistent navigation for the employer section of the dashboard.
-*   **Target File:** `app/(dashboard)/employer/layout.tsx`
+*   **Purpose:** Display a list of available job postings with robust search and filtering capabilities. Corresponds to "Job Search and Application" flow start in `app-flow.md`.
+*   **Target Route Slice:** `app/jobs/`
 *   **Key Functionality:**
-    *   Implement a persistent sidebar navigation component on the left side of the employer dashboard pages.
-    *   Include navigation links to key employer sections (e.g., "Dashboard Overview", "Post a Job" -> `/employer/jobs/new`, "My Job Postings" -> `/employer/jobs`, "Company Profile" -> `/employer/profile`, "Applicants" - link might point to `/employer/jobs` initially).
-    *   The sidebar must be collapsible on small screens, with a standard hamburger menu icon to toggle visibility.
-    *   Style the sidebar according to `style-guide.md`.
-*   **Implementation:** Define the sidebar structure and navigation items within the `layout.tsx` file. Use state management within the layout (or a dedicated client component imported into the layout) to handle the collapsible state.
-
-**2. Job Posting Form (`app/(dashboard)/employer/jobs/new/`)**
-
-*   **Purpose:** Allow logged-in employers to create and submit new job postings.
-*   **Target Route Slice:** `app/(dashboard)/employer/jobs/new/`
-*   **Key Functionality:**
-    *   **Form Fields:** Create a comprehensive form using RHF/Zod that captures all necessary job details based on the `jobs` table schema in `schema.ts`. This includes:
-        *   `title`, `description` (using Syncfusion Editor), `jobLanguage`, `numberOfOpenings`, `displayAddress`.
-        *   `locationId` (UI to select from `locations` table), `workLocation` (enum).
-        *   `educationRequirements` (text array?), `experienceRequirements` (text array?), `experienceLevel` (enum).
-        *   `languageRequirements` (text array?), `languageTrainingProvided` (boolean).
-        *   `jobType` (enum), `schedule` (enum array?), `expectedHours`, `hoursType`.
-        *   `contractLength`, `contractPeriod` (conditional based on `jobType`).
-        *   `plannedStartDate`.
-        *   Salary fields (`salaryRangeMin`, `salaryRangeMax`, `salaryCurrency`, `salaryFrequency`, `salaryDisplayType`).
-        *   `supplementalPay` (text array?), `benefits` (text array?).
-        *   Skills (UI to select multiple skills from `skills` table - to be saved in `jobSkills`).
-        *   Industries (UI to select multiple industries from `industries` table - to be saved in `jobIndustries`).
-        *   Application settings (`applicationMethod`, `applicationInstructions`, `applicationUrl`, `applicationEmail`, `resumeRequired`, `allowCandidateContact`, `applicationDeadline`).
-        *   **Job Duration/Expiry:** Include a field to select the desired job posting duration (e.g., 1 month, 2 months). This will be used later (likely in the Server Action/payment logic) to calculate the `expiresAt` timestamp.
-        *   **Payment Method Selection:** Radio buttons or similar to choose 'Stripe' or 'Cash'.
-    *   **Validation:** Define a comprehensive Zod schema in `_utils/validation.ts` covering all required fields and formats.
+    *   **Fetch Jobs:** Retrieve a paginated list of active/published jobs based on current filter criteria.
+    *   **Search Bar:** Allow users to search by keywords (matching against `jobs.title`, `jobs.description`, potentially `skills.name`, `employerProfiles.companyName`).
+    *   **Filters:** Provide UI controls (dropdowns, checkboxes, sliders, etc.) to filter jobs by:
+        *   Location (using data from `locations` table, potentially region, district, city).
+        *   Job Type (using `jobTypeEnum`).
+        *   Work Location (using `workLocationEnum`).
+        *   Experience Level (using `experienceLevelEnum`).
+        *   Salary Range (min/max).
+        *   Industry (using data from `industries` via `jobIndustries`).
+        *   Other relevant fields from `jobs` schema as deemed necessary (e.g., `schedule`).
+    *   **URL State:** Use `nuqs` to reflect the current keyword search and selected filters in the URL query parameters. Changes in the UI controls should update the URL, and the page should read the URL on load to set the initial filter state and trigger data fetching.
+    *   **Display Results:** Render the filtered and paginated job results using a reusable job card component. Include pagination controls.
 *   **UI Structure:**
-    *   `page.tsx`: Can be a Server Component rendering the main form component.
-    *   `_components/NewJobForm.tsx` (`'use client'`): The main form component using RHF, Zod resolver, Shadcn UI components, and the Syncfusion Editor. Handles form state and submission triggering. May include sub-components for complex sections like skill/industry/location selection.
-*   **Data Flow (Write):** `NewJobForm.tsx` submits validated data -> Calls Server Action `createJobPosting` in `./_actions.ts`.
-*   **Server Action (`_actions.ts` -> `createJobPosting`):**
-    *   Receives validated form data, selected job duration, and chosen payment method.
-    *   Retrieves the logged-in employer's `profileId` and `employerProfileId` (likely via `getUser()` and a quick query).
-    *   Calculates `expiresAt` based on the selected duration.
-    *   Determines the initial `jobs.status`:
-        *   If 'Cash' selected: `status = 'PENDING_PAYMENT'`.
-        *   If 'Stripe' selected: `status = 'DRAFT'` (or 'PENDING_PAYMENT' until Stripe confirms).
-    *   Calls a function in `./_queries.ts` (e.g., `insertNewJob`) to insert the main job record into the `jobs` table and associated records into `jobSkills` and `jobIndustries`. This query function should handle the creation of related records within a transaction if possible using Drizzle's transaction API.
-    *   **Payment Handling:**
-        *   **Cash:** After successful insertion with `PENDING_PAYMENT` status, potentially create a record in the `payments` table with `status='pending'`, `method='cash'`. Redirect user to a confirmation page ("Job submitted, pending payment confirmation").
-        *   **Stripe:** After successful insertion (maybe still as `DRAFT` or `PENDING_PAYMENT`), initiate the Stripe payment flow (e.g., create a Checkout session associated with the new `jobId` and payment amount based on duration). This might involve calling a separate Stripe-specific service/action. Redirect the user to the Stripe Checkout URL. A separate mechanism (webhook handler - outside the scope of *this* instruction set but needs consideration) will be required to listen for successful Stripe payments and update the corresponding `jobs.status` to `'ACTIVE'` and potentially create the `payments` record.
-    *   Returns success/error state or performs redirect.
-*   **Data Query (`_queries.ts` -> `insertNewJob`):** Handles inserting data into `jobs`, `jobSkills`, `jobIndustries`. Should accept all necessary data from the action. Use transactions for atomicity.
+    *   `page.tsx`: Likely needs to be a Client Component (`'use client'`) or contain one to manage interaction with `nuqs` and the filter UI state. It orchestrates fetching data based on the URL state.
+    *   `_components/`:
+        *   `JobFilters.tsx` (`'use client'`): Contains the search bar and all filter controls. Uses `nuqs` hooks (from `_hooks/`) to manage state.
+        *   `JobList.tsx`: Renders the list of job cards based on data passed from `page.tsx`. Might handle pagination display.
+        *   `JobCard.tsx`: Displays summary information for a single job (title, company, location, salary snippet, date posted). Should link to the corresponding job detail page (`/jobs/[id]`). This component *might* be reusable on the detail page or other areas, consider if it belongs here or potentially slightly higher up if truly generic *within the job context*. For now, place in `app/jobs/_components/`.
+    *   `_hooks/`:
+        *   `useJobFilters.ts` (`'use client'`): Custom hook encapsulating `nuqs` logic for parsing and updating job filter parameters in the URL.
+    *   `_utils/`: May contain validation schemas (`validation.ts`) for filter inputs if needed.
+*   **Data Flow:**
+    *   **Client (`JobFilters.tsx`, `page.tsx`, `useJobFilters.ts`):** User interacts with filters -> `nuqs` hook updates URL -> `page.tsx` detects URL change -> Triggers data re-fetch, passing current filters.
+    *   **Server (`page.tsx` on re-render/navigation, called from client fetch):** Receives filter parameters (parsed from URL state) -> Calls function in `./_queries.ts` (e.g., `getFilteredJobs(filters, pagination)`).
+    *   **Query (`_queries.ts` -> `getFilteredJobs`):** Constructs a Drizzle query based on the provided filters (keywords, locationId, jobType, etc.) and pagination settings. Fetches relevant data, joining necessary tables (`employerProfiles`, `locations`, etc.). Returns paginated job list.
 
-**3. My Job Postings View (`app/(dashboard)/employer/jobs/`)**
+**2. Job Detail Page (`app/jobs/[id]/`)**
 
-*   **Purpose:** Allow employers to view a list of the jobs they have posted.
-*   **Target Route Slice:** `app/(dashboard)/employer/jobs/`
+*   **Purpose:** Display comprehensive information about a single job posting. Allow users to initiate the application process (details of the application submission itself are a separate feature).
+*   **Target Route Slice:** `app/jobs/[id]/`
 *   **Key Functionality:**
-    *   Fetch and display a list of jobs associated with the logged-in employer's `companyId` (`employerProfiles.id`).
-    *   Display key information for each job (Title, Status, Date Posted, Expires At, Number of Applicants - count may be a separate feature).
-    *   Provide links/buttons for actions like: View Details/Applicants (likely links to `/jobs/[slug]` initially or a dedicated applicant view page later), Edit (links to `/employer/jobs/[id]/edit/` - edit feature is separate), potentially Renew/Delete.
+    *   Fetch detailed information for the job identified by the `id` parameter.
+    *   Display all relevant job details from the `jobs` table and related tables (company info, full description, requirements, salary, benefits, location details, skills list, application instructions, etc.).
+    *   Include a prominent "Apply" button/mechanism (which might link externally, open an email, or trigger an on-platform application flow later).
+    *   Potentially display related jobs or company information.
 *   **UI Structure:**
-    *   `page.tsx`: Server Component. Fetches the employer's jobs using a function from `./_queries.ts`. Passes data to a list/table component.
-    *   `_components/EmployerJobList.tsx` (or DataTable): Renders the jobs in a table or list format using Shadcn components.
-*   **Data Flow (Read):** `page.tsx` calls `./_queries.ts` function (e.g., `getEmployerJobs(employerProfileId)`) -> Query fetches jobs linked to the employer -> Data rendered by UI component.
+    *   `page.tsx`: Server Component. Reads the `id` from `params`. Calls a function in `./_queries.ts` to fetch the job details. Passes data to display components. Handle "Not Found" cases if the id is invalid or the job is not active/published.
+    *   `_components/`: Components specific to rendering sections of the job detail page (e.g., `JobHeader.tsx`, `JobDescriptionSection.tsx`, `CompanyInfoSidebar.tsx`, `SkillsList.tsx`).
+*   **Data Flow (Read):** `page.tsx` reads `id` -> Calls function in `./_queries.ts` (e.g., `getJobDetailsByid(id)`) -> Query fetches data for the specific job, joining related tables -> Data passed to UI components.
+*   **Data Query (`_queries.ts` -> `getJobDetailsByid`):** Fetches a single job record matching the `id` where `status='ACTIVE'` and `expiresAt` is valid. Includes detailed information by joining `employerProfiles`, `locations`, `jobSkills` -> `skills`, etc.
+
+**3. UI/Styling Constraints:**
+
+*   Implement all UI according to `style-guide.md`, focusing on the specified glassmorphic look, shadows for elevation (especially on `JobCard.tsx`), and overall feel.
+*   Ensure layout and components are fully responsive and provide an excellent experience on mobile devices. Test thoroughly on various screen sizes.
+
+
 `</user instructions>`
