@@ -87,19 +87,21 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
       skillIds, 
       industryIds, 
       educationRequirements, 
-      experienceRequirements, 
+      experienceRequirements,
+      educationRequirementsRichText,
+      experienceRequirementsRichText,
       ...baseJobData 
     } = jobData
     
-    // Log the array fields for debugging
-    console.log('[Action Debug] Education Requirements (type):', typeof educationRequirements, Array.isArray(educationRequirements));
-    console.log('[Action Debug] Experience Requirements (type):', typeof experienceRequirements, Array.isArray(experienceRequirements));
+    // Log the rich text fields for debugging
+    console.log('[Action Debug] Education Rich Text Length:', educationRequirementsRichText?.length || 0);
+    console.log('[Action Debug] Experience Rich Text Length:', experienceRequirementsRichText?.length || 0);
     
-    // Convert arrays to strings properly based on schema requirement
+    // Use rich text fields for the database
     const jobDataToInsert = {
       ...baseJobData,
-      educationRequirements: Array.isArray(educationRequirements) ? educationRequirements.join('\n') : '',
-      experienceRequirements: Array.isArray(experienceRequirements) ? experienceRequirements.join('\n') : ''
+      educationRequirements: educationRequirementsRichText || '',
+      experienceRequirements: experienceRequirementsRichText || ''
     };
     
     // Insert the job (and related records)
