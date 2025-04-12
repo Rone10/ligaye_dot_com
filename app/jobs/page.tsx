@@ -74,7 +74,11 @@ export default async function JobsPage({ searchParams }: PageProps) {
       </Suspense>
       
       <div className="mt-8">
-        <Suspense fallback={<div className="bg-white/70 backdrop-blur-md border border-gray-200 rounded-lg p-6">Loading jobs...</div>}>
+        <Suspense 
+          fallback={
+            <div className="bg-white/70 backdrop-blur-md border border-gray-200 rounded-lg p-6">Loading jobs...</div>
+          }
+        >
           <JobListWithSaving 
             jobs={jobs}
             totalCount={totalCount}

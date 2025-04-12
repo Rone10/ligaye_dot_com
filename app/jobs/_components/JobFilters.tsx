@@ -36,6 +36,7 @@ import {
 import {
   Slider
 } from '@/components/ui/slider';
+import RiseLoaderSpinner from '@/components/loaders/rise-loader';
 
 interface FilterProps {
   locations: { id: string; region: string; city: string | null }[];
@@ -108,7 +109,14 @@ export function JobFilters({ locations, industries }: FilterProps) {
   // --- End wrapped functions ---
 
   return (
-    <div className={`bg-white/70 backdrop-blur-md border border-gray-200 rounded-lg shadow-sm transition-opacity duration-300 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+    <div className={`relative bg-white/70 backdrop-blur-md border border-gray-200 rounded-lg shadow-sm transition-opacity duration-300 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+      {/* Conditionally render spinner overlay */}
+      {isPending && (
+        <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-lg">
+          <RiseLoaderSpinner />
+        </div>
+      )}
+
       {/* Desktop Search Bar */}
       <div className="p-4 border-b border-gray-200">
         <div className="relative">
@@ -120,13 +128,11 @@ export function JobFilters({ locations, industries }: FilterProps) {
             placeholder="Search job titles, keywords, or companies"
             value={filters.search || ''}
             onChange={e => handleFilterChange({ search: e.target.value, page: 1 })}
-            disabled={isPending}
           />
           {filters.search && (
             <button
               className="absolute inset-y-0 right-0 flex items-center pr-3"
               onClick={() => handleFilterChange({ search: null, page: 1 })}
-              disabled={isPending}
             >
               <X className="h-4 w-4 text-gray-500" />
             </button>
@@ -140,9 +146,8 @@ export function JobFilters({ locations, industries }: FilterProps) {
         <Select 
           value={filters.locationId || 'all'} 
           onValueChange={value => handleFilterChange({ locationId: value as string, page: 1 })}
-          disabled={isPending}
         >
-          <SelectTrigger className="w-[180px] bg-white" disabled={isPending}>
+          <SelectTrigger className="w-[180px] bg-white">
             <SelectValue placeholder="Location" />
           </SelectTrigger>
           <SelectContent>
@@ -159,9 +164,8 @@ export function JobFilters({ locations, industries }: FilterProps) {
         <Select 
           value={filters.jobType || 'all'} 
           onValueChange={value => handleFilterChange({ jobType: value as any, page: 1 })}
-          disabled={isPending}
         >
-          <SelectTrigger className="w-[180px] bg-white" disabled={isPending}>
+          <SelectTrigger className="w-[180px] bg-white">
             <SelectValue placeholder="Job Type" />
           </SelectTrigger>
           <SelectContent>
@@ -178,9 +182,8 @@ export function JobFilters({ locations, industries }: FilterProps) {
         <Select 
           value={filters.workLocation || 'all'} 
           onValueChange={value => handleFilterChange({ workLocation: value as any, page: 1 })}
-          disabled={isPending}
         >
-          <SelectTrigger className="w-[180px] bg-white" disabled={isPending}>
+          <SelectTrigger className="w-[180px] bg-white">
             <SelectValue placeholder="Work Location" />
           </SelectTrigger>
           <SelectContent>
@@ -197,9 +200,8 @@ export function JobFilters({ locations, industries }: FilterProps) {
         <Select 
           value={filters.experienceLevel || 'all'} 
           onValueChange={value => handleFilterChange({ experienceLevel: value as any, page: 1 })}
-          disabled={isPending}
         >
-          <SelectTrigger className="w-[180px] bg-white" disabled={isPending}>
+          <SelectTrigger className="w-[180px] bg-white">
             <SelectValue placeholder="Experience Level" />
           </SelectTrigger>
           <SelectContent>
@@ -216,9 +218,8 @@ export function JobFilters({ locations, industries }: FilterProps) {
         <Select 
           value={filters.industryId || 'all'} 
           onValueChange={value => handleFilterChange({ industryId: value as string, page: 1 })}
-          disabled={isPending}
         >
-          <SelectTrigger className="w-[180px] bg-white" disabled={isPending}>
+          <SelectTrigger className="w-[180px] bg-white">
             <SelectValue placeholder="Industry" />
           </SelectTrigger>
           <SelectContent>
@@ -237,7 +238,6 @@ export function JobFilters({ locations, industries }: FilterProps) {
             variant="outline"
             onClick={handleResetFilters}
             className="ml-auto"
-            disabled={isPending}
           >
             Clear All Filters
           </Button>
@@ -257,7 +257,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
         
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="sm" className="flex items-center gap-2" disabled={isPending}>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
               <span>Filter</span>
             </Button>
@@ -269,14 +269,13 @@ export function JobFilters({ locations, industries }: FilterProps) {
             <div className="py-4">
               <Accordion type="single" collapsible className="w-full" defaultValue="location">
                 <AccordionItem value="location">
-                  <AccordionTrigger disabled={isPending}>Location</AccordionTrigger>
+                  <AccordionTrigger>Location</AccordionTrigger>
                   <AccordionContent>
                     <Select 
                       value={filters.locationId || 'all'} 
                       onValueChange={value => handleFilterChange({ locationId: value as string, page: 1 })}
-                      disabled={isPending}
                     >
-                      <SelectTrigger className="w-full bg-white" disabled={isPending}>
+                      <SelectTrigger className="w-full bg-white">
                         <SelectValue placeholder="Any Location" />
                       </SelectTrigger>
                       <SelectContent>
@@ -292,14 +291,13 @@ export function JobFilters({ locations, industries }: FilterProps) {
                 </AccordionItem>
 
                 <AccordionItem value="jobType">
-                  <AccordionTrigger disabled={isPending}>Job Type</AccordionTrigger>
+                  <AccordionTrigger>Job Type</AccordionTrigger>
                   <AccordionContent>
                     <Select 
                       value={filters.jobType || 'all'} 
                       onValueChange={value => handleFilterChange({ jobType: value as any, page: 1 })}
-                      disabled={isPending}
                     >
-                      <SelectTrigger className="w-full bg-white" disabled={isPending}>
+                      <SelectTrigger className="w-full bg-white">
                         <SelectValue placeholder="Any Type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -315,14 +313,13 @@ export function JobFilters({ locations, industries }: FilterProps) {
                 </AccordionItem>
 
                 <AccordionItem value="workLocation">
-                  <AccordionTrigger disabled={isPending}>Work Location</AccordionTrigger>
+                  <AccordionTrigger>Work Location</AccordionTrigger>
                   <AccordionContent>
                     <Select 
                       value={filters.workLocation || 'all'} 
                       onValueChange={value => handleFilterChange({ workLocation: value as any, page: 1 })}
-                      disabled={isPending}
                     >
-                      <SelectTrigger className="w-full bg-white" disabled={isPending}>
+                      <SelectTrigger className="w-full bg-white">
                         <SelectValue placeholder="Any Work Location" />
                       </SelectTrigger>
                       <SelectContent>
@@ -338,14 +335,13 @@ export function JobFilters({ locations, industries }: FilterProps) {
                 </AccordionItem>
 
                 <AccordionItem value="experienceLevel">
-                  <AccordionTrigger disabled={isPending}>Experience Level</AccordionTrigger>
+                  <AccordionTrigger>Experience Level</AccordionTrigger>
                   <AccordionContent>
                     <Select 
                       value={filters.experienceLevel || 'all'} 
                       onValueChange={value => handleFilterChange({ experienceLevel: value as any, page: 1 })}
-                      disabled={isPending}
                     >
-                      <SelectTrigger className="w-full bg-white" disabled={isPending}>
+                      <SelectTrigger className="w-full bg-white">
                         <SelectValue placeholder="Any Experience" />
                       </SelectTrigger>
                       <SelectContent>
@@ -361,7 +357,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
                 </AccordionItem>
 
                 <AccordionItem value="salary">
-                  <AccordionTrigger disabled={isPending}>Salary Range</AccordionTrigger>
+                  <AccordionTrigger>Salary Range</AccordionTrigger>
                   <AccordionContent>
                     <div className="space-y-4">
                       <div className="flex justify-between">
@@ -375,13 +371,11 @@ export function JobFilters({ locations, industries }: FilterProps) {
                         step={5000}
                         onValueChange={handleSalaryRangeChange}
                         className="my-6"
-                        disabled={isPending}
                       />
                       <Button 
                         onClick={applySalaryRange}
                         size="sm" 
                         className="w-full"
-                        disabled={isPending}
                       >
                         Apply Salary Range
                       </Button>
@@ -390,14 +384,13 @@ export function JobFilters({ locations, industries }: FilterProps) {
                 </AccordionItem>
 
                 <AccordionItem value="industry">
-                  <AccordionTrigger disabled={isPending}>Industry</AccordionTrigger>
+                  <AccordionTrigger>Industry</AccordionTrigger>
                   <AccordionContent>
                     <Select 
                       value={filters.industryId || 'all'} 
                       onValueChange={value => handleFilterChange({ industryId: value as string, page: 1 })}
-                      disabled={isPending}
                     >
-                      <SelectTrigger className="w-full bg-white" disabled={isPending}>
+                      <SelectTrigger className="w-full bg-white">
                         <SelectValue placeholder="Any Industry" />
                       </SelectTrigger>
                       <SelectContent>
@@ -415,14 +408,13 @@ export function JobFilters({ locations, industries }: FilterProps) {
             </div>
             <SheetFooter>
               <SheetClose asChild>
-                <Button variant="outline" className="mr-2" disabled={isPending}>Cancel</Button>
+                <Button variant="outline" className="mr-2">Cancel</Button>
               </SheetClose>
               {activeFiltersCount > 0 && (
                 <Button
                   variant="destructive"
                   onClick={handleResetFilters}
                   size="sm"
-                  disabled={isPending}
                 >
                   Clear All Filters
                 </Button>
@@ -436,96 +428,72 @@ export function JobFilters({ locations, industries }: FilterProps) {
       {activeFiltersCount > 0 && (
         <div className="px-4 py-2 border-t border-gray-200 flex flex-wrap gap-2">
           {filters.search && (
-            <Badge 
-              variant="secondary" 
-              className="flex items-center gap-1"
-            >
+            <Badge variant="secondary" className="flex items-center gap-1">
               Search: {filters.search}
-              <button onClick={() => handleFilterChange({ search: null, page: 1 })} disabled={isPending} className="disabled:opacity-50">
+              <button onClick={() => handleFilterChange({ search: null, page: 1 })} className="disabled:opacity-50">
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
           )}
           
           {filters.locationId && filters.locationId !== 'all' && (
-            <Badge 
-              variant="secondary" 
-              className="flex items-center gap-1"
-            >
+            <Badge variant="secondary" className="flex items-center gap-1">
               Location: {getLocationLabel(filters.locationId)}
-              <button onClick={() => handleFilterChange({ locationId: 'all' as string, page: 1 })} disabled={isPending} className="disabled:opacity-50">
+              <button onClick={() => handleFilterChange({ locationId: 'all' as string, page: 1 })} className="disabled:opacity-50">
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
           )}
           
           {filters.jobType && filters.jobType !== 'all' && (
-            <Badge 
-              variant="secondary" 
-              className="flex items-center gap-1"
-            >
+            <Badge variant="secondary" className="flex items-center gap-1">
               Type: {jobTypeOptions.find(opt => opt.value === filters.jobType)?.label}
-              <button onClick={() => handleFilterChange({ jobType: 'all' as any, page: 1 })} disabled={isPending} className="disabled:opacity-50">
+              <button onClick={() => handleFilterChange({ jobType: 'all' as any, page: 1 })} className="disabled:opacity-50">
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
           )}
           
           {filters.workLocation && filters.workLocation !== 'all' && (
-            <Badge 
-              variant="secondary" 
-              className="flex items-center gap-1"
-            >
+            <Badge variant="secondary" className="flex items-center gap-1">
               Work Location: {workLocationOptions.find(opt => opt.value === filters.workLocation)?.label}
-              <button onClick={() => handleFilterChange({ workLocation: 'all' as any, page: 1 })} disabled={isPending} className="disabled:opacity-50">
+              <button onClick={() => handleFilterChange({ workLocation: 'all' as any, page: 1 })} className="disabled:opacity-50">
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
           )}
           
           {filters.experienceLevel && filters.experienceLevel !== 'all' && (
-            <Badge 
-              variant="secondary" 
-              className="flex items-center gap-1"
-            >
+            <Badge variant="secondary" className="flex items-center gap-1">
               Experience: {experienceLevelOptions.find(opt => opt.value === filters.experienceLevel)?.label}
-              <button onClick={() => handleFilterChange({ experienceLevel: 'all' as any, page: 1 })} disabled={isPending} className="disabled:opacity-50">
+              <button onClick={() => handleFilterChange({ experienceLevel: 'all' as any, page: 1 })} className="disabled:opacity-50">
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
           )}
           
           {filters.salaryMin && (
-            <Badge 
-              variant="secondary" 
-              className="flex items-center gap-1"
-            >
+            <Badge variant="secondary" className="flex items-center gap-1">
               Min Salary: GMD {filters.salaryMin.toLocaleString()}
-              <button onClick={() => handleFilterChange({ salaryMin: null, page: 1 })} disabled={isPending} className="disabled:opacity-50">
+              <button onClick={() => handleFilterChange({ salaryMin: null, page: 1 })} className="disabled:opacity-50">
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
           )}
           
           {filters.salaryMax && filters.salaryMax < 200000 && (
-            <Badge 
-              variant="secondary" 
-              className="flex items-center gap-1"
-            >
+            <Badge variant="secondary" className="flex items-center gap-1">
               Max Salary: GMD {filters.salaryMax.toLocaleString()}
-              <button onClick={() => handleFilterChange({ salaryMax: null, page: 1 })} disabled={isPending} className="disabled:opacity-50">
+              <button onClick={() => handleFilterChange({ salaryMax: null, page: 1 })} className="disabled:opacity-50">
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
           )}
           
           {filters.industryId && filters.industryId !== 'all' && (
-            <Badge 
-              variant="secondary" 
-              className="flex items-center gap-1"
-            >
+            <Badge variant="secondary" className="flex items-center gap-1">
               Industry: {getIndustryLabel(filters.industryId)}
-              <button onClick={() => handleFilterChange({ industryId: 'all' as string, page: 1 })} disabled={isPending} className="disabled:opacity-50">
+              <button onClick={() => handleFilterChange({ industryId: 'all' as string, page: 1 })} className="disabled:opacity-50">
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
