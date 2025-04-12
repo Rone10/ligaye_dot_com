@@ -132,17 +132,11 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
                 <GraduationCap className="mr-2.5 h-5 w-5 text-[#4a6cfa]" />
                 Education
               </h3>
-              {job.educationRequirementsRichText ? (
+              {typeof job.educationRequirements === 'string' && job.educationRequirements.trim() ? (
                 <div 
                   className="prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: parseJobDescription(job.educationRequirementsRichText) }}
+                  dangerouslySetInnerHTML={{ __html: parseJobDescription(job.educationRequirements) }}
                 />
-              ) : typeof job.educationRequirements === 'string' && job.educationRequirements.trim() ? (
-                <ul className="list-disc pl-10 space-y-1">
-                  {job.educationRequirements.split('\n').filter((item: string) => item.trim()).map((item: string, index: number) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
               ) : (
                 <p className="text-gray-500">No specific education requirements specified</p>
               )}
@@ -159,17 +153,11 @@ export default function JobDetails({ job, location, skills, industries }: JobDet
                   <span className="font-medium">Level:</span> {job.experienceLevel.replace(/_/g, ' ')}
                 </p>
               )}
-              {job.experienceRequirementsRichText ? (
+              {typeof job.experienceRequirements === 'string' && job.experienceRequirements.trim() ? (
                 <div 
                   className="prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: parseJobDescription(job.experienceRequirementsRichText) }}
+                  dangerouslySetInnerHTML={{ __html: parseJobDescription(job.experienceRequirements) }}
                 />
-              ) : typeof job.experienceRequirements === 'string' && job.experienceRequirements.trim() ? (
-                <ul className="list-disc pl-10 space-y-1">
-                  {job.experienceRequirements.split('\n').filter((item: string) => item.trim()).map((item: string, index: number) => (
-                    <li key={index}>{item}</li>
-                  ))}
-                </ul>
               ) : (
                 <p className="text-gray-500">No specific experience requirements specified</p>
               )}
