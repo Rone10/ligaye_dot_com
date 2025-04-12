@@ -7,7 +7,7 @@ import {
   getSavedJobIdsForUser
 } from './_queries';
 import { createLoader } from 'nuqs/server';
-import { jobFiltersParsers, jobFiltersUrlKeys } from './_hooks/useJobFilters';
+import { jobFiltersParsers, jobFiltersUrlKeys } from './_utils/job-filter-parsers';
 import { jobTypeEnum, workLocationEnum, experienceLevelEnum } from '@/lib/db/schema';
 import { getUser } from '@/lib/supabase/server';
 import { 
@@ -20,45 +20,45 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-// Create server-side loader for URL state parsing
 const loadJobFilters = createLoader(jobFiltersParsers, { urlKeys: jobFiltersUrlKeys });
 
 export default async function JobsPage({ searchParams }: PageProps) {
-  // Load URL params with the loader
-  const filters = await loadJobFilters(searchParams);
+  const awaitedSearchParams = await searchParams;
+  const filters = await loadJobFilters(awaitedSearchParams);
   
-  // Get filter options for dropdowns
+  console.log("[Debug] filters.jobType from loader:", filters.jobType);
+  
   const locations = await getLocationsForFilters();
   const industries = await getIndustriesForFilters();
   
-  // Transform filter values for DB query
   const queryFilters: JobFiltersType = {
     search: filters.search || null,
-    locationId: filters.locationId || null,
-    jobType: filters.jobType as typeof jobTypeEnum.enumValues[number] | null || null,
-    workLocation: filters.workLocation as typeof workLocationEnum.enumValues[number] | null || null,
-    experienceLevel: filters.experienceLevel as typeof experienceLevelEnum.enumValues[number] | null || null,
+    locationId: filters.locationId === 'all' ? null : filters.locationId,
+    jobType: filters.jobType === 'all' ? null : filters.jobType as typeof jobTypeEnum.enumValues[number] | null,
+    workLocation: filters.workLocation === 'all' ? null : filters.workLocation as typeof workLocationEnum.enumValues[number] | null,
+    experienceLevel: filters.experienceLevel === 'all' ? null : filters.experienceLevel as typeof experienceLevelEnum.enumValues[number] | null,
     salaryMin: filters.salaryMin || null,
     salaryMax: filters.salaryMax || null,
-    industryId: filters.industryId || null
+    industryId: filters.industryId === 'all' ? null : filters.industryId
   };
   
-  // Get pagination values
+  console.log("[Debug] queryFilters.jobType being sent to query:", queryFilters.jobType);
+  
   const page = filters.page;
   const pageSize = filters.pageSize;
   
-  // Fetch jobs with filters
+  console.log("Applied filters (loader):", queryFilters);
+  console.log("Raw searchParams (awaited):", awaitedSearchParams);
+  
   const { jobs, totalCount, pageCount } = await getFilteredJobs(
     queryFilters,
     { page, pageSize }
   );
   
   if (page > pageCount && pageCount > 0) {
-    // If requested page exceeds available pages, redirect to last page
     notFound();
   }
   
-  // Get current user and their saved jobs
   const user = await getUser();
   const savedJobIds = user ? await getSavedJobIdsForUser(user.id) : [];
   

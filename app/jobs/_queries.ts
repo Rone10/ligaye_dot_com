@@ -1,4 +1,4 @@
-import { sql, and, eq, gte, lte, like, or, inArray } from 'drizzle-orm';
+import { sql, and, eq, gte, lte, like, or, inArray, ilike } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { 
   jobs, 
@@ -42,9 +42,9 @@ export async function getFilteredJobs(
     const searchTerm = `%${search.trim()}%`;
     conditions.push(
       or(
-        like(jobs.title, searchTerm),
-        like(jobs.description, searchTerm),
-        like(employerProfiles.companyName, searchTerm)
+        ilike(jobs.title, searchTerm),
+        ilike(jobs.description, searchTerm),
+        ilike(employerProfiles.companyName, searchTerm)
       )
     );
   }
@@ -106,12 +106,18 @@ export async function getFilteredJobs(
   const countResult = await db()
     .select({ count: sql<number>`count(*)` })
     .from(jobs)
+    // Restore joins for count
     .leftJoin(employerProfiles, eq(jobs.companyId, employerProfiles.id))
     .leftJoin(locations, eq(jobs.locationId, locations.id))
     .where(finalWhereCondition);
     
-  const totalCount = countResult[0]?.count || 0;
-  const pageCount = Math.ceil(totalCount / pageSize);
+    // Ensure totalCount is a number before calculation
+    const totalCount = Number(countResult[0]?.count || 0);
+    // Add logs for pagination debugging
+    console.log("[Debug Pagination] totalCount:", totalCount, "(Type:", typeof totalCount, ")");
+    console.log("[Debug Pagination] pageSize:", pageSize, "(Type:", typeof pageSize, ")");
+    const pageCount = Math.ceil(totalCount / pageSize);
+    console.log("[Debug Pagination] calculated pageCount:", pageCount);
   
   // Process the results to ensure they match the expected types
   const processedJobs = jobsQuery.map(job => ({

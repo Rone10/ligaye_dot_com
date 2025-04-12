@@ -54,23 +54,25 @@ export function JobFilters({ locations, industries }: FilterProps) {
   useEffect(() => {
     let count = 0;
     if (filters.search) count++;
-    if (filters.locationId) count++;
-    if (filters.jobType) count++;
-    if (filters.workLocation) count++;
-    if (filters.experienceLevel) count++;
+    if (filters.locationId && filters.locationId !== 'all') count++;
+    if (filters.jobType && filters.jobType !== 'all') count++;
+    if (filters.workLocation && filters.workLocation !== 'all') count++;
+    if (filters.experienceLevel && filters.experienceLevel !== 'all') count++;
     if (filters.salaryMin) count++;
-    if (filters.industryId) count++;
+    if (filters.industryId && filters.industryId !== 'all') count++;
     setActiveFiltersCount(count);
   }, [filters]);
 
   // Format location display
   const getLocationLabel = (locationId: string) => {
+    if (locationId === 'all') return 'Any Location';
     const location = locations.find(loc => loc.id === locationId);
     return location ? `${location.city || ''}, ${location.region}` : '';
   };
 
   // Format industry display
   const getIndustryLabel = (industryId: string) => {
+    if (industryId === 'all') return 'Any Industry';
     const industry = industries.find(ind => ind.id === industryId);
     return industry ? industry.name : '';
   };
@@ -83,6 +85,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
     setFilters({
       salaryMin: salaryRange[0] > 0 ? salaryRange[0] : null,
       salaryMax: salaryRange[1] < 200000 ? salaryRange[1] : null,
+      page: 1
     });
   };
 
@@ -115,8 +118,8 @@ export function JobFilters({ locations, industries }: FilterProps) {
       <div className="hidden lg:flex p-4 gap-4 flex-wrap items-center">
         {/* Location Filter */}
         <Select 
-          value={filters.locationId || ''} 
-          onValueChange={value => setFilters({ locationId: value === "all" ? null : value, page: 1 })}
+          value={filters.locationId || 'all'} 
+          onValueChange={value => setFilters({ locationId: value as string, page: 1 })}
         >
           <SelectTrigger className="w-[180px] bg-white">
             <SelectValue placeholder="Location" />
@@ -134,7 +137,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
         {/* Job Type Filter */}
         <Select 
           value={filters.jobType || 'all'} 
-          onValueChange={value => setFilters({ jobType: value === "all" ? null : value, page: 1 })}
+          onValueChange={value => setFilters({ jobType: value as any, page: 1 })}
         >
           <SelectTrigger className="w-[180px] bg-white">
             <SelectValue placeholder="Job Type" />
@@ -152,7 +155,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
         {/* Work Location Filter */}
         <Select 
           value={filters.workLocation || 'all'} 
-          onValueChange={value => setFilters({ workLocation: value === "all" ? null : value, page: 1 })}
+          onValueChange={value => setFilters({ workLocation: value as any, page: 1 })}
         >
           <SelectTrigger className="w-[180px] bg-white">
             <SelectValue placeholder="Work Location" />
@@ -170,7 +173,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
         {/* Experience Level Filter */}
         <Select 
           value={filters.experienceLevel || 'all'} 
-          onValueChange={value => setFilters({ experienceLevel: value === "all" ? null : value, page: 1 })}
+          onValueChange={value => setFilters({ experienceLevel: value as any, page: 1 })}
         >
           <SelectTrigger className="w-[180px] bg-white">
             <SelectValue placeholder="Experience Level" />
@@ -188,7 +191,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
         {/* Industry Filter */}
         <Select 
           value={filters.industryId || 'all'} 
-          onValueChange={value => setFilters({ industryId: value === "all" ? null : value, page: 1 })}
+          onValueChange={value => setFilters({ industryId: value as string, page: 1 })}
         >
           <SelectTrigger className="w-[180px] bg-white">
             <SelectValue placeholder="Industry" />
@@ -244,7 +247,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
                   <AccordionContent>
                     <Select 
                       value={filters.locationId || 'all'} 
-                      onValueChange={value => setFilters({ locationId: value === "all" ? null : value, page: 1 })}
+                      onValueChange={value => setFilters({ locationId: value as string, page: 1 })}
                     >
                       <SelectTrigger className="w-full bg-white">
                         <SelectValue placeholder="Any Location" />
@@ -266,7 +269,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
                   <AccordionContent>
                     <Select 
                       value={filters.jobType || 'all'} 
-                      onValueChange={value => setFilters({ jobType: value === "all" ? null : value, page: 1 })}
+                      onValueChange={value => setFilters({ jobType: value as any, page: 1 })}
                     >
                       <SelectTrigger className="w-full bg-white">
                         <SelectValue placeholder="Any Type" />
@@ -288,7 +291,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
                   <AccordionContent>
                     <Select 
                       value={filters.workLocation || 'all'} 
-                      onValueChange={value => setFilters({ workLocation: value === "all" ? null : value, page: 1 })}
+                      onValueChange={value => setFilters({ workLocation: value as any, page: 1 })}
                     >
                       <SelectTrigger className="w-full bg-white">
                         <SelectValue placeholder="Any Work Location" />
@@ -310,7 +313,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
                   <AccordionContent>
                     <Select 
                       value={filters.experienceLevel || 'all'} 
-                      onValueChange={value => setFilters({ experienceLevel: value === "all" ? null : value, page: 1 })}
+                      onValueChange={value => setFilters({ experienceLevel: value as any, page: 1 })}
                     >
                       <SelectTrigger className="w-full bg-white">
                         <SelectValue placeholder="Any Experience" />
@@ -359,7 +362,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
                   <AccordionContent>
                     <Select 
                       value={filters.industryId || 'all'} 
-                      onValueChange={value => setFilters({ industryId: value === "all" ? null : value, page: 1 })}
+                      onValueChange={value => setFilters({ industryId: value as string, page: 1 })}
                     >
                       <SelectTrigger className="w-full bg-white">
                         <SelectValue placeholder="Any Industry" />
@@ -410,49 +413,49 @@ export function JobFilters({ locations, industries }: FilterProps) {
             </Badge>
           )}
           
-          {filters.locationId && (
+          {filters.locationId && filters.locationId !== 'all' && (
             <Badge 
               variant="secondary" 
               className="flex items-center gap-1"
             >
               Location: {getLocationLabel(filters.locationId)}
-              <button onClick={() => setFilters({ locationId: null, page: 1 })}>
+              <button onClick={() => setFilters({ locationId: 'all' as string, page: 1 })}>
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
           )}
           
-          {filters.jobType && (
+          {filters.jobType && filters.jobType !== 'all' && (
             <Badge 
               variant="secondary" 
               className="flex items-center gap-1"
             >
               Type: {jobTypeOptions.find(opt => opt.value === filters.jobType)?.label}
-              <button onClick={() => setFilters({ jobType: null, page: 1 })}>
+              <button onClick={() => setFilters({ jobType: 'all' as any, page: 1 })}>
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
           )}
           
-          {filters.workLocation && (
+          {filters.workLocation && filters.workLocation !== 'all' && (
             <Badge 
               variant="secondary" 
               className="flex items-center gap-1"
             >
               Work Location: {workLocationOptions.find(opt => opt.value === filters.workLocation)?.label}
-              <button onClick={() => setFilters({ workLocation: null, page: 1 })}>
+              <button onClick={() => setFilters({ workLocation: 'all' as any, page: 1 })}>
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
           )}
           
-          {filters.experienceLevel && (
+          {filters.experienceLevel && filters.experienceLevel !== 'all' && (
             <Badge 
               variant="secondary" 
               className="flex items-center gap-1"
             >
               Experience: {experienceLevelOptions.find(opt => opt.value === filters.experienceLevel)?.label}
-              <button onClick={() => setFilters({ experienceLevel: null, page: 1 })}>
+              <button onClick={() => setFilters({ experienceLevel: 'all' as any, page: 1 })}>
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
@@ -482,13 +485,13 @@ export function JobFilters({ locations, industries }: FilterProps) {
             </Badge>
           )}
           
-          {filters.industryId && (
+          {filters.industryId && filters.industryId !== 'all' && (
             <Badge 
               variant="secondary" 
               className="flex items-center gap-1"
             >
               Industry: {getIndustryLabel(filters.industryId)}
-              <button onClick={() => setFilters({ industryId: null, page: 1 })}>
+              <button onClick={() => setFilters({ industryId: 'all' as string, page: 1 })}>
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>
