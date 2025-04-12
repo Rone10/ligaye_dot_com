@@ -7,7 +7,9 @@ import {
   jobSkills, 
   skills,
   jobIndustries,
-  industries
+  industries,
+  savedJobs,
+  profiles
 } from '@/lib/db/schema';
 import type { JobFilters, JobsQueryResult } from './_utils/types';
 
@@ -153,4 +155,35 @@ export async function getIndustriesForFilters() {
     .from(industries)
     .where(eq(industries.deleted, false))
     .orderBy(industries.name);
+}
+
+/**
+ * Get saved jobs IDs for a user
+ */
+export async function getSavedJobIdsForUser(userId: string) {
+  // First get the profile ID from the user ID
+  const profileResult = await db()
+    .select({ id: profiles.id })
+    .from(profiles)
+    .where(eq(profiles.userId, userId))
+    .limit(1);
+    
+  if (!profileResult.length) {
+    return [];
+  }
+  
+  const profileId = profileResult[0].id;
+  
+  // Get saved job IDs that aren't deleted
+  const savedJobIds = await db()
+    .select({ jobId: savedJobs.jobId })
+    .from(savedJobs)
+    .where(
+      and(
+        eq(savedJobs.userId, profileId),
+        eq(savedJobs.deleted, false)
+      )
+    );
+    
+  return savedJobIds.map(row => row.jobId);
 } 

@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leagate - Find Your Dream Job</title>
+    <style>
+        :root {
+            --primary: #4a6cfa;
+            --primary-light: #7b90ff;
+            --secondary: #05ce91;
+            --dark: #1a1e2d;
+            --light: #f8faff;
+            --gray: #e1e5f2;
+            --gray-dark: #9aa3bc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e9efff 0%, #f4f7ff 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Glassmorphism styles */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        /* Main content */
+        .content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+        }
+
+        /* Search section */
+        .search-section {
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input input {
+            width: 100%;
+            padding: 14px 14px 14px 45px;
+            border-radius: 10px;
+            border: 1px solid var(--gray);
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 108, 250, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-dark);
+        }
+
+        .search-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0 25px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-btn:hover {
+            background: var(--primary-light);
+        }
+
+        .popular-searches {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .popular-tag {
+            padding: 6px 15px;
+            border-radius: 30px;
+            background: white;
+            border: 1px solid var(--gray);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .popular-tag:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Filters sidebar */
+        .filters {
+            padding: 25px;
+        }
+
+        .filter-section {
+            margin-bottom: 25px;
+        }
+
+        .filter-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .clear-btn {
+            font-size: 13px;
+            color: var(--primary);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .filter-option {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-checkbox {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 1px solid var(--gray-dark);
+            margin-right: 10px;
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .filter-checkbox.checked {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .filter-checkbox.checked::after {
+            content: "✓";
+            color: white;
+            position: absolute;
+            font-size: 12px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .filter-label {
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .filter-count {
+            font-size: 13px;
+            color: var(--gray-dark);
+            margin-left: auto;
+        }
+
+        .range-filter {
+            margin-top: 15px;
+        }
+
+        .range-slider {
+            width: 100%;
+            height: 4px;
+            background: var(--gray);
+            border-radius: 2px;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .range-progress {
+            position: absolute;
+            height: 100%;
+            background: var(--primary);
+            border-radius: 2px;
+            left: 20%;
+            right: 20%;
+        }
+
+        .range-handle {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+        }
+
+        .range-handle.start {
+            left: 20%;
+        }
+
+        .range-handle.end {
+            left: 80%;
+        }
+
+        .range-values {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--gray-dark);
+        }
+
+        /* Jobs list */
+        .jobs-section {
+            padding: 0;
+        }
+
+        .jobs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+
+        .jobs-found {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .jobs-count {
+            color: var(--primary);
+        }
+
+        .sort-dropdown {
+            background: white;
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .jobs-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 0 20px 20px 20px;
+        }
+
+        .job-card {
+            padding: 25px;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(31, 38, 135, 0.15);
+        }
+
+        .company-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .logo-google {
+            background: #4285F4;
+        }
+
+        .logo-amazon {
+            background: #FF9900;
+        }
+
+        .logo-microsoft {
+            background: #00A4EF;
+        }
+
+        .logo-netflix {
+            background: #E50914;
+        }
+
+        .logo-apple {
+            background: #000000;
+        }
+
+        .logo-facebook {
+            background: #3b5998;
+        }
+
+        .job-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .company-name {
+            font-size: 14px;
+            color: var(--gray-dark);
+            margin-bottom: 15px;
+        }
+
+        .job-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .job-tag {
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(74, 108, 250, 0.1);
+            color: var(--primary);
+            font-size: 13px;
+        }
+
+        .job-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .job-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .job-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .apply-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .apply-btn:hover {
+            background: var(--primary-light);
+        }
+
+        .save-job {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(74, 108, 250, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .save-job:hover {
+            background: rgba(74, 108, 250, 0.2);
+        }
+
+        .job-salary {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .job-posted {
+            font-size: 13px;
+            color: var(--gray-dark);
+        }
+
+        .load-more {
+            display: block;
+            width: 200px;
+            margin: 30px auto;
+            padding: 12px 0;
+            border-radius: 30px;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .load-more:hover {
+            background: var(--primary-light);
+        }
+
+        /* Responsive design */
+        @media (max-width: 992px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                order: 2;
+            }
+
+            .jobs-section {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+            }
+
+            .job-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .job-actions {
+                width: 100%;
+                margin-top: 15px;
+                justify-content: space-between;
+            }
+
+            .apply-btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header section -->
+        <header class="glass">
+            <div class="logo">
+                <div class="logo-icon">L</div>
+                <div class="logo-text">Leagate</div>
+            </div>
+
+            <!-- Search bar section -->
+            <div class="search-section">
+                <div class="search-container">
+                    <div class="search-input">
+                        <div class="search-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                viewBox="0 0 16 16">
+                                <path
+                                    d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                            </svg>
+                        </div>
+                        <input type="text" placeholder="Search for jobs, companies, or keywords">
+                    </div>
+                    <button class="search-btn">Search</button>
+                </div>
+                <div class="popular-searches">
+                    <div class="popular-tag">Software Engineer</div>
+                    <div class="popular-tag">Product Manager</div>
+                    <div class="popular-tag">Data Scientist</div>
+                    <div class="popular-tag">Remote</div>
+                    <div class="popular-tag">Full-time</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main content -->
+        <div class="content">
+            <!-- Filters sidebar -->
+            <div class="filters glass">
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <span>Job Type</span>
+                        <button class="clear-btn">Clear</button>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox checked"></div>
+                        <span class="filter-label">Full-time</span>
+                        <span class="filter-count">1,203</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Part-time</span>
+                        <span class="filter-count">342</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Contract</span>
+                        <span class="filter-count">275</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Freelance</span>
+                        <span class="filter-count">164</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Internship</span>
+                        <span class="filter-count">89</span>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <span>Experience Level</span>
+                        <button class="clear-btn">Clear</button>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Entry Level</span>
+                        <span class="filter-count">487</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox checked"></div>
+                        <span class="filter-label">Mid Level</span>
+                        <span class="filter-count">643</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Senior Level</span>
+                        <span class="filter-count">352</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Director</span>
+                        <span class="filter-count">105</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Executive</span>
+                        <span class="filter-count">47</span>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <span>Salary Range</span>
+                        <button class="clear-btn">Reset</button>
+                    </div>
+                    <div class="range-filter">
+                        <div class="range-slider">
+                            <div class="range-progress"></div>
+                            <div class="range-handle start"></div>
+                            <div class="range-handle end"></div>
+                        </div>
+                        <div class="range-values">
+                            <span>$40,000</span>
+                            <span>$200,000+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <span>Remote Options</span>
+                        <button class="clear-btn">Clear</button>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox checked"></div>
+                        <span class="filter-label">Remote</span>
+                        <span class="filter-count">652</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Hybrid</span>
+                        <span class="filter-count">423</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">On-site</span>
+                        <span class="filter-count">278</span>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <span>Location</span>
+                        <button class="clear-btn">Clear</button>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox checked"></div>
+                        <span class="filter-label">United States</span>
+                        <span class="filter-count">754</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">United Kingdom</span>
+                        <span class="filter-count">287</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Canada</span>
+                        <span class="filter-count">194</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Germany</span>
+                        <span class="filter-count">156</span>
+                    </div>
+                    <div class="filter-option">
+                        <div class="filter-checkbox"></div>
+                        <span class="filter-label">Australia</span>
+                        <span class="filter-count">132</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jobs list -->
+            <div class="jobs-section">
+                <div class="jobs-header">
+                    <div class="jobs-found">
+                        <span class="jobs-count">1,203</span> jobs found
+                    </div>
+                    <select class="sort-dropdown">
+                        <option>Most Relevant</option>
+                        <option>Newest First</option>
+                        <option>Highest Salary</option>
+                        <option>Lowest Salary</option>
+                    </select>
+                </div>
+
+                <div class="jobs-grid">
+                    <!-- Job Card 1 -->
+                    <div class="job-card glass">
+                        <div class="company-logo logo-google">G</div>
+                        <div class="job-info">
+                            <h3 class="job-title">Senior Software Engineer</h3>
+                            <div class="company-name">Google • Mountain View, CA</div>
+                            <div class="job-details">
+                                <div class="job-tag">Full-time</div>
+                                <div class="job-tag">Remote</div>
+                                <div class="job-tag">Senior Level</div>
+                            </div>
+                            <div class="job-bottom">
+                                <div class="job-salary">$150,000 - $180,000</div>
+                                <div class="job-posted">Posted 2d ago</div>
+                            </div>
+                        </div>
+                        <div class="job-actions">
+                            <button class="apply-btn">Apply Now</button>
+                            <div class="save-job">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                    viewBox="0 0 16 16">
+                                    <path
+                                        d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job Card 2 -->
+                    <div class="job-card glass">
+                        <div class="company-logo logo-amazon">A</div>
+                        <div class="job-info">
+                            <h3 class="job-title">Product Manager</h3>
+                            <div class="company-name">Amazon • Seattle, WA</div>
+                            <div class="job-details">
+                                <div class="job-tag">Full-time</div>
+                                <div class="job-tag">Hybrid</div>
+                                <div class="job-tag">Mid Level</div>
+                            </div>
+                            <div class="job-bottom">
+                                <div class="job-salary">$120,000 - $145,000</div>
+                                <div class="job-posted">Posted 3d ago</div>
+                            </div>
+                        </div>
+                        <div class="job-actions">
+                            <button class="apply-btn">Apply Now</button>
+                            <div class="save-job">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                    viewBox="0 0 16 16">
+                                    <path
+                                        d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job Card 3 -->
+                    <div class="job-card glass">
+                        <div class="company-logo logo-microsoft">M</div>
+                        <div class="job-info">
+                            <h3 class="job-title">Frontend Developer</h3>
+                            <div class="company-name">Microsoft • Redmond, WA</div>
+                            <div class="job-details">
+                                <div class="job-tag">Full-time</div>
+                                <div class="job-tag">On-site</div>
+                                <div class="job-tag">Mid Level</div>
+                            </div>
+                            <div class="job-bottom">
+                                <div class="job-salary">$110,000 - $140,000</div>
+                                <div class="job-posted">Posted 1d ago</div>
+                            </div>
+                        </div>
+                        <div class="job-actions">
+                            <button class="apply-btn">Apply Now</button>
+                            <div class="save-job">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                    viewBox="0 0 16 16">
+                                    <path
+                                        d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job Card 4 -->
+                    <div class="job-card glass">
+                        <div class="company-logo logo-netflix">N</div>
+                        <div class="job-info">
+                            <h3 class="job-title">Data Scientist</h3>
+                            <div class="company-name">Netflix • Los Gatos, CA</div>
+                            <div class="job-details">
+                                <div class="job-tag">Full-time</div>
+                                <div class="job-tag">Remote</div>
+                                <div class="job-tag">Senior Level</div>
+                            </div>
+                            <div class="job-bottom">
+                                <div class="job-salary">$140,000 - $170,000</div>
+                                <div class="job-posted">Posted 5d ago</div>
+                            </div>
+                        </div>
+                        <div class="job-actions">
+                            <button class="apply-btn">Apply Now</button>
+                            <div class="save-job">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                    viewBox="0 0 16 16">
+                                    <path
+                                        d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job Card 5 -->
+                    <div class="job-card glass">
+                        <div class="company-logo logo-apple">A</div>
+                        <div class="job-info">
+                            <h3 class="job-title">UX/UI Designer</h3>
+                            <div class="company-name">Apple • Cupertino, CA</div>
+                            <div class="job-details">
+                                <div class="job-tag">Full-time</div>
+                                <div class="job-tag">Hybrid</div>
+                                <div class="job-tag">Mid Level</div>
+                            </div>
+                            <div class="job-bottom">
+                                <div class="job-salary">$125,000 - $155,000</div>
+                                <div class="job-posted">Posted 2d ago</div>
+                            </div>
+                        </div>
+                        <div class="job-actions">
+                            <button class="apply-btn">Apply Now</button>
+                            <div class="save-job">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                    viewBox="0 0 16 16">
+                                    <path
+                                        d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job Card 6 -->
+                    <div class="job-card glass">
+                        <div class="company-logo logo-facebook">F</div>
+                        <div class="job-info">
+                            <h3 class="job-title">DevOps Engineer</h3>
+                            <div class="company-name">Facebook • Menlo Park, CA</div>
+                            <div class="job-details">
+                                <div class="job-tag">Full-time</div>
+                                <div class="job-tag">Remote</div>
+                                <div class="job-tag">Senior Level</div>
+                            </div>
+                            <div class="job-bottom">
+                                <div class="job-salary">$135,000 - $165,000</div>
+                                <div class="job-posted">Posted 1d ago</div>
+                            </div>
+                        </div>
+                        <div class="job-actions">
+                            <button class="apply-btn">Apply Now</button>
+                            <div class="save-job">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                    viewBox="0 0 16 16">
+                                    <path
+                                        d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="load-more">Load More Jobs</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
