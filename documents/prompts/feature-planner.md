@@ -37,75 +37,76 @@ Please proceed with your analysis and implementation plan based on the following
 
 `<user instructions>`
 
-Implement the core job discovery features for Ligaye.com, including listing jobs, providing search and filtering capabilities, and displaying detailed job information. Ensure the implementation strictly follows the project's VSA, conventions (`base-knowledge.md`), database schema (`schema.ts`), and specific technical requirements outlined below.
+Implement the Job Application feature for Ligaye.com, allowing logged-in candidates to apply for specific jobs. This includes navigating from the job detail page to a dedicated application form, handling resume and cover letter submission (using profile defaults, new uploads, or text input), and providing user feedback upon successful submission. Ensure strict adherence to the project's VSA, conventions (`base-knowledge.md`), database schema (`schema.ts`), and the specific requirements below.
 
 **General Requirements:**
 
-1.  **Architecture:** Implement using the granular Vertical Slice Architecture (VSA). Code related to the job listing/filtering will reside primarily in `app/jobs/`, while code for the job detail view will be in `app/jobs/[id]/` (using `id` from the `jobs` table for the route parameter is preferred). Ensure co-location of components (`_components/`), queries (`_queries.ts`), hooks (`_hooks/`), etc., within their respective slices.
-2.  **Data:** Use Drizzle ORM via functions in slice-specific `_queries.ts` for all data fetching from the `jobs` table and related tables (`employerProfiles`, `locations`, `skills` via `jobSkills`, etc.). Queries should only return non-deleted (`deleted=false` or appropriate `status`) and active/published (`status='ACTIVE'`, `expiresAt` > now) jobs unless specifically for admin views (which is not part of this feature).
+1.  **Architecture:** Implement using granular Vertical Slice Architecture.
+    *   The primary application form and logic will reside in a new slice, e.g., `app/jobs/[slug]/apply/`. The `[slug]` parameter identifies the job being applied for.
+    *   The trigger ("Apply" button) will likely be on the job detail page (`app/jobs/[slug]/`).
+2.  **Data:** Use Drizzle ORM via functions in slice-specific `_queries.ts` to insert application records into the `applications` table (`schema.ts`). Ensure the `jobCandidateUniqueIdx` constraint (preventing duplicate applications) is handled gracefully.
 3.  **Technology:**
-    *   **URL State Management:** Utilize `nuqs` for managing search and filter parameters in the URL on the job listing page (`app/jobs/`). The relevant client-side component(s) will use `nuqs` hooks (likely defined in `app/jobs/_hooks/`) to read/write filter state to the URL. 
-    *   **UI:** Implement UI elements using Shadcn UI components (`components/ui/`). Adhere strictly to the visual guidelines specified in `style-guide.md` (glassmorphism, shadows, elevation).
-    *   **Responsiveness:** All components, especially the job list, job cards, filters, and detail page layout, **must** be fully responsive and optimized for mobile devices.
-    *   Server Actions (`_actions.ts`) are likely *not* the primary mechanism here, as this is mainly data fetching, but could be used if any interactive elements require server mutations (e.g., a "quick apply" directly from the list - though the main flow goes to the detail page).
-
-4. **Statement Management API (`nuqs`)**
-- We'll be using nuqs for the URL state management in this feature for filtering the jobs listing page. 
-- the package has already been installed and configured properly.
-- you can read about how to implement it in `documents/nuqs-docs.md`.
+    *   **Forms:** Use React Hook Form (RHF) and Zod (`_utils/validation.ts` within the `apply/` slice) for the application form.
+    *   **Rich Text Editor:** Utilize the pre-configured Syncfusion Rich Text Editor component (`@/components/RichTextEditor/editor`) for the optional cover letter text input.
+    *   **Mutations:** Use a Server Action (`_actions.ts` within the `apply/` slice) to handle form submission, process data (including file uploads), and interact with the database.
+    *   **File Handling:** Implement file uploads for resumes and cover letters, likely using Supabase Storage. Store the resulting URL and original filename in the `applications` table.
+    *   **UI:** Use Shadcn UI components (`components/ui/`) for form elements, buttons, and the success modal. Adhere to `style-guide.md`.
+    *   **Responsiveness:** Ensure the application form and modal are fully responsive.
+4.  **Authentication:** The application route must be protected, ensuring only logged-in users with the 'candidate' role can access it. The Server Action must retrieve the candidate's `profileId` and `candidateProfileId`.
 
 **Specific Feature Implementations:**
 
-**1. Job Listing & Filtering Page (`app/jobs/`)**
+**1. Trigger Application Flow (on `app/jobs/[slug]/`)**
 
-*   **Purpose:** Display a list of available job postings with robust search and filtering capabilities. Corresponds to "Job Search and Application" flow start in `app-flow.md`.
-*   **Target Route Slice:** `app/jobs/`
+*   **Location:** Job Detail Page (`app/jobs/[slug]/page.tsx` or a component within it).
+*   **Functionality:** Include an "Apply" button. This button should navigate the user to the dedicated application page (`/jobs/[slug]/apply`). Ensure the `slug` is passed correctly. Check if the job's `applicationMethod` allows platform applications (if relevant).
+
+**2. Job Application Page (`app/jobs/[slug]/apply/`)**
+
+*   **Purpose:** Provide the interface for a candidate to submit their application for the specific job identified by `[slug]`.
+*   **Target Route Slice:** `app/jobs/[slug]/apply/`
 *   **Key Functionality:**
-    *   **Fetch Jobs:** Retrieve a paginated list of active/published jobs based on current filter criteria.
-    *   **Search Bar:** Allow users to search by keywords (matching against `jobs.title`, `jobs.description`, potentially `skills.name`, `employerProfiles.companyName`).
-    *   **Filters:** Provide UI controls (dropdowns, checkboxes, sliders, etc.) to filter jobs by:
-        *   Location (using data from `locations` table, potentially region, district, city).
-        *   Job Type (using `jobTypeEnum`).
-        *   Work Location (using `workLocationEnum`).
-        *   Experience Level (using `experienceLevelEnum`).
-        *   Salary Range (min/max).
-        *   Industry (using data from `industries` via `jobIndustries`).
-        *   Other relevant fields from `jobs` schema as deemed necessary (e.g., `schedule`).
-    *   **URL State:** Use `nuqs` to reflect the current keyword search and selected filters in the URL query parameters. Changes in the UI controls should update the URL, and the page should read the URL on load to set the initial filter state and trigger data fetching.
-    *   **Display Results:** Render the filtered and paginated job results using a reusable job card component. Include pagination controls.
+    *   **Fetch Context Data:** On page load, fetch details of the job (`jobs` table via `slug`) and the logged-in candidate's profile (`profiles`, `candidateProfiles`), including their default `resumeUrl` and `resumeFilename`.
+    *   **Display Job Context:** Show minimal job details (e.g., Title, Company) for user orientation.
+    *   **Application Form:** Present a form with the following sections:
+        *   **Resume Selection:**
+            *   Radio button/toggle: "Use profile resume ([filename])".
+            *   Radio button/toggle: "Upload a new resume".
+            *   Conditional file input field for uploading a new resume (`.pdf`, `.docx`, etc.).
+        *   **Cover Letter Selection:**
+            *   Radio button/toggle: "Upload cover letter file".
+            *   Radio button/toggle: "Paste cover letter text".
+            *   Radio button/toggle: "No cover letter" (Optional, based on requirements).
+            *   Conditional file input field for uploading a cover letter file.
+            *   Conditional Rich Text Editor (`@/components/RichTextEditor/editor`) for pasting cover letter text.
+        *   **Submit Button.**
 *   **UI Structure:**
-    *   `page.tsx`: Likely needs to be a Client Component (`'use client'`) or contain one to manage interaction with `nuqs` and the filter UI state. It orchestrates fetching data based on the URL state.
-    *   `_components/`:
-        *   `JobFilters.tsx` (`'use client'`): Contains the search bar and all filter controls. Uses `nuqs` hooks (from `_hooks/`) to manage state.
-        *   `JobList.tsx`: Renders the list of job cards based on data passed from `page.tsx`. Might handle pagination display.
-        *   `JobCard.tsx`: Displays summary information for a single job (title, company, location, salary snippet, date posted). Should link to the corresponding job detail page (`/jobs/[id]`). This component *might* be reusable on the detail page or other areas, consider if it belongs here or potentially slightly higher up if truly generic *within the job context*. For now, place in `app/jobs/_components/`.
-    *   `_hooks/`:
-        *   `useJobFilters.ts` (`'use client'`): Custom hook encapsulating `nuqs` logic for parsing and updating job filter parameters in the URL.
-    *   `_utils/`: May contain validation schemas (`validation.ts`) for filter inputs if needed.
-*   **Data Flow:**
-    *   **Client (`JobFilters.tsx`, `page.tsx`, `useJobFilters.ts`):** User interacts with filters -> `nuqs` hook updates URL -> `page.tsx` detects URL change -> Triggers data re-fetch, passing current filters.
-    *   **Server (`page.tsx` on re-render/navigation, called from client fetch):** Receives filter parameters (parsed from URL state) -> Calls function in `./_queries.ts` (e.g., `getFilteredJobs(filters, pagination)`).
-    *   **Query (`_queries.ts` -> `getFilteredJobs`):** Constructs a Drizzle query based on the provided filters (keywords, locationId, jobType, etc.) and pagination settings. Fetches relevant data, joining necessary tables (`employerProfiles`, `locations`, etc.). Returns paginated job list.
+    *   `page.tsx`: Server Component. Reads `slug` from `params`. Fetches job and candidate profile data using `./_queries.ts`. Passes data to the form component.
+    *   `_components/ApplicationForm.tsx` (`'use client'`): The main form using RHF/Zod. Manages state for resume/cover letter choices and inputs. Handles conditional display of file inputs/editor. On submit, calls the `submitApplication` Server Action. Manages display of the success modal upon successful submission.
+    *   `_components/ApplicationSuccessModal.tsx` (`'use client'`): A modal component displayed upon successful application submission.
+    *   `_utils/validation.ts`: Zod schema for form validation (potentially optional fields for cover letter/resume depending on choices).
+*   **Data Flow (Load):** `page.tsx` reads `slug`, gets `userId` -> `./_queries.ts` (`getApplicationContextData`) -> DB (fetch job by slug, fetch candidate profile by userId) -> Pass data to `ApplicationForm.tsx`.
 
-**2. Job Detail Page (`app/jobs/[id]/`)**
+**3. Application Submission Logic (`app/jobs/[slug]/apply/`)**
 
-*   **Purpose:** Display comprehensive information about a single job posting. Allow users to initiate the application process (details of the application submission itself are a separate feature).
-*   **Target Route Slice:** `app/jobs/[id]/`
-*   **Key Functionality:**
-    *   Fetch detailed information for the job identified by the `id` parameter.
-    *   Display all relevant job details from the `jobs` table and related tables (company info, full description, requirements, salary, benefits, location details, skills list, application instructions, etc.).
-    *   Include a prominent "Apply" button/mechanism (which might link externally, open an email, or trigger an on-platform application flow later).
-    *   Potentially display related jobs or company information.
-*   **UI Structure:**
-    *   `page.tsx`: Server Component. Reads the `id` from `params`. Calls a function in `./_queries.ts` to fetch the job details. Passes data to display components. Handle "Not Found" cases if the id is invalid or the job is not active/published.
-    *   `_components/`: Components specific to rendering sections of the job detail page (e.g., `JobHeader.tsx`, `JobDescriptionSection.tsx`, `CompanyInfoSidebar.tsx`, `SkillsList.tsx`).
-*   **Data Flow (Read):** `page.tsx` reads `id` -> Calls function in `./_queries.ts` (e.g., `getJobDetailsByid(id)`) -> Query fetches data for the specific job, joining related tables -> Data passed to UI components.
-*   **Data Query (`_queries.ts` -> `getJobDetailsByid`):** Fetches a single job record matching the `id` where `status='ACTIVE'` and `expiresAt` is valid. Includes detailed information by joining `employerProfiles`, `locations`, `jobSkills` -> `skills`, etc.
-
-**3. UI/Styling Constraints:**
-
-*   Implement all UI according to `style-guide.md`, focusing on the specified glassmorphic look, shadows for elevation (especially on `JobCard.tsx`), and overall feel.
-*   Ensure layout and components are fully responsive and provide an excellent experience on mobile devices. Test thoroughly on various screen sizes.
+*   **Target Files:** `_actions.ts`, `_queries.ts`
+*   **Server Action (`_actions.ts` -> `submitApplication`):**
+    *   Accepts validated form data, `jobId` (derived from slug lookup), `candidateProfileId` (from logged-in user).
+    *   **File Upload Handling:**
+        *   If a new resume was uploaded, upload it to Supabase Storage (e.g., under a path like `resumes/[candidateProfileId]/[jobId]/[filename]`). Get the `resumeUrl` and `resumeFilename`.
+        *   If a cover letter file was uploaded, upload it similarly. Get `coverLetterUrl` and `coverLetterFilename`.
+    *   **Data Preparation:** Construct the `NewApplication` object for insertion:
+        *   Set `jobId`, `candidateProfileId`.
+        *   Determine `resumeUrl`/`resumeFilename` based on user choice (profile default or new upload).
+        *   Determine `coverLetterUrl`/`coverLetterFilename` or `coverLetterText` based on user choice.
+        *   Set initial `status` to `'APPLIED'`.
+    *   **Database Insertion:** Call the `insertApplication` function from `./_queries.ts`.
+    *   **Error Handling:** Catch potential errors, especially unique constraint violations (user already applied). Return structured success/error states to the form.
+*   **Query (`_queries.ts` -> `insertApplication`):**
+    *   Accepts the `NewApplication` object.
+    *   Uses Drizzle (`await db()`) to insert the record into the `applications` table.
+*   **Query (`_queries.ts` -> `getApplicationContextData`):**
+    *   Fetches job details by slug and candidate profile details by user ID. Needed for the application page load.
 
 
 `</user instructions>`
