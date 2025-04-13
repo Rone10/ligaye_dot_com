@@ -65,12 +65,12 @@ export default function JobHeader({ job }: JobHeaderProps) {
         </div>
         
         <div className="flex gap-3 mt-4 md:mt-0">
-          <a
-            href="#apply"
+          <Link
+            href={`/jobs/${job.id}/apply`}
             className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
           >
             Apply Now
-          </a>
+          </Link>
           <Button 
             variant="outline" 
             className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-md border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 whitespace-nowrap h-auto"

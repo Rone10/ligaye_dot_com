@@ -143,7 +143,7 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
               <div className="text-sm text-gray-500">Salary</div>
               <div className="font-semibold text-gray-900">{salaryDisplay}</div>
             </div>
-            <Link href={`/jobs/${job.id}`} passHref>
+            <Link href={`/jobs/${job.id}/apply`} passHref>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 Apply Now
               </Button>

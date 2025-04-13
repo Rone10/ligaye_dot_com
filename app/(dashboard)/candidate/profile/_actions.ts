@@ -102,7 +102,7 @@ export async function handleResumeUpload(formData: FormData) {
     .upload(fileName, resumeFile);
     
   if (error){
-    console.error('File upload failed:', error);
+    console.log('File upload failed in handleResumeUpload:', error);
     throw new Error('File upload failed');
   }
   

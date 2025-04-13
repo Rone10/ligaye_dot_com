@@ -6,6 +6,8 @@ import RelatedJobs from './_components/RelatedJobs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { JobActionButton } from './_components/JobActionButton';
+import { getUser } from '@/lib/supabase/server';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -15,6 +17,9 @@ export default async function JobDetailPage({ params }: PageProps) {
   // Extract the job ID from params
   const resolvedParams = await params;
   const id = resolvedParams.id;
+  
+  // Get the current user
+  const user = await getUser();
   
   // Fetch job details
   const job = await getJobById(id);
@@ -26,6 +31,16 @@ export default async function JobDetailPage({ params }: PageProps) {
     <div className="container max-w-7xl py-8 mx-auto space-y-8">
       {/* Job Header */}
       <JobHeader job={job} />
+      
+      {/* Add Apply Button */}
+      <div className="mt-6">
+        <JobActionButton 
+          id={id}
+          applicationMethod={job.applicationMethod}
+          isLoggedIn={!!user}
+          userRole={user?.role || null}
+        />
+      </div>
       
       <Separator className="my-6" />
       
