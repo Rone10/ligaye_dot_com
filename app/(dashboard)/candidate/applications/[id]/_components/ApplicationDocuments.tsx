@@ -164,7 +164,7 @@ export default function ApplicationDocuments({
           {coverLetterText && (
             <div className="bg-[#f8faff] p-4 rounded-lg border border-[#e1e5f2]">
               <h3 className="font-medium text-[#1a1e2d] mb-2">Cover Letter</h3>
-              <div className="text-sm text-[#1a1e2d] max-h-56 overflow-y-auto p-4 bg-white rounded border border-[#e1e5f2]">
+              <div className="text-sm text-[#1a1e2d] p-4 bg-white rounded border border-[#e1e5f2]">
                 <div 
                   className="prose prose-sm max-w-none" 
                   dangerouslySetInnerHTML={{ __html: parseCoverLetterText(coverLetterText) }}

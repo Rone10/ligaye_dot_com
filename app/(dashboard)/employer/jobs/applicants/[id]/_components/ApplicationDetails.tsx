@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import StatusBadge from '../../_components/StatusBadge'
 import Link from 'next/link'
 import { ExternalLink, FileText, Calendar } from 'lucide-react'
+import { formatEnumValue } from '@/lib/utils'
 
 interface ApplicationDetailsProps {
   application: {
@@ -109,8 +110,8 @@ export default function ApplicationDetails({ application, job }: ApplicationDeta
               </Link>
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
-              <Badge variant="outline">{job.jobType}</Badge>
-              <Badge variant="outline">{job.workLocation}</Badge>
+              <Badge variant="outline">{formatEnumValue(job.jobType)}</Badge>
+              <Badge variant="outline">{formatEnumValue(job.workLocation)}</Badge>
             </div>
           </div>
           

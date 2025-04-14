@@ -43,3 +43,21 @@ export function getInitials(name: string): string {
   
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
+
+/**
+ * Format enum values by replacing underscores with spaces and properly capitalizing
+ * @param value - The enum value to format (e.g., 'FULL_TIME', 'ON_SITE')
+ * @returns Formatted string (e.g., 'Full Time', 'On Site')
+ */
+export function formatEnumValue(value: string): string {
+  if (!value) return '';
+  
+  // Replace underscores with spaces and convert to lowercase
+  const spacedValue = value.replace(/_/g, ' ').toLowerCase();
+  
+  // Capitalize each word
+  return spacedValue
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
