@@ -2,7 +2,7 @@
 
 import { eq, and, or, desc, asc, ne, SQL, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { applications, jobs, employerProfiles, profiles, candidateProfiles, applicationStatusEnum } from '@/lib/db/schema'
+import { applications, jobs, employerProfiles, profiles, candidateProfiles, applicationStatusEnum, education, experience } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
 
 export interface ApplicationFilter {
@@ -198,7 +198,36 @@ export async function getApplicationById(applicationId: string) {
       return { error: 'Application not found or you do not have permission to view it' }
     }
     
-    return { application: applicationData[0] }
+    // Get candidate's education history
+    const educationData = await db()
+      .select()
+      .from(education)
+      .where(and(
+        eq(education.candidateProfileId, applicationData[0].candidate.id),
+        eq(education.deleted, false)
+      ))
+      .orderBy(desc(education.endDate))
+    
+    // Get candidate's work experience
+    const experienceData = await db()
+      .select()
+      .from(experience)
+      .where(and(
+        eq(experience.candidateProfileId, applicationData[0].candidate.id),
+        eq(experience.deleted, false)
+      ))
+      .orderBy(desc(experience.startDate))
+    
+    return { 
+      application: {
+        ...applicationData[0],
+        candidate: {
+          ...applicationData[0].candidate,
+          education: educationData,
+          experience: experienceData
+        }
+      } 
+    }
   } catch (error) {
     console.error('Error fetching application details:', error)
     return { error: 'Failed to fetch application details' }

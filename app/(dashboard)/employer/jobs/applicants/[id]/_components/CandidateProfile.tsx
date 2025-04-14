@@ -10,7 +10,29 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { getInitials } from '@/lib/utils'
-import { Linkedin, Github, Globe, FileText } from 'lucide-react'
+import { Linkedin, Github, Globe, FileText, Briefcase, GraduationCap, CalendarIcon, Building } from 'lucide-react'
+import { format } from 'date-fns'
+
+interface Education {
+  id: string
+  institution: string
+  degree: string
+  fieldOfStudy: string | null
+  startDate: string | null
+  endDate: string | null
+  description: string | null
+}
+
+interface Experience {
+  id: string
+  jobTitle: string
+  companyName: string
+  location: string | null
+  startDate: string | null
+  endDate: string | null
+  isCurrent: boolean
+  description: string | null
+}
 
 interface CandidateProfileProps {
   candidate: {
@@ -24,10 +46,17 @@ interface CandidateProfileProps {
     githubUrl: string | null
     portfolioUrl: string | null
     bio: string | null
+    education?: Education[]
+    experience?: Experience[]
   }
 }
 
 export default function CandidateProfile({ candidate }: CandidateProfileProps) {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Present';
+    return format(new Date(dateString), 'MMM yyyy');
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -60,6 +89,72 @@ export default function CandidateProfile({ candidate }: CandidateProfileProps) {
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-gray-500">Bio</h3>
             <p className="text-sm">{candidate.bio}</p>
+          </div>
+        )}
+        
+        {/* Education Section */}
+        {candidate.education && candidate.education.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-gray-500 flex items-center gap-2">
+              <GraduationCap size={16} className="text-blue-600" />
+              Education
+            </h3>
+            <div className="space-y-4">
+              {candidate.education.map((edu) => (
+                <div key={edu.id} className="border-l-2 border-blue-100 pl-4 py-1">
+                  <h4 className="font-medium">{edu.degree}</h4>
+                  <p className="text-sm text-gray-700">{edu.institution}</p>
+                  {edu.fieldOfStudy && (
+                    <p className="text-sm text-gray-600">{edu.fieldOfStudy}</p>
+                  )}
+                  <div className="flex items-center text-xs text-gray-500 mt-1">
+                    <CalendarIcon size={12} className="mr-1" />
+                    <span>
+                      {edu.startDate ? formatDate(edu.startDate) : 'N/A'} - {formatDate(edu.endDate)}
+                    </span>
+                  </div>
+                  {edu.description && (
+                    <p className="text-sm mt-1 text-gray-600">{edu.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Work Experience Section */}
+        {candidate.experience && candidate.experience.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-gray-500 flex items-center gap-2">
+              <Briefcase size={16} className="text-blue-600" />
+              Work Experience
+            </h3>
+            <div className="space-y-4">
+              {candidate.experience.map((exp) => (
+                <div key={exp.id} className="border-l-2 border-blue-100 pl-4 py-1">
+                  <h4 className="font-medium">{exp.jobTitle}</h4>
+                  <div className="flex items-center gap-1 text-sm text-gray-700">
+                    <Building size={12} />
+                    <span>{exp.companyName}</span>
+                  </div>
+                  {exp.location && (
+                    <p className="text-sm text-gray-600">{exp.location}</p>
+                  )}
+                  <div className="flex items-center text-xs text-gray-500 mt-1">
+                    <CalendarIcon size={12} className="mr-1" />
+                    <span>
+                      {exp.startDate ? formatDate(exp.startDate) : 'N/A'} - {exp.isCurrent ? 'Present' : formatDate(exp.endDate)}
+                    </span>
+                    {exp.isCurrent && (
+                      <Badge variant="outline" className="ml-2 text-[10px] py-0 h-4">Current</Badge>
+                    )}
+                  </div>
+                  {exp.description && (
+                    <p className="text-sm mt-1 text-gray-600">{exp.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
         

@@ -10,6 +10,43 @@ import StatusUpdateForm from './_components/StatusUpdateForm'
 import NotesForm from './_components/NotesForm'
 import InterviewScheduler from './_components/InterviewScheduler'
 
+// Define interfaces matching those in CandidateProfile.tsx
+interface Education {
+  id: string
+  institution: string
+  degree: string
+  fieldOfStudy: string | null
+  startDate: string | null
+  endDate: string | null
+  description: string | null
+}
+
+interface Experience {
+  id: string
+  jobTitle: string
+  companyName: string
+  location: string | null
+  startDate: string | null
+  endDate: string | null
+  isCurrent: boolean
+  description: string | null
+}
+
+interface FormattedCandidate {
+  id: string
+  fullName: string
+  title: string | null
+  experienceLevel: string | null
+  avatarUrl: string | null
+  resumeUrl: string | null
+  linkedinUrl: string | null
+  githubUrl: string | null
+  portfolioUrl: string | null
+  bio: string | null
+  education?: Education[]
+  experience?: Experience[]
+}
+
 interface PageParams {
   id: string
 }
@@ -45,6 +82,43 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     redirect('/employer/jobs/applicants')
   }
   
+  // Transform database data to match component expectations
+  const formattedEducation: Education[] = application.candidate.education?.map(edu => ({
+    id: edu.id,
+    institution: edu.institution,
+    degree: edu.degree,
+    fieldOfStudy: edu.fieldOfStudy,
+    startDate: edu.startDate ? edu.startDate.toISOString() : null,
+    endDate: edu.endDate ? edu.endDate.toISOString() : null,
+    description: edu.description
+  })) || [];
+  
+  const formattedExperience: Experience[] = application.candidate.experience?.map(exp => ({
+    id: exp.id,
+    jobTitle: exp.jobTitle,
+    companyName: exp.companyName,
+    location: exp.location,
+    startDate: exp.startDate ? exp.startDate.toISOString() : null,
+    endDate: exp.endDate ? exp.endDate.toISOString() : null,
+    isCurrent: exp.isCurrent === true,
+    description: exp.description
+  })) || [];
+  
+  const formattedCandidate: FormattedCandidate = {
+    id: application.candidate.id,
+    fullName: application.candidate.fullName,
+    title: application.candidate.title,
+    experienceLevel: application.candidate.experienceLevel,
+    avatarUrl: application.candidate.avatarUrl,
+    resumeUrl: application.candidate.resumeUrl,
+    linkedinUrl: application.candidate.linkedinUrl,
+    githubUrl: application.candidate.githubUrl,
+    portfolioUrl: application.candidate.portfolioUrl,
+    bio: application.candidate.bio,
+    education: formattedEducation,
+    experience: formattedExperience
+  };
+  
   return (
     <div className="container mx-auto py-10">
       <div className="mb-8">
@@ -69,7 +143,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             application={application.application} 
             job={application.job} 
           />
-          <CandidateProfile candidate={application.candidate} />
+          <CandidateProfile candidate={formattedCandidate} />
         </div>
         
         <div className="space-y-6">
