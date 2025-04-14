@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { applicationMethodEnum } from "@/lib/db/schema"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { useEffect } from "react"
 
 interface JobActionButtonProps {
   id: string
@@ -22,6 +23,17 @@ export function JobActionButton({
 }: JobActionButtonProps) {
   const router = useRouter()
   
+  // Log the props for debugging purposes
+  useEffect(() => {
+    console.log('JobActionButton props:', {
+      id,
+      applicationMethod,
+      isLoggedIn,
+      userRole,
+      hasApplied
+    })
+  }, [id, applicationMethod, isLoggedIn, userRole, hasApplied])
+  
   const handleApply = () => {
     if (!isLoggedIn) {
       router.push(`/login?redirect=/jobs/${id}/apply`)
@@ -36,8 +48,9 @@ export function JobActionButton({
     return null
   }
   
-  // Determine button state
-  const isDisabled = (userRole !== 'candidate' && isLoggedIn) || hasApplied
+  // Determine button state - FIXED: Now only disable if user has applied OR their role is specifically 'employer'
+  // This allows both 'authenticated' and 'candidate' roles to apply
+  const isDisabled = (userRole === 'employer' && isLoggedIn) || hasApplied
   
   // Show tooltip if already applied
   if (hasApplied) {
@@ -49,6 +62,7 @@ export function JobActionButton({
               <Button 
                 className="w-full md:w-auto" 
                 disabled={true}
+                variant="secondary"
               >
                 Already Applied
               </Button>

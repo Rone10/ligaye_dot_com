@@ -176,7 +176,11 @@ export async function getRelatedJobs(jobId: string, limit: number = 3) {
 
 // Add this function after existing exports
 export async function checkUserApplication(jobId: string, userId: string | undefined) {
-  if (!userId) return false;
+  console.log('Checking if user has applied - userId:', userId, 'jobId:', jobId);
+  if (!userId) {
+    console.log('checkUserApplication: No userId provided, returning false');
+    return false;
+  }
   
   // Get the candidate profile ID for this user
   const candidateResult = await db()
@@ -188,7 +192,12 @@ export async function checkUserApplication(jobId: string, userId: string | undef
     .where(eq(profiles.userId, userId))
     .limit(1);
   
-  if (!candidateResult.length) return false;
+  console.log('Candidate profile search result:', candidateResult);
+  
+  if (!candidateResult.length) {
+    console.log('checkUserApplication: No candidate profile found for user', userId);
+    return false;
+  }
   
   const candidateProfileId = candidateResult[0].id;
   
@@ -204,7 +213,11 @@ export async function checkUserApplication(jobId: string, userId: string | undef
     )
     .limit(1);
   
-  return applicationResult.length > 0;
+  console.log('Application search result:', applicationResult);
+  const hasApplied = applicationResult.length > 0;
+  console.log('User has applied:', hasApplied);
+  
+  return hasApplied;
 }
 
 // Add this function to check if a job is saved by a user

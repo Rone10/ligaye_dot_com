@@ -33,6 +33,10 @@ export default async function JobDetailPage({ params }: PageProps) {
   // Check if user has saved this job
   const isSaved = user ? await checkUserSavedJob(id, user.id) : false;
   
+  // Log debug info (will show in server console)
+  console.log('User info:', user ? { id: user.id, role: user.role } : 'Not logged in');
+  console.log('Job application status - hasApplied:', hasApplied);
+  
   return (
     <div className="container max-w-7xl py-8 mx-auto space-y-8">
       {/* Job Header */}
