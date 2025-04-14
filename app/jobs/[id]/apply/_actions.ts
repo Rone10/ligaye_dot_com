@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { getUser } from "@/lib/supabase/server"
 import { createClient } from "@/lib/supabase/server"
 import { applicationFormSchema, type ApplicationFormValues } from "./_utils/validation"
@@ -124,6 +124,10 @@ export async function submitApplication({
     revalidatePath(`/jobs/${jobId}`)
     revalidatePath('/applications')
     revalidatePath('/dashboard/applications')
+    revalidatePath('/candidate/applications')
+    
+    // Revalidate applications cache tag
+    revalidateTag('applications')
     
     return result
   } catch (error) {

@@ -1,40 +1,16 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { eq, and, desc, isNull } from 'drizzle-orm'
+import { eq, and, desc } from 'drizzle-orm'
 import { applications, jobs, employerProfiles, candidateProfiles, profiles } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
+import { unstable_cache } from 'next/cache'
 
 /**
- * Gets all applications for the current logged-in candidate
+ * Gets all applications for a specific candidate profile
  */
-export async function getCandidateApplications() {
-  const user = await getUser()
-  
-  if (!user) {
-    throw new Error('User not authenticated')
-  }
-  
+export async function getCandidateApplicationsForProfile(candidateProfileId: string) {
   try {
-    // First find the candidate profile ID for this user
-    const candidateProfile = await db()
-      .select({
-        id: candidateProfiles.id
-      })
-      .from(candidateProfiles)
-      .innerJoin(profiles, eq(candidateProfiles.profileId, profiles.id))
-      .where(and(
-        eq(profiles.userId, user.id),
-        eq(candidateProfiles.deleted, false),
-        eq(profiles.deleted, false)
-      ))
-      .limit(1)
-      .then(res => res[0])
-    
-    if (!candidateProfile) {
-      return { data: [], error: null }
-    }
-    
     // Get applications with job and employer details
     const results = await db()
       .select({
@@ -64,7 +40,7 @@ export async function getCandidateApplications() {
       .innerJoin(jobs, eq(applications.jobId, jobs.id))
       .innerJoin(employerProfiles, eq(jobs.companyId, employerProfiles.id))
       .where(and(
-        eq(applications.candidateProfileId, candidateProfile.id),
+        eq(applications.candidateProfileId, candidateProfileId),
         eq(applications.deleted, false)
       ))
       .orderBy(desc(applications.appliedAt))
@@ -73,5 +49,57 @@ export async function getCandidateApplications() {
   } catch (error) {
     console.error('Error fetching candidate applications:', error)
     return { data: null, error: 'Failed to fetch your applications' }
+  }
+}
+
+/**
+ * Cached version of the applications query for a specific candidate profile
+ */
+const getCandidateApplicationsCached = unstable_cache(
+  async (candidateProfileId: string) => {
+    return getCandidateApplicationsForProfile(candidateProfileId)
+  },
+  ['candidate-applications'],
+  {
+    tags: ['applications']
+  }
+)
+
+/**
+ * Gets all applications for the current logged-in candidate
+ * Main entry point that handles auth checks before using the cached function
+ */
+export async function getCandidateApplications() {
+  const user = await getUser()
+  
+  if (!user) {
+    throw new Error('User not authenticated')
+  }
+  
+  try {
+    // First find the candidate profile ID for this user
+    const candidateProfile = await db()
+      .select({
+        id: candidateProfiles.id
+      })
+      .from(candidateProfiles)
+      .innerJoin(profiles, eq(candidateProfiles.profileId, profiles.id))
+      .where(and(
+        eq(profiles.userId, user.id),
+        eq(candidateProfiles.deleted, false),
+        eq(profiles.deleted, false)
+      ))
+      .limit(1)
+      .then(res => res[0])
+    
+    if (!candidateProfile) {
+      return { data: [], error: null }
+    }
+    
+    // Use the cached function with the candidateProfileId
+    return getCandidateApplicationsCached(candidateProfile.id)
+  } catch (error) {
+    console.error('Error in getCandidateApplications:', error)
+    return { data: [], error: 'Failed to fetch your applications' }
   }
 } 

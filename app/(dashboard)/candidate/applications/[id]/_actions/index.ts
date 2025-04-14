@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 import { eq, and } from 'drizzle-orm'
 import { applications, candidateProfiles, profiles } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 /**
  * Withdraws a job application
@@ -64,6 +64,9 @@ export async function withdrawApplication(applicationId: string) {
     // Revalidate the applications pages
     revalidatePath('/candidate/applications')
     revalidatePath(`/candidate/applications/${applicationId}`)
+    
+    // Revalidate the applications cache tag
+    revalidateTag('applications')
     
     return { success: true }
   } catch (error) {
