@@ -1,10 +1,10 @@
-import { AlertCircle, FileQuestion, LucideIcon } from 'lucide-react'
+import { AlertCircle, FileQuestion, Bookmark, LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface EmptyStateProps {
   title: string
   description?: string
-  icon?: 'FileQuestion' | 'AlertCircle'
+  icon?: 'FileQuestion' | 'AlertCircle' | 'Bookmark'
   iconClassName?: string
   children?: React.ReactNode
 }
@@ -21,6 +21,8 @@ export function EmptyState({
     switch (icon) {
       case 'AlertCircle':
         return <AlertCircle className="h-6 w-6 text-foreground/70" />
+      case 'Bookmark':
+        return <Bookmark className="h-6 w-6 text-foreground/70" />
       case 'FileQuestion':
       default:
         return <FileQuestion className="h-6 w-6 text-foreground/70" />

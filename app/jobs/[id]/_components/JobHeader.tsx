@@ -8,6 +8,7 @@ import { formatSalaryDisplay, jobTypeLabels, workLocationLabels, experienceLevel
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { toggleSaveJob } from '../_actions'
 import { useState } from 'react'
+import Image from 'next/image';
 
 interface JobHeaderProps {
   job: any
@@ -117,7 +118,7 @@ export default function JobHeader({ job, hasApplied = false, isSaved = false }: 
           <div className="flex items-center">
             <div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0 overflow-hidden">
               {job.company?.companyLogoUrl ? (
-                <img src={job.company.companyLogoUrl} alt={job.company.companyName || 'Company logo'} className="w-full h-full object-cover" />
+                <Image src={job.company.companyLogoUrl} alt={job.company.companyName || 'Company logo'} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-500">
                   {job.company?.companyName?.charAt(0) || 'C'}

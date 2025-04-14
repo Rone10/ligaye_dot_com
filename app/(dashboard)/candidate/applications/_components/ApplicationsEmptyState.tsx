@@ -14,7 +14,7 @@ export default function ApplicationsEmptyState() {
       <h3 className="text-xl font-semibold text-[#1a1e2d] mb-2">No Applications Yet</h3>
       
       <p className="text-[#9aa3bc] max-w-md mb-6">
-        You haven't applied to any jobs yet. Browse available job listings and 
+        You haven&apos;t applied to any jobs yet. Browse available job listings and 
         submit your first application to get started on your career journey.
       </p>
       

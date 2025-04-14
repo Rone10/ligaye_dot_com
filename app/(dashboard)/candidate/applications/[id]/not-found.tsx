@@ -12,7 +12,7 @@ export default function ApplicationNotFound() {
       <h1 className="text-2xl font-bold text-[#1a1e2d] mb-3">Application Not Found</h1>
       
       <p className="text-[#9aa3bc] max-w-md mb-8">
-        We couldn't find the application you're looking for. It may have been removed,
+        We couldn&apos;t find the application you&apos;re looking for. It may have been removed,
         or you might not have permission to view it.
       </p>
       
