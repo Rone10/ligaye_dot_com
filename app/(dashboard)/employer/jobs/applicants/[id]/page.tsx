@@ -176,7 +176,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-500">
-                  Change application status to "Interview Scheduled" to enable the interview scheduler.
+                  Change application status to &quot;Interview Scheduled&quot; to enable the interview scheduler.
                 </p>
               </CardContent>
             </Card>
@@ -199,7 +199,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-500">
-                  Change application status to "Interview Scheduled" to enable the interview notes feature.
+                  Change application status to &quot;Interview Scheduled&quot; to enable the interview notes feature.
                 </p>
               </CardContent>
             </Card>
