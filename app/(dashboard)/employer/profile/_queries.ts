@@ -2,6 +2,7 @@ import { db } from '@/lib/db';
 import { profiles, employerProfiles, industries, locations } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import type { Profile, EmployerProfile, Industry, Location, NewEmployerProfile } from '@/lib/db/schema';
+import { unstable_cache } from 'next/cache';
 
 interface EmployerProfileData {
   profile: Profile;
@@ -10,13 +11,15 @@ interface EmployerProfileData {
   location: Location | null;
 }
 
-// Main query to fetch complete employer profile
-export async function getEmployerProfile(userId: string): Promise<EmployerProfileData | null> {
-  // First get the base profile
+/**
+ * Fetches employer profile data by profile ID (uncached version)
+ */
+export async function getEmployerProfileData(profileId: string): Promise<EmployerProfileData | null> {
+  // Get the base profile
   const profile = await db()
     .select()
     .from(profiles)
-    .where(eq(profiles.userId, userId))
+    .where(eq(profiles.id, profileId))
     .limit(1)
     .then(res => res[0]);
 
@@ -58,21 +61,69 @@ export async function getEmployerProfile(userId: string): Promise<EmployerProfil
   };
 }
 
-// Get all industries for selection
-export async function getAllIndustries(): Promise<Industry[]> {
-  return db()
+/**
+ * Cached version of employer profile data
+ */
+const getEmployerProfileCached = unstable_cache(
+  async (profileId: string) => {
+    return getEmployerProfileData(profileId);
+  },
+  ['employer-profile'],
+  {
+    tags: ['employer-profile']
+  }
+);
+
+/**
+ * Main entry point for getting employer profile
+ * Handles finding the profile ID from user ID
+ */
+export async function getEmployerProfile(userId: string): Promise<EmployerProfileData | null> {
+  // First get the base profile
+  const profile = await db()
     .select()
-    .from(industries)
-    .where(eq(industries.deleted, false));
+    .from(profiles)
+    .where(eq(profiles.userId, userId))
+    .limit(1)
+    .then(res => res[0]);
+
+  if (!profile) return null;
+
+  // Use the cached function with profile ID
+  return getEmployerProfileCached(profile.id);
 }
 
-// Get all locations for selection
-export async function getAllLocations(): Promise<Location[]> {
-  return db()
-    .select()
-    .from(locations)
-    .where(eq(locations.deleted, false));
-}
+/**
+ * Cached function to get all industries
+ */
+export const getAllIndustries = unstable_cache(
+  async (): Promise<Industry[]> => {
+    return db()
+      .select()
+      .from(industries)
+      .where(eq(industries.deleted, false));
+  },
+  ['all-industries'],
+  {
+    tags: ['industries']
+  }
+);
+
+/**
+ * Cached function to get all locations
+ */
+export const getAllLocations = unstable_cache(
+  async (): Promise<Location[]> => {
+    return db()
+      .select()
+      .from(locations)
+      .where(eq(locations.deleted, false));
+  },
+  ['all-locations'],
+  {
+    tags: ['locations']
+  }
+);
 
 // Create or update employer profile
 export async function upsertEmployerProfile(

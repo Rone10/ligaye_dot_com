@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { getUser } from '@/lib/supabase/server';
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
@@ -67,7 +67,10 @@ export async function updateEmployerProfileDetails(
     const result = await upsertEmployerProfile(profile.id, validatedData);
     console.log('Database update result:', result);
     
+    // Revalidate the page and cache
     revalidatePath('/employer/profile');
+    revalidateTag('employer-profile');
+    
     return { success: true, message: 'Profile updated successfully' };
   } catch (error) {
     console.error('Error updating profile:', error);
@@ -151,6 +154,9 @@ export async function handleLogoUpload(formData: FormData) {
     companyLogoUrl: publicUrl
   });
   
+  // Revalidate the page and cache
   revalidatePath('/employer/profile');
+  revalidateTag('employer-profile');
+  
   return { success: true, url: publicUrl };
 } 
