@@ -7,7 +7,10 @@ import {
   industries,
   jobSkills,
   skills,
-  jobIndustries
+  jobIndustries,
+  candidateProfiles,
+  profiles,
+  applications
 } from '@/lib/db/schema';
 import { notFound } from 'next/navigation';
 import type { JobDetail, SimpleSkill, SimpleIndustry } from '../_utils/types';
@@ -168,4 +171,37 @@ export async function getRelatedJobs(jobId: string, limit: number = 3) {
       )
     )
     .limit(limit);
+}
+
+// Add this function after existing exports
+export async function checkUserApplication(jobId: string, userId: string | undefined) {
+  if (!userId) return false;
+  
+  // Get the candidate profile ID for this user
+  const candidateResult = await db()
+    .select({
+      id: candidateProfiles.id,
+    })
+    .from(candidateProfiles)
+    .leftJoin(profiles, eq(candidateProfiles.profileId, profiles.id))
+    .where(eq(profiles.userId, userId))
+    .limit(1);
+  
+  if (!candidateResult.length) return false;
+  
+  const candidateProfileId = candidateResult[0].id;
+  
+  // Check if this candidate has applied to this job
+  const applicationResult = await db()
+    .select({ id: applications.id })
+    .from(applications)
+    .where(
+      and(
+        eq(applications.jobId, jobId),
+        eq(applications.candidateProfileId, candidateProfileId)
+      )
+    )
+    .limit(1);
+  
+  return applicationResult.length > 0;
 } 

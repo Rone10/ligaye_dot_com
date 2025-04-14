@@ -22,11 +22,16 @@ export default async function ApplicationPage({ params }: ApplicationPageProps) 
   }
   
   // Fetch application context data (job and candidate info)
-  const { job, candidateProfile } = await getApplicationContextData(id, user.id)
+  const { job, candidateProfile, existingApplication } = await getApplicationContextData(id, user.id)
   
   // Redirect if job not found
   if (!job) {
     redirect('/jobs?error=jobNotFound')
+  }
+  
+  // Redirect if user has already applied
+  if (existingApplication) {
+    redirect(`/jobs/${id}?error=alreadyApplied`)
   }
   
   // Redirect if job doesn't allow platform applications

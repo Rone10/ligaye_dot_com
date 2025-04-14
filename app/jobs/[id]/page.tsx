@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { getJobById, getRelatedJobs } from './_queries';
+import { getJobById, getRelatedJobs, checkUserApplication } from './_queries';
 import JobHeader from './_components/JobHeader';
 import JobDetails from './_components/JobDetails';
 import RelatedJobs from './_components/RelatedJobs';
@@ -27,6 +27,9 @@ export default async function JobDetailPage({ params }: PageProps) {
   // Fetch related jobs
   const relatedJobs = await getRelatedJobs(id);
   
+  // Check if user has already applied
+  const hasApplied = user ? await checkUserApplication(id, user.id) : false;
+  
   return (
     <div className="container max-w-7xl py-8 mx-auto space-y-8">
       {/* Job Header */}
@@ -39,6 +42,7 @@ export default async function JobDetailPage({ params }: PageProps) {
           applicationMethod={job.applicationMethod}
           isLoggedIn={!!user}
           userRole={user?.role || null}
+          hasApplied={hasApplied}
         />
       </div>
       
