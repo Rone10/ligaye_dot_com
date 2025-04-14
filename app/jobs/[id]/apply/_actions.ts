@@ -84,7 +84,7 @@ export async function submitApplication({
       
       // Upload file to Supabase Storage
       const { data: clData, error: clError } = await supabase.storage
-        .from('applications')
+        .from('cover-letters')
         .upload(filePath, file)
       
       if (clError) {
@@ -94,7 +94,7 @@ export async function submitApplication({
       
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('applications')
+        .from('cover-letters')
         .getPublicUrl(filePath)
       
       coverLetterUrl = publicUrl

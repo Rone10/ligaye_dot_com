@@ -318,3 +318,51 @@ USING (
 CREATE POLICY "Anyone can view published tenders" 
 ON tenders FOR SELECT 
 USING (status = 'PUBLISHED' AND NOT deleted);
+
+
+
+
+
+
+-- ########################################################
+
+-- Cover Letters Storage policies
+-- Policy for uploading cover letters (only authenticated users can upload)
+CREATE POLICY "Users can upload their own cover letters"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+  bucket_id = 'cover-letters' AND
+  (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- Policy for viewing cover letters (users can only see their own)
+CREATE POLICY "Users can view their own cover letters"
+ON storage.objects FOR SELECT
+TO authenticated
+USING (
+  bucket_id = 'cover-letters' AND
+  (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- Policy for updating cover letters (users can only update their own)
+CREATE POLICY "Users can update their own cover letters"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+  bucket_id = 'cover-letters' AND
+  (storage.foldername(name))[1] = auth.uid()::text
+)
+WITH CHECK (
+  bucket_id = 'cover-letters' AND
+  (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- Policy for deleting cover letters (users can only delete their own)
+CREATE POLICY "Users can delete their own cover letters"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'cover-letters' AND
+  (storage.foldername(name))[1] = auth.uid()::text
+);
