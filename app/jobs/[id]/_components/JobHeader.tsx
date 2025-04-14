@@ -3,12 +3,14 @@ import { Calendar, Clock, MapPin, Building, Briefcase, User, BookmarkPlus } from
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatSalaryDisplay, jobTypeLabels, workLocationLabels, experienceLevelLabels } from '../../_utils/constants'
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 interface JobHeaderProps {
   job: any
+  hasApplied?: boolean
 }
 
-export default function JobHeader({ job }: JobHeaderProps) {
+export default function JobHeader({ job, hasApplied = false }: JobHeaderProps) {
   // Format the location display
   const formatLocation = () => {
     if (!job.location) return workLocationLabels[job.workLocation] || 'Location not specified'
@@ -24,6 +26,44 @@ export default function JobHeader({ job }: JobHeaderProps) {
     job.workLocation === 'REMOTE' ? 'Remote' : 
     job.workLocation === 'HYBRID' ? `Hybrid - ${formatLocation()}` : 
     formatLocation()
+  
+  // Render application button based on application status
+  const renderApplyButton = () => {
+    if (job.applicationMethod !== 'PLATFORM') {
+      return null;
+    }
+    
+    if (hasApplied) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button 
+                  className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 whitespace-nowrap" 
+                  disabled={true}
+                >
+                  Already Applied
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>You have already applied for this job</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+    
+    return (
+      <Link
+        href={`/jobs/${job.id}/apply`}
+        className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
+      >
+        Apply Now
+      </Link>
+    );
+  };
   
   return (
     <div className="flex flex-col gap-6">
@@ -65,12 +105,7 @@ export default function JobHeader({ job }: JobHeaderProps) {
         </div>
         
         <div className="flex gap-3 mt-4 md:mt-0">
-          <Link
-            href={`/jobs/${job.id}/apply`}
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
-          >
-            Apply Now
-          </Link>
+          {renderApplyButton()}
           <Button 
             variant="outline" 
             className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-md border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 whitespace-nowrap h-auto"

@@ -15,15 +15,17 @@ import {
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 interface JobDetailsProps {
   job: any
   location?: any
   skills?: any[]
   industries?: any[]
+  hasApplied?: boolean
 }
 
-export default function JobDetails({ job, location, skills = [], industries = [] }: JobDetailsProps) {
+export default function JobDetails({ job, location, skills = [], industries = [], hasApplied = false }: JobDetailsProps) {
   // Format location display
   const formatLocation = () => {
     if (!location) return 'Remote'
@@ -94,6 +96,44 @@ export default function JobDetails({ job, location, skills = [], industries = []
     parsedText = parsedText.replace(safeTagsRegex, '');
     
     return parsedText;
+  };
+
+  // Render application button based on application status
+  const renderApplyButton = () => {
+    if (job.applicationMethod !== 'PLATFORM') {
+      return null;
+    }
+    
+    if (hasApplied) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <button 
+                  className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 opacity-70 cursor-not-allowed"
+                  disabled
+                >
+                  Already Applied
+                </button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>You have already applied for this job</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+    
+    return (
+      <a
+        href={`/jobs/${job.id}/apply`}
+        className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Apply on Platform
+      </a>
+    );
   };
   
   return (
@@ -233,14 +273,7 @@ export default function JobDetails({ job, location, skills = [], industries = []
                 </a>
               )}
               
-              {job.applicationMethod === 'PLATFORM' && (
-                <a
-                  href="#"
-                  className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Apply on Platform
-                </a>
-              )}
+              {job.applicationMethod === 'PLATFORM' && renderApplyButton()}
             </div>
           </CardContent>
         </Card>

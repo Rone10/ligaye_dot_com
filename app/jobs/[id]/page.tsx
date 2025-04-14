@@ -33,7 +33,7 @@ export default async function JobDetailPage({ params }: PageProps) {
   return (
     <div className="container max-w-7xl py-8 mx-auto space-y-8">
       {/* Job Header */}
-      <JobHeader job={job} />
+      <JobHeader job={job} hasApplied={hasApplied} />
       
       {/* Add Apply Button */}
       <div className="mt-6">
@@ -64,6 +64,7 @@ export default async function JobDetailPage({ params }: PageProps) {
             location={job.location} 
             skills={job.skills} 
             industries={job.industries} 
+            hasApplied={hasApplied}
           />
         </TabsContent>
         
