@@ -36,7 +36,7 @@ export function JobActionButton({
   
   const handleApply = () => {
     if (!isLoggedIn) {
-      router.push(`/login?redirect=/jobs/${id}/apply`)
+      router.push(`/sign-in?redirect=/jobs/${id}/apply`)
       return
     }
     
@@ -48,9 +48,10 @@ export function JobActionButton({
     return null
   }
   
-  // Determine button state - FIXED: Now only disable if user has applied OR their role is specifically 'employer'
-  // This allows both 'authenticated' and 'candidate' roles to apply
-  const isDisabled = (userRole === 'employer' && isLoggedIn) || hasApplied
+  // Determine button state - FIXED: 
+  // - For authenticated users: only disable if they have applied OR their role is specifically 'employer'
+  // - For unauthenticated users: always enable the button (they'll be redirected to login on click)
+  const isDisabled = isLoggedIn ? ((userRole === 'employer') || hasApplied) : false
   
   // Show tooltip if already applied
   if (hasApplied) {

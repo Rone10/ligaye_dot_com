@@ -34,7 +34,7 @@ export const applicationFormSchema = z.object({
     })
     .optional()
     .nullable(),
-  coverLetterText: z.string().max(5000).optional(),
+  coverLetterText: z.string().max(20000).optional(),
 })
 
 export type ApplicationFormValues = z.infer<typeof applicationFormSchema> 

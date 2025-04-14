@@ -13,7 +13,7 @@ export default async function ApplicationPage({ params }: ApplicationPageProps) 
   
   // Redirect if not logged in
   if (!user) {
-    redirect(`/login?redirect=/jobs/${id}/apply`)
+    redirect(`/sign-in?redirect=/jobs/${id}/apply`)
   }
   
   // Redirect if not a candidate
