@@ -1,0 +1,110 @@
+'use server'
+
+import { db } from '@/lib/db'
+import { eq, and } from 'drizzle-orm'
+import { savedJobs, profiles } from '@/lib/db/schema'
+import { getUser } from '@/lib/supabase/server'
+
+/**
+ * Save a job for the current logged-in user
+ */
+export async function saveJob(jobId: string) {
+  const user = await getUser()
+  
+  if (!user) {
+    return { success: false, error: 'User not authenticated' }
+  }
+  
+  try {
+    // Find user's profile
+    const userProfile = await db()
+      .select({
+        id: profiles.id
+      })
+      .from(profiles)
+      .where(eq(profiles.userId, user.id))
+      .limit(1)
+      .then(res => res[0])
+    
+    if (!userProfile) {
+      return { success: false, error: 'User profile not found' }
+    }
+    
+    // Check if the job is already saved
+    const existingSavedJob = await db()
+      .select({ id: savedJobs.jobId })
+      .from(savedJobs)
+      .where(and(
+        eq(savedJobs.jobId, jobId),
+        eq(savedJobs.userId, userProfile.id)
+      ))
+      .limit(1)
+      .then(res => res[0])
+    
+    if (existingSavedJob) {
+      // If job was previously saved but marked as deleted, update it
+      await db()
+        .update(savedJobs)
+        .set({ deleted: false })
+        .where(and(
+          eq(savedJobs.jobId, jobId),
+          eq(savedJobs.userId, userProfile.id)
+        ))
+    } else {
+      // Otherwise, create a new saved job entry
+      await db()
+        .insert(savedJobs)
+        .values({
+          jobId,
+          userId: userProfile.id,
+          deleted: false
+        })
+    }
+    
+    return { success: true, error: null }
+  } catch (error) {
+    console.error('Error saving job:', error)
+    return { success: false, error: 'Failed to save job' }
+  }
+}
+
+/**
+ * Unsave (remove) a job for the current logged-in user
+ */
+export async function unsaveJob(jobId: string) {
+  const user = await getUser()
+  
+  if (!user) {
+    return { success: false, error: 'User not authenticated' }
+  }
+  
+  try {
+    // Find user's profile
+    const userProfile = await db()
+      .select({
+        id: profiles.id
+      })
+      .from(profiles)
+      .where(eq(profiles.userId, user.id))
+      .limit(1)
+      .then(res => res[0])
+    
+    if (!userProfile) {
+      return { success: false, error: 'User profile not found' }
+    }
+    
+    // Soft delete the saved job by setting deleted to true
+    await db()
+      .update(savedJobs)
+      .set({ deleted: true })
+      .where(and(
+        eq(savedJobs.jobId, jobId),
+        eq(savedJobs.userId, userProfile.id)
+      ))
+    
+    return { success: true, error: null }
+  } catch (error) {
+    console.error('Error unsaving job:', error)
+    return { success: false, error: 'Failed to remove job from saved list' }
+  }
+} 
