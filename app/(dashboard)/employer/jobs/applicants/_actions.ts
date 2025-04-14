@@ -4,10 +4,11 @@ import { eq, and } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { applications, jobs, employerProfiles, profiles } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { ApplicationStatus } from '@/types/application'
 
 // Update application status
-export async function updateApplicationStatus(applicationId: string, status: string) {
+export async function updateApplicationStatus(applicationId: string, status: ApplicationStatus) {
   try {
     const user = await getUser()
     if (!user) {
@@ -68,6 +69,9 @@ export async function updateApplicationStatus(applicationId: string, status: str
     
     revalidatePath('/employer/jobs/applicants')
     revalidatePath(`/employer/jobs/applicants/${applicationId}`)
+    revalidateTag('employer-applications')
+    revalidateTag('application-detail')
+    revalidateTag('application-counts')
     
     return { success: true }
   } catch (error) {
@@ -137,6 +141,8 @@ export async function updateApplicationNotes(applicationId: string, notes: strin
       .where(eq(applications.id, applicationId))
     
     revalidatePath(`/employer/jobs/applicants/${applicationId}`)
+    revalidateTag('employer-applications')
+    revalidateTag('application-detail')
     
     return { success: true }
   } catch (error) {
@@ -209,6 +215,9 @@ export async function scheduleInterview(applicationId: string, interviewDate: Da
     
     revalidatePath('/employer/jobs/applicants')
     revalidatePath(`/employer/jobs/applicants/${applicationId}`)
+    revalidateTag('employer-applications')
+    revalidateTag('application-detail')
+    revalidateTag('application-counts')
     
     return { success: true }
   } catch (error) {

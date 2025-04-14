@@ -85,26 +85,94 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   }
   
   // Transform database data to match component expectations
-  const formattedEducation: Education[] = application.candidate.education?.map(edu => ({
-    id: edu.id,
-    institution: edu.institution,
-    degree: edu.degree,
-    fieldOfStudy: edu.fieldOfStudy,
-    startDate: edu.startDate ? edu.startDate.toISOString() : null,
-    endDate: edu.endDate ? edu.endDate.toISOString() : null,
-    description: edu.description
-  })) || [];
+  const formattedEducation: Education[] = application.candidate.education?.map(edu => {
+    // Safely handle date values regardless of type (Date object or string)
+    let startDateValue = null;
+    let endDateValue = null;
+    
+    if (edu.startDate) {
+      try {
+        // Handle both Date objects and string representations
+        startDateValue = typeof edu.startDate === 'string' 
+          ? edu.startDate 
+          : (edu.startDate instanceof Date 
+              ? edu.startDate.toISOString() 
+              : String(edu.startDate));
+      } catch (e) {
+        console.error('Error formatting startDate:', e);
+        startDateValue = null;
+      }
+    }
+    
+    if (edu.endDate) {
+      try {
+        // Handle both Date objects and string representations
+        endDateValue = typeof edu.endDate === 'string' 
+          ? edu.endDate 
+          : (edu.endDate instanceof Date 
+              ? edu.endDate.toISOString() 
+              : String(edu.endDate));
+      } catch (e) {
+        console.error('Error formatting endDate:', e);
+        endDateValue = null;
+      }
+    }
+    
+    return {
+      id: edu.id,
+      institution: edu.institution,
+      degree: edu.degree,
+      fieldOfStudy: edu.fieldOfStudy,
+      startDate: startDateValue,
+      endDate: endDateValue,
+      description: edu.description
+    };
+  }) || [];
   
-  const formattedExperience: Experience[] = application.candidate.experience?.map(exp => ({
-    id: exp.id,
-    jobTitle: exp.jobTitle,
-    companyName: exp.companyName,
-    location: exp.location,
-    startDate: exp.startDate ? exp.startDate.toISOString() : null,
-    endDate: exp.endDate ? exp.endDate.toISOString() : null,
-    isCurrent: exp.isCurrent === true,
-    description: exp.description
-  })) || [];
+  const formattedExperience: Experience[] = application.candidate.experience?.map(exp => {
+    // Safely handle date values regardless of type (Date object or string)
+    let startDateValue = null;
+    let endDateValue = null;
+    
+    if (exp.startDate) {
+      try {
+        // Handle both Date objects and string representations
+        startDateValue = typeof exp.startDate === 'string' 
+          ? exp.startDate 
+          : (exp.startDate instanceof Date 
+              ? exp.startDate.toISOString() 
+              : String(exp.startDate));
+      } catch (e) {
+        console.error('Error formatting startDate:', e);
+        startDateValue = null;
+      }
+    }
+    
+    if (exp.endDate) {
+      try {
+        // Handle both Date objects and string representations
+        endDateValue = typeof exp.endDate === 'string' 
+          ? exp.endDate 
+          : (exp.endDate instanceof Date 
+              ? exp.endDate.toISOString() 
+              : String(exp.endDate));
+      } catch (e) {
+        console.error('Error formatting endDate:', e);
+        endDateValue = null;
+      }
+    }
+    
+    return {
+      id: exp.id,
+      jobTitle: exp.jobTitle,
+      companyName: exp.companyName,
+      location: exp.location,
+      startDate: startDateValue,
+      endDate: endDateValue,
+      isCurrent: exp.isCurrent === true,
+      description: exp.description
+    };
+  }) || [];
   
   const formattedCandidate: FormattedCandidate = {
     id: application.candidate.id,
