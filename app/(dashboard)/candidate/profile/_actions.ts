@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getUser, createClient } from '@/lib/supabase/server';
 import { profiles, candidateProfiles } from '@/lib/db/schema';
@@ -59,6 +59,7 @@ export async function updateBasicProfileInfo(formData: FormData) {
   });
   
   revalidatePath('/candidate/profile');
+  revalidateTag('candidate-profile');
   return { success: true };
 }
 
@@ -119,6 +120,7 @@ export async function handleResumeUpload(formData: FormData) {
   });
   
   revalidatePath('/candidate/profile');
+  revalidateTag('candidate-profile');
   return { success: true, url: urlData.publicUrl };
 }
 
@@ -164,6 +166,7 @@ export async function addEducation(formData: FormData) {
   await addEducationRecord(educationData);
   
   revalidatePath('/candidate/profile');
+  revalidateTag('candidate-profile');
   return { success: true };
 }
 
@@ -212,6 +215,7 @@ export async function updateEducation(formData: FormData) {
   await updateEducationRecord(educationId, educationData);
   
   revalidatePath('/candidate/profile');
+  revalidateTag('candidate-profile');
   return { success: true };
 }
 
@@ -238,6 +242,7 @@ export async function deleteEducation(formData: FormData) {
   await deleteEducationRecord(educationId);
   
   revalidatePath('/candidate/profile');
+  revalidateTag('candidate-profile');
   return { success: true };
 }
 
@@ -286,6 +291,7 @@ export async function addExperience(formData: FormData) {
   await addExperienceRecord(experienceData);
   
   revalidatePath('/candidate/profile');
+  revalidateTag('candidate-profile');
   return { success: true };
 }
 
@@ -338,6 +344,7 @@ export async function updateExperience(formData: FormData) {
   await updateExperienceRecord(experienceId, experienceData);
   
   revalidatePath('/candidate/profile');
+  revalidateTag('candidate-profile');
   return { success: true };
 }
 
@@ -364,6 +371,7 @@ export async function deleteExperience(formData: FormData) {
   await deleteExperienceRecord(experienceId);
   
   revalidatePath('/candidate/profile');
+  revalidateTag('candidate-profile');
   return { success: true };
 }
 
@@ -427,5 +435,6 @@ export async function updateSkills(formData: FormData) {
   await updateCandidateSkills(candidateProfileId, skills);
   
   revalidatePath('/candidate/profile');
+  revalidateTag('candidate-profile');
   return { success: true };
 } 

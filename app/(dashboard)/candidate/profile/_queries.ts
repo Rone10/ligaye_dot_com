@@ -19,6 +19,7 @@ import type {
   NewExperience,
   NewCandidateSkill
 } from '@/lib/db/schema';
+import { unstable_cache } from 'next/cache';
 
 export interface CandidateProfileData {
   profile: Profile;
@@ -28,13 +29,13 @@ export interface CandidateProfileData {
   skills: (Skill & { candidateSkillId: string })[];
 }
 
-// Main query to fetch complete candidate profile
-export async function getCandidateProfile(userId: string): Promise<CandidateProfileData | null> {
-  // First, get the base profile
+// Uncached internal function for profile data retrieval
+export async function getCandidateProfileData(profileId: string): Promise<CandidateProfileData | null> {
+  // Get the base profile
   const profile = await db()
     .select()
     .from(profiles)
-    .where(eq(profiles.userId, userId))
+    .where(eq(profiles.id, profileId))
     .limit(1)
     .then(res => res[0]);
 
@@ -105,6 +106,33 @@ export async function getCandidateProfile(userId: string): Promise<CandidateProf
     experience: experienceRecords,
     skills: skillsData
   };
+}
+
+// Cached version of profile data retrieval
+const getCandidateProfileCached = unstable_cache(
+  async (profileId: string) => {
+    return getCandidateProfileData(profileId);
+  },
+  ['candidate-profile'],
+  {
+    tags: ['candidate-profile']
+  }
+);
+
+// Main entry point for getting candidate profile, handling auth
+export async function getCandidateProfile(userId: string): Promise<CandidateProfileData | null> {
+  // First, get the base profile
+  const profile = await db()
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, userId))
+    .limit(1)
+    .then(res => res[0]);
+
+  if (!profile) return null;
+
+  // Use cached function with profile ID
+  return getCandidateProfileCached(profile.id);
 }
 
 // Create or update candidate profile details

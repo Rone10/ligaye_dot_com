@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { eq, and } from 'drizzle-orm'
 import { savedJobs, profiles } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 /**
  * Save a job for the current logged-in user
@@ -61,6 +62,10 @@ export async function saveJob(jobId: string) {
         })
     }
     
+    // Revalidate cached data
+    revalidatePath('/candidate/saved-jobs')
+    revalidateTag('saved-jobs')
+    
     return { success: true, error: null }
   } catch (error) {
     console.error('Error saving job:', error)
@@ -101,6 +106,10 @@ export async function unsaveJob(jobId: string) {
         eq(savedJobs.jobId, jobId),
         eq(savedJobs.userId, userProfile.id)
       ))
+    
+    // Revalidate cached data
+    revalidatePath('/candidate/saved-jobs')
+    revalidateTag('saved-jobs')
     
     return { success: true, error: null }
   } catch (error) {
