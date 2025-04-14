@@ -37,6 +37,57 @@ interface ApplicationDetailsProps {
 }
 
 export default function ApplicationDetails({ application, job }: ApplicationDetailsProps) {
+  // Parse HTML and preserve formatting in cover letter text
+  const parseCoverLetterText = (text: string) => {
+    if (!text) return '';
+    
+    // Replace HTML entities first
+    let parsedText = text
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'")
+      .replace(/&nbsp;/g, ' ');
+    
+    // Replace paragraph tags with appropriate markup
+    parsedText = parsedText
+      .replace(/<p\s*[^>]*>/g, '<div class="mb-4">')
+      .replace(/<\/p>/g, '</div>')
+      .replace(/<br\s*\/?>/g, '<br />');
+    
+    // Handle headers with proper styling
+    parsedText = parsedText
+      .replace(/<h1\s*[^>]*>(.*?)<\/h1>/g, '<div class="text-3xl font-bold mb-4">$1</div>')
+      .replace(/<h2\s*[^>]*>(.*?)<\/h2>/g, '<div class="text-2xl font-bold mb-3">$1</div>')
+      .replace(/<h3\s*[^>]*>(.*?)<\/h3>/g, '<div class="text-xl font-bold mb-2">$1</div>')
+      .replace(/<h4\s*[^>]*>(.*?)<\/h4>/g, '<div class="text-lg font-semibold mb-2">$1</div>')
+      .replace(/<h5\s*[^>]*>(.*?)<\/h5>/g, '<div class="text-base font-semibold mb-1">$1</div>')
+      .replace(/<h6\s*[^>]*>(.*?)<\/h6>/g, '<div class="text-sm font-semibold mb-1">$1</div>');
+    
+    // Preserve text formatting
+    parsedText = parsedText
+      .replace(/<strong\s*[^>]*>(.*?)<\/strong>/g, '<span class="font-bold">$1</span>')
+      .replace(/<b\s*[^>]*>(.*?)<\/b>/g, '<span class="font-bold">$1</span>')
+      .replace(/<em\s*[^>]*>(.*?)<\/em>/g, '<span class="italic">$1</span>')
+      .replace(/<i\s*[^>]*>(.*?)<\/i>/g, '<span class="italic">$1</span>')
+      .replace(/<u\s*[^>]*>(.*?)<\/u>/g, '<span class="underline">$1</span>');
+    
+    // Handle lists
+    parsedText = parsedText
+      .replace(/<ul\s*[^>]*>/g, '<div class="pl-6 mb-4 space-y-1">')
+      .replace(/<\/ul>/g, '</div>')
+      .replace(/<ol\s*[^>]*>/g, '<div class="pl-6 mb-4 space-y-1 list-decimal">')
+      .replace(/<\/ol>/g, '</div>')
+      .replace(/<li\s*[^>]*>(.*?)<\/li>/g, '<div class="flex"><span class="mr-2">•</span><span>$1</span></div>');
+    
+    // Clean up any potentially unsafe tags while keeping our safe ones
+    const safeTagsRegex = /<(?!\/?(div|span|br)(?!\w)[^>]*>)([^>]*)>/g;
+    parsedText = parsedText.replace(safeTagsRegex, '');
+    
+    return parsedText;
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -120,8 +171,11 @@ export default function ApplicationDetails({ application, job }: ApplicationDeta
           {application.coverLetterText && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-gray-500">Cover Letter</h3>
-              <div className="bg-gray-50 p-4 rounded-md whitespace-pre-wrap">
-                {application.coverLetterText}
+              <div className="bg-gray-50 p-4 rounded-md">
+                <div 
+                  className="prose prose-sm max-w-none" 
+                  dangerouslySetInnerHTML={{ __html: parseCoverLetterText(application.coverLetterText) }}
+                />
               </div>
             </div>
           )}
