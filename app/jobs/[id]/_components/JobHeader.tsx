@@ -1,16 +1,25 @@
+'use client';
+
 import Link from 'next/link'
-import { Calendar, Clock, MapPin, Building, Briefcase, User, BookmarkPlus } from 'lucide-react'
+import { Calendar, Clock, MapPin, Building, Briefcase, User, BookmarkPlus, Bookmark, BookmarkCheck } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatSalaryDisplay, jobTypeLabels, workLocationLabels, experienceLevelLabels } from '../../_utils/constants'
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { toggleSaveJob } from '../_actions'
+import { useState } from 'react'
 
 interface JobHeaderProps {
   job: any
   hasApplied?: boolean
+  isSaved?: boolean
 }
 
-export default function JobHeader({ job, hasApplied = false }: JobHeaderProps) {
+export default function JobHeader({ job, hasApplied = false, isSaved = false }: JobHeaderProps) {
+  // Local state to handle optimistic updates
+  const [isSaving, setIsSaving] = useState(false)
+  const [savedState, setSavedState] = useState(isSaved)
+
   // Format the location display
   const formatLocation = () => {
     if (!job.location) return workLocationLabels[job.workLocation] || 'Location not specified'
@@ -64,6 +73,24 @@ export default function JobHeader({ job, hasApplied = false }: JobHeaderProps) {
       </Link>
     );
   };
+
+  // Toggle job saved state
+  const handleToggleSave = async () => {
+    try {
+      setIsSaving(true)
+      // Optimistic update
+      setSavedState(!savedState)
+      
+      // Call the server action
+      await toggleSaveJob(job.id)
+    } catch (error) {
+      // Revert on error
+      setSavedState(savedState)
+      console.error('Failed to save job:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
   
   return (
     <div className="flex flex-col gap-6">
@@ -109,9 +136,15 @@ export default function JobHeader({ job, hasApplied = false }: JobHeaderProps) {
           <Button 
             variant="outline" 
             className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-md border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 whitespace-nowrap h-auto"
+            onClick={handleToggleSave}
+            disabled={isSaving}
           >
-            <BookmarkPlus className="h-4 w-4 text-[#4a6cfa] mr-2" />
-            <span>Save Job</span>
+            {savedState ? (
+              <BookmarkCheck className="h-4 w-4 text-green-600 mr-2" />
+            ) : (
+              <BookmarkPlus className="h-4 w-4 text-[#4a6cfa] mr-2" />
+            )}
+            <span>{savedState ? 'Saved' : 'Save Job'}</span>
           </Button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { getJobById, getRelatedJobs, checkUserApplication } from './_queries';
+import { getJobById, getRelatedJobs, checkUserApplication, checkUserSavedJob } from './_queries';
 import JobHeader from './_components/JobHeader';
 import JobDetails from './_components/JobDetails';
 import RelatedJobs from './_components/RelatedJobs';
@@ -30,10 +30,13 @@ export default async function JobDetailPage({ params }: PageProps) {
   // Check if user has already applied
   const hasApplied = user ? await checkUserApplication(id, user.id) : false;
   
+  // Check if user has saved this job
+  const isSaved = user ? await checkUserSavedJob(id, user.id) : false;
+  
   return (
     <div className="container max-w-7xl py-8 mx-auto space-y-8">
       {/* Job Header */}
-      <JobHeader job={job} hasApplied={hasApplied} />
+      <JobHeader job={job} hasApplied={hasApplied} isSaved={isSaved} />
       
       {/* Add Apply Button */}
       <div className="mt-6">

@@ -10,7 +10,8 @@ import {
   jobIndustries,
   candidateProfiles,
   profiles,
-  applications
+  applications,
+  savedJobs
 } from '@/lib/db/schema';
 import { notFound } from 'next/navigation';
 import type { JobDetail, SimpleSkill, SimpleIndustry } from '../_utils/types';
@@ -204,4 +205,37 @@ export async function checkUserApplication(jobId: string, userId: string | undef
     .limit(1);
   
   return applicationResult.length > 0;
+}
+
+// Add this function to check if a job is saved by a user
+export async function checkUserSavedJob(jobId: string, userId: string | undefined) {
+  if (!userId) return false;
+  
+  // Get the profile ID for this user
+  const profileResult = await db()
+    .select({
+      id: profiles.id,
+    })
+    .from(profiles)
+    .where(eq(profiles.userId, userId))
+    .limit(1);
+  
+  if (!profileResult.length) return false;
+  
+  const profileId = profileResult[0].id;
+  
+  // Check if this user has saved this job
+  const savedJobResult = await db()
+    .select({ deleted: savedJobs.deleted })
+    .from(savedJobs)
+    .where(
+      and(
+        eq(savedJobs.jobId, jobId),
+        eq(savedJobs.userId, profileId)
+      )
+    )
+    .limit(1);
+  
+  // Return true if the job is saved (record exists and deleted is false)
+  return savedJobResult.length > 0 && !savedJobResult[0].deleted;
 } 
