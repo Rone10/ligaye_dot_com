@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getUser } from '@/lib/supabase/server'
 import { jobFormSchema } from './_utils/validation'
@@ -57,6 +57,10 @@ export async function updateJobPosting(jobId: string, formData: z.infer<typeof j
     // Revalidate the paths
     revalidatePath(`/employer/jobs/${jobId}`)
     revalidatePath('/employer/jobs')
+    
+    // Revalidate cache tags
+    revalidateTag('job-detail')
+    revalidateTag('job-applications')
     
     // Return success
     return { success: true, jobId }

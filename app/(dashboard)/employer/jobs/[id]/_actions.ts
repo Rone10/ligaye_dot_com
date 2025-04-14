@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getUser } from '@/lib/supabase/server'
 import { 
@@ -46,6 +46,10 @@ export async function updateJobStatus(jobId: string, status: 'ACTIVE' | 'EXPIRED
     // Revalidate paths
     revalidatePath(`/employer/jobs/${jobId}`)
     revalidatePath('/employer/jobs')
+    
+    // Revalidate cache tags
+    revalidateTag('job-detail')
+    revalidateTag('job-applications')
     
     return { success: true }
   } catch (error) {

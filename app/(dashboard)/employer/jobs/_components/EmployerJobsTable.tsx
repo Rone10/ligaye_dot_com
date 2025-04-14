@@ -138,7 +138,9 @@ export default function EmployerJobsTable({ jobs }: EmployerJobsTableProps) {
             
             return (
               <TableRow key={job.id}>
+                <Link href={`/employer/jobs/${job.id}`}>
                 <TableCell className="font-medium">{job.title}</TableCell>
+                </Link>
                 <TableCell>
                   <Badge 
                     variant={statusBadge.variant}

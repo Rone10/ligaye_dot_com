@@ -14,6 +14,7 @@ import {
 } from '@/lib/db/schema'
 import { eq, and, isNull, not, count, desc } from 'drizzle-orm'
 import type { Job } from '@/lib/db/schema'
+import { unstable_cache } from 'next/cache'
 
 // Get employer profile for a user
 export async function getEmployerProfile(userId: string) {
@@ -39,8 +40,10 @@ export async function getEmployerProfile(userId: string) {
   }
 }
 
-// Get job by ID with detailed location info
-export async function getJobById(jobId: string) {
+/**
+ * Get job by ID with detailed location info (uncached version)
+ */
+export async function getJobByIdData(jobId: string) {
   try {
     const result = await db()
       .select({
@@ -65,6 +68,26 @@ export async function getJobById(jobId: string) {
   }
 }
 
+/**
+ * Cached version of job data
+ */
+const getJobByIdCached = unstable_cache(
+  async (jobId: string) => {
+    return getJobByIdData(jobId)
+  },
+  ['job-detail'],
+  {
+    tags: ['job-detail']
+  }
+)
+
+/**
+ * Main entry point for getting job data
+ */
+export async function getJobById(jobId: string) {
+  return getJobByIdCached(jobId)
+}
+
 // Check if job belongs to employer
 export async function checkJobOwnership(jobId: string, employerProfileId: string) {
   try {
@@ -86,8 +109,10 @@ export async function checkJobOwnership(jobId: string, employerProfileId: string
   }
 }
 
-// Get job skills
-export async function getJobSkills(jobId: string) {
+/**
+ * Get job skills (uncached version)
+ */
+export async function getJobSkillsData(jobId: string) {
   try {
     const result = await db()
       .select({
@@ -108,8 +133,30 @@ export async function getJobSkills(jobId: string) {
   }
 }
 
-// Get job industries
-export async function getJobIndustries(jobId: string) {
+/**
+ * Cached version of job skills
+ */
+const getJobSkillsCached = unstable_cache(
+  async (jobId: string) => {
+    return getJobSkillsData(jobId)
+  },
+  ['job-skills'],
+  {
+    tags: ['job-detail']
+  }
+)
+
+/**
+ * Main entry point for getting job skills
+ */
+export async function getJobSkills(jobId: string) {
+  return getJobSkillsCached(jobId)
+}
+
+/**
+ * Get job industries (uncached version)
+ */
+export async function getJobIndustriesData(jobId: string) {
   try {
     const result = await db()
       .select({
@@ -130,8 +177,30 @@ export async function getJobIndustries(jobId: string) {
   }
 }
 
-// Get application statistics
-export async function getApplicationStats(jobId: string) {
+/**
+ * Cached version of job industries
+ */
+const getJobIndustriesCached = unstable_cache(
+  async (jobId: string) => {
+    return getJobIndustriesData(jobId)
+  },
+  ['job-industries'],
+  {
+    tags: ['job-detail']
+  }
+)
+
+/**
+ * Main entry point for getting job industries
+ */
+export async function getJobIndustries(jobId: string) {
+  return getJobIndustriesCached(jobId)
+}
+
+/**
+ * Get application statistics (uncached version)
+ */
+export async function getApplicationStatsData(jobId: string) {
   try {
     const result = await db()
       .select({
@@ -161,8 +230,30 @@ export async function getApplicationStats(jobId: string) {
   }
 }
 
-// Get recent applications
-export async function getRecentApplications(jobId: string, limit = 5) {
+/**
+ * Cached version of application statistics
+ */
+const getApplicationStatsCached = unstable_cache(
+  async (jobId: string) => {
+    return getApplicationStatsData(jobId)
+  },
+  ['application-stats'],
+  {
+    tags: ['job-applications']
+  }
+)
+
+/**
+ * Main entry point for getting application statistics
+ */
+export async function getApplicationStats(jobId: string) {
+  return getApplicationStatsCached(jobId)
+}
+
+/**
+ * Get recent applications (uncached version)
+ */
+export async function getRecentApplicationsData(jobId: string, limit = 5) {
   try {
     const result = await db()
       .select({
@@ -184,4 +275,24 @@ export async function getRecentApplications(jobId: string, limit = 5) {
     console.error('Error getting recent applications:', error)
     return []
   }
+}
+
+/**
+ * Cached version of recent applications
+ */
+const getRecentApplicationsCached = unstable_cache(
+  async (jobId: string, limit = 5) => {
+    return getRecentApplicationsData(jobId, limit)
+  },
+  ['recent-applications'],
+  {
+    tags: ['job-applications']
+  }
+)
+
+/**
+ * Main entry point for getting recent applications
+ */
+export async function getRecentApplications(jobId: string, limit = 5) {
+  return getRecentApplicationsCached(jobId, limit)
 } 
