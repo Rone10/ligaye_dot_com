@@ -11,8 +11,16 @@ export interface JobListingFilter {
   sort?: 'newest' | 'oldest'
 }
 
+// Cache options type for Next.js
+type CacheOptions = {
+  next?: {
+    tags?: string[];
+    revalidate?: number;
+  }
+};
+
 // Get employer job listings with optional filtering
-export async function getEmployerJobs(filter: JobListingFilter = {}) {
+export async function getEmployerJobs(filter: JobListingFilter = {}, options?: CacheOptions) {
   try {
     const user = await getUser()
     if (!user) {
@@ -105,7 +113,7 @@ export async function getEmployerJobs(filter: JobListingFilter = {}) {
 }
 
 // Get counts of jobs by status for the employer dashboard
-export async function getEmployerJobCounts() {
+export async function getEmployerJobCounts(options?: CacheOptions) {
   try {
     const user = await getUser()
     if (!user) {

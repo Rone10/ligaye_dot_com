@@ -9,6 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { JobActionButton } from './_components/JobActionButton';
 import { getUser } from '@/lib/supabase/server';
 
+// Export cache configuration for on-demand revalidation
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -21,11 +24,11 @@ export default async function JobDetailPage({ params }: PageProps) {
   // Get the current user
   const user = await getUser();
   
-  // Fetch job details
-  const job = await getJobById(id);
+  // Fetch job details - add cache tags for on-demand revalidation
+  const job = await getJobById(id, { next: { tags: [`job-${id}`] } });
   
-  // Fetch related jobs
-  const relatedJobs = await getRelatedJobs(id);
+  // Fetch related jobs - add cache tags for job company
+  const relatedJobs = await getRelatedJobs(id, 3, { next: { tags: [`company-${job.companyId}`] } });
   
   // Check if user has already applied
   const hasApplied = user ? await checkUserApplication(id, user.id) : false;
@@ -34,7 +37,7 @@ export default async function JobDetailPage({ params }: PageProps) {
   const isSaved = user ? await checkUserSavedJob(id, user.id) : false;
   
   // Log debug info (will show in server console)
-  console.log('User info:', user ? { id: user.id, role: user.role } : 'Not logged in');
+  console.log('User info:', user ? { id: user.id, role: user.user_metadata.role } : 'Not logged in');
   console.log('Job application status - hasApplied:', hasApplied);
   
   return (

@@ -6,6 +6,9 @@ import EmployerJobsTable from './_components/EmployerJobsTable'
 import JobFilters from './_components/JobFilters'
 import { Button } from '@/components/ui/button'
 
+// Set up dynamic rendering for on-demand cache revalidation
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   searchParams: Promise<{ 
     status?: string;
@@ -15,7 +18,7 @@ interface PageProps {
 }
 
 export default async function EmployerJobsPage({ searchParams }: PageProps) {
-    const params = await searchParams
+  const params = await searchParams
   const user = await getUser()
   
   if (!user) {
@@ -29,10 +32,17 @@ export default async function EmployerJobsPage({ searchParams }: PageProps) {
     sort: params.sort || 'newest'
   }
   
+  // Cache options for employer-specific jobs
+  const cacheOptions = {
+    next: { 
+      tags: [`employer-jobs-${user.id}`] 
+    }
+  };
+  
   // Fetch job listings and counts
   const [jobsResult, countsResult] = await Promise.all([
-    getEmployerJobs(filters),
-    getEmployerJobCounts()
+    getEmployerJobs(filters, cacheOptions),
+    getEmployerJobCounts(cacheOptions)
   ])
   
   // Handle errors

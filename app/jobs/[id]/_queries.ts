@@ -16,10 +16,18 @@ import {
 import { notFound } from 'next/navigation';
 import type { JobDetail, SimpleSkill, SimpleIndustry } from '../_utils/types';
 
+// Cache options type for Next.js
+type CacheOptions = {
+  next?: {
+    tags?: string[];
+    revalidate?: number;
+  }
+};
+
 /**
  * Get detailed job information by ID
  */
-export async function getJobById(jobId: string): Promise<JobDetail> {
+export async function getJobById(jobId: string, options?: CacheOptions): Promise<JobDetail> {
   // Get the job with basic company and location information
   const jobQuery = await db()
     .select()
@@ -139,7 +147,7 @@ export async function getJobById(jobId: string): Promise<JobDetail> {
 /**
  * Get similar/related jobs (same company or industry)
  */
-export async function getRelatedJobs(jobId: string, limit: number = 3) {
+export async function getRelatedJobs(jobId: string, limit: number = 3, options?: CacheOptions) {
   const currentJob = await db()
     .select({
       companyId: jobs.companyId
@@ -175,7 +183,7 @@ export async function getRelatedJobs(jobId: string, limit: number = 3) {
 }
 
 // Add this function after existing exports
-export async function checkUserApplication(jobId: string, userId: string | undefined) {
+export async function checkUserApplication(jobId: string, userId: string | undefined, options?: CacheOptions) {
   console.log('Checking if user has applied - userId:', userId, 'jobId:', jobId);
   if (!userId) {
     console.log('checkUserApplication: No userId provided, returning false');
@@ -221,7 +229,7 @@ export async function checkUserApplication(jobId: string, userId: string | undef
 }
 
 // Add this function to check if a job is saved by a user
-export async function checkUserSavedJob(jobId: string, userId: string | undefined) {
+export async function checkUserSavedJob(jobId: string, userId: string | undefined, options?: CacheOptions) {
   if (!userId) return false;
   
   // Get the profile ID for this user
