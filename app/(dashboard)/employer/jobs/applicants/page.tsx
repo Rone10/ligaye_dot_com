@@ -8,6 +8,7 @@ import ApplicationsDataTable from './_components/ApplicationsDataTable'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import RiseLoaderSpinner  from '@/components/loaders/rise-loader'
 import Link from 'next/link'
 
 // Debounce function implementation
@@ -222,15 +223,11 @@ export default function EmployerApplicationsPage() {
   
   if (isLoading || isPending) {
     return (
-      <div className="container mx-auto py-10">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-          <div className="animate-pulse flex flex-col items-center">
-            <div className="rounded-full bg-gray-200 h-12 w-12 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-48 mb-2"></div>
-            <div className="h-3 bg-gray-200 rounded w-64"></div>
-          </div>
-        </div>
+    <div className="container mx-auto py-10">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+        <RiseLoaderSpinner />
       </div>
+    </div>
     )
   }
   

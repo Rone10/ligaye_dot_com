@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getUser } from '@/lib/supabase/server'
 import { jobFormSchema } from './_utils/validation'
@@ -117,6 +117,18 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
     const paymentAmount = validatedData.jobDuration * 5000 // $50 in cents per month
     console.log('[Action Debug] Calculated paymentAmount (cents):', paymentAmount);
     
+    // Invalidate caches related to jobs
+    revalidateTag('jobs')
+    revalidateTag('employer-jobs')
+    revalidateTag('public-jobs')
+    // Invalidate reference data caches if they might be affected
+    revalidateTag('locations')
+    revalidateTag('skills') 
+    revalidateTag('industries')
+    // Revalidate paths that show job listings
+    revalidatePath('/employer/jobs')
+    revalidatePath('/jobs')
+    
     // Handle payment method
     if (validatedData.paymentMethod === 'stripe') {
       try {
@@ -191,7 +203,6 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
       })
       
       // Redirect to job listing with pending status
-      revalidatePath('/employer/jobs')
       return { jobId: newJob.id, status: 'PENDING_PAYMENT' }
     }
   } catch (error) {

@@ -13,6 +13,7 @@ import {
 } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import type { NewJob, NewJobSkill, NewJobIndustry } from '@/lib/db/schema'
+import { unstable_cache } from 'next/cache'
 
 // Get employer profile for a user
 export async function getEmployerProfile(userId: string) {
@@ -38,8 +39,8 @@ export async function getEmployerProfile(userId: string) {
   }
 }
 
-// Get all locations from database
-export async function getAllLocations() {
+// Function to fetch locations data
+async function getAllLocationsData() {
   try {
     return await db()
       .select({
@@ -57,8 +58,19 @@ export async function getAllLocations() {
   }
 }
 
-// Get all skills from database
-export async function getAllSkills() {
+// Get all locations from database with caching
+export const getAllLocations = unstable_cache(
+  async () => {
+    return getAllLocationsData()
+  },
+  ['locations'],
+  {
+    tags: ['locations']
+  }
+)
+
+// Function to fetch skills data
+async function getAllSkillsData() {
   try {
     return await db()
       .select({
@@ -74,8 +86,19 @@ export async function getAllSkills() {
   }
 }
 
-// Get all industries from database
-export async function getAllIndustries() {
+// Get all skills from database with caching
+export const getAllSkills = unstable_cache(
+  async () => {
+    return getAllSkillsData()
+  },
+  ['skills'],
+  {
+    tags: ['skills']
+  }
+)
+
+// Function to fetch industries data
+async function getAllIndustriesData() {
   try {
     return await db()
       .select({
@@ -90,6 +113,17 @@ export async function getAllIndustries() {
     return []
   }
 }
+
+// Get all industries from database with caching
+export const getAllIndustries = unstable_cache(
+  async () => {
+    return getAllIndustriesData()
+  },
+  ['industries'],
+  {
+    tags: ['industries']
+  }
+)
 
 // Helper to calculate expiresAt based on duration
 export async function calculateExpiryDate(durationMonths: number): Promise<Date> {
