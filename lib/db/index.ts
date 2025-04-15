@@ -20,7 +20,7 @@ const connectionOptions = {
   prepare: false,
   keepAlive: true,
   connection: {
-    application_name: 'trading-blotter'
+    application_name: 'Ligaye.com'
   }
 } as const;
 
