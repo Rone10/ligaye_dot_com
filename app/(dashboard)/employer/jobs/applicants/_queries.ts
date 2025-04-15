@@ -298,10 +298,11 @@ export async function getApplicationById(applicationId: string) {
  * Data fetching function for application counts
  */
 async function getApplicationCountsData(employerProfileId: string) {
-  // Get all applications for the employer's jobs
-  const allApplications = await db()
+  // Get application counts using SQL aggregation for better performance
+  const countsByStatus = await db()
     .select({
-      status: applications.status
+      status: applications.status,
+      count: sql`count(*)`.as('count')
     })
     .from(applications)
     .innerJoin(jobs, eq(applications.jobId, jobs.id))
@@ -310,20 +311,64 @@ async function getApplicationCountsData(employerProfileId: string) {
       eq(applications.deleted, false),
       ne(jobs.status, 'DELETED')
     ))
+    .groupBy(applications.status)
   
-  // Count applications by status
-  return {
-    all: allApplications.length,
-    applied: allApplications.filter(app => app.status === 'APPLIED').length,
-    reviewing: allApplications.filter(app => app.status === 'REVIEWING').length,
-    shortlisted: allApplications.filter(app => app.status === 'SHORTLISTED').length,
-    interview: allApplications.filter(app => app.status === 'INTERVIEW_SCHEDULED').length,
-    interviewed: allApplications.filter(app => app.status === 'INTERVIEWED').length,
-    offered: allApplications.filter(app => app.status === 'OFFER_EXTENDED').length,
-    hired: allApplications.filter(app => app.status === 'HIRED').length,
-    rejected: allApplications.filter(app => app.status === 'REJECTED').length,
-    withdrawn: allApplications.filter(app => app.status === 'WITHDRAWN').length
-  }
+  // Initialize counts object with zeros
+  const counts = {
+    all: 0,
+    applied: 0,
+    reviewing: 0,
+    shortlisted: 0,
+    interview: 0,
+    interviewed: 0,
+    offered: 0,
+    hired: 0,
+    rejected: 0,
+    withdrawn: 0
+  };
+  
+  // Calculate total
+  let total = 0;
+  
+  // Populate counts from SQL aggregation results
+  countsByStatus.forEach(item => {
+    const count = Number(item.count);
+    total += count;
+    
+    switch(item.status) {
+      case 'APPLIED':
+        counts.applied = count;
+        break;
+      case 'REVIEWING':
+        counts.reviewing = count;
+        break;
+      case 'SHORTLISTED':
+        counts.shortlisted = count;
+        break;
+      case 'INTERVIEW_SCHEDULED':
+        counts.interview = count;
+        break;
+      case 'INTERVIEWED':
+        counts.interviewed = count;
+        break;
+      case 'OFFER_EXTENDED':
+        counts.offered = count;
+        break;
+      case 'HIRED':
+        counts.hired = count;
+        break;
+      case 'REJECTED':
+        counts.rejected = count;
+        break;
+      case 'WITHDRAWN':
+        counts.withdrawn = count;
+        break;
+    }
+  });
+  
+  counts.all = total;
+  
+  return counts;
 }
 
 /**

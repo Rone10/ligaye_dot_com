@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, ChangeEvent, useMemo } from 'react'
+import { useState, useEffect, ChangeEvent, useMemo, useCallback, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getEmployerApplications, getApplicationCounts } from './_queries'
@@ -9,6 +9,16 @@ import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
+
+// Debounce function implementation
+function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  
+  return function(...args: Parameters<T>) {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 // Application type definition based on _queries.ts
 type ApplicationStatus = 'APPLIED' | 'REVIEWING' | 'SHORTLISTED' | 'INTERVIEW_SCHEDULED' | 
@@ -56,7 +66,9 @@ export default function EmployerApplicationsPage() {
   const supabase = createClient()
   
   const [isLoading, setIsLoading] = useState(true)
-  const [applications, setApplications] = useState<Application[]>([])
+  const [isPending, startTransition] = useTransition()
+  const [allApplications, setAllApplications] = useState<Application[]>([])
+  const [filteredApplications, setFilteredApplications] = useState<Application[]>([])
   const [counts, setCounts] = useState<ApplicationCounts>({
     all: 0,
     applied: 0,
@@ -69,6 +81,7 @@ export default function EmployerApplicationsPage() {
     rejected: 0,
     withdrawn: 0
   })
+  const [searchValue, setSearchValue] = useState(searchParams.get('q') || '')
   
   // Parse filters from search params and memoize to prevent unnecessary rerenders
   const filters = useMemo(() => ({
@@ -76,6 +89,78 @@ export default function EmployerApplicationsPage() {
     searchTerm: searchParams.get('q') || '',
     sort: (searchParams.get('sort') as 'newest' | 'oldest') || 'newest'
   }), [searchParams]);
+  
+  // Load all applications data once
+  const loadAllData = useCallback(async () => {
+    setIsLoading(true)
+    
+    try {
+      // Fetch all applications and counts - no longer passing sort parameter
+      const [applicationsResult, countsResult] = await Promise.all([
+        getEmployerApplications(),
+        getApplicationCounts()
+      ])
+      
+      // Handle errors
+      if (applicationsResult.error || countsResult.error) {
+        if (applicationsResult.error === 'Employer profile not found' || 
+            countsResult.error === 'Employer profile not found') {
+          router.push('/employer/profile')
+          return
+        }
+      }
+      
+      setAllApplications(applicationsResult.applications || [])
+      setCounts(countsResult.counts || {
+        all: 0,
+        applied: 0,
+        reviewing: 0,
+        shortlisted: 0,
+        interview: 0,
+        interviewed: 0,
+        offered: 0,
+        hired: 0,
+        rejected: 0,
+        withdrawn: 0
+      })
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [router])
+  
+  // Apply client-side filtering based on URL params
+  useEffect(() => {
+    if (allApplications.length > 0) {
+      let filtered = [...allApplications]
+      
+      // Apply status filter
+      if (filters.status && filters.status !== 'ALL') {
+        filtered = filtered.filter(app => 
+          app.application.status === filters.status
+        )
+      }
+      
+      // Apply search filter
+      if (filters.searchTerm) {
+        const term = filters.searchTerm.toLowerCase()
+        filtered = filtered.filter(app =>
+          app.job.title.toLowerCase().includes(term) ||
+          app.candidate.fullName.toLowerCase().includes(term)
+        )
+      }
+      
+      // Apply client-side sorting
+      filtered = [...filtered].sort((a, b) => {
+        const dateA = new Date(a.application.appliedAt).getTime()
+        const dateB = new Date(b.application.appliedAt).getTime()
+        return filters.sort === 'newest' ? dateB - dateA : dateA - dateB
+      })
+      
+      setFilteredApplications(filtered)
+    }
+  }, [allApplications, filters.status, filters.searchTerm, filters.sort])
   
   useEffect(() => {
     async function checkAuth() {
@@ -86,59 +171,56 @@ export default function EmployerApplicationsPage() {
         return
       }
       
-      loadData()
-    }
-    
-    async function loadData() {
-      setIsLoading(true)
-      
-      try {
-        // Fetch applications and counts
-        const [applicationsResult, countsResult] = await Promise.all([
-          getEmployerApplications(filters),
-          getApplicationCounts()
-        ])
-        
-        // Handle errors
-        if (applicationsResult.error || countsResult.error) {
-          // If it's a profile not found error, redirect to create profile
-          if (applicationsResult.error === 'Employer profile not found' || 
-              countsResult.error === 'Employer profile not found') {
-            router.push('/employer/profile')
-            return
-          }
-        }
-        
-        setApplications(applicationsResult.applications || [])
-        setCounts(countsResult.counts || {
-          all: 0,
-          applied: 0,
-          reviewing: 0,
-          shortlisted: 0,
-          interview: 0,
-          interviewed: 0,
-          offered: 0,
-          hired: 0,
-          rejected: 0,
-          withdrawn: 0
-        })
-      } catch (error) {
-        console.error('Error loading data:', error)
-      } finally {
-        setIsLoading(false)
-      }
+      loadAllData()
     }
     
     checkAuth()
-  }, [filters.status, filters.searchTerm, filters.sort, router, supabase, filters])
+  }, [loadAllData, router, supabase])
   
-  const handleSortChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const newParams = new URLSearchParams(searchParams.toString())
-    newParams.set('sort', e.target.value)
-    router.push(`/employer/jobs/applicants?${newParams.toString()}`)
-  }
+  // Update URL without page navigation
+  const updateUrlWithFilter = useCallback((key: string, value: string | null) => {
+    startTransition(() => {
+      const newParams = new URLSearchParams(searchParams.toString())
+      
+      if (value === null || value === '') {
+        newParams.delete(key)
+      } else {
+        newParams.set(key, value)
+      }
+      
+      // Use router.replace to update URL without navigation
+      router.replace(`/employer/jobs/applicants?${newParams.toString()}`, { scroll: false })
+    })
+  }, [router, searchParams])
   
-  if (isLoading) {
+  // Handle filter changes
+  const handleStatusChange = useCallback((status: string) => {
+    updateUrlWithFilter('status', status === 'ALL' ? null : status)
+  }, [updateUrlWithFilter])
+  
+  const handleSortChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
+    updateUrlWithFilter('sort', e.target.value)
+    // No longer need to reload data from server for sorting
+  }, [updateUrlWithFilter])
+  
+  const handleSearch = useCallback(debounce((term: string) => {
+    updateUrlWithFilter('q', term || null)
+  }, 300), [updateUrlWithFilter])
+  
+  const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchValue(value)
+    handleSearch(value)
+  }, [handleSearch])
+  
+  const handleClearFilters = useCallback(() => {
+    startTransition(() => {
+      router.replace('/employer/jobs/applicants', { scroll: false })
+      setSearchValue('')
+    })
+  }, [router])
+  
+  if (isLoading || isPending) {
     return (
       <div className="container mx-auto py-10">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
@@ -165,184 +247,155 @@ export default function EmployerApplicationsPage() {
         <div className="border-b border-gray-100">
           <div className="px-4 py-3">
             <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
-              <Link href="/employer/jobs/applicants" 
-                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                    filters.status === 'ALL' 
-                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
-                  }`}>
+              <button
+                onClick={() => handleStatusChange('ALL')}
+                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                  filters.status === 'ALL' 
+                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                }`}>
                 <span>All</span>
                 <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.all}</span>
-              </Link>
-              <Link href="/employer/jobs/applicants?status=APPLIED" 
-                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                    filters.status === 'APPLIED' 
-                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
-                  }`}>
+              </button>
+              <button
+                onClick={() => handleStatusChange('APPLIED')}
+                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                  filters.status === 'APPLIED' 
+                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                }`}>
                 <span>Applied</span>
                 <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.applied}</span>
-              </Link>
-              <Link href="/employer/jobs/applicants?status=REVIEWING" 
-                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                    filters.status === 'REVIEWING' 
-                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
-                  }`}>
+              </button>
+              <button
+                onClick={() => handleStatusChange('REVIEWING')}
+                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                  filters.status === 'REVIEWING' 
+                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                }`}>
                 <span>Reviewing</span>
                 <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.reviewing}</span>
-              </Link>
-              <Link href="/employer/jobs/applicants?status=SHORTLISTED" 
-                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                    filters.status === 'SHORTLISTED' 
-                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
-                  }`}>
+              </button>
+              <button
+                onClick={() => handleStatusChange('SHORTLISTED')}
+                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                  filters.status === 'SHORTLISTED' 
+                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                }`}>
                 <span>Shortlisted</span>
                 <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.shortlisted}</span>
-              </Link>
-              <Link href="/employer/jobs/applicants?status=INTERVIEW_SCHEDULED" 
-                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                    filters.status === 'INTERVIEW_SCHEDULED' 
-                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
-                  }`}>
+              </button>
+              <button
+                onClick={() => handleStatusChange('INTERVIEW_SCHEDULED')}
+                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                  filters.status === 'INTERVIEW_SCHEDULED' 
+                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                }`}>
                 <span>Interview</span>
                 <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.interview}</span>
-              </Link>
-              <Link href="/employer/jobs/applicants?status=INTERVIEWED" 
-                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                    filters.status === 'INTERVIEWED' 
-                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
-                  }`}>
+              </button>
+              <button
+                onClick={() => handleStatusChange('INTERVIEWED')}
+                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                  filters.status === 'INTERVIEWED' 
+                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                }`}>
                 <span>Interviewed</span>
                 <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.interviewed}</span>
-              </Link>
-              <Link href="/employer/jobs/applicants?status=OFFER_EXTENDED" 
-                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                    filters.status === 'OFFER_EXTENDED' 
-                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
-                  }`}>
+              </button>
+              <button
+                onClick={() => handleStatusChange('OFFER_EXTENDED')}
+                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                  filters.status === 'OFFER_EXTENDED' 
+                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                }`}>
                 <span>Offered</span>
                 <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.offered}</span>
-              </Link>
-              <Link href="/employer/jobs/applicants?status=HIRED" 
-                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                    filters.status === 'HIRED' 
-                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
-                  }`}>
+              </button>
+              <button
+                onClick={() => handleStatusChange('HIRED')}
+                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                  filters.status === 'HIRED' 
+                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                }`}>
                 <span>Hired</span>
                 <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.hired}</span>
-              </Link>
-              <Link href="/employer/jobs/applicants?status=REJECTED" 
-                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                    filters.status === 'REJECTED' 
-                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
-                  }`}>
+              </button>
+              <button
+                onClick={() => handleStatusChange('REJECTED')}
+                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                  filters.status === 'REJECTED' 
+                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                }`}>
                 <span>Rejected</span>
                 <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.rejected}</span>
-              </Link>
-              <Link href="/employer/jobs/applicants?status=WITHDRAWN" 
-                  className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                    filters.status === 'WITHDRAWN' 
-                      ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                      : 'text-gray-600 hover:bg-gray-50 border border-transparent'
-                  }`}>
+              </button>
+              <button
+                onClick={() => handleStatusChange('WITHDRAWN')}
+                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
+                  filters.status === 'WITHDRAWN' 
+                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
+                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                }`}>
                 <span>Withdrawn</span>
                 <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.withdrawn}</span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>
         
-        {/* Enhanced search and filters section */}
-        <div className="p-4">
-          <div className="flex flex-col md:flex-row gap-3">
-            <form className="relative  flex-1 w-full" action="/employer/jobs/applicants" method="GET">
-              <input type="hidden" name="status" value={filters.status} />
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
-              </div>
-              <Input 
-                type="text" 
-                name="q"
-                defaultValue={filters.searchTerm}
-                placeholder="Search by job title or candidate name" 
-                className="pl-10 h-10 border border-gray-200 rounded-lg w-full focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-0"
-              />
-              <input type="hidden" name="sort" value={filters.sort} />
-              <Button 
-                type="submit" 
-                size="sm"
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
-              >
-                Search
-              </Button>
-            </form>
-            
-            <div className="w-full md:w-40 flex items-center">
-              <select 
-                className="h-10 rounded-lg border border-gray-200 px-3 py-2 bg-white w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-                onChange={handleSortChange}
-                value={filters.sort}
-              >
-                <option value="newest">Newest first</option>
-                <option value="oldest">Oldest first</option>
-              </select>
-            </div>
+        {/* Search and filter controls */}
+        <div className="px-4 py-3 flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Input
+              type="text"
+              placeholder="Search by job title or candidate name"
+              value={searchValue}
+              onChange={handleSearchChange}
+              className="pl-10 h-10 w-full"
+            />
           </div>
-
-          {/* Current filter indicators */}
-          {(filters.status !== 'ALL' || filters.searchTerm) && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {filters.status !== 'ALL' && (
-                <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-700 border border-blue-100">
-                  <span>Status: {filters.status.replace('_', ' ').toLowerCase()}</span>
-                  <Link href={`/employer/jobs/applicants${filters.searchTerm ? `?q=${filters.searchTerm}` : ''}`}>
-                    <span className="ml-1 p-0.5 rounded-full hover:bg-blue-100 cursor-pointer">×</span>
-                  </Link>
-                </div>
-              )}
-              {filters.searchTerm && (
-                <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-700 border border-blue-100">
-                  <span>Search: {filters.searchTerm}</span>
-                  <Link href={`/employer/jobs/applicants${filters.status !== 'ALL' ? `?status=${filters.status}` : ''}`}>
-                    <span className="ml-1 p-0.5 rounded-full hover:bg-blue-100 cursor-pointer">×</span>
-                  </Link>
-                </div>
-              )}
-              <Link href="/employer/jobs/applicants">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors">
-                  Clear all filters
-                </span>
-              </Link>
-            </div>
-          )}
+          <div className="flex gap-2">
+            <select
+              value={filters.sort}
+              onChange={handleSortChange}
+              className="border border-gray-200 h-10 rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </div>
         </div>
       </div>
       
       {/* Display applications or empty state */}
       <div className="mt-6">
-        {applications.length > 0 ? (
-          <ApplicationsDataTable applications={applications} />
+        {filteredApplications.length > 0 ? (
+          <ApplicationsDataTable applications={filteredApplications} />
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
-            <div className="mx-auto w-16 h-16 mb-4 text-gray-300 flex items-center justify-center bg-gray-50 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">No applications found</h3>
-            <p className="text-gray-500 mb-5 max-w-md mx-auto">No applications match your current filters. Try adjusting your search criteria.</p>
-            <Link href="/employer/jobs/applicants">
-              <Button variant="outline" className="px-4 py-2 text-sm font-medium border-gray-200 hover:bg-gray-50">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-10 text-center">
+            <div className="flex flex-col items-center">
+              <div className="h-16 w-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                <Search className="text-blue-500" size={24} />
+              </div>
+              <h3 className="text-gray-800 font-medium text-lg mb-2">No applications found</h3>
+              <p className="text-gray-500 max-w-md mb-6">There are no applications matching your current filters. Try changing your search terms or filter criteria.</p>
+              <Button 
+                onClick={handleClearFilters}
+                variant="outline" 
+                className="border-gray-200"
+              >
                 Clear all filters
               </Button>
-            </Link>
+            </div>
           </div>
         )}
       </div>
