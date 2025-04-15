@@ -125,9 +125,14 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
     revalidateTag('locations')
     revalidateTag('skills') 
     revalidateTag('industries')
+    // Invalidate employer dashboard caches
+    revalidateTag('employer-dashboard')
+    revalidateTag('employer-dashboard-stats')
+    revalidateTag('employer-recent-jobs')
     // Revalidate paths that show job listings
     revalidatePath('/employer/jobs')
     revalidatePath('/jobs')
+    revalidatePath('/employer') // Also revalidate the employer dashboard path
     
     // Handle payment method
     if (validatedData.paymentMethod === 'stripe') {

@@ -13,9 +13,13 @@ import { Badge } from '@/components/ui/badge';
 import { getEmployerDashboardData } from './_actions';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+// We still need 'force-dynamic' because this page uses cookies for authentication
+// However, the actual data fetching is still cached using unstable_cache
 export const dynamic = 'force-dynamic';
 
 export default async function EmployerDashboard() {
+  // Data will be cached based on the unstable_cache configuration in _queries.ts
+  // Cache will be invalidated when jobs or applications change
   const { data, error } = await getEmployerDashboardData();
 
   // Handle errors from the action

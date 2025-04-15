@@ -3,12 +3,13 @@ import { and, eq, sql, count } from 'drizzle-orm';
 import { Job, jobs, applications } from '@/lib/db/schema';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { getUser } from '@/lib/supabase/server';
+import { unstable_cache } from 'next/cache';
 
 /**
  * Fetches statistics for the employer dashboard based on company ID.
  * Counts active jobs, total applicants (across all jobs), and expiring jobs.
  */
-export async function getEmployerDashboardStats(companyId: string) {
+async function getEmployerDashboardStatsData(companyId: string) {
   if (!companyId) throw new Error('Company ID is required');
 
   const [activeJobsResult, totalApplicantsResult, expiringJobsResult] = await Promise.all([
@@ -49,9 +50,22 @@ export async function getEmployerDashboardStats(companyId: string) {
 }
 
 /**
+ * Cached version of employer dashboard stats
+ */
+export const getEmployerDashboardStats = unstable_cache(
+  async (companyId: string) => {
+    return getEmployerDashboardStatsData(companyId);
+  },
+  ['employer-dashboard-stats'],
+  {
+    tags: ['employer-dashboard', 'employer-jobs', 'employer-applications'],
+  }
+);
+
+/**
  * Fetches the 5 most recent job postings for the employer based on company ID.
  */
-export async function getRecentEmployerJobs(companyId: string): Promise<Job[]> {
+async function getRecentEmployerJobsData(companyId: string): Promise<Job[]> {
   if (!companyId) throw new Error('Company ID is required');
 
   return db()
@@ -60,4 +74,17 @@ export async function getRecentEmployerJobs(companyId: string): Promise<Job[]> {
     .where(eq(jobs.companyId, companyId))
     .orderBy(sql`${jobs.createdAt} DESC`)
     .limit(5);
-} 
+}
+
+/**
+ * Cached version of recent employer jobs
+ */
+export const getRecentEmployerJobs = unstable_cache(
+  async (companyId: string) => {
+    return getRecentEmployerJobsData(companyId);
+  },
+  ['employer-recent-jobs'],
+  {
+    tags: ['employer-dashboard', 'employer-jobs'],
+  }
+); 
