@@ -51,6 +51,12 @@ export function JobFilters({ locations, industries }: FilterProps) {
     filters.salaryMax || 200000
   ]);
   const [isPending, startTransition] = useTransition();
+  
+  // Sort options
+  const sortOptions = [
+    { value: 'newest', label: 'Newest first' },
+    { value: 'oldest', label: 'Oldest first' }
+  ];
 
   // Track active filter count for mobile badge
   useEffect(() => {
@@ -63,6 +69,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
     if (filters.salaryMin) count++;
     if (filters.salaryMax && filters.salaryMax < 200000) count++;
     if (filters.industryId && filters.industryId !== 'all') count++;
+    if (filters.sortBy && filters.sortBy !== 'newest') count++;
     setActiveFiltersCount(count);
   }, [filters]);
 
@@ -109,22 +116,22 @@ export function JobFilters({ locations, industries }: FilterProps) {
   // --- End wrapped functions ---
 
   return (
-    <div className={`relative bg-white/70 backdrop-blur-md border border-gray-200 rounded-lg shadow-sm transition-opacity duration-300 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+    <div className={`relative bg-[rgba(255,255,255,0.7)] backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] shadow-[0_8px_32px_rgba(31,38,135,0.1)] transition-opacity duration-300 max-w-3xl mx-auto ${isPending ? 'opacity-70' : 'opacity-100'}`}>
       {/* Conditionally render spinner overlay */}
       {isPending && (
-        <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-lg">
+        <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-[16px]">
           <RiseLoaderSpinner />
         </div>
       )}
 
       {/* Desktop Search Bar */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-5 border-b border-[rgba(255,255,255,0.5)]">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Search className="h-4 w-4 text-gray-500" />
+            <Search className="h-4 w-4 text-[#9aa3bc]" />
           </div>
           <Input
-            className="pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-md w-full focus:border-blue-500 focus:ring focus:ring-blue-200"
+            className="pl-10 pr-4 py-2 bg-white/70 border border-[rgba(255,255,255,0.5)] rounded-[10px] w-full focus:border-[#4a6cfa] focus:ring focus:ring-[rgba(74,108,250,0.15)]"
             placeholder="Search job titles, keywords, or companies"
             value={filters.search || ''}
             onChange={e => handleFilterChange({ search: e.target.value, page: 1 })}
@@ -134,23 +141,23 @@ export function JobFilters({ locations, industries }: FilterProps) {
               className="absolute inset-y-0 right-0 flex items-center pr-3"
               onClick={() => handleFilterChange({ search: null, page: 1 })}
             >
-              <X className="h-4 w-4 text-gray-500" />
+              <X className="h-4 w-4 text-[#9aa3bc]" />
             </button>
           )}
         </div>
       </div>
 
       {/* Desktop Filter Bar */}
-      <div className="hidden lg:flex p-4 gap-4 flex-wrap items-center">
+      <div className="hidden lg:flex p-5 gap-4 flex-wrap items-center justify-center">
         {/* Location Filter */}
         <Select 
           value={filters.locationId || 'all'} 
           onValueChange={value => handleFilterChange({ locationId: value as string, page: 1 })}
         >
-          <SelectTrigger className="w-[180px] bg-white">
+          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
             <SelectValue placeholder="Location" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-[10px]">
             <SelectItem value="all">Any Location</SelectItem>
             {locations.map(location => (
               <SelectItem key={location.id} value={location.id}>
@@ -165,10 +172,10 @@ export function JobFilters({ locations, industries }: FilterProps) {
           value={filters.jobType || 'all'} 
           onValueChange={value => handleFilterChange({ jobType: value as any, page: 1 })}
         >
-          <SelectTrigger className="w-[180px] bg-white">
+          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
             <SelectValue placeholder="Job Type" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-[10px]">
             <SelectItem value="all">Any Type</SelectItem>
             {jobTypeOptions.map(option => (
               <SelectItem key={option.value} value={option.value}>
@@ -183,10 +190,10 @@ export function JobFilters({ locations, industries }: FilterProps) {
           value={filters.workLocation || 'all'} 
           onValueChange={value => handleFilterChange({ workLocation: value as any, page: 1 })}
         >
-          <SelectTrigger className="w-[180px] bg-white">
+          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
             <SelectValue placeholder="Work Location" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-[10px]">
             <SelectItem value="all">Any Work Location</SelectItem>
             {workLocationOptions.map(option => (
               <SelectItem key={option.value} value={option.value}>
@@ -201,10 +208,10 @@ export function JobFilters({ locations, industries }: FilterProps) {
           value={filters.experienceLevel || 'all'} 
           onValueChange={value => handleFilterChange({ experienceLevel: value as any, page: 1 })}
         >
-          <SelectTrigger className="w-[180px] bg-white">
+          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
             <SelectValue placeholder="Experience Level" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-[10px]">
             <SelectItem value="all">Any Experience Level</SelectItem>
             {experienceLevelOptions.map(option => (
               <SelectItem key={option.value} value={option.value}>
@@ -219,14 +226,31 @@ export function JobFilters({ locations, industries }: FilterProps) {
           value={filters.industryId || 'all'} 
           onValueChange={value => handleFilterChange({ industryId: value as string, page: 1 })}
         >
-          <SelectTrigger className="w-[180px] bg-white">
+          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
             <SelectValue placeholder="Industry" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-[10px]">
             <SelectItem value="all">Any Industry</SelectItem>
             {industries.map(industry => (
               <SelectItem key={industry.id} value={industry.id}>
                 {industry.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        {/* Sort By Filter */}
+        <Select 
+          value={filters.sortBy || 'newest'} 
+          onValueChange={value => handleFilterChange({ sortBy: value as 'newest' | 'oldest', page: 1 })}
+        >
+          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
+            <SelectValue placeholder="Sort By" />
+          </SelectTrigger>
+          <SelectContent className="rounded-[10px]">
+            {sortOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -404,6 +428,27 @@ export function JobFilters({ locations, industries }: FilterProps) {
                     </Select>
                   </AccordionContent>
                 </AccordionItem>
+                
+                <AccordionItem value="sortBy">
+                  <AccordionTrigger>Sort By</AccordionTrigger>
+                  <AccordionContent>
+                    <Select 
+                      value={filters.sortBy || 'newest'} 
+                      onValueChange={value => handleFilterChange({ sortBy: value as 'newest' | 'oldest', page: 1 })}
+                    >
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue placeholder="Sort By" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sortOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </AccordionContent>
+                </AccordionItem>
               </Accordion>
             </div>
             <SheetFooter>
@@ -494,6 +539,15 @@ export function JobFilters({ locations, industries }: FilterProps) {
             <Badge variant="secondary" className="flex items-center gap-1">
               Industry: {getIndustryLabel(filters.industryId)}
               <button onClick={() => handleFilterChange({ industryId: 'all' as string, page: 1 })} className="disabled:opacity-50">
+                <X className="h-3 w-3 ml-1" />
+              </button>
+            </Badge>
+          )}
+          
+          {filters.sortBy && filters.sortBy !== 'newest' && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              Sort: {sortOptions.find(opt => opt.value === filters.sortBy)?.label}
+              <button onClick={() => handleFilterChange({ sortBy: 'newest', page: 1 })} className="disabled:opacity-50">
                 <X className="h-3 w-3 ml-1" />
               </button>
             </Badge>

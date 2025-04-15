@@ -121,7 +121,7 @@ export function formatSalaryDisplay({
       break;
     case 'NEGOTIABLE':
     default:
-      return 'Salary Negotiable';
+      return 'Negotiable';
   }
   
   // Fallback for incomplete data

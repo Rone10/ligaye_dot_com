@@ -29,13 +29,13 @@ export function JobList({
 
   return (
     <div className="space-y-8">
-      <div className="mb-4">
-        <p className="text-gray-600 text-sm">
+      <div className="mb-4 text-center">
+        <p className="text-[#9aa3bc] text-sm">
           {totalCount} {totalCount === 1 ? 'job' : 'jobs'} found • Page {currentPage} of {pageCount}
         </p>
       </div>
       
-      <div className="space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6">
         {jobs.map(job => (
           <JobCard 
             key={job.id} 
@@ -47,10 +47,12 @@ export function JobList({
       </div>
       
       {pageCount > 1 && (
-        <JobPagination 
-          currentPage={currentPage} 
-          totalPages={pageCount}
-        />
+        <div className="flex justify-center mt-10">
+          <JobPagination 
+            currentPage={currentPage} 
+            totalPages={pageCount}
+          />
+        </div>
       )}
     </div>
   );

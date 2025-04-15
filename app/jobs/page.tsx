@@ -39,7 +39,8 @@ export default async function JobsPage({ searchParams }: PageProps) {
     experienceLevel: filters.experienceLevel === 'all' ? null : filters.experienceLevel as typeof experienceLevelEnum.enumValues[number] | null,
     salaryMin: filters.salaryMin || null,
     salaryMax: filters.salaryMax || null,
-    industryId: filters.industryId === 'all' ? null : filters.industryId
+    industryId: filters.industryId === 'all' ? null : filters.industryId,
+    sortBy: filters.sortBy
   };
   
   console.log("[Debug] queryFilters.jobType being sent to query:", queryFilters.jobType);
@@ -63,30 +64,32 @@ export default async function JobsPage({ searchParams }: PageProps) {
   const savedJobIds = user ? await getSavedJobIdsForUser(user.id) : [];
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Find Your Perfect Job</h1>
-      
-      <Suspense fallback={<div className="bg-white/70 backdrop-blur-md border border-gray-200 rounded-lg p-6 mb-8">Loading filter options...</div>}>
-        <JobFilters 
-          locations={locations} 
-          industries={industries} 
-        />
-      </Suspense>
-      
-      <div className="mt-8">
-        <Suspense 
-          fallback={
-            <div className="bg-white/70 backdrop-blur-md border border-gray-200 rounded-lg p-6">Loading jobs...</div>
-          }
-        >
-          <JobListWithSaving 
-            jobs={jobs}
-            totalCount={totalCount}
-            currentPage={page}
-            pageCount={pageCount}
-            savedJobIds={savedJobIds}
+    <div className="min-h-screen bg-gradient-to-br from-[#e9efff] to-[#f4f7ff]">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className="text-3xl font-bold mb-8 text-[#1a1e2d] text-center">Find Your Perfect Job</h1>
+        
+        <Suspense fallback={<div className="bg-[rgba(255,255,255,0.7)] backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] p-6 mb-8 shadow-[0_8px_32px_rgba(31,38,135,0.1)] max-w-3xl mx-auto">Loading filter options...</div>}>
+          <JobFilters 
+            locations={locations} 
+            industries={industries} 
           />
         </Suspense>
+        
+        <div className="mt-10">
+          <Suspense 
+            fallback={
+              <div className="bg-[rgba(255,255,255,0.7)] backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] p-6 shadow-[0_8px_32px_rgba(31,38,135,0.1)] max-w-3xl mx-auto">Loading jobs...</div>
+            }
+          >
+            <JobListWithSaving 
+              jobs={jobs}
+              totalCount={totalCount}
+              currentPage={page}
+              pageCount={pageCount}
+              savedJobIds={savedJobIds}
+            />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

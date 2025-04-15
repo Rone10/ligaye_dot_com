@@ -1,4 +1,4 @@
-import { sql, and, eq, gte, lte, like, or, inArray, ilike } from 'drizzle-orm';
+import { sql, and, eq, gte, lte, like, or, inArray, ilike, asc, desc } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { 
   jobs, 
@@ -76,6 +76,10 @@ export async function getFilteredJobs(
     ? and(whereCondition, inArray(jobs.id, jobIdsInIndustry))
     : whereCondition;
     
+  // Determine sort order based on sortBy param (default to newest first)
+  const sortDirection = filters.sortBy === 'oldest' ? asc : desc;
+  const secondarySortDirection = filters.sortBy === 'oldest' ? asc : desc;
+  
   // Query jobs with pagination
   const jobsQuery = await db()
     .select({
@@ -98,7 +102,12 @@ export async function getFilteredJobs(
     .leftJoin(employerProfiles, eq(jobs.companyId, employerProfiles.id))
     .leftJoin(locations, eq(jobs.locationId, locations.id))
     .where(finalWhereCondition)
-    .orderBy(jobs.publishedAt)
+    // Use sql.coalesce to handle null publishedAt dates - fall back to createdAt
+    // Apply sort direction using Drizzle functions
+    .orderBy(
+      sortDirection(sql`coalesce(${jobs.publishedAt}, ${jobs.createdAt})`),
+      secondarySortDirection(jobs.id) // Use ID as final tiebreaker
+    )
     .limit(pageSize)
     .offset(offset);
     

@@ -21,6 +21,9 @@ export const parseAsStringOrAll = createParser({
   }
 });
 
+// Sort options
+export type SortOption = 'newest' | 'oldest';
+
 // Define parsers for URL state
 export const jobFiltersParsers = {
   search: parseAsString.withDefault(''),
@@ -31,6 +34,7 @@ export const jobFiltersParsers = {
   salaryMin: parseAsInteger,
   salaryMax: parseAsInteger,
   industryId: parseAsStringOrAll,
+  sortBy: parseAsStringLiteral(['newest', 'oldest'] as const).withDefault('newest'),
   page: parseAsInteger.withDefault(1),
   pageSize: parseAsInteger.withDefault(10)
 };
@@ -45,6 +49,7 @@ export const jobFiltersUrlKeys: UrlKeys<typeof jobFiltersParsers> = {
   salaryMin: 'smin',
   salaryMax: 'smax',
   industryId: 'ind',
+  sortBy: 'sort',
   page: 'p',
   pageSize: 'ps'
 }; 

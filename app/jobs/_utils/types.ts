@@ -4,6 +4,7 @@ import type {
   salaryFrequencyEnum, applicationMethodEnum, scheduleTypeEnum,
   jobStatusEnum
 } from '@/lib/db/schema';
+import type { SortOption } from './job-filter-parsers';
 
 // Filter state shape
 export interface JobFilters {
@@ -15,6 +16,7 @@ export interface JobFilters {
   salaryMin: number | null;
   salaryMax: number | null;
   industryId: string | null;
+  sortBy?: SortOption;
 }
 
 // Pagination state

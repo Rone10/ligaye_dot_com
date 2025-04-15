@@ -52,21 +52,28 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
     displayType: job.salaryDisplayType
   });
 
+  // Generate initials for company if no logo is available
+  const companyInitial = job.companyName ? job.companyName.charAt(0).toUpperCase() : 'C';
+
   return (
-    <div className="bg-white/70 backdrop-blur-md border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:translate-y-[-2px]">
-      <div className="flex items-start gap-4">
-        {/* Company Logo */}
-        <div className="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center text-gray-400">
+    <div className="bg-[rgba(255,255,255,0.7)] backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] p-7 shadow-[0_8px_32px_rgba(31,38,135,0.1)] transition-all duration-300 hover:shadow-[0_15px_35px_rgba(31,38,135,0.15)] hover:translate-y-[-2px]">
+      <div className="flex items-start gap-5">
+        {/* Company Logo/Initial */}
+        <div className="flex-shrink-0 w-16 h-16 rounded-[12px] overflow-hidden flex items-center justify-center text-white font-semibold text-xl" 
+             style={{ 
+               backgroundColor: job.companyLogoUrl ? '#f8faff' : job.companyName?.toLowerCase().includes('google') ? '#4285F4' : 
+                               job.companyName?.toLowerCase().includes('amazon') ? '#FF9900' : '#4a6cfa'
+             }}>
           {job.companyLogoUrl ? (
             <Image 
               src={job.companyLogoUrl}
               alt={`${job.companyName || 'Company'} logo`}
-              width={48}
-              height={48}
+              width={64}
+              height={64}
               className="object-contain"
             />
           ) : (
-            <BriefcaseIcon className="w-6 h-6" />
+            companyInitial
           )}
         </div>
 
@@ -74,13 +81,15 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
         <div className="flex-grow">
           <div className="flex justify-between items-start">
             <div>
-              <Link 
-                href={`/jobs/${job.id}`}
-                className="text-xl font-semibold text-blue-700 hover:text-blue-800 hover:underline transition-colors"
-              >
-                {job.title}
-              </Link>
-              <div className="mt-1 text-gray-700 font-medium">{job.companyName}</div>
+              <h3 className="text-xl font-semibold text-[#1a1e2d]">
+                <Link 
+                  href={`/jobs/${job.id}`}
+                  className="hover:text-[#4a6cfa] transition-colors"
+                >
+                  {job.title}
+                </Link>
+              </h3>
+              <div className="mt-1.5 text-[#1a1e2d] font-medium">{job.companyName} • {job.locationName || (job.workLocation === 'REMOTE' ? 'Remote' : 'Location Not Specified')}</div>
             </div>
             
             {/* Save Button */}
@@ -88,63 +97,45 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
               onClick={handleSave}
               disabled={saving}
               className={cn(
-                "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-                saved ? "text-blue-600" : "text-gray-400 hover:text-gray-600"
+                "flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors",
+                saved ? "text-[#4a6cfa]" : "text-[#9aa3bc] hover:text-[#1a1e2d]"
               )}
               aria-label={saved ? "Unsave job" : "Save job"}
             >
               <BookmarkIcon 
                 className={cn(
-                  "w-5 h-5 transition-all",
-                  saved ? "fill-blue-600 stroke-blue-600" : "fill-transparent"
+                  "w-6 h-6 transition-all",
+                  saved ? "fill-[#4a6cfa] stroke-[#4a6cfa]" : "fill-transparent"
                 )}
               />
             </button>
           </div>
 
-          {/* Location and Job Type */}
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-            {job.locationName && (
-              <div className="flex items-center gap-1">
-                <MapPinIcon className="w-4 h-4" />
-                <span>{job.locationName}</span>
-                {job.workLocation === 'HYBRID' && <span>(Hybrid)</span>}
-              </div>
-            )}
-            {!job.locationName && job.workLocation === 'REMOTE' && (
-              <div className="flex items-center gap-1">
-                <MapPinIcon className="w-4 h-4" />
-                <span>Remote</span>
-              </div>
-            )}
-            <div className="flex items-center gap-1">
-              <BriefcaseIcon className="w-4 h-4" />
-              <span>{job.jobType.replace(/_/g, ' ').toLowerCase()}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <ClockIcon className="w-4 h-4" />
-              <span>Posted {publishedDate}</span>
-            </div>
-          </div>
-
           {/* Tags */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-              {job.workLocation}
+          <div className="mt-5 flex flex-wrap gap-2">
+            <span className="inline-block px-3.5 py-1.5 rounded-full text-xs font-medium bg-[rgba(74,108,250,0.1)] text-[#4a6cfa]">
+              {job.workLocation === 'REMOTE' ? 'Remote' : job.workLocation === 'HYBRID' ? 'Hybrid' : 'On-site'}
             </span>
-            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+            <span className="inline-block px-3.5 py-1.5 rounded-full text-xs font-medium bg-[rgba(74,108,250,0.1)] text-[#4a6cfa]">
               {job.jobType.replace(/_/g, ' ')}
             </span>
+            <span className="inline-block px-3.5 py-1.5 rounded-full text-xs font-medium bg-[rgba(74,108,250,0.1)] text-[#4a6cfa]">
+              {job.title.includes('Senior') ? 'Senior Level' : job.title.includes('Junior') ? 'Junior Level' : job.title.includes('Mid') ? 'Mid Level' : 'Any Level'}
+            </span>
           </div>
 
-          {/* Salary and Apply Button */}
-          <div className="mt-5 flex flex-wrap justify-between items-center gap-3">
+          {/* Salary and Details */}
+          <div className="mt-6 flex flex-wrap justify-between items-center gap-3">
             <div>
-              <div className="text-sm text-gray-500">Salary</div>
-              <div className="font-semibold text-gray-900">{salaryDisplay}</div>
+              <div className="text-[#9aa3bc]">
+                <span className="font-semibold text-[#1a1e2d] text-base">{salaryDisplay}</span>
+              </div>
+              <div className="text-sm text-[#9aa3bc] mt-1.5">
+                Posted {publishedDate}
+              </div>
             </div>
             <Link href={`/jobs/${job.id}/apply`} passHref>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button className="bg-[#4a6cfa] hover:bg-[#7b90ff] text-white px-6 py-2.5 rounded-[10px] font-semibold text-base">
                 Apply Now
               </Button>
             </Link>

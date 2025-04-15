@@ -25,6 +25,7 @@ export function useJobFilters() {
       salaryMin: null,
       salaryMax: null,
       industryId: null,
+      sortBy: 'newest',
       page: 1
     });
   };
