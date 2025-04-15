@@ -9,8 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { JobActionButton } from './_components/JobActionButton';
 import { getUser } from '@/lib/supabase/server';
 
-// Export cache configuration for on-demand revalidation
-export const dynamic = 'force-dynamic';
+// Instead of forcing dynamic rendering, use static rendering with ISR
+export const revalidate = 3600; // Revalidate every hour (cache for 1 hour)
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -25,16 +25,36 @@ export default async function JobDetailPage({ params }: PageProps) {
   const user = await getUser();
   
   // Fetch job details - add cache tags for on-demand revalidation
-  const job = await getJobById(id, { next: { tags: [`job-${id}`] } });
+  const job = await getJobById(id, { 
+    next: { 
+      tags: [`job-${id}`],
+      revalidate: 3600 // 1 hour cache
+    }
+  });
   
-  // Fetch related jobs - add cache tags for job company
-  const relatedJobs = await getRelatedJobs(id, 3, { next: { tags: [`company-${job.companyId}`] } });
+  // Fetch related jobs in parallel with other user-specific data
+  const relatedJobsPromise = getRelatedJobs(id, 3, { 
+    next: { 
+      tags: [`company-${job.companyId}`],
+      revalidate: 3600 // 1 hour cache
+    }
+  });
   
-  // Check if user has already applied
-  const hasApplied = user ? await checkUserApplication(id, user.id) : false;
+  // These user-specific checks should only be fetched when a user is logged in
+  // and they should run in parallel to prevent waterfall loading
+  let hasApplied = false;
+  let isSaved = false;
   
-  // Check if user has saved this job
-  const isSaved = user ? await checkUserSavedJob(id, user.id) : false;
+  if (user) {
+    // Run these checks in parallel
+    [hasApplied, isSaved] = await Promise.all([
+      checkUserApplication(id, user.id),
+      checkUserSavedJob(id, user.id)
+    ]);
+  }
+  
+  // Await related jobs only after other data has loaded
+  const relatedJobs = await relatedJobsPromise;
   
   // Log debug info (will show in server console)
   console.log('User info:', user ? { id: user.id, role: user.user_metadata.role } : 'Not logged in');
@@ -51,7 +71,7 @@ export default async function JobDetailPage({ params }: PageProps) {
           id={id}
           applicationMethod={job.applicationMethod}
           isLoggedIn={!!user}
-          userRole={user?.role || null}
+          userRole={user?.user_metadata.role || null}
           hasApplied={hasApplied}
         />
       </div>

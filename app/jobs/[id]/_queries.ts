@@ -15,6 +15,7 @@ import {
 } from '@/lib/db/schema';
 import { notFound } from 'next/navigation';
 import type { JobDetail, SimpleSkill, SimpleIndustry } from '../_utils/types';
+import { cache } from 'react';
 
 // Cache options type for Next.js
 type CacheOptions = {
@@ -26,8 +27,9 @@ type CacheOptions = {
 
 /**
  * Get detailed job information by ID
+ * React cache wrapping to prevent duplicate queries within the same render
  */
-export async function getJobById(jobId: string, options?: CacheOptions): Promise<JobDetail> {
+export const getJobById = cache(async function getJobByIdInternal(jobId: string, options?: CacheOptions): Promise<JobDetail> {
   // Get the job with basic company and location information
   const jobQuery = await db()
     .select()
@@ -54,15 +56,28 @@ export async function getJobById(jobId: string, options?: CacheOptions): Promise
   
   const job = jobResult.jobs;
   
-  // Get job skills
-  const skillsQuery = await db()
-    .select({
-      id: skills.id,
-      name: skills.name
-    })
-    .from(jobSkills)
-    .leftJoin(skills, eq(jobSkills.skillId, skills.id))
-    .where(eq(jobSkills.jobId, jobId));
+  // Run both skill and industry queries in parallel
+  const [skillsQuery, industriesQuery] = await Promise.all([
+    // Get job skills
+    db()
+      .select({
+        id: skills.id,
+        name: skills.name
+      })
+      .from(jobSkills)
+      .leftJoin(skills, eq(jobSkills.skillId, skills.id))
+      .where(eq(jobSkills.jobId, jobId)),
+    
+    // Get job industries
+    db()
+      .select({
+        id: industries.id,
+        name: industries.name
+      })
+      .from(jobIndustries)
+      .leftJoin(industries, eq(jobIndustries.industryId, industries.id))
+      .where(eq(jobIndustries.jobId, jobId))
+  ]);
     
   const jobSkillsList: SimpleSkill[] = skillsQuery
     .filter(skill => skill.id !== null)
@@ -71,16 +86,6 @@ export async function getJobById(jobId: string, options?: CacheOptions): Promise
       name: skill.name || ''
     }));
     
-  // Get job industries
-  const industriesQuery = await db()
-    .select({
-      id: industries.id,
-      name: industries.name
-    })
-    .from(jobIndustries)
-    .leftJoin(industries, eq(jobIndustries.industryId, industries.id))
-    .where(eq(jobIndustries.jobId, jobId));
-  
   const jobIndustriesList: SimpleIndustry[] = industriesQuery
     .filter(industry => industry.id !== null)
     .map(industry => ({
@@ -142,12 +147,13 @@ export async function getJobById(jobId: string, options?: CacheOptions): Promise
   };
 
   return jobDetail;
-}
+});
 
 /**
  * Get similar/related jobs (same company or industry)
+ * Wrapped with React cache to prevent duplicate queries
  */
-export async function getRelatedJobs(jobId: string, limit: number = 3, options?: CacheOptions) {
+export const getRelatedJobs = cache(async function getRelatedJobsInternal(jobId: string, limit: number = 3, options?: CacheOptions) {
   const currentJob = await db()
     .select({
       companyId: jobs.companyId
@@ -180,13 +186,14 @@ export async function getRelatedJobs(jobId: string, limit: number = 3, options?:
       )
     )
     .limit(limit);
-}
+});
 
-// Add this function after existing exports
-export async function checkUserApplication(jobId: string, userId: string | undefined, options?: CacheOptions) {
-  console.log('Checking if user has applied - userId:', userId, 'jobId:', jobId);
+/**
+ * Check if user has applied to a job
+ * Wrapped with React cache to prevent duplicate queries
+ */
+export const checkUserApplication = cache(async function checkUserApplicationInternal(jobId: string, userId: string | undefined, options?: CacheOptions) {
   if (!userId) {
-    console.log('checkUserApplication: No userId provided, returning false');
     return false;
   }
   
@@ -200,10 +207,7 @@ export async function checkUserApplication(jobId: string, userId: string | undef
     .where(eq(profiles.userId, userId))
     .limit(1);
   
-  console.log('Candidate profile search result:', candidateResult);
-  
   if (!candidateResult.length) {
-    console.log('checkUserApplication: No candidate profile found for user', userId);
     return false;
   }
   
@@ -221,15 +225,14 @@ export async function checkUserApplication(jobId: string, userId: string | undef
     )
     .limit(1);
   
-  console.log('Application search result:', applicationResult);
-  const hasApplied = applicationResult.length > 0;
-  console.log('User has applied:', hasApplied);
-  
-  return hasApplied;
-}
+  return applicationResult.length > 0;
+});
 
-// Add this function to check if a job is saved by a user
-export async function checkUserSavedJob(jobId: string, userId: string | undefined, options?: CacheOptions) {
+/**
+ * Check if a job is saved by a user
+ * Wrapped with React cache to prevent duplicate queries
+ */
+export const checkUserSavedJob = cache(async function checkUserSavedJobInternal(jobId: string, userId: string | undefined, options?: CacheOptions) {
   if (!userId) return false;
   
   // Get the profile ID for this user
@@ -259,4 +262,4 @@ export async function checkUserSavedJob(jobId: string, userId: string | undefine
   
   // Return true if the job is saved (record exists and deleted is false)
   return savedJobResult.length > 0 && !savedJobResult[0].deleted;
-} 
+}); 
