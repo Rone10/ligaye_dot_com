@@ -12,17 +12,18 @@ import {
   profiles
 } from '@/lib/db/schema';
 import type { JobFilters, JobsQueryResult } from './_utils/types';
+import { unstable_cache } from 'next/cache';
 
 /**
  * Get a filtered and paginated list of jobs based on search criteria
  */
-export async function getFilteredJobs(
+async function getFilteredJobsData(
   filters: JobFilters,
   pagination: { page: number; pageSize: number }
 ): Promise<JobsQueryResult> {
   const { 
     search, locationId, jobType, workLocation, 
-    experienceLevel, salaryMin, salaryMax, industryId 
+    experienceLevel, salaryMin, salaryMax, industryId, sortBy 
   } = filters;
   
   const { page, pageSize } = pagination;
@@ -77,8 +78,8 @@ export async function getFilteredJobs(
     : whereCondition;
     
   // Determine sort order based on sortBy param (default to newest first)
-  const sortDirection = filters.sortBy === 'oldest' ? asc : desc;
-  const secondarySortDirection = filters.sortBy === 'oldest' ? asc : desc;
+  const sortDirection = sortBy === 'oldest' ? asc : desc;
+  const secondarySortDirection = sortBy === 'oldest' ? asc : desc;
   
   // Query jobs with pagination
   const jobsQuery = await db()
@@ -143,9 +144,23 @@ export async function getFilteredJobs(
 }
 
 /**
- * Get list of all locations for filter options
+ * Cached version of filtered jobs 
  */
-export async function getLocationsForFilters() {
+export const getFilteredJobs = unstable_cache(
+  async (filters: JobFilters, pagination: { page: number; pageSize: number }) => {
+    return getFilteredJobsData(filters, pagination);
+  },
+  ['filtered-jobs'],
+  {
+    tags: ['jobs'],
+    revalidate: 60 * 10 // Revalidate every 10 minutes
+  }
+);
+
+/**
+ * Get location data for filter options
+ */
+async function getLocationsForFiltersData() {
   return db()
     .select({
       id: locations.id,
@@ -159,9 +174,23 @@ export async function getLocationsForFilters() {
 }
 
 /**
- * Get list of all industries for filter options
+ * Cached version of locations for filters
  */
-export async function getIndustriesForFilters() {
+export const getLocationsForFilters = unstable_cache(
+  async () => {
+    return getLocationsForFiltersData();
+  },
+  ['locations-for-filters'],
+  {
+    tags: ['locations', 'job-filters'],
+    revalidate: 3600 // Revalidate hourly
+  }
+);
+
+/**
+ * Get industry data for filter options
+ */
+async function getIndustriesForFiltersData() {
   return db()
     .select({
       id: industries.id,
@@ -173,9 +202,23 @@ export async function getIndustriesForFilters() {
 }
 
 /**
+ * Cached version of industries for filters
+ */
+export const getIndustriesForFilters = unstable_cache(
+  async () => {
+    return getIndustriesForFiltersData();
+  },
+  ['industries-for-filters'],
+  {
+    tags: ['industries', 'job-filters'],
+    revalidate: 3600 // Revalidate hourly
+  }
+);
+
+/**
  * Get saved jobs IDs for a user
  */
-export async function getSavedJobIdsForUser(userId: string) {
+async function getSavedJobIdsForUserData(userId: string) {
   // First get the profile ID from the user ID
   const profileResult = await db()
     .select({ id: profiles.id })
@@ -201,4 +244,18 @@ export async function getSavedJobIdsForUser(userId: string) {
     );
     
   return savedJobIds.map(row => row.jobId);
-} 
+}
+
+/**
+ * Cached version of saved job IDs for a user
+ */
+export const getSavedJobIdsForUser = unstable_cache(
+  async (userId: string) => {
+    return getSavedJobIdsForUserData(userId);
+  },
+  ['saved-job-ids'],
+  {
+    tags: ['saved-jobs', 'user-data'],
+    revalidate: 60 // Revalidate every minute
+  }
+); 

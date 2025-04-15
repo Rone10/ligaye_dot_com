@@ -118,7 +118,13 @@ export default function JobHeader({ job, hasApplied = false, isSaved = false }: 
           <div className="flex items-center">
             <div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0 overflow-hidden">
               {job.company?.companyLogoUrl ? (
-                <Image src={job.company.companyLogoUrl} alt={job.company.companyName || 'Company logo'} className="w-full h-full object-cover" />
+                <Image 
+                  src={job.company.companyLogoUrl} 
+                  alt={job.company.companyName || 'Company logo'} 
+                  className="w-full h-full object-cover" 
+                  width={40}
+                  height={40}
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-500">
                   {job.company?.companyName?.charAt(0) || 'C'}

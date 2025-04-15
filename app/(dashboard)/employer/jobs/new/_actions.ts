@@ -121,6 +121,7 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
     revalidateTag('jobs')
     revalidateTag('employer-jobs')
     revalidateTag('public-jobs')
+    revalidateTag('filtered-jobs') // Invalidate cached job listings for public jobs page
     // Invalidate reference data caches if they might be affected
     revalidateTag('locations')
     revalidateTag('skills') 
@@ -129,6 +130,12 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
     revalidateTag('employer-dashboard')
     revalidateTag('employer-dashboard-stats')
     revalidateTag('employer-recent-jobs')
+    // Invalidate public job listing caches
+    revalidateTag('job-filters')
+    revalidateTag('locations-for-filters')
+    revalidateTag('industries-for-filters')
+    revalidateTag('saved-jobs') // Invalidate saved jobs cache to ensure accuracy
+    revalidateTag('user-data') // Invalidate user data cache that might reference jobs
     // Revalidate paths that show job listings
     revalidatePath('/employer/jobs')
     revalidatePath('/jobs')
