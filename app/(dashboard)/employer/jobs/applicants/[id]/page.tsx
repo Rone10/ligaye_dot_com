@@ -7,10 +7,6 @@ import { ChevronLeft } from 'lucide-react'
 import ApplicationDetails from './_components/ApplicationDetails'
 import CandidateProfile from './_components/CandidateProfile'
 import StatusUpdateForm from './_components/StatusUpdateForm'
-import NotesForm from './_components/NotesForm'
-import InterviewScheduler from './_components/InterviewScheduler'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { CalendarX, FileX } from 'lucide-react'
 
 // Define interfaces matching those in CandidateProfile.tsx
 interface Education {
@@ -189,9 +185,6 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     experience: formattedExperience
   };
   
-  // Check if status is INTERVIEW_SCHEDULED
-  const isInterviewScheduled = application.application.status === 'INTERVIEW_SCHEDULED';
-  
   return (
     <div className="container mx-auto py-10">
       <div className="mb-8">
@@ -224,55 +217,10 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             <StatusUpdateForm 
               applicationId={applicationId} 
               currentStatus={application.application.status} 
+              currentInterviewDate={application.application.interviewDate}
+              currentNotes={application.application.notes}
             />
           </div>
-          
-          {isInterviewScheduled ? (
-            <div className="bg-white p-6 rounded-lg border shadow-sm">
-              <InterviewScheduler
-                applicationId={applicationId}
-                currentInterviewDate={application.application.interviewDate}
-              />
-            </div>
-          ) : (
-            <Card className="bg-gray-50 border-dashed">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
-                  <CalendarX size={16} className="text-gray-400" />
-                  Schedule Interview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-500">
-                  Change application status to &quot;Interview Scheduled&quot; to enable the interview scheduler.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-          
-          {isInterviewScheduled ? (
-            <div className="bg-white p-6 rounded-lg border shadow-sm">
-              <NotesForm
-                applicationId={applicationId}
-                currentNotes={application.application.notes}
-                currentStatus={application.application.status}
-              />
-            </div>
-          ) : (
-            <Card className="bg-gray-50 border-dashed">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
-                  <FileX size={16} className="text-gray-400" />
-                  Interview Notes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-500">
-                  Change application status to &quot;Interview Scheduled&quot; to enable the interview notes feature.
-                </p>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
     </div>
