@@ -1,10 +1,11 @@
 import { z } from "zod"
+import { applicationStatusEnum } from "@/lib/db/schema"
 
 // Define allowed file types
 const ALLOWED_RESUME_TYPES = [
-  "application/pdf", 
-  "application/msword", 
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ]
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -37,4 +38,12 @@ export const applicationFormSchema = z.object({
   coverLetterText: z.string().max(20000).optional(),
 })
 
-export type ApplicationFormValues = z.infer<typeof applicationFormSchema> 
+// Schema for application status updates from employers
+export const applicationStatusUpdateSchema = z.object({
+  status: z.enum(applicationStatusEnum.enumValues),
+  interviewDate: z.union([z.string().datetime(), z.undefined(), z.null()]).optional(),
+  notes: z.union([z.string().max(1000), z.undefined(), z.null()]).optional(),
+})
+
+export type ApplicationFormValues = z.infer<typeof applicationFormSchema>
+export type ApplicationStatusUpdateInput = z.infer<typeof applicationStatusUpdateSchema> 

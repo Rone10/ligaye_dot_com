@@ -18,12 +18,8 @@ import {
     dashboardUrl: string;
   }
   
-  const isProduction = process.env.NODE_ENV === 'production';
-  const baseUrl = process.env.BASE_URL || 'https://ligaye.com';
-  
-  const logoSrc = isProduction
-    ? `${baseUrl}/branding/full_logo.png` // NOTE: Assumes production logo is in /branding/
-    : '/static/full_logo.png';
+  // Always use absolute URLs for email images
+  const logoUrl = 'https://ligaye.com/branding/full_logo.png';
 
   export const JobPostedEmail = ({
     employerName,
@@ -39,7 +35,7 @@ import {
         </Preview>
         <Container style={container}>
           <Img
-            src={logoSrc}
+            src={logoUrl}
             width="250"
             height="250"
             alt="Ligaye.com"

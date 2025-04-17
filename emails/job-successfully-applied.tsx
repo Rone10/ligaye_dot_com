@@ -20,12 +20,8 @@ interface JobSuccessfullyAppliedEmailProps {
   exploreMoreJobsUrl: string;
 }
 
-const isProduction = process.env.NODE_ENV === 'production';
-const baseUrl = process.env.BASE_URL || 'https://ligaye.com';
-
-const logoSrc = isProduction
-  ? `${baseUrl}/branding/full_logo.png`
-  : '/static/full_logo.png';
+// Always use absolute URLs for email images
+const logoUrl = 'https://ligaye.com/branding/full_logo.png';
 
 export const JobSuccessfullyAppliedEmail = ({
   candidateName,
@@ -43,7 +39,7 @@ export const JobSuccessfullyAppliedEmail = ({
       </Preview>
       <Container style={container}>
         <Img
-          src={logoSrc}
+          src={logoUrl}
           width="250"
           height="250"
           alt="Ligaye.com"

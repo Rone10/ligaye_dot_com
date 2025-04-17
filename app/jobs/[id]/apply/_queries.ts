@@ -8,6 +8,7 @@ import {
   type NewApplication
 } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
+import { ApplicationStatusUpdateInput } from "./_utils/validation"
 
 // Get job and candidate data for application context
 export async function getApplicationContextData(
@@ -77,45 +78,80 @@ export async function getApplicationContextData(
 }
 
 // Insert application
-export async function insertApplication(data: NewApplication) {
+export async function insertApplication(applicationData: any) {
   try {
-    const result = await db()
-      .insert(applications)
-      .values(data)
-      .returning({ id: applications.id })
-    
-    return { success: true, data: result[0] }
-  } catch (error: any) {
-    // Handle unique constraint violation
-    if (error.code === '23505') { // PostgreSQL unique violation
-      return { 
-        success: false, 
-        error: 'You have already applied for this job' 
-      }
-    }
-    
-    return { 
-      success: false, 
-      error: 'Failed to submit application' 
-    }
+    await db().insert(applications).values(applicationData)
+    return { success: true }
+  } catch (error) {
+    console.error("Error inserting application:", error)
+    return { success: false, error: "Database error when submitting application" }
   }
 }
 
 // Check if a candidate has already applied to a job
-export async function checkExistingApplication(
-  jobId: string, 
-  candidateProfileId: string
-) {
-  const result = await db()
-    .select({ id: applications.id })
-    .from(applications)
-    .where(
-      and(
-        eq(applications.jobId, jobId),
-        eq(applications.candidateProfileId, candidateProfileId)
+export async function checkExistingApplication(jobId: string, candidateProfileId: string) {
+  try {
+    const result = await db()
+      .select({ id: applications.id })
+      .from(applications)
+      .where(
+        and(
+          eq(applications.jobId, jobId),
+          eq(applications.candidateProfileId, candidateProfileId),
+          eq(applications.deleted, false)
+        )
       )
-    )
-    .limit(1)
-  
-  return result.length > 0
+      .limit(1)
+    
+    return result.length > 0
+  } catch (error) {
+    console.error("Error checking existing application:", error)
+    throw error
+  }
+}
+
+export async function updateApplicationStatus(applicationId: string, data: ApplicationStatusUpdateInput) {
+  try {
+    // Parse date string to Date object if it exists, or null if not
+    let interviewDate: Date | null = null;
+    if (data.interviewDate && typeof data.interviewDate === 'string') {
+      interviewDate = new Date(data.interviewDate);
+    }
+    
+    await db()
+      .update(applications)
+      .set({
+        status: data.status,
+        interviewDate,
+        notes: data.notes,
+        updatedAt: new Date()
+      })
+      .where(eq(applications.id, applicationId))
+    
+    return { success: true }
+  } catch (error) {
+    console.error("Error updating application status:", error)
+    return { success: false, error: "Failed to update application status" }
+  }
+}
+
+export async function getJobDetails(jobId: string) {
+  try {
+    const result = await db()
+      .select({
+        id: jobs.id,
+        title: jobs.title,
+        companyId: jobs.companyId,
+        companyName: employerProfiles.companyName
+      })
+      .from(jobs)
+      .leftJoin(employerProfiles, eq(jobs.companyId, employerProfiles.id))
+      .where(eq(jobs.id, jobId))
+      .limit(1)
+    
+    return result[0]
+  } catch (error) {
+    console.error("Error fetching job details:", error)
+    return null
+  }
 } 

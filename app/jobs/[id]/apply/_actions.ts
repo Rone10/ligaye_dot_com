@@ -4,9 +4,14 @@ import { revalidatePath, revalidateTag } from "next/cache"
 import { getUser } from "@/lib/supabase/server"
 import { createClient } from "@/lib/supabase/server"
 import { applicationFormSchema, type ApplicationFormValues } from "./_utils/validation"
-import { insertApplication, checkExistingApplication } from "./_queries"
+import { insertApplication, checkExistingApplication, getJobDetails } from "./_queries"
 import { applicationStatusEnum } from "@/lib/db/schema"
 import { v4 as uuidv4 } from "uuid"
+import { Resend } from 'resend'
+import { JobSuccessfullyAppliedEmail } from '@/emails/job-successfully-applied'
+import { format } from 'date-fns'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 interface ApplicationSubmissionParams {
   formData: ApplicationFormValues
@@ -103,6 +108,9 @@ export async function submitApplication({
       coverLetterText = validatedData.coverLetterText
     }
     
+    // Create application date
+    const applicationDate = new Date()
+    
     // Prepare application data
     const applicationData = {
       jobId,
@@ -113,12 +121,50 @@ export async function submitApplication({
       coverLetterUrl,
       coverLetterFilename,
       coverLetterText,
-      appliedAt: new Date(),
-      updatedAt: new Date(),
+      appliedAt: applicationDate,
+      updatedAt: applicationDate,
     }
     
     // Insert application record
     const result = await insertApplication(applicationData)
+    
+    // If the application was successful, send confirmation email to the candidate
+    if (result.success) {
+      try {
+        // Get job details and company name
+        const jobDetails = await getJobDetails(jobId)
+        
+        if (jobDetails && user.email) {
+          // Format the application date
+          const formattedDate = format(applicationDate, 'MMMM d, yyyy')
+          
+          // Send the confirmation email to the candidate
+          console.log('user.user_metadata', user.user_metadata)
+          const candidateFullName = user.user_metadata?.first_name + ' ' + user.user_metadata?.last_name
+          const { error: emailError } = await resend.emails.send({
+            from: 'Ligaye.com <no-reply@ligaye.com>',
+            to: [user.email],
+            subject: `Application Submitted: ${jobDetails.title}`,
+            react: JobSuccessfullyAppliedEmail({
+              candidateName: candidateFullName || 'Candidate',
+              jobTitle: jobDetails.title,
+              companyName: jobDetails.companyName || 'Unknown Company',
+              applicationDate: formattedDate,
+              dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/candidate/applications`,
+              exploreMoreJobsUrl: `${process.env.NEXT_PUBLIC_APP_URL}/jobs`,
+            }),
+          })
+          
+          if (emailError) {
+            console.error("Failed to send confirmation email:", emailError)
+            // Don't return error here, as the application was successful
+          }
+        }
+      } catch (emailError) {
+        console.error("Error sending confirmation email:", emailError)
+        // Application was still successful, so continue
+      }
+    }
     
     // Revalidate related paths
     revalidatePath(`/jobs/${jobId}`)
