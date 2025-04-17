@@ -6,7 +6,7 @@ import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { scheduleInterview } from '../../_actions'
+import { updateStatus } from '../_actions'
 
 interface InterviewSchedulerProps {
   applicationId: string
@@ -30,7 +30,10 @@ export default function InterviewScheduler({ applicationId, currentInterviewDate
     setIsScheduling(true)
     
     try {
-      const result = await scheduleInterview(applicationId, new Date(interviewDate))
+      const result = await updateStatus(applicationId, {
+        status: 'INTERVIEW_SCHEDULED',
+        interviewDate: interviewDate
+      })
       
       if (result.error) {
         toast.error(result.error)

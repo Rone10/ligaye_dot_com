@@ -255,6 +255,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               <NotesForm
                 applicationId={applicationId}
                 currentNotes={application.application.notes}
+                currentStatus={application.application.status}
               />
             </div>
           ) : (

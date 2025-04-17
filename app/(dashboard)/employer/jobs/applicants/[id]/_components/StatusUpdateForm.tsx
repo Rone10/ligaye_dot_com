@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import StatusBadge from '../../_components/StatusBadge'
-import { updateApplicationStatus } from '../../_actions'
+import { updateStatus } from '../_actions'
 import { ApplicationStatus } from '@/types/application'
 
 interface StatusUpdateFormProps {
@@ -29,7 +29,7 @@ export default function StatusUpdateForm({ applicationId, currentStatus }: Statu
     setIsUpdating(true)
     
     try {
-      const result = await updateApplicationStatus(applicationId, status as ApplicationStatus)
+      const result = await updateStatus(applicationId, { status: status as ApplicationStatus })
       
       if (result.error) {
         toast.error(result.error)

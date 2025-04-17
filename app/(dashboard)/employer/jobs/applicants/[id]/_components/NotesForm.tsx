@@ -4,14 +4,16 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { updateApplicationNotes } from '../../_actions'
+import { updateStatus } from '../_actions'
+import { ApplicationStatus } from '@/types/application'
 
 interface NotesFormProps {
   applicationId: string
   currentNotes: string | null
+  currentStatus?: ApplicationStatus
 }
 
-export default function NotesForm({ applicationId, currentNotes }: NotesFormProps) {
+export default function NotesForm({ applicationId, currentNotes, currentStatus = 'INTERVIEW_SCHEDULED' as ApplicationStatus }: NotesFormProps) {
   const [notes, setNotes] = useState(currentNotes || '')
   const [isSaving, setIsSaving] = useState(false)
   
@@ -21,7 +23,10 @@ export default function NotesForm({ applicationId, currentNotes }: NotesFormProp
     setIsSaving(true)
     
     try {
-      const result = await updateApplicationNotes(applicationId, notes)
+      const result = await updateStatus(applicationId, {
+        status: currentStatus,
+        notes,
+      })
       
       if (result.error) {
         toast.error(result.error)
