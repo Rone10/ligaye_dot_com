@@ -45,7 +45,7 @@ export const JobSuccessfullyAppliedEmail = ({
           alt="Ligaye.com"
           style={logo}
         />
-        <Text style={paragraph}>Hi {candidateName},</Text>
+        <Text style={paragraph}>Hi <strong>{candidateName}</strong>,</Text>
         <Text style={paragraph}>
           Great news! Your application for <strong>{jobTitle}</strong> at <strong>{companyName}</strong> was successfully submitted on {applicationDate}.
         </Text>
@@ -61,7 +61,7 @@ export const JobSuccessfullyAppliedEmail = ({
           Here are some next steps you might consider:
         </Text>
         <Text style={listContainer}>
-          • Prepare for a potential interview by researching {companyName}
+          • Prepare for a potential interview by researching <strong>{companyName}</strong>
           <br />
           • Update your profile with any additional relevant skills or experiences
           <br />
@@ -73,12 +73,12 @@ export const JobSuccessfullyAppliedEmail = ({
           </Button>
         </Section>
         <Text style={paragraph}>
-          Thank you for using Ligaye.com for your job search.
+          Thank you for using <strong>Ligaye.com</strong> for your job search.
         </Text>
         <Text style={paragraph}>
           Best regards,
           <br />
-          The Ligaye.com Team
+          The <strong>Ligaye.com</strong> Team
         </Text>
         <Hr style={hr} />
         <Text style={footer}>

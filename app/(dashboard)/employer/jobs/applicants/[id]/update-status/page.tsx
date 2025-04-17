@@ -37,7 +37,7 @@ export default async function UpdateStatusPage({ params }: UpdateStatusPageProps
         <CardHeader>
           <CardTitle>Update Application Status</CardTitle>
           <CardDescription>
-            Change the status of {applicationDetails.candidateName}'s application for {applicationDetails.jobTitle}
+            Change the status of {applicationDetails.candidateName}&apos;s application for {applicationDetails.jobTitle}
           </CardDescription>
         </CardHeader>
         <CardContent>

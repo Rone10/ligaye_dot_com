@@ -43,7 +43,7 @@ export const JobAppliedEmail = ({
           alt="Ligaye.com"
           style={logo}
         />
-        <Text style={paragraph}>Hi {employerName},</Text>
+        <Text style={paragraph}>Hi <strong>{employerName}</strong>,</Text>
         <Text style={paragraph}>
           You have received a new application for <strong>{jobTitle}</strong> from <strong>{candidateName}</strong> on {applicationDate}.
         </Text>
@@ -56,12 +56,12 @@ export const JobAppliedEmail = ({
           </Button>
         </Section>
         <Text style={paragraph}>
-          Thank you for using Ligaye.com for your recruitment needs.
+          Thank you for using <strong>Ligaye.com</strong> for your recruitment needs.
         </Text>
         <Text style={paragraph}>
           Best regards,
           <br />
-          The Ligaye.com Team
+          The <strong>Ligaye.com</strong> Team
         </Text>
         <Hr style={hr} />
         <Text style={footer}>

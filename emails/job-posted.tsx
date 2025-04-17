@@ -41,9 +41,9 @@ import {
             alt="Ligaye.com"
             style={logo}
           />
-          <Text style={paragraph}>Hi {employerName},</Text>
+          <Text style={paragraph}>Hi <strong>{employerName}</strong>,</Text>
           <Text style={paragraph}>
-            Great news! Your job posting for <strong>{jobTitle}</strong> in {jobLocation} is now live on Ligaye.com. 
+            Great news! Your job posting for <strong>{jobTitle}</strong> in <strong>{jobLocation}</strong> is now live on <strong>Ligaye.com</strong>. 
             Qualified candidates can now discover and apply to your position.
           </Text>
           <Text style={paragraph}>
@@ -55,12 +55,12 @@ import {
             </Button>
           </Section>
           <Text style={paragraph}>
-            Thank you for choosing Ligaye.com for your recruitment needs.
+            Thank you for choosing <strong>Ligaye.com</strong> for your recruitment needs.
           </Text>
           <Text style={paragraph}>
             Best regards,
             <br />
-            The Ligaye.com Team
+            The <strong>Ligaye.com</strong> Team
           </Text>
           <Hr style={hr} />
           <Text style={footer}>

@@ -31,49 +31,49 @@ const getStatusContent = (status: string, props: ApplicationStatusUpdatedEmailPr
     case 'REVIEWING':
       return {
         subject: `Your application for ${props.jobTitle} at ${props.companyName} is being reviewed`,
-        body: `Your application for ${props.jobTitle} at ${props.companyName} is now being reviewed by the hiring team. We'll update you as your application progresses.`,
+        body: `Your application for <strong>${props.jobTitle}</strong> at <strong>${props.companyName}</strong> is now being reviewed by the hiring team. We'll update you as your application progresses.`,
         buttonText: 'View Application',
       };
     case 'SHORTLISTED':
       return {
         subject: `You've been shortlisted for ${props.jobTitle} at ${props.companyName}`,
-        body: `Congratulations! Your application for ${props.jobTitle} at ${props.companyName} has been shortlisted. The hiring team was impressed with your qualifications and experience.`,
+        body: `Congratulations! Your application for <strong>${props.jobTitle}</strong> at <strong>${props.companyName}</strong> has been shortlisted. The hiring team was impressed with your qualifications and experience.`,
         buttonText: 'View Application',
       };
     case 'INTERVIEW_SCHEDULED':
       return {
         subject: `Interview scheduled for ${props.jobTitle} at ${props.companyName}`,
-        body: `Your interview for ${props.jobTitle} at ${props.companyName} has been scheduled for ${props.interviewDate || '[Date TBD]'} ${props.interviewLocation ? `at ${props.interviewLocation}` : ''}. Please confirm your availability through your dashboard.`,
+        body: `Your interview for <strong>${props.jobTitle}</strong> at <strong>${props.companyName}</strong> has been scheduled for ${props.interviewDate || '[Date TBD]'} ${props.interviewLocation ? `at <strong>${props.interviewLocation}</strong>` : ''}. Please confirm your availability through your dashboard.`,
         buttonText: 'Confirm Interview',
       };
     case 'INTERVIEWED':
       return {
         subject: `Thank you for interviewing for ${props.jobTitle} at ${props.companyName}`,
-        body: `Thank you for completing your interview for the ${props.jobTitle} position at ${props.companyName}. The hiring team is currently evaluating all candidates and will provide an update soon.`,
+        body: `Thank you for completing your interview for the <strong>${props.jobTitle}</strong> position at <strong>${props.companyName}</strong>. The hiring team is currently evaluating all candidates and will provide an update soon.`,
         buttonText: 'View Application',
       };
     case 'OFFER_EXTENDED':
       return {
         subject: `Job offer for ${props.jobTitle} at ${props.companyName}`,
-        body: `Congratulations! We're pleased to inform you that ${props.companyName} would like to offer you the ${props.jobTitle} position. Please check your dashboard for more details and next steps.`,
+        body: `Congratulations! We're pleased to inform you that <strong>${props.companyName}</strong> would like to offer you the <strong>${props.jobTitle}</strong> position. Please check your dashboard for more details and next steps.`,
         buttonText: 'View Offer Details',
       };
     case 'HIRED':
       return {
         subject: `Welcome to ${props.companyName}!`,
-        body: `Congratulations! Your hiring process for ${props.jobTitle} at ${props.companyName} is complete. We're excited to welcome you to the team. Please check your dashboard for onboarding details.`,
+        body: `Congratulations! Your hiring process for <strong>${props.jobTitle}</strong> at <strong>${props.companyName}</strong> is complete. We're excited to welcome you to the team. Please check your dashboard for onboarding details.`,
         buttonText: 'View Onboarding Details',
       };
     case 'REJECTED':
       return {
         subject: `Update on your application for ${props.jobTitle} at ${props.companyName}`,
-        body: `Thank you for your interest in the ${props.jobTitle} position at ${props.companyName}. After careful consideration, the hiring team has decided to pursue other candidates whose qualifications more closely match their current needs. We appreciate your time and encourage you to apply for future positions that match your skills and experience.`,
+        body: `Thank you for your interest in the <strong>${props.jobTitle}</strong> position at <strong>${props.companyName}</strong>. After careful consideration, the hiring team has decided to pursue other candidates whose qualifications more closely match their current needs. We appreciate your time and encourage you to apply for future positions that match your skills and experience.`,
         buttonText: 'Explore Other Jobs',
       };
     default:
       return {
         subject: `Update on your application for ${props.jobTitle} at ${props.companyName}`,
-        body: `There has been an update to your application for ${props.jobTitle} at ${props.companyName}. Please check your dashboard for more details.`,
+        body: `There has been an update to your application for <strong>${props.jobTitle}</strong> at <strong>${props.companyName}</strong>. Please check your dashboard for more details.`,
         buttonText: 'View Application',
       };
   }
@@ -96,10 +96,8 @@ export const ApplicationStatusUpdatedEmail = (props: ApplicationStatusUpdatedEma
             alt="Ligaye.com"
             style={logo}
           />
-          <Text style={paragraph}>Hi {candidateName},</Text>
-          <Text style={paragraph}>
-            {statusContent.body}
-          </Text>
+          <Text style={paragraph}>Hi <strong>{candidateName}</strong>,</Text>
+          <Text style={paragraph} dangerouslySetInnerHTML={{ __html: statusContent.body }} />
 
           {additionalNotes && (
             <Text style={paragraph}>
@@ -119,7 +117,7 @@ export const ApplicationStatusUpdatedEmail = (props: ApplicationStatusUpdatedEma
           <Text style={paragraph}>
             Best regards,
             <br />
-            The Ligaye.com Team
+            The <strong>Ligaye.com</strong> Team
           </Text>
           <Hr style={hr} />
           <Text style={footer}>
