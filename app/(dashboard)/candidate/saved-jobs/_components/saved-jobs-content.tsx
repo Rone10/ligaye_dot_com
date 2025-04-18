@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { unsaveJob } from '../_actions'
 import { formatSalary } from '../_utils/format-salary'
 import { SavedJob } from '../_utils/types'
+import { formatJobType, formatWorkLocation } from '@/app/(dashboard)/candidate/applications/_utils/formatters'
 
 interface SavedJobsContentProps {
   savedJobs: SavedJob[]
@@ -75,8 +76,8 @@ export function SavedJobsContent({ savedJobs }: SavedJobsContentProps) {
                 {formatSalary(item.job)}
               </p>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="outline">{item.job.jobType}</Badge>
-                <Badge variant="outline">{item.job.workLocation}</Badge>
+                <Badge variant="outline">{formatJobType(item.job.jobType)}</Badge>
+                <Badge variant="outline">{formatWorkLocation(item.job.workLocation)}</Badge>
                 {item.job.experienceLevel && (
                   <Badge variant="outline">{item.job.experienceLevel}</Badge>
                 )}
