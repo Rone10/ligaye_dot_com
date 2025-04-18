@@ -7,9 +7,9 @@ import { getUser } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
 
 /**
- * Fetches saved jobs for a specific user profile ID (uncached version)
+ * Fetches saved jobs for a specific user profile ID (uncached version) - Reverted name
  */
-export async function getSavedJobsForProfile(profileId: string) {
+export async function getSavedJobsForProfile(profileId: string) { // Reverted name
   try {
     // Get saved jobs with job and employer details
     const results = await db()
@@ -37,7 +37,7 @@ export async function getSavedJobsForProfile(profileId: string) {
         },
         employer: {
           id: employerProfiles.id,
-          companyName: employerProfiles.companyName, 
+          companyName: employerProfiles.companyName,
           companyLogoUrl: employerProfiles.companyLogoUrl
         }
       })
@@ -45,14 +45,14 @@ export async function getSavedJobsForProfile(profileId: string) {
       .innerJoin(jobs, eq(savedJobs.jobId, jobs.id))
       .innerJoin(employerProfiles, eq(jobs.companyId, employerProfiles.id))
       .where(and(
-        eq(savedJobs.userId, profileId),
+        eq(savedJobs.userId, profileId), // Reverted to use profileId
         eq(savedJobs.deleted, false),
         not(eq(jobs.status, 'DELETED')),
         not(eq(jobs.status, 'EXPIRED')),
         not(eq(jobs.status, 'DRAFT'))
       ))
       .orderBy(desc(savedJobs.createdAt))
-    
+
     return { data: results, error: null }
   } catch (error) {
     console.error('Error fetching saved jobs:', error)
@@ -64,12 +64,12 @@ export async function getSavedJobsForProfile(profileId: string) {
  * Cached version of saved jobs query
  */
 const getSavedJobsCached = unstable_cache(
-  async (profileId: string) => {
-    return getSavedJobsForProfile(profileId)
+  async (profileId: string) => { // Reverted parameter name
+    return getSavedJobsForProfile(profileId) // Reverted function call
   },
-  ['saved-jobs'],
+  ['saved-jobs'], // Reverted cache key
   {
-    tags: ['saved-jobs']
+    tags: ['saved-jobs'] // Tag remains the same
   }
 )
 
@@ -79,13 +79,14 @@ const getSavedJobsCached = unstable_cache(
  */
 export async function getSavedJobs() {
   const user = await getUser()
-  
+
   if (!user) {
-    throw new Error('User not authenticated')
+    // Throw error as per original logic, page should handle this boundary
+    throw new Error('User not authenticated') 
   }
-  
+
   try {
-    // Find user's profile
+    // Restore logic to find user's profile first
     const userProfile = await db()
       .select({
         id: profiles.id
@@ -94,12 +95,13 @@ export async function getSavedJobs() {
       .where(eq(profiles.userId, user.id))
       .limit(1)
       .then(res => res[0])
-    
+      
     if (!userProfile) {
-      return { data: [], error: null }
+      // If profile not found, return empty array (no saved jobs)
+      return { data: [], error: null } 
     }
     
-    // Use the cached function with profile ID
+    // Use the cached function with the found profile ID
     return getSavedJobsCached(userProfile.id)
   } catch (error) {
     console.error('Error in getSavedJobs:', error)
@@ -108,9 +110,9 @@ export async function getSavedJobs() {
 }
 
 /**
- * Checks if a job is saved for a specific profile ID (uncached version)
+ * Checks if a job is saved for a specific profile ID (uncached version) - Reverted name
  */
-export async function isJobSavedForProfile(jobId: string, profileId: string) {
+export async function isJobSavedForProfile(jobId: string, profileId: string) { // Reverted name
   try {
     // Check if job is saved
     const result = await db()
@@ -118,12 +120,12 @@ export async function isJobSavedForProfile(jobId: string, profileId: string) {
       .from(savedJobs)
       .where(and(
         eq(savedJobs.jobId, jobId),
-        eq(savedJobs.userId, profileId),
+        eq(savedJobs.userId, profileId), // Reverted to use profileId
         eq(savedJobs.deleted, false)
       ))
       .limit(1)
       .then(res => res[0])
-    
+
     return { isSaved: Boolean(result), error: null }
   } catch (error) {
     console.error('Error checking if job is saved:', error)
@@ -135,12 +137,12 @@ export async function isJobSavedForProfile(jobId: string, profileId: string) {
  * Cached version of job saved check
  */
 const isJobSavedCached = unstable_cache(
-  async (jobId: string, profileId: string) => {
-    return isJobSavedForProfile(jobId, profileId)
+  async (jobId: string, profileId: string) => { // Reverted parameter name
+    return isJobSavedForProfile(jobId, profileId) // Reverted function call
   },
-  ['job-saved-check'],
+  ['job-saved-check'], // Reverted cache key
   {
-    tags: ['saved-jobs']
+    tags: ['saved-jobs'] // Tag remains the same
   }
 )
 
@@ -150,13 +152,13 @@ const isJobSavedCached = unstable_cache(
  */
 export async function isJobSaved(jobId: string) {
   const user = await getUser()
-  
+
   if (!user) {
     return { isSaved: false, error: 'User not authenticated' }
   }
-  
+
   try {
-    // Find user's profile
+    // Restore logic to find user's profile first
     const userProfile = await db()
       .select({
         id: profiles.id
@@ -165,12 +167,13 @@ export async function isJobSaved(jobId: string) {
       .where(eq(profiles.userId, user.id))
       .limit(1)
       .then(res => res[0])
-    
+      
     if (!userProfile) {
-      return { isSaved: false, error: null }
+      // If profile doesn't exist, job cannot be saved for them
+      return { isSaved: false, error: null } 
     }
     
-    // Use the cached function with job ID and profile ID
+    // Use the cached function with job ID and found profile ID
     return isJobSavedCached(jobId, userProfile.id)
   } catch (error) {
     console.error('Error in isJobSaved:', error)

@@ -17,7 +17,7 @@ export async function saveJob(jobId: string) {
   }
   
   try {
-    // Find user's profile
+    // Restore userProfile lookup
     const userProfile = await db()
       .select({
         id: profiles.id
@@ -26,18 +26,18 @@ export async function saveJob(jobId: string) {
       .where(eq(profiles.userId, user.id))
       .limit(1)
       .then(res => res[0])
-    
+      
     if (!userProfile) {
       return { success: false, error: 'User profile not found' }
     }
-    
-    // Check if the job is already saved
+
+    // Check if the job is already saved using the profile ID
     const existingSavedJob = await db()
       .select({ id: savedJobs.jobId })
       .from(savedJobs)
       .where(and(
         eq(savedJobs.jobId, jobId),
-        eq(savedJobs.userId, userProfile.id)
+        eq(savedJobs.userId, userProfile.id) // Use profile ID
       ))
       .limit(1)
       .then(res => res[0])
@@ -49,15 +49,15 @@ export async function saveJob(jobId: string) {
         .set({ deleted: false })
         .where(and(
           eq(savedJobs.jobId, jobId),
-          eq(savedJobs.userId, userProfile.id)
+          eq(savedJobs.userId, userProfile.id) // Use profile ID
         ))
     } else {
-      // Otherwise, create a new saved job entry
+      // Otherwise, create a new saved job entry using profile ID
       await db()
         .insert(savedJobs)
         .values({
           jobId,
-          userId: userProfile.id,
+          userId: userProfile.id, // Use profile ID
           deleted: false
         })
     }
@@ -84,7 +84,7 @@ export async function unsaveJob(jobId: string) {
   }
   
   try {
-    // Find user's profile
+    // Restore userProfile lookup
     const userProfile = await db()
       .select({
         id: profiles.id
@@ -93,18 +93,18 @@ export async function unsaveJob(jobId: string) {
       .where(eq(profiles.userId, user.id))
       .limit(1)
       .then(res => res[0])
-    
+      
     if (!userProfile) {
       return { success: false, error: 'User profile not found' }
     }
-    
-    // Soft delete the saved job by setting deleted to true
+
+    // Soft delete the saved job by setting deleted to true using profile ID
     await db()
       .update(savedJobs)
       .set({ deleted: true })
       .where(and(
         eq(savedJobs.jobId, jobId),
-        eq(savedJobs.userId, userProfile.id)
+        eq(savedJobs.userId, userProfile.id) // Use profile ID
       ))
     
     // Revalidate cached data
