@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { getUser } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { savedJobs, profiles } from '@/lib/db/schema';
@@ -74,6 +74,8 @@ export async function toggleSaveJob(jobId: string) {
     
     // Revalidate jobs page to show updated save state
     revalidatePath('/jobs');
+    revalidatePath('/candidate/saved-jobs')
+    revalidateTag('saved-jobs')
     return { success: true };
   } catch (error) {
     console.error('Error toggling job save:', error);

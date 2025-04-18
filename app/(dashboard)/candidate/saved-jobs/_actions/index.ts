@@ -109,6 +109,7 @@ export async function unsaveJob(jobId: string) {
     
     // Revalidate cached data
     revalidatePath('/candidate/saved-jobs')
+    revalidatePath('/jobs')
     revalidateTag('saved-jobs')
     
     return { success: true, error: null }
