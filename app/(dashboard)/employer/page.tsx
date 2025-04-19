@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getEmployerDashboardData } from './_actions';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -44,7 +45,7 @@ export default async function EmployerDashboard() {
     );
   }
 
-  const { statsData, recentJobs, userName } = data;
+  const { statsData, recentJobs, recentApplications, userName } = data;
   
   const stats = [
     { 
@@ -143,25 +144,40 @@ export default async function EmployerDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Placeholder for now - requires applications data */}
             <div className="space-y-2">
-              <div className="text-center text-muted-foreground py-4">
-                Application data coming soon.
-              </div>
-              {[/* Placeholder: Add application list here when data is available */].map((_, i) => (
-                <div key={i} className="flex items-center gap-4 rounded-lg border p-3">
-                  <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                    <UsersIcon className="h-5 w-5 text-gray-600" />
+              {recentApplications && recentApplications.length > 0 ? (
+                recentApplications.map((app) => (
+                  <div key={app.applicationId} className="flex items-center gap-4 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+                    <Avatar className="h-10 w-10 border">
+                      <AvatarImage src={app.candidateAvatarUrl ?? undefined} alt={app.candidateName ?? 'Candidate'} />
+                      <AvatarFallback>
+                        <UsersIcon className="h-5 w-5 text-gray-500" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <Link href={`/employer/jobs/applicants/${app.applicationId}`}>
+                        <p className="text-sm font-medium truncate">{app.candidateName ?? 'Unknown Candidate'}</p>
+                      </Link>
+                      <p className="text-xs text-muted-foreground">
+                        Applied for{' '}
+                        <Link href={`/employer/jobs/${app.jobId}`} className="hover:underline font-medium">
+                          {app.jobTitle}
+                        </Link>{' '}
+                        {app.appliedAt ? formatDistanceToNow(app.appliedAt, { addSuffix: true }) : ''}
+                      </p>
+                    </div>
+                    <Link href={`/employer/jobs/applicants/${app.applicationId}`}>
+                      <Button variant="ghost" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </Link>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Candidate {i + 1}</p>
-                    <p className="text-xs text-muted-foreground">Applied for Software Engineer</p>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    View
-                  </Button>
+                ))
+              ) : (
+                <div className="text-center text-muted-foreground py-8">
+                  No recent applications found.
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -193,8 +209,8 @@ export default async function EmployerDashboard() {
                       {job.status}
                     </Badge>
                     <Link href={`/employer/jobs/${job.id}/edit`}>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
+                      <Button variant="outline" size="sm">
+                        Edit
                       </Button>
                     </Link>
                   </div>

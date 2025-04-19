@@ -1,9 +1,13 @@
+'use server'
+
 import { db } from '@/lib/db';
 import { and, eq, sql, count } from 'drizzle-orm';
-import { Job, jobs, applications } from '@/lib/db/schema';
+import { Job, jobs, applications, candidateProfiles, profiles } from '@/lib/db/schema';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { getUser } from '@/lib/supabase/server';
 import { unstable_cache } from 'next/cache';
+import { alias } from 'drizzle-orm/pg-core';
+import { desc } from 'drizzle-orm';
 
 /**
  * Fetches statistics for the employer dashboard based on company ID.
@@ -54,11 +58,35 @@ async function getEmployerDashboardStatsData(companyId: string) {
  */
 export const getEmployerDashboardStats = unstable_cache(
   async (companyId: string) => {
-    return getEmployerDashboardStatsData(companyId);
+    console.log(`Fetching dashboard stats for company: ${companyId}`);
+    // Add proper error handling if needed
+    const activeJobsCount = await db()
+      .select({ count: jobs.id })
+      .from(jobs)
+      .where(and(eq(jobs.companyId, companyId), eq(jobs.status, 'ACTIVE')));
+
+    // Placeholder for total applicants - Requires joining applications table
+    // For now, let's count distinct candidates who applied to this company's jobs
+     const totalApplicantsCountResult = await db()
+      .selectDistinct({ candidateProfileId: applications.candidateProfileId })
+      .from(applications)
+      .innerJoin(jobs, eq(applications.jobId, jobs.id))
+      .where(and(eq(jobs.companyId, companyId), eq(applications.deleted, false), eq(jobs.status, 'ACTIVE'))) // Count applications for active jobs? Or all jobs? Let's do active for now.
+      .then(res => res.length);
+
+    // TODO: Implement actual expiring jobs count logic here later
+    // const expiringJobsCount = await db()...select()...where(jobs.expiresAt...)
+
+    return {
+      activeJobs: activeJobsCount[0]?.count ?? 0,
+      totalApplicants: totalApplicantsCountResult ?? 0, // Use the counted result
+      expiringJobs: 0, // Placeholder value
+    };
   },
-  ['employer-dashboard-stats'],
+  ['employer-dashboard-stats'], // Cache key parts
   {
-    tags: ['employer-dashboard', 'employer-jobs', 'employer-applications'],
+    revalidate: 60 * 5, // Revalidate every 5 minutes
+    tags: ['employer-dashboard', 'employer-jobs', 'employer-applications'], // Cache tags
   }
 );
 
@@ -81,10 +109,73 @@ async function getRecentEmployerJobsData(companyId: string): Promise<Job[]> {
  */
 export const getRecentEmployerJobs = unstable_cache(
   async (companyId: string) => {
-    return getRecentEmployerJobsData(companyId);
+    console.log(`Fetching recent jobs for company: ${companyId}`);
+    // Add proper error handling
+    const recentJobs = await db()
+      .select({
+        id: jobs.id,
+        title: jobs.title,
+        status: jobs.status,
+        createdAt: jobs.createdAt,
+      })
+      .from(jobs)
+      .where(and(eq(jobs.companyId, companyId), eq(jobs.status, 'ACTIVE'))) // Ensure not deleted
+      .orderBy(desc(jobs.createdAt))
+      .limit(5);
+
+    // Map status to be uppercase for display consistency if needed, schema uses uppercase enums already
+    // return recentJobs.map(job => ({ ...job, status: job.status.toUpperCase() }));
+    return recentJobs;
   },
-  ['employer-recent-jobs'],
+  ['employer-recent-jobs'], // Cache key parts
   {
-    tags: ['employer-dashboard', 'employer-jobs'],
+    revalidate: 60 * 5, // Revalidate every 5 minutes
+    tags: ['employer-dashboard', 'employer-jobs'], // Cache tags
   }
-); 
+);
+
+// --- NEW: Recent Applications Query ---
+export const getRecentApplicationsForEmployer = unstable_cache(
+  async (companyId: string) => {
+    console.log(`Fetching recent applications for company: ${companyId}`);
+
+    const candidateBaseProfile = alias(profiles, 'candidateBaseProfile');
+
+    const recentApplications = await db()
+      .select({
+        applicationId: applications.id,
+        appliedAt: applications.appliedAt,
+        jobId: jobs.id,
+        jobTitle: jobs.title,
+        candidateProfileId: candidateProfiles.id,
+        candidateName: candidateBaseProfile.fullName,
+        candidateAvatarUrl: candidateBaseProfile.avatarUrl, // Fetch avatar URL
+      })
+      .from(applications)
+      .innerJoin(jobs, eq(applications.jobId, jobs.id))
+      .innerJoin(candidateProfiles, eq(applications.candidateProfileId, candidateProfiles.id))
+      .innerJoin(candidateBaseProfile, eq(candidateProfiles.profileId, candidateBaseProfile.id))
+      .where(
+        and(
+          eq(jobs.companyId, companyId), // Filter by employer's company ID
+          eq(applications.deleted, false), // Ensure application not deleted
+          eq(jobs.status, 'ACTIVE'),         // Ensure job not deleted
+          eq(candidateProfiles.deleted, false), // Ensure candidate profile not deleted
+          eq(candidateBaseProfile.deleted, false) // Ensure base profile not deleted
+        )
+      )
+      .orderBy(desc(applications.appliedAt))
+      .limit(5);
+
+    return recentApplications;
+  },
+  ['employer-recent-applications'], // Cache key parts
+  {
+    revalidate: 60 * 2, // Revalidate applications more frequently (e.g., every 2 minutes)
+    tags: ['employer-dashboard', 'employer-applications'], // Cache tags
+  }
+);
+
+// Type definition for the data returned by getRecentApplicationsForEmployer
+// export type RecentApplicationData = Awaited<ReturnType<typeof getRecentApplicationsForEmployer>>[number];
+// Using ReturnType directly might be simpler in the component/action 

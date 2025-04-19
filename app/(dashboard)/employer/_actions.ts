@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { getUser } from '@/lib/supabase/server';
-import { getEmployerDashboardStats, getRecentEmployerJobs } from './_queries';
+import { getEmployerDashboardStats, getRecentEmployerJobs, getRecentApplicationsForEmployer } from './_queries';
 import { employerProfiles, profiles } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 
@@ -43,15 +43,17 @@ export async function getEmployerDashboardData() {
     const companyId = employerProfileResult.employerProfileId;
 
     // Fetch stats and recent jobs using the companyId
-    const [statsData, recentJobs] = await Promise.all([
+    const [statsData, recentJobs, recentApplications] = await Promise.all([
       getEmployerDashboardStats(companyId),
-      getRecentEmployerJobs(companyId)
+      getRecentEmployerJobs(companyId),
+      getRecentApplicationsForEmployer(companyId)
     ]);
 
     return {
       data: {
         statsData,
         recentJobs,
+        recentApplications,
         userName: user?.user_metadata?.first_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Employer',
       },
       error: null
