@@ -24,6 +24,7 @@ interface Application {
   status: string
   appliedAt: string | Date
   candidateProfileId: string
+  candidateName?: string | null
 }
 
 interface ApplicationsSummaryProps {
@@ -146,14 +147,16 @@ export default function ApplicationsSummary({
                           <Users className="h-5 w-5" />
                         </div>
                         <div>
-                          <div className="font-medium">Candidate {application.candidateProfileId.slice(0, 8)}...</div>
+                          <Link href={`/employer/jobs/applicants/${application.id}`} className="font-medium hover:underline">
+                            {application.candidateName || `Candidate ${application.candidateProfileId.slice(0, 8)}...`}
+                          </Link>
                           <div className="text-sm text-gray-500 flex items-center">
                             <Clock3 className="mr-1 h-3 w-3" />
                             {formatRelativeTime(application.appliedAt)}
                           </div>
                         </div>
                       </div>
-                      <Badge variant="outline" className={statusInfo.color}>
+                      <Badge variant="secondary" className={statusInfo.color}>
                         {statusInfo.label}
                       </Badge>
                     </div>

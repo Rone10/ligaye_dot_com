@@ -10,9 +10,11 @@ import {
   skills,
   industries,
   locations,
-  applications
+  applications,
+  candidateProfiles
 } from '@/lib/db/schema'
 import { eq, and, isNull, not, count, desc } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import type { Job } from '@/lib/db/schema'
 import { unstable_cache } from 'next/cache'
 
@@ -255,17 +257,25 @@ export async function getApplicationStats(jobId: string) {
  */
 export async function getRecentApplicationsData(jobId: string, limit = 5) {
   try {
+    // Alias profiles table to avoid conflict
+    const candidateBaseProfile = alias(profiles, 'candidateBaseProfile');
+
     const result = await db()
       .select({
         id: applications.id,
         status: applications.status,
         appliedAt: applications.appliedAt,
         candidateProfileId: applications.candidateProfileId,
+        candidateName: candidateBaseProfile.fullName
       })
       .from(applications)
+      .innerJoin(candidateProfiles, eq(applications.candidateProfileId, candidateProfiles.id))
+      .innerJoin(candidateBaseProfile, eq(candidateProfiles.profileId, candidateBaseProfile.id))
       .where(and(
         eq(applications.jobId, jobId),
-        eq(applications.deleted, false)
+        eq(applications.deleted, false),
+        eq(candidateProfiles.deleted, false),
+        eq(candidateBaseProfile.deleted, false)
       ))
       .orderBy(desc(applications.appliedAt))
       .limit(limit)
