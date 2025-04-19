@@ -61,25 +61,26 @@ export const getEmployerDashboardStats = unstable_cache(
     console.log(`Fetching dashboard stats for company: ${companyId}`);
     // Add proper error handling if needed
     const activeJobsCount = await db()
-      .select({ count: jobs.id })
+      .select({ count: count() })
       .from(jobs)
       .where(and(eq(jobs.companyId, companyId), eq(jobs.status, 'ACTIVE')));
 
-    // Placeholder for total applicants - Requires joining applications table
-    // For now, let's count distinct candidates who applied to this company's jobs
-     const totalApplicantsCountResult = await db()
-      .selectDistinct({ candidateProfileId: applications.candidateProfileId })
+    // Correctly count total non-deleted applications for this employer's jobs
+    const totalApplicationsCountResult = await db()
+      .select({ count: count() })
       .from(applications)
       .innerJoin(jobs, eq(applications.jobId, jobs.id))
-      .where(and(eq(jobs.companyId, companyId), eq(applications.deleted, false), eq(jobs.status, 'ACTIVE'))) // Count applications for active jobs? Or all jobs? Let's do active for now.
-      .then(res => res.length);
+      .where(and(
+        eq(jobs.companyId, companyId), // Jobs belonging to the employer
+        eq(applications.deleted, false) // Only count non-deleted applications
+      ));
 
     // TODO: Implement actual expiring jobs count logic here later
     // const expiringJobsCount = await db()...select()...where(jobs.expiresAt...)
 
     return {
       activeJobs: activeJobsCount[0]?.count ?? 0,
-      totalApplicants: totalApplicantsCountResult ?? 0, // Use the counted result
+      totalApplicants: totalApplicationsCountResult[0]?.count ?? 0, // Use the correct application count
       expiringJobs: 0, // Placeholder value
     };
   },
