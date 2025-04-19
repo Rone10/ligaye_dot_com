@@ -120,7 +120,7 @@ export default function JobHeader({ job, applicationsCount }: JobHeaderProps) {
       </div>
       
       <div className="flex flex-wrap items-center gap-3">
-        <Link href={`/jobs/${job.slug}`} target="_blank">
+        <Link href={`/jobs/${job.id}`} target="_blank">
           <Button variant="outline" size="sm" className="flex items-center gap-1">
             <Eye className="h-4 w-4" />
             <span>View Public</span>
