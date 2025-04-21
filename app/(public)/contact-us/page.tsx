@@ -3,7 +3,6 @@
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -17,32 +16,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Phone, MapPin } from "lucide-react";
-// import { sendContactMessage } from "./_actions"; // We will create this action later
-
-// Define Zod schema for validation
-const contactFormSchema = z.object({
-    name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-    email: z.string().email({ message: "Please enter a valid email address." }),
-    subject: z.string().min(5, { message: "Subject must be at least 5 characters." }),
-    message: z.string().min(10, { message: "Message must be at least 10 characters." }).max(1000, { message: "Message cannot exceed 1000 characters." }),
-});
-
-type ContactFormValues = z.infer<typeof contactFormSchema>;
-
-// Placeholder server action function - replace with actual import
-async function sendContactMessage(data: ContactFormValues) {
-    console.log("Simulating sending message:", data);
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // In a real scenario, you would call your backend/API here
-    // For demonstration, we'll just return success
-    return { success: true, message: "Message sent successfully!" };
-}
-
+import { contactFormSchema, type ContactFormValues } from "./_utils/validation"; // Import from utils
+import { sendContactMessage } from "./_actions"; // Import the actual server action
 
 export default function ContactUsPage() {
     const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [submitStatus, setSubmitStatus] = React.useState<{ success: boolean; message: string } | null>(null);
+    const [submitStatus, setSubmitStatus] = React.useState<{ success: boolean; message?: string; error?: string } | null>(null); // Allow error message
 
     const form = useForm<ContactFormValues>({
         resolver: zodResolver(contactFormSchema),
@@ -65,7 +44,7 @@ export default function ContactUsPage() {
             }
         } catch (error) {
             console.error("Submission error:", error);
-            setSubmitStatus({ success: false, message: "An error occurred. Please try again." });
+            setSubmitStatus({ success: false, error: "An error occurred. Please try again." });
         } finally {
             setIsSubmitting(false);
         }
@@ -161,7 +140,7 @@ export default function ContactUsPage() {
                             </Form>
                              {submitStatus && (
                                 <p className={`mt-4 text-center text-sm font-medium ${submitStatus.success ? 'text-secondary-green dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                    {submitStatus.message}
+                                    {submitStatus.success ? submitStatus.message : submitStatus.error}
                                 </p>
                             )}
                         </CardContent>
