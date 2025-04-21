@@ -1,68 +1,71 @@
 'use server'
 
-import { eq, and, not, desc, asc, sql } from 'drizzle-orm'
+import { eq, and, not, desc, asc, sql, or, inArray } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { payments, jobs, employerProfiles, profiles } from '@/lib/db/schema'
+import type { Job, EmployerProfile, Profile } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-// Get pending cash payments for admin
-export async function getPendingCashPayments(
+
+// Define the structure for the unpaid jobs list item
+export interface UnpaidJobListItem {
+  job: Pick<Job, 'id' | 'title' | 'status' | 'createdAt'>;
+  employer: Pick<EmployerProfile, 'id' | 'companyName'>;
+  employerUser: Pick<Profile, 'fullName'>;
+}
+
+// Get unpaid jobs (DRAFT or PENDING_PAYMENT)
+export async function getUnpaidJobs(
   sort: 'newest' | 'oldest' = 'newest'
-) {
-      // Verify user is admin
-      const user = await getUser()
-      if (!user) {
-        return { error: 'Unauthorized' }
-      }
-      
-    if (user.user_metadata.role !== 'admin') {
-      redirect('/sign-in')
-    }
+): Promise<{ unpaidJobs?: UnpaidJobListItem[], error?: string }> {
+  // Verify user is admin
+  const user = await getUser()
+  if (!user) {
+    return { error: 'Unauthorized' }
+  }
+  if (user.user_metadata.role !== 'admin') {
+    // Use redirect within the function for clarity
+    redirect('/sign-in'); 
+    // Although redirect throws an error, satisfy TypeScript return type
+    return { error: 'Redirecting...' }; 
+  }
+
   try {
-    // Get all pending cash payments with related job and employer information
-    const pendingPayments = await db()
+    const unpaidJobs = await db()
       .select({
-        payment: {
-          id: payments.id,
-          amount: payments.amount,
-          currency: payments.currency,
-          method: payments.method,
-          status: payments.status,
-          createdAt: payments.createdAt,
-          updatedAt: payments.updatedAt
-        },
         job: {
           id: jobs.id,
           title: jobs.title,
-          status: jobs.status
+          status: jobs.status,
+          createdAt: jobs.createdAt
         },
         employer: {
           id: employerProfiles.id,
           companyName: employerProfiles.companyName,
-          profileId: employerProfiles.profileId
+          // profileId: employerProfiles.profileId // Not needed for display
         },
         employerUser: {
           fullName: profiles.fullName
         }
       })
-      .from(payments)
-      .innerJoin(jobs, eq(payments.jobId, jobs.id))
-      .innerJoin(employerProfiles, eq(payments.employerProfileId, employerProfiles.id))
+      .from(jobs)
+      .innerJoin(employerProfiles, eq(jobs.companyId, employerProfiles.id))
       .innerJoin(profiles, eq(employerProfiles.profileId, profiles.id))
-      .where(and(
-        eq(payments.method, 'cash'),
-        eq(payments.status, 'pending'),
-        eq(jobs.status, 'PENDING_PAYMENT'),
-        eq(payments.deleted, false),
-        not(eq(jobs.status, 'DELETED'))
-      ))
-      .orderBy(sort === 'newest' ? desc(payments.createdAt) : asc(payments.createdAt))
+      .where(
+        and(
+          // Fetch jobs with status DRAFT or PENDING_PAYMENT
+          inArray(jobs.status, ['DRAFT', 'PENDING_PAYMENT']), 
+          not(eq(jobs.status, 'DELETED')), // Exclude explicitly deleted jobs
+          eq(profiles.deleted, false) // Ensure employer profile is not deleted
+        )
+      )
+      .orderBy(sort === 'newest' ? desc(jobs.createdAt) : asc(jobs.createdAt))
     
-    return { pendingPayments }
+    return { unpaidJobs }
   } catch (error) {
-    console.error('Error fetching pending cash payments:', error)
-    return { error: 'Failed to fetch pending payments' }
+    console.error('Error fetching unpaid jobs:', error)
+    return { error: 'Failed to fetch unpaid jobs' }
   }
 }
 
@@ -209,80 +212,62 @@ export async function rejectCashPayment(paymentId: string) {
   }
 }
 
-// Get payment statistics for admin dashboard
-export async function getPaymentStats() {
+// Get job payment statistics for admin dashboard
+export async function getJobPaymentStats(): Promise<{ stats?: { draft: number, pendingPayment: number, active: number }, error?: string }> {
+  // Verify user is admin
+  const user = await getUser()
+  if (!user) {
+    return { error: 'Unauthorized' }
+  }
+  const adminProfile = await db()
+    .select({ role: profiles.role }) // Select only role
+    .from(profiles)
+    .where(and(
+      eq(profiles.userId, user.id),
+      eq(profiles.deleted, false)
+    ))
+    .limit(1)
+    .then(res => res[0]); // Get first result or undefined
+
+  if (!adminProfile || adminProfile.role !== 'admin') {
+    return { error: 'Unauthorized. Admin access required.' }
+  }
+  
   try {
-    // Verify user is admin
-    const user = await getUser()
-    if (!user) {
-      return { error: 'Unauthorized' }
-    }
-    
-    const adminProfile = await db()
-      .select()
-      .from(profiles)
-      .where(and(
-        eq(profiles.userId, user.id),
-        eq(profiles.deleted, false)
-      ))
-      .limit(1)
-    
-    if (!adminProfile.length || adminProfile[0].role !== 'admin') {
-      return { error: 'Unauthorized. Admin access required.' }
-    }
-    
-    // Get payment counts by status and method
-    const [pendingCashCount, totalSucceededCount, totalFailedCount] = await Promise.all([
-      // Pending cash payments count - NOW CHECKS JOB STATUS
-      db()
-        .select({
-          count: sql<number>`count(DISTINCT ${payments.id})` // Use DISTINCT in case of potential join issues (though unlikely here)
-        })
-        .from(payments)
-        .innerJoin(jobs, eq(payments.jobId, jobs.id)) // JOIN with jobs table
-        .where(and(
-          eq(payments.method, 'cash'),
-          eq(payments.status, 'pending'),
-          eq(jobs.status, 'PENDING_PAYMENT'), // ADDED: Check job status
-          eq(payments.deleted, false),
-          not(eq(jobs.status, 'DELETED')) // Keep this check
-        ))
-        .then(result => result[0]?.count || 0),
-      
-      // Total succeeded payments count
-      db()
-        .select({
-          count: sql<number>`count(*)`
-        })
-        .from(payments)
-        .where(and(
-          eq(payments.status, 'succeeded'),
-          eq(payments.deleted, false)
-        ))
-        .then(result => result[0]?.count || 0),
-      
-      // Total failed payments count
-      db()
-        .select({
-          count: sql<number>`count(*)`
-        })
-        .from(payments)
-        .where(and(
-          eq(payments.status, 'failed'),
-          eq(payments.deleted, false)
-        ))
-        .then(result => result[0]?.count || 0)
-    ])
-    
-    return {
-      stats: {
-        pendingCash: pendingCashCount,
-        succeeded: totalSucceededCount,
-        failed: totalFailedCount
+    // Get job counts by status
+    const jobCounts = await db()
+      .select({
+        status: jobs.status,
+        count: sql<number>`count(*)`
+      })
+      .from(jobs)
+      .where(
+         // Only count relevant statuses, exclude DELETED
+         inArray(jobs.status, ['DRAFT', 'PENDING_PAYMENT', 'ACTIVE']) 
+      )
+      .groupBy(jobs.status);
+
+    // Process results into the desired structure
+    const stats = {
+      draft: 0,
+      pendingPayment: 0,
+      active: 0 // Added active count for context
+    };
+
+    for (const row of jobCounts) {
+      if (row.status === 'DRAFT') {
+        stats.draft = row.count;
+      } else if (row.status === 'PENDING_PAYMENT') {
+        stats.pendingPayment = row.count;
+      } else if (row.status === 'ACTIVE') {
+        stats.active = row.count;
       }
     }
+    
+    return { stats };
+
   } catch (error) {
-    console.error('Error fetching payment stats:', error)
-    return { error: 'Failed to fetch payment statistics' }
+    console.error('Error fetching job payment stats:', error)
+    return { error: 'Failed to fetch job payment statistics' }
   }
 } 

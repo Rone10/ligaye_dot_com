@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
-import { Clock } from 'lucide-react'
-import { getPendingCashPayments, getPaymentStats } from './_queries'
-import PaymentsTable from './_components/PaymentsTable'
+import { FileText, Clock, CheckCircle } from 'lucide-react'
+import { getUnpaidJobs, getJobPaymentStats } from './_queries'
+import UnpaidJobsTable from './_components/UnpaidJobsTable'
 import { DashboardHeader } from '@/components/dashboard/dashboard-header'
 import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,84 +11,61 @@ import { Skeleton } from '@/components/ui/skeleton'
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Payments - Admin Dashboard',
-  description: 'Review and manage payment transactions',
+  title: 'Unpaid Jobs - Admin Dashboard',
+  description: 'Review jobs awaiting payment or in draft status',
 }
 
-export default async function PaymentsPage() {
-  const paymentsResult = await getPendingCashPayments()
-  const statsResult = await getPaymentStats()
+export default async function UnpaidJobsPage() {
+  const jobsResult = await getUnpaidJobs()
+  const statsResult = await getJobPaymentStats()
   
   // Handle potential error responses
-  const payments = 'pendingPayments' in paymentsResult && paymentsResult.pendingPayments ? paymentsResult.pendingPayments : []
-  const stats = 'stats' in statsResult && statsResult.stats ? statsResult.stats : { pendingCash: 0, succeeded: 0, failed: 0 }
+  const unpaidJobs = 'unpaidJobs' in jobsResult && jobsResult.unpaidJobs ? jobsResult.unpaidJobs : []
+  const stats = 'stats' in statsResult && statsResult.stats ? statsResult.stats : { draft: 0, pendingPayment: 0, active: 0 }
   
   return (
     <DashboardShell>
       <DashboardHeader
-        heading="Payments Management"
-        description="Review and approve cash payments for job postings"
+        heading="Unpaid Jobs Management"
+        description="Review jobs that are in Draft or Pending Payment status"
       />
       
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Approval</CardTitle>
+            <CardTitle className="text-sm font-medium">Draft Jobs</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.draft}</div>
+            <p className="text-xs text-muted-foreground">
+              Jobs saved but not yet submitted for payment
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Payment</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingCash}</div>
+            <div className="text-2xl font-bold">{stats.pendingPayment}</div>
             <p className="text-xs text-muted-foreground">
-              Cash payments awaiting review
+              Jobs awaiting payment confirmation (Cash or Stripe)
             </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Approved</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
+            <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.succeeded}</div>
+            <div className="text-2xl font-bold">{stats.active}</div>
             <p className="text-xs text-muted-foreground">
-              Payments successfully processed
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="h-4 w-4 text-muted-foreground"
-            >
-              <rect width="20" height="14" x="2" y="5" rx="2" />
-              <path d="M2 10h20" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.failed}</div>
-            <p className="text-xs text-muted-foreground">
-              Payments that were declined
+              Jobs currently live on the platform
             </p>
           </CardContent>
         </Card>
@@ -97,33 +74,33 @@ export default async function PaymentsPage() {
       <Separator className="my-6" />
       
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold tracking-tight">Pending Cash Payments</h2>
-        <Suspense fallback={<PaymentsTableSkeleton />}>
-          <PaymentsTable payments={payments} />
+        <h2 className="text-xl font-semibold tracking-tight">Jobs Awaiting Payment / Activation</h2>
+        <Suspense fallback={<UnpaidJobsTableSkeleton />}>
+          <UnpaidJobsTable jobs={unpaidJobs} />
         </Suspense>
       </div>
     </DashboardShell>
   )
 }
 
-function PaymentsTableSkeleton() {
+function UnpaidJobsTableSkeleton() {
   return (
     <div className="border rounded-xl overflow-hidden shadow-sm">
       <div className="h-12 bg-muted px-4 flex items-center border-b">
-        <Skeleton className="h-4 w-[100px]" />
-        <Skeleton className="h-4 w-[100px] ml-auto" />
+        <Skeleton className="h-4 w-[200px]" />
+        <Skeleton className="h-4 w-[150px] ml-auto" />
+        <Skeleton className="h-4 w-[100px] ml-6" />
+        <Skeleton className="h-4 w-[100px] ml-6" />
       </div>
       <div className="p-4 space-y-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="flex items-center justify-between">
-            <div className="space-y-2">
+          <div key={i} className="flex items-center">
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-[300px]" />
               <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[200px]" />
             </div>
-            <div className="flex gap-2">
-              <Skeleton className="h-9 w-[90px] rounded-md" />
-              <Skeleton className="h-9 w-[90px] rounded-md" />
-            </div>
+            <Skeleton className="h-4 w-[100px] ml-6" />
+            <Skeleton className="h-4 w-[100px] ml-6" />
           </div>
         ))}
       </div>
