@@ -212,6 +212,38 @@ export async function rejectCashPayment(paymentId: string) {
   }
 }
 
+// --- NEW FUNCTION to update job status directly ---
+export async function updateJobStatusInDb(
+  jobId: string, 
+  newStatus: Job['status'] // Use indexed access type for status
+): Promise<{ success: boolean, error?: string }> {
+  try {
+    const updateData: Partial<Job> = {
+      status: newStatus,
+      updatedAt: new Date(),
+    };
+
+    // Set publishedAt only if transitioning to ACTIVE
+    if (newStatus === 'ACTIVE') {
+      updateData.publishedAt = new Date();
+    } else {
+      // Ensure publishedAt is nullified if moving away from ACTIVE
+      // This might need adjustment based on exact requirements for reactivation
+      updateData.publishedAt = null; 
+    }
+
+    await db()
+      .update(jobs)
+      .set(updateData)
+      .where(eq(jobs.id, jobId));
+      
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating job status in DB:', error);
+    return { success: false, error: 'Database error updating job status.' };
+  }
+}
+
 // Get job payment statistics for admin dashboard
 export async function getJobPaymentStats(): Promise<{ stats?: { draft: number, pendingPayment: number, active: number }, error?: string }> {
   // Verify user is admin
