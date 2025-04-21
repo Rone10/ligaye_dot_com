@@ -107,7 +107,9 @@ export default function UsersTable({ users }: UsersTableProps) {
                         <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-medium">{user.fullName}</div>
+                        <Link href={`/users/${user.id}`} className='hover:underline'>
+                          <div className="font-medium">{user.fullName}</div>
+                        </Link>
                         <div className="text-xs text-gray-500 truncate max-w-[180px]">
                           {user.email}
                         </div>
