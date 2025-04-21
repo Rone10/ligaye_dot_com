@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, BriefcaseIcon, Building2, Search, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
 import RingLoaderSpinner from '@/components/loaders/ring-loader';
@@ -215,47 +216,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-dark text-white py-10 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-semibold mb-4">Ligaye.com</h3>
-              <p className="text-gray-300">Gambia&apos;s Premier Job Board</p>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-medium mb-3">For Job Seekers</h4>
-              <ul className="space-y-2">
-                <li><Link href="/jobs" className="text-gray-300 hover:text-white">Find Jobs</Link></li>
-                <li><Link href="/create-profile" className="text-gray-300 hover:text-white">Create Profile</Link></li>
-                <li><Link href="/job-alerts" className="text-gray-300 hover:text-white">Job Alerts</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-medium mb-3">For Employers</h4>
-              <ul className="space-y-2">
-                <li><Link href="/employer/jobs/new" className="text-gray-300 hover:text-white">Post a Job</Link></li>
-                <li><Link href="/pricing" className="text-gray-300 hover:text-white">Pricing</Link></li>
-                <li><Link href="/resources" className="text-gray-300 hover:text-white">Resources</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-medium mb-3">Contact</h4>
-              <ul className="space-y-2">
-                <li><Link href="/about" className="text-gray-300 hover:text-white">About Us</Link></li>
-                <li><Link href="/contact" className="text-gray-300 hover:text-white">Support</Link></li>
-                <li><Link href="/privacy" className="text-gray-300 hover:text-white">Privacy Policy</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; {new Date().getFullYear()} Ligaye.com. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
     </>
   );
