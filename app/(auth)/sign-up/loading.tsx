@@ -1,13 +1,9 @@
-import { Skeleton } from "@/components/ui/skeleton"
+import RingLoaderSpinner from "@/components/loaders/ring-loader";
 
- function Loading() {
+export default function Loading() {
   return (
-    <div className="flex flex-col gap-4">
-      <Skeleton className="h-10 w-full" />
-      <Skeleton className="h-10 w-full" />
-      <Skeleton className="h-10 w-full" />
-    </div>
-  )
-}
-
-export default Loading; 
+    <div className='flex justify-center items-center h-screen container mx-auto'>
+    <RingLoaderSpinner />
+  </div>
+  );
+} 
