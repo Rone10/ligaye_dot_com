@@ -1,9 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
-import { eq } from "drizzle-orm";
-import { db } from "@/lib/db";
-import { profiles } from "@/lib/db/schema";
+import AdminSidebar from "./admin/_components/AdminSidebar";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard - Ligaye.com",
@@ -25,19 +23,17 @@ export default async function AdminLayout({
   
   // Check if user is admin
   if (user.user_metadata.role !== 'admin') {
-    redirect('/sign-in');
+    redirect('/sign-in'); // Or maybe redirect to a different unauthorized page? For now, sign-in.
   }
   
+  // New layout structure with Sidebar
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 container mx-auto">
-      <div className="container mx-auto px-4 py-8">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-primary">Ligaye.com Admin Panel</h1>
-          <p className="text-gray-500">Manage users, jobs, and platform settings</p>
-        </header>
-        
-        <main>{children}</main>
-      </div>
+    <div className="h-screen container mx-auto flex overflow-hidden bg-gradient-to-br from-blue-50 to-gray-50">
+      <AdminSidebar /> 
+      <main className="flex-1 overflow-y-auto p-6 lg:px-8">
+        {/* Render children directly within the main scrollable area */}
+        {children}
+      </main>
     </div>
   );
 } 

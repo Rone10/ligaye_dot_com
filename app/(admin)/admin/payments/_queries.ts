@@ -5,31 +5,21 @@ import { db } from '@/lib/db'
 import { payments, jobs, employerProfiles, profiles } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-
+import { redirect } from 'next/navigation'
 // Get pending cash payments for admin
 export async function getPendingCashPayments(
   sort: 'newest' | 'oldest' = 'newest'
 ) {
+      // Verify user is admin
+      const user = await getUser()
+      if (!user) {
+        return { error: 'Unauthorized' }
+      }
+      
+    if (user.user_metadata.role !== 'admin') {
+      redirect('/sign-in')
+    }
   try {
-    // Verify user is admin
-    const user = await getUser()
-    if (!user) {
-      return { error: 'Unauthorized' }
-    }
-    
-    const adminProfile = await db()
-      .select()
-      .from(profiles)
-      .where(and(
-        eq(profiles.userId, user.id),
-        eq(profiles.deleted, false)
-      ))
-      .limit(1)
-    
-    if (!adminProfile.length || adminProfile[0].role !== 'admin') {
-      return { error: 'Unauthorized. Admin access required.' }
-    }
-    
     // Get all pending cash payments with related job and employer information
     const pendingPayments = await db()
       .select({
