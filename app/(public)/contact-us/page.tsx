@@ -62,7 +62,7 @@ export default function ContactUsPage() {
                         Get In Touch
                     </h1>
                     <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
-                        Have questions or want to collaborate? Send us a message, and we'll get back to you soon.
+                        Have questions or want to collaborate? Send us a message, and we&apos;ll get back to you soon.
                     </p>
                 </section>
 
