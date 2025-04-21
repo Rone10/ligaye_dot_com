@@ -233,16 +233,19 @@ export async function getPaymentStats() {
     
     // Get payment counts by status and method
     const [pendingCashCount, totalSucceededCount, totalFailedCount] = await Promise.all([
-      // Pending cash payments count
+      // Pending cash payments count - NOW CHECKS JOB STATUS
       db()
         .select({
-          count: sql<number>`count(*)`
+          count: sql<number>`count(DISTINCT ${payments.id})` // Use DISTINCT in case of potential join issues (though unlikely here)
         })
         .from(payments)
+        .innerJoin(jobs, eq(payments.jobId, jobs.id)) // JOIN with jobs table
         .where(and(
           eq(payments.method, 'cash'),
           eq(payments.status, 'pending'),
-          eq(payments.deleted, false)
+          eq(jobs.status, 'PENDING_PAYMENT'), // ADDED: Check job status
+          eq(payments.deleted, false),
+          not(eq(jobs.status, 'DELETED')) // Keep this check
         ))
         .then(result => result[0]?.count || 0),
       
