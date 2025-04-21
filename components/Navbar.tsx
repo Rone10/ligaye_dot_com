@@ -63,14 +63,14 @@ export default function Navbar({ user }: NavbarProps) {
             <Link href="/jobs" className="text-gray-dark hover:text-dark transition-colors font-medium">
               Find Jobs
             </Link>
-            <Link href="/companies" className="text-gray-dark hover:text-dark transition-colors font-medium">
-              Companies
-            </Link>
             <Link href="/tenders" className="text-gray-dark hover:text-dark transition-colors font-medium">
               Tenders
             </Link>
-            <Link href="/pricing" className="text-gray-dark hover:text-dark transition-colors font-medium">
-              Pricing
+            <Link href="/about-us" className="text-gray-dark hover:text-dark transition-colors font-medium">
+              About Us
+            </Link>
+            <Link href="/contact-us" className="text-gray-dark hover:text-dark transition-colors font-medium">
+              Contact Us
             </Link>
           </div>
         </nav>
