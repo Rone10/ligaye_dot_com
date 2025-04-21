@@ -19,19 +19,9 @@ export default async function AdminDashboardLayout({
   }
   
   // Check if user has admin role
-  const profile = await db()
-    .select()
-    .from(profiles)
-    .where(and(
-      eq(profiles.userId, user.id),
-      eq(profiles.deleted, false)
-    ))
-    .limit(1)
-    .then(res => res[0])
-  
-  if (!profile || profile.role !== 'admin') {
-    redirect('/sign-in')
-  }
+ if (user.user_metadata.role !== 'admin') {
+  redirect('/sign-in')
+ }
   
   return (
     <div className="h-screen flex overflow-hidden bg-gradient-to-br from-blue-50 to-gray-50">
