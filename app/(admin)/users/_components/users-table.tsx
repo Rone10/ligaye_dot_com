@@ -109,7 +109,7 @@ export default function UsersTable({ users }: UsersTableProps) {
                       <div>
                         <div className="font-medium">{user.fullName}</div>
                         <div className="text-xs text-gray-500 truncate max-w-[180px]">
-                          {user.userId}
+                          {user.email}
                         </div>
                       </div>
                     </div>

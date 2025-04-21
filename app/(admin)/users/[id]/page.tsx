@@ -44,7 +44,7 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
   
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center container mx-auto">
         <div>
           <div className="mb-3">
             <Link href="/users">

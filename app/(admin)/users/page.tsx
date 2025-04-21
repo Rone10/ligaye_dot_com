@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 export default async function UsersPage() {
   // Fetch all users
   const users = await getAllUsers();
+
+  console.log('users', users)
   
   // Count total, active, and deleted users
   const totalUsers = users.length;

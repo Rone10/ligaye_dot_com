@@ -23,24 +23,13 @@ export default async function AdminLayout({
     redirect('/sign-in');
   }
   
-  // Check if user has a profile
-  const profile = await db()
-    .select()
-    .from(profiles)
-    .where(eq(profiles.userId, user.id))
-    .limit(1)
-    .then(res => res[0]);
-  
-  if (!profile) {
+  // Check if user is admin
+  if (user.user_metadata.role !== 'admin') {
     redirect('/sign-in');
   }
   
-  if (profile.role !== 'admin') {
-    redirect('/dashboard');
-  }
-  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 container mx-auto">
       <div className="container mx-auto px-4 py-8">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-primary">Ligaye.com Admin Panel</h1>
