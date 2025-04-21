@@ -51,6 +51,7 @@ export async function signInUser(formData: FormData): Promise<SignInActionResult
       }
     }
     authUser = authData.user
+    // console.log('authUser', authUser)
   } catch (error) {
     if (error instanceof z.ZodError) {
       const fieldErrors: { [key: string]: string[] } = {}
@@ -115,6 +116,8 @@ export async function signInUser(formData: FormData): Promise<SignInActionResult
           where: eq(employerProfiles.profileId, profileId),
         });
         redirectPath = existingSpecificProfile ? '/employer' : '/employer/profile';
+      } else if (userRole === 'admin') {
+        redirectPath = '/users'
       } else {
         console.warn(`Unknown role ('${userRole}') found for userId: ${userId}. Redirecting to home.`);
         redirectPath = '/'

@@ -32,9 +32,7 @@ export default function LandingPage() {
   }, []);
 
   if (loading) {
-    // TODO: Add a loading spinner
 
-    
     return <div className='flex justify-center items-center h-screen container mx-auto'>
       <RingLoaderSpinner />
     </div>;

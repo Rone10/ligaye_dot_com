@@ -14,7 +14,7 @@ export default async function CandidateDashboardLayout({
   }
 
   // only allow candidate or admin to access this page
-  if (user.user_metadata.role !== 'candidate' && user.user_metadata.role !== 'admin') {
+  if (user.user_metadata.role !== 'candidate') {
     redirect('/sign-in')
   }
   
