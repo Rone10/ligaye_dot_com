@@ -12,6 +12,11 @@ export default async function CandidateDashboardLayout({
   if (!user) {
     redirect('/sign-in')
   }
+
+  // only allow candidate or admin to access this page
+  if (user.user_metadata.role !== 'candidate' && user.user_metadata.role !== 'admin') {
+    redirect('/sign-in')
+  }
   
   return (
     <div className="h-screen flex overflow-hidden bg-gradient-to-br from-[#e9efff] to-[#f4f7ff]">

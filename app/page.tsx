@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import Navbar from '@/components/Navbar';
 import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
+import RingLoaderSpinner from '@/components/loaders/ring-loader';
+
 export default function LandingPage() {
   const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -33,7 +35,9 @@ export default function LandingPage() {
     // TODO: Add a loading spinner
 
     
-    return <div className='flex justify-center items-center h-screen container mx-auto'>Loading...</div>;
+    return <div className='flex justify-center items-center h-screen container mx-auto'>
+      <RingLoaderSpinner />
+    </div>;
   }
 
   return (
