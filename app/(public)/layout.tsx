@@ -20,14 +20,12 @@ export default async function RootLayout({
 }>) {
   const user = await getUser();
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen flex flex-col`}>
-        <Navbar user={user} />
-        {children}
-        {/* <NuqsAdapter>{children}</NuqsAdapter>
-        <Toaster  position="top-right" richColors /> */}
-        <Footer />
-      </body>
-    </html>
+    <>
+      <Navbar user={user} />
+      {children}
+      {/* <NuqsAdapter>{children}</NuqsAdapter>
+      <Toaster  position="top-right" richColors /> */}
+      <Footer />
+    </>
   );
 }
