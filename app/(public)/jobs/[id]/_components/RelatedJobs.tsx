@@ -8,6 +8,7 @@ interface RelatedJobsProps {
 }
 
 export default function RelatedJobs({ relatedJobs }: RelatedJobsProps) {
+  console.log('relatedJobs', relatedJobs)
   if (!relatedJobs || relatedJobs.length === 0) {
     return (
       <Card className="overflow-hidden shadow-[0_8px_32px_rgba(31,38,135,0.1)] bg-background/80 backdrop-blur-md border-[rgba(255,255,255,0.3)] rounded-2xl">

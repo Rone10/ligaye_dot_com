@@ -1,4 +1,4 @@
-import { eq, and, gte } from 'drizzle-orm';
+import { eq, and, gte, ne } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { 
   jobs, 
@@ -182,7 +182,8 @@ export const getRelatedJobs = cache(async function getRelatedJobsInternal(jobId:
       and(
         eq(jobs.companyId, companyId),
         eq(jobs.status, 'ACTIVE'),
-        gte(jobs.expiresAt, new Date())
+        gte(jobs.expiresAt, new Date()),
+        ne(jobs.id, jobId)
       )
     )
     .limit(limit);

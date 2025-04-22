@@ -83,9 +83,9 @@ export default async function JobDetailPage({ params }: PageProps) {
         <TabsList className="mb-6">
           <TabsTrigger value="details">Job Details</TabsTrigger>
           <TabsTrigger value="company">Company Info</TabsTrigger>
-          {relatedJobs.length > 0 && (
+          {/* {relatedJobs.length > 0 && ( */}
             <TabsTrigger value="related">Similar Jobs</TabsTrigger>
-          )}
+          {/* )} */}
         </TabsList>
         
         <TabsContent value="details">
@@ -132,11 +132,11 @@ export default async function JobDetailPage({ params }: PageProps) {
           </div>
         </TabsContent>
         
-        {relatedJobs.length > 0 && (
+        {/* {relatedJobs.length > 0 && ( */}
           <TabsContent value="related">
             <RelatedJobs relatedJobs={relatedJobs} />
           </TabsContent>
-        )}
+        {/* )} */}
       </Tabs>
     </div>
   );
