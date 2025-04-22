@@ -31,7 +31,7 @@ export default function RelatedJobs({ relatedJobs }: RelatedJobsProps) {
           {relatedJobs.map(job => (
             <div key={job.id} className="p-4 hover:bg-blue-50/50 transition-colors">
               <h3 className="font-medium text-lg mb-1">
-                <Link href={`/jobs/${job.slug || job.id}`} className="text-blue-600 hover:text-blue-800">
+                <Link href={`/jobs/${job.id}`} className="text-blue-600 hover:text-blue-800">
                   {job.title}
                 </Link>
               </h3>
