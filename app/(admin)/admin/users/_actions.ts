@@ -38,7 +38,7 @@ export async function softDeleteUserProfile(formData: FormData) {
   const result = await deleteUserProfile(profileId);
   
   // Revalidate the users page
-  revalidatePath("/users");
+  revalidatePath("/admin/users");
   
   return result;
 }
@@ -74,7 +74,7 @@ export async function restoreDeletedUserProfile(formData: FormData) {
   const result = await restoreUserProfile(profileId);
   
   // Revalidate the users page
-  revalidatePath("/users");
+  revalidatePath("/admin/users");
   
   return result;
 } 

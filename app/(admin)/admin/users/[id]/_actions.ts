@@ -63,7 +63,7 @@ export async function updateUserProfileAdmin(formData: FormData) {
   const result = await updateProfile(profileId, validatedData);
   
   // Revalidate the page
-  revalidatePath(`/users/${profileId}`);
+  revalidatePath(`/admin/users/${profileId}`);
   
   return { success: true, data: result };
 }
@@ -107,7 +107,7 @@ export async function updateCandidateProfileAdmin(formData: FormData) {
   const result = await updateCandidateProfile(profileId, validatedData);
   
   // Revalidate the page
-  revalidatePath(`/users/${profileId}`);
+  revalidatePath(`/admin/users/${profileId}`);
   
   return { success: true, data: result };
 }
@@ -153,7 +153,7 @@ export async function updateEmployerProfileAdmin(formData: FormData) {
   const result = await updateEmployerProfile(profileId, validatedData);
   
   // Revalidate the page
-  revalidatePath(`/users/${profileId}`);
+  revalidatePath(`/admin/users/${profileId}`);
   
   return { success: true, data: result };
 }
@@ -197,7 +197,7 @@ export async function addEducationRecordAdmin(formData: FormData) {
   const result = await addEducationRecord(candidateProfileId, educationData);
   
   // Revalidate the page
-  revalidatePath(`/users/${profileId}`);
+  revalidatePath(`/admin/users/${profileId}`);
   
   return { success: true, data: result };
 }
@@ -240,7 +240,7 @@ export async function updateEducationRecordAdmin(formData: FormData) {
   const result = await updateEducationRecord(educationId, educationData);
   
   // Revalidate the page
-  revalidatePath(`/users/${profileId}`);
+  revalidatePath(`/admin/users/${profileId}`);
   
   return { success: true, data: result };
 }
@@ -260,7 +260,7 @@ export async function deleteEducationRecordAdmin(formData: FormData) {
   const result = await deleteEducationRecord(educationId);
   
   // Revalidate the page
-  revalidatePath(`/users/${profileId}`);
+  revalidatePath(`/admin/users/${profileId}`);
   
   return result;
 }
@@ -306,7 +306,7 @@ export async function addExperienceRecordAdmin(formData: FormData) {
   const result = await addExperienceRecord(candidateProfileId, experienceData);
   
   // Revalidate the page
-  revalidatePath(`/users/${profileId}`);
+  revalidatePath(`/admin/users/${profileId}`);
   
   return { success: true, data: result };
 }
@@ -351,7 +351,7 @@ export async function updateExperienceRecordAdmin(formData: FormData) {
   const result = await updateExperienceRecord(experienceId, experienceData);
   
   // Revalidate the page
-  revalidatePath(`/users/${profileId}`);
+  revalidatePath(`/admin/users/${profileId}`);
   
   return { success: true, data: result };
 }
@@ -371,7 +371,7 @@ export async function deleteExperienceRecordAdmin(formData: FormData) {
   const result = await deleteExperienceRecord(experienceId);
   
   // Revalidate the page
-  revalidatePath(`/users/${profileId}`);
+  revalidatePath(`/admin/users/${profileId}`);
   
   return result;
 }
@@ -395,7 +395,7 @@ export async function updateCandidateSkillsAdmin(formData: FormData) {
   const result = await updateCandidateSkills(candidateProfileId, selectedSkills);
   
   // Revalidate the page
-  revalidatePath(`/users/${profileId}`);
+  revalidatePath(`/admin/users/${profileId}`);
   
   return result;
 } 

@@ -117,7 +117,7 @@ export async function signInUser(formData: FormData): Promise<SignInActionResult
         });
         redirectPath = existingSpecificProfile ? '/employer' : '/employer/profile';
       } else if (userRole === 'admin') {
-        redirectPath = '/users'
+        redirectPath = '/admin/users'
       } else {
         console.warn(`Unknown role ('${userRole}') found for userId: ${userId}. Redirecting to home.`);
         redirectPath = '/'

@@ -141,7 +141,7 @@ export default function UsersTable({ users }: UsersTableProps) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Link href={`/users/${user.id}`} passHref>
+                      <Link href={`/admin/users/${user.id}`} passHref>
                         <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                           <Eye className="h-4 w-4" />
                           <span className="sr-only">View</span>

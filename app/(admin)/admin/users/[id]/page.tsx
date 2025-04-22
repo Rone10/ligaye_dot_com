@@ -47,7 +47,7 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
       <div className="flex justify-between items-center container mx-auto">
         <div>
           <div className="mb-3">
-            <Link href="/users">
+            <Link href="/admin/users">
               <Button variant="outline" size="sm" className="flex items-center gap-1 text-gray-500 hover:text-gray-700">
                 <ChevronLeft className="h-4 w-4" />
                 Back to Users
