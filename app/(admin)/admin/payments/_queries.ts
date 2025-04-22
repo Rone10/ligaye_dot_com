@@ -5,7 +5,7 @@ import { db } from '@/lib/db'
 import { payments, jobs, employerProfiles, profiles } from '@/lib/db/schema'
 import type { Job, EmployerProfile, Profile } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 // Define the structure for the unpaid jobs list item
@@ -134,6 +134,14 @@ export async function approveCashPayment(paymentId: string) {
     })
     
     revalidatePath('/admin/payments')
+    revalidatePath('/jobs')
+    revalidatePath('/candidate/saved-jobs')
+    revalidateTag('saved-jobs')
+    revalidateTag('jobs')
+    revalidateTag('job-status')
+    revalidateTag('job-status-update')
+    revalidateTag('job-status-update-admin')
+    
     return { success: true }
   } catch (error) {
     console.error('Error approving cash payment:', error)
