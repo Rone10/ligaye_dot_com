@@ -139,8 +139,6 @@ export async function approveCashPayment(paymentId: string) {
     revalidateTag('saved-jobs')
     revalidateTag('jobs')
     revalidateTag('job-status')
-    revalidateTag('job-status-update')
-    revalidateTag('job-status-update-admin')
     
     return { success: true }
   } catch (error) {
