@@ -38,21 +38,21 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Define protected routes that require authentication
-  const protectedRoutes = ['/update-password', '/candidate', '/employer', '/admin']
+  const protectedRoutes = ['/update-password', '/candidate', '/employer', '/admin'] // Add other protected prefixes if needed
   
   // Check if the current route is protected
   const isProtectedRoute = protectedRoutes.some(route => 
     request.nextUrl.pathname.startsWith(route)
   )
 
-  // Redirect from protected routes to login if not authenticated
+  // Redirect unauthenticated users trying to access protected routes
   if (isProtectedRoute && !user) {
     const redirectUrl = new URL('/sign-in', request.url)
     redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
     return NextResponse.redirect(redirectUrl)
   }
 
-  // IMPORTANT: Return the supabase response as is to maintain cookies
+  // IMPORTANT: Return the original supabaseResponse to keep session handling intact
   return supabaseResponse
 }
 
@@ -63,8 +63,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - /auth (Supabase auth callback routes) - IMPORTANT
+     * - /login (Login page itself) - IMPORTANT
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|auth/.*|login|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

@@ -13,9 +13,17 @@ export default async function CandidateDashboardLayout({
     redirect('/sign-in')
   }
 
-  // only allow candidate or admin to access this page
-  if (user.user_metadata.role !== 'candidate') {
-    redirect('/sign-in')
+  // Only allow candidate to access this page
+  const userRole = user.user_metadata?.role;
+  if (userRole !== 'candidate') {
+    if (userRole === 'employer') {
+      console.warn(`Redirecting user ${user.id} with role '${userRole}' from candidate layout to /employer`);
+      redirect('/employer'); // Redirect non-candidates away
+    }
+    if (userRole === 'admin') {
+      console.warn(`Redirecting user ${user.id} with role '${userRole}' from candidate layout to /admin`);
+      redirect('/admin/users'); // Redirect non-candidates away
+    }
   }
   
   return (

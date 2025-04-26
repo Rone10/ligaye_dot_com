@@ -13,6 +13,19 @@ export default async function EmployerDashboardLayout({
     redirect('/sign-in')
   }
   
+  // Only allow employer to access this page
+  const userRole = user.user_metadata?.role;
+  if (userRole !== 'employer') {
+    if (userRole === 'candidate') {
+      console.warn(`Redirecting user ${user.id} with role '${userRole}' from employer layout to /candidate`);
+      redirect('/candidate'); // Redirect non-employers away
+    }
+    if (userRole === 'admin') {
+      console.warn(`Redirecting user ${user.id} with role '${userRole}' from employer layout to /admin`);
+      redirect('/admin/users'); // Redirect non-employers away
+    }
+  }
+
   return (
     <div className="h-screen flex overflow-hidden bg-gradient-to-br from-[#e9efff] to-[#f4f7ff]">
       <EmployerSidebar />
