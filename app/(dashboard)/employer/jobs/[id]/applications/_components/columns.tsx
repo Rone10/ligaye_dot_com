@@ -48,13 +48,13 @@ export const columns: ColumnDef<ApplicationWithCandidateDetails>[] = [
         accessorKey: 'candidateName',
         header: ({ column }: { column: Column<ApplicationWithCandidateDetails, unknown> }) => {
             return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                 >
                     Candidate
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
             )
         },
         cell: ({ row }: { row: Row<ApplicationWithCandidateDetails> }) => {
@@ -71,8 +71,11 @@ export const columns: ColumnDef<ApplicationWithCandidateDetails>[] = [
                         <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                        <span className="font-medium text-sm text-[#1a1e2d]">{name || 'N/A'}</span>
+                        <Link href={`/employer/jobs/applicants/${row.original.id}`}>
+                            <span className="font-medium text-sm text-[#1a1e2d]">{name || 'N/A'}</span>
+                        </Link>
                         {title && <span className="text-xs text-[#9aa3bc]">{title}</span>}
+                    
                     </div>
                 </div>
             )

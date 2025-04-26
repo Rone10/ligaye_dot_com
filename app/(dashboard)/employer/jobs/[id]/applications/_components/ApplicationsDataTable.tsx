@@ -65,7 +65,7 @@ export function ApplicationsDataTable<TData, TValue>({
   })
 
   return (
-    <div className="w-full">
+    <div className="w-full px-4">
          <div className="flex items-center py-4 gap-2">
              {/* Example Filter Input - Filter by Candidate Name */}
             <Input
@@ -150,7 +150,7 @@ export function ApplicationsDataTable<TData, TValue>({
             </Table>
         </div>
          {/* Pagination Controls */}
-        <div className="flex items-center justify-end ml-4 space-x-2 py-4">
+        <div className="flex items-center justify-end px-4 space-x-2 py-4">
              {/* Optional: Display selected row count */}
              <div className="flex-1 text-sm text-muted-foreground">
                 {table.getFilteredSelectedRowModel().rows.length} of{" "}
