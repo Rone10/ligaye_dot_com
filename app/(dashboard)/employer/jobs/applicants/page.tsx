@@ -8,7 +8,7 @@ import ApplicationsDataTable from './_components/ApplicationsDataTable'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import RiseLoaderSpinner  from '@/components/loaders/rise-loader'
+import PropagateLoaderSpinner  from '@/components/loaders/propagate-loarder'
 import Link from 'next/link'
 
 // Debounce function implementation
@@ -225,7 +225,7 @@ export default function EmployerApplicationsPage() {
     return (
     <div className="container mx-auto py-10">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-        <RiseLoaderSpinner />
+        <PropagateLoaderSpinner />
       </div>
     </div>
     )
