@@ -173,38 +173,38 @@ export const columns: ColumnDef<ApplicationWithCandidateDetails>[] = [
         },
         enableSorting: false,
     },
-    {
-        id: 'actions',
-        header: () => <div className="text-right font-medium text-[#1a1e2d]">Actions</div>,
-        cell: ({ row }: { row: Row<ApplicationWithCandidateDetails> }) => {
-            const application = row.original
+    // {
+    //     id: 'actions',
+    //     header: () => <div className="text-right font-medium text-[#1a1e2d]">Actions</div>,
+    //     cell: ({ row }: { row: Row<ApplicationWithCandidateDetails> }) => {
+    //         const application = row.original
 
-            // Example Action: Link to a future detailed application view
-            // const viewLink = `/employer/applications/${application.id}`;
+    //         // Example Action: Link to a future detailed application view
+    //         // const viewLink = `/employer/applications/${application.id}`;
 
-            return (
-                <div className="flex justify-end space-x-2">
-                    {/* Add actions like 'View Details', 'Change Status', 'Message Candidate' here */}
-                    {/* Example: View Details Button */}
-                    {/*
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                     <Link href={viewLink}>
-                                        <Eye className="h-4 w-4" />
-                                        <span className="sr-only">View Application</span>
-                                     </Link>
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>View Details</TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                    */}
-                    <span className="text-xs text-[#9aa3bc] italic">No actions</span>
-                </div>
-            )
-        },
-        enableSorting: false,
-    },
+    //         return (
+    //             <div className="flex justify-end space-x-2">
+    //                 {/* Add actions like 'View Details', 'Change Status', 'Message Candidate' here */}
+    //                 {/* Example: View Details Button */}
+    //                 {/*
+    //                 <TooltipProvider>
+    //                     <Tooltip>
+    //                         <TooltipTrigger asChild>
+    //                             <Button variant="ghost" size="icon" className="h-8 w-8">
+    //                                  <Link href={viewLink}>
+    //                                     <Eye className="h-4 w-4" />
+    //                                     <span className="sr-only">View Application</span>
+    //                                  </Link>
+    //                             </Button>
+    //                         </TooltipTrigger>
+    //                         <TooltipContent>View Details</TooltipContent>
+    //                     </Tooltip>
+    //                 </TooltipProvider>
+    //                 */}
+    //                 <span className="text-xs text-[#9aa3bc] italic">No actions</span>
+    //             </div>
+    //         )
+    //     },
+    //     enableSorting: false,
+    // },
 ] 

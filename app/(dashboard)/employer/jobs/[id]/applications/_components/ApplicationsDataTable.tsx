@@ -30,7 +30,7 @@ import {
     DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
-
+import { formatColumnName } from '../_utils/format-column-name'
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
@@ -63,6 +63,7 @@ export function ApplicationsDataTable<TData, TValue>({
       rowSelection, // Added
     },
   })
+
 
   return (
     <div className="w-full px-4">
@@ -97,7 +98,8 @@ export function ApplicationsDataTable<TData, TValue>({
                                         column.toggleVisibility(!!value)
                                     }
                                 >
-                                    {column.id}
+
+                                    {formatColumnName(column.id)}
                                 </DropdownMenuCheckboxItem>
                             )
                         })}
