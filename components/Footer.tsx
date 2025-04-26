@@ -6,34 +6,34 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-semibold mb-4">Ligaye.com</h3>
-              <p className="text-gray-300">Gambia&apos;s Premier Job Board</p>
+              <h3 className="text-xl text-white font-semibold mb-4">Ligaye.com</h3>
+              <p className="text-zinc-400">Gambia&apos;s Premier Job Board</p>
             </div>
             
             <div>
-              <h4 className="text-lg font-medium mb-3">For Job Seekers</h4>
+              <h4 className="text-lg text-white font-medium mb-3">For Job Seekers</h4>
               <ul className="space-y-2">
-                <li><Link href="/jobs" className="text-gray-300 hover:text-white">Find Jobs</Link></li>
-                <li><Link href="/create-profile" className="text-gray-300 hover:text-white">Create Profile</Link></li>
-                <li><Link href="/job-alerts" className="text-gray-300 hover:text-white">Job Alerts</Link></li>
+                <li><Link href="/jobs" className="text-zinc-400 hover:text-white">Find Jobs</Link></li>
+                <li><Link href="/create-profile" className="text-zinc-400 hover:text-white">Create Profile</Link></li>
+                <li><Link href="/job-alerts" className="text-zinc-400 hover:text-white">Job Alerts</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-lg font-medium mb-3">For Employers</h4>
+              <h4 className="text-lg text-white font-medium mb-3 ">For Employers</h4>
               <ul className="space-y-2">
-                <li><Link href="/employer/jobs/new" className="text-gray-300 hover:text-white">Post a Job</Link></li>
-                <li><Link href="/pricing" className="text-gray-300 hover:text-white">Pricing</Link></li>
-                <li><Link href="/resources" className="text-gray-300 hover:text-white">Resources</Link></li>
+                <li><Link href="/employer/jobs/new" className="text-zinc-400 hover:text-white">Post a Job</Link></li>
+                <li><Link href="/pricing" className="text-zinc-400 hover:text-white">Pricing</Link></li>
+                <li><Link href="/resources" className="text-zinc-400 hover:text-white">Resources</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-lg font-medium mb-3">Contact</h4>
+              <h4 className="text-lg text-white font-medium mb-3">Contact</h4>
               <ul className="space-y-2">
-                <li><Link href="/about" className="text-gray-300 hover:text-white">About Us</Link></li>
-                <li><Link href="/contact" className="text-gray-300 hover:text-white">Support</Link></li>
-                <li><Link href="/privacy" className="text-gray-300 hover:text-white">Privacy Policy</Link></li>
+                <li><Link href="/about" className="text-zinc-400 hover:text-white">About Us</Link></li>
+                <li><Link href="/contact" className="text-zinc-400 hover:text-white">Support</Link></li>
+                <li><Link href="/privacy" className="text-zinc-400 hover:text-white">Privacy Policy</Link></li>
               </ul>
             </div>
           </div>
