@@ -72,7 +72,7 @@ export const columns: ColumnDef<ApplicationWithCandidateDetails>[] = [
                     </Avatar>
                     <div className="flex flex-col">
                         <Link href={`/employer/jobs/applicants/${row.original.id}`}>
-                            <span className="font-medium text-sm text-[#1a1e2d]">{name || 'N/A'}</span>
+                            <span className="font-medium text-base text-primary hover:underline hover:text-primary/80">{name || 'N/A'}</span>
                         </Link>
                         {title && <span className="text-xs text-[#9aa3bc]">{title}</span>}
                     
