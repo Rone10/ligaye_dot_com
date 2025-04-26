@@ -43,8 +43,8 @@ const getStatusContent = (status: string, props: ApplicationStatusUpdatedEmailPr
     case 'INTERVIEW_SCHEDULED':
       return {
         subject: `Interview scheduled for ${props.jobTitle} at ${props.companyName}`,
-        body: `Your interview for <strong>${props.jobTitle}</strong> at <strong>${props.companyName}</strong> has been scheduled for ${props.interviewDate || '[Date TBD]'} ${props.interviewLocation ? `at <strong>${props.interviewLocation}</strong>` : ''}. Please confirm your availability through your dashboard.`,
-        buttonText: 'Confirm Interview',
+        body: `Your interview for <strong>${props.jobTitle}</strong> at <strong>${props.companyName}</strong> has been scheduled for ${props.interviewDate || '[Date TBD]'} ${props.interviewLocation ? `at <strong>${props.interviewLocation}</strong>` : ''}.`,
+        buttonText: 'View Application',
       };
     case 'INTERVIEWED':
       return {
