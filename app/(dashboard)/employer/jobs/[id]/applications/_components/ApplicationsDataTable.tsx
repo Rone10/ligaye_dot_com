@@ -150,12 +150,12 @@ export function ApplicationsDataTable<TData, TValue>({
             </Table>
         </div>
          {/* Pagination Controls */}
-        <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="flex items-center justify-end ml-4 space-x-2 py-4">
              {/* Optional: Display selected row count */}
-             {/* <div className="flex-1 text-sm text-muted-foreground">
+             <div className="flex-1 text-sm text-muted-foreground">
                 {table.getFilteredSelectedRowModel().rows.length} of{" "}
                 {table.getFilteredRowModel().rows.length} row(s) selected.
-            </div> */}
+            </div>
             <Button
                 variant="outline"
                 size="sm"
