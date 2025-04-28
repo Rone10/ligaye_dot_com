@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { format, parseISO } from 'date-fns'
 import { Textarea } from '@/components/ui/textarea'
+import { FormControl, FormDescription, FormMessage } from '@/components/ui/form'
 
 interface StatusUpdateFormProps {
   applicationId: string
@@ -127,18 +128,21 @@ export default function StatusUpdateForm({
           <>
             <div className="space-y-2 mt-4">
               <Label htmlFor="interview-date">Interview Date & Time</Label>
-              <Input
-                id="interview-date"
-                type="datetime-local"
-                value={interviewDate}
-                onChange={(e) => setInterviewDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0] + 'T00:00'}
-              />
+              <FormControl>
+                <Input
+                  id="interview-date"
+                  type="datetime-local"
+                  value={interviewDate}
+                  onChange={(e) => setInterviewDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0] + 'T00:00'}
+                />
+              </FormControl>
               {currentInterviewDate && (
-                <div className="text-sm text-gray-500 mt-1">
-                  Current: {format(new Date(currentInterviewDate), 'PPP p')}
-                </div>
+                <FormDescription>
+                  Current: {format(new Date(currentInterviewDate), 'dd/MM/yyyy p')}
+                </FormDescription>
               )}
+              <FormMessage />
             </div>
             
             <div className="space-y-2 mt-4">

@@ -9,6 +9,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 import { toggleSaveJob } from '../_actions'
 import { useState } from 'react'
 import Image from 'next/image';
+import { format } from 'date-fns';
 
 interface JobHeaderProps {
   job: any
@@ -180,9 +181,9 @@ export default function JobHeader({ job, hasApplied = false, isSaved = false }: 
         
         {(job.salaryRangeMin || job.salaryRangeMax) && (
           <div className="flex items-center px-2.5 py-1 rounded-full bg-white border border-gray-200">
-            <div className="bg-blue-100 text-blue-800 rounded-full h-5 w-auto px-1.5 text-xs font-bold flex items-center justify-center mr-1.5">
+            {/* <div className="bg-blue-100 text-blue-800 rounded-full h-5 w-auto px-1.5 text-xs font-bold flex items-center justify-center mr-1.5">
               {job.salaryCurrency || 'GMD'}
-            </div>
+            </div> */}
             <span className="font-medium">
               {formatSalaryDisplay({
                 min: job.salaryRangeMin,
@@ -198,14 +199,14 @@ export default function JobHeader({ job, hasApplied = false, isSaved = false }: 
         {job.publishedAt && (
           <div className="flex items-center px-2.5 py-1 rounded-full bg-white border border-gray-200">
             <Calendar className="mr-1.5 h-4 w-4 text-[#4a6cfa]" />
-            <span className="font-medium">Posted: {new Date(job.publishedAt).toLocaleDateString()}</span>
+            <span className="font-medium">Posted: {format(new Date(job.publishedAt), 'dd/MM/yyyy')}</span>
           </div>
         )}
         
         {job.applicationDeadline && (
           <div className="flex items-center px-2.5 py-1 rounded-full bg-white border border-gray-200">
             <Clock className="mr-1.5 h-4 w-4 text-[#4a6cfa]" />
-            <span className="font-medium">Deadline: {new Date(job.applicationDeadline).toLocaleDateString()}</span>
+            <span className="font-medium">Deadline: {format(new Date(job.applicationDeadline), 'dd/MM/yyyy')}</span>
           </div>
         )}
       </div>

@@ -64,9 +64,9 @@ export default function InterviewScheduler({ applicationId, currentInterviewDate
       </div>
       
       {currentInterviewDate && (
-        <div className="text-sm">
-          <span className="font-medium">Current Interview: </span>
-          {format(new Date(currentInterviewDate), 'PPP p')}
+        <div className="text-sm text-gray-500 mt-1">
+          Current:{' '}
+          {format(new Date(currentInterviewDate), 'dd/MM/yyyy p')}
         </div>
       )}
       

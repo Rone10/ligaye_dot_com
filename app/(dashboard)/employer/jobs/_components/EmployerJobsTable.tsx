@@ -160,7 +160,7 @@ export default function EmployerJobsTable({ jobs }: EmployerJobsTableProps) {
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   {job.expiresAt 
-                    ? format(new Date(job.expiresAt), 'MMM d, yyyy')
+                    ? format(new Date(job.expiresAt), 'dd MMM yyyy')
                     : 'N/A'}
                 </TableCell>
                 <TableCell className="text-right">

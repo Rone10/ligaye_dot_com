@@ -5,7 +5,7 @@ export function formatDate(date: Date | string | null | undefined): string {
   if (!date) return 'N/A'
   
   const dateObj = date instanceof Date ? date : new Date(date)
-  return format(dateObj, 'MMM d, yyyy')
+  return format(dateObj, 'dd MMM yyyy')
 }
 
 // Format relative time

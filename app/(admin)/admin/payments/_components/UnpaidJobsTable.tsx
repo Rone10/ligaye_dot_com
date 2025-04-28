@@ -132,7 +132,7 @@ export default function UnpaidJobsTable({ jobs }: UnpaidJobsTableProps) {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(jobItem.job.createdAt), 'PPP')}
+                        {jobItem.job.createdAt ? format(new Date(jobItem.job.createdAt), 'dd/MM/yyyy') : '-'}
                       </TableCell>
                       <TableCell>
                         <Button 

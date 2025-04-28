@@ -16,7 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-
+import { format } from 'date-fns';
 interface JobDetailsProps {
   job: any
   location?: any
@@ -363,7 +363,7 @@ export default function JobDetails({ job, location, skills = [], industries = []
                   <Calendar className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                   <div>
                     <span className="block font-medium text-[#1a1e2d]">Date Posted</span>
-                    <span className="text-gray-600">{new Date(job.publishedAt).toLocaleDateString()}</span>
+                      <span className="text-gray-600">{format(new Date(job.publishedAt), 'dd/MM/yyyy')}</span>
                   </div>
                 </li>
               )}
@@ -373,7 +373,7 @@ export default function JobDetails({ job, location, skills = [], industries = []
                   <Clock className="mr-3 h-5 w-5 text-[#4a6cfa] mt-0.5 flex-shrink-0" />
                   <div>
                     <span className="block font-medium text-[#1a1e2d]">Application Deadline</span>
-                    <span className="text-gray-600">{new Date(job.applicationDeadline).toLocaleDateString()}</span>
+                    <span className="text-gray-600">{format(new Date(job.applicationDeadline), 'dd/MM/yyyy')}</span>
                   </div>
                 </li>
               )}

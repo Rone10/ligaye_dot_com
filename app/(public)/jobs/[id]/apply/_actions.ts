@@ -136,7 +136,7 @@ export async function submitApplication({
         
         if (jobDetails && user.email) {
           // Format the application date
-          const formattedDate = format(applicationDate, 'MMMM d, yyyy')
+          const formattedDate = format(applicationDate, 'd MMMM yyyy')
           
           // Send the confirmation email to the candidate
           console.log('user.user_metadata', user.user_metadata)

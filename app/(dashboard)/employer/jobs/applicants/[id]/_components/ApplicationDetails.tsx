@@ -118,12 +118,12 @@ export default function ApplicationDetails({ application, job }: ApplicationDeta
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Applied On</h3>
-              <p>{format(new Date(application.appliedAt), 'PPP')}</p>
+              <p>{format(new Date(application.appliedAt), 'dd/MM/yyyy')}</p>
             </div>
             
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Last Updated</h3>
-              <p>{format(new Date(application.updatedAt), 'PPP')}</p>
+              <p>{format(new Date(application.updatedAt), 'dd/MM/yyyy')}</p>
             </div>
             
             {application.interviewDate && (
@@ -131,7 +131,7 @@ export default function ApplicationDetails({ application, job }: ApplicationDeta
                 <Calendar className="text-purple-500" />
                 <div>
                   <h3 className="font-medium">Interview Scheduled</h3>
-                  <p className="text-sm">{format(new Date(application.interviewDate), 'PPP p')}</p>
+                  <p className="text-sm">{format(new Date(application.interviewDate), 'dd/MM/yyyy p')}</p>
                 </div>
               </div>
             )}

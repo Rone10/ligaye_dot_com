@@ -41,7 +41,9 @@ export async function updateStatus(
           // Format interview date if provided
           let formattedInterviewDate: string | undefined = undefined
           if (validatedData.interviewDate) {
-            formattedInterviewDate = format(new Date(validatedData.interviewDate), 'MMMM d, yyyy h:mm a')
+            formattedInterviewDate = format(new Date(validatedData.interviewDate), 'd MMMM yyyy h:mm a')
+          } else {
+            formattedInterviewDate = "Not scheduled"
           }
           
           // Ensure we have valid strings for required fields, provide fallbacks for null values

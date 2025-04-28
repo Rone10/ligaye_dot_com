@@ -207,7 +207,7 @@ export default function PaymentsTable({ payments }: PaymentsTableProps) {
                   </Badge>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {format(new Date(payment.payment.createdAt), 'MMM d, yyyy')}
+                  {format(new Date(payment.payment.createdAt), 'dd MMM yyyy')}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
