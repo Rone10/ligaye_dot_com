@@ -1,0 +1,147 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Fixing `react-hooks/exhaustive-deps` Warnings
+
+The `eslint-plugin-react-hooks` package includes an essential rule: `exhaustive-deps`. This rule helps prevent bugs caused by stale closures in React hooks like `useEffect`, `useCallback`, `useMemo`, etc., by ensuring all external variables used inside the hook are included in its dependency array.
+
+## Why is it important?
+
+If you omit a dependency, the hook might close over a stale value from a previous render, leading to unexpected behavior. For example, a `useEffect` might not re-run when a prop it uses changes, or a `useCallback` might call an old version of a function.
+
+## Common Scenarios and Fixes
+
+### 1. Missing Dependencies
+
+**Warning:** `React Hook useEffect has a missing dependency: 'someValue'. Either include it or remove the dependency array. react-hooks/exhaustive-deps`
+
+**Incorrect Code:**
+```jsx
+function MyComponent({ someValue }) {
+  const [state, setState] = useState(0);
+
+  useEffect(() => {
+    // Uses someValue but doesn't list it as a dependency
+    console.log('Value is:', someValue);
+    setState(someValue * 2);
+  }, []); // <-- Missing someValue
+
+  // ...
+}
+```
+
+**Correct Code:**
+```jsx
+function MyComponent({ someValue }) {
+  const [state, setState] = useState(0);
+
+  useEffect(() => {
+    console.log('Value is:', someValue);
+    setState(someValue * 2);
+  }, [someValue]); // <-- Added someValue
+
+  // ...
+}
+```
+
+### 2. Function Dependencies
+
+**Warning:** `The 'doSomething' function makes the dependencies of useEffect Hook change on every render. Move it inside the useEffect callback. Alternatively, wrap the 'doSomething' definition in its own useCallback() Hook. react-hooks/exhaustive-deps`
+
+**Incorrect Code:**
+```jsx
+function MyComponent({ id }) {
+  const doSomething = () => {
+    console.log('Doing something with ID:', id);
+    // fetch(`/api/data/${id}`)
+  };
+
+  useEffect(() => {
+    doSomething();
+  }, [doSomething]); // <-- doSomething is recreated every render
+
+  // ...
+}
+```
+
+**Correct Code (Option 1: Move function inside):**
+```jsx
+function MyComponent({ id }) {
+  useEffect(() => {
+    // Define the function inside useEffect
+    const doSomething = () => {
+      console.log('Doing something with ID:', id);
+      // fetch(`/api/data/${id}`)
+    };
+
+    doSomething();
+  }, [id]); // <-- Depend on the actual value (id) used inside
+
+  // ...
+}
+```
+
+**Correct Code (Option 2: Wrap function in `useCallback`):**
+```jsx
+function MyComponent({ id }) {
+  // Memoize the function definition
+  const doSomething = useCallback(() => {
+    console.log('Doing something with ID:', id);
+    // fetch(`/api/data/${id}`)
+  }, [id]); // <-- useCallback depends on id
+
+  useEffect(() => {
+    doSomething();
+  }, [doSomething]); // <-- Now depends on the stable, memoized function
+
+  // ...
+}
+```
+
+### 3. Complex Dependencies (e.g., Debounce/Throttle)
+
+**Warning:** `React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead.` (or similar for `useMemo`/`useEffect`)
+
+**Incorrect Code (Debounce inside `useCallback`):**
+```jsx
+const updateSearch = useCallback((term) => { /* ... */ }, [/* deps */]);
+
+const handleSearch = useCallback(debounce((term) => {
+  updateSearch(term);
+}, 300), [updateSearch]); // <-- Linter can't analyze deps inside debounce
+```
+
+**Correct Code (Memoize debounced function):**
+```jsx
+const updateSearch = useCallback((term) => { /* ... */ }, [/* deps */]);
+
+// 1. Create a stable debounced function using useMemo
+const debouncedUpdateSearch = useMemo(
+  () => debounce((term) => {
+    updateSearch(term);
+  }, 300),
+  [updateSearch] // Recreate debounce if updateSearch changes
+);
+
+// 2. Use the stable debounced function directly
+const handleSearchChange = useCallback((e) => {
+  const term = e.target.value;
+  debouncedUpdateSearch(term);
+}, [debouncedUpdateSearch]); // Depend on the stable debounced function
+```
+
+## When to Ignore (Use Sparingly!)
+
+Sometimes, you *intentionally* want to omit a dependency (e.g., run an effect only on mount). Use the `// eslint-disable-next-line react-hooks/exhaustive-deps` comment **with caution and a clear explanation** why it's safe.
+
+```jsx
+useEffect(() => {
+  // Fetch initial data only once on mount
+  fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []); // Intentional: Run only on mount
+```
+
+**General Guideline:** Trust the linter. Most of the time, adding the suggested dependencies is the correct and safest approach. If a dependency causes unwanted re-renders/re-executions, investigate *why* that dependency is changing and stabilize it further up the chain (e.g., using `useMemo`, `useCallback`, or fixing state updates).
