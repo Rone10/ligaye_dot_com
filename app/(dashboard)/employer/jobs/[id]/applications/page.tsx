@@ -9,17 +9,14 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, Users } from 'lucide-react'
 
 // Interface for page props according to base-knowledge.md Next.js 15 convention
-interface PageParams {
-    id: Promise<string>; // The id itself is a promise
-}
-
 interface PageProps {
-    params: PageParams;
+    params: Promise<{ id: string }>; // params is the Promise wrapping the id object
 }
 
 export default async function JobApplicationsPage({ params }: PageProps) {
-    // Await the id from the params promise
-    const jobId = await params.id; // Correctly await the id property
+    // Await the params promise first, then access id
+    const awaitedParams = await params;
+    const jobId = awaitedParams.id; 
     
     // Fetch job applications data
     const { job, applications } = await getJobApplicationsData(jobId);
