@@ -2,6 +2,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BrainCircuit, Target, Users, Gem } from 'lucide-react';
 
+export const dynamic = 'force-static';
+
 export default function AboutUsPage() {
   // Glassmorphic styles using Tailwind arbitrary values / utility classes
   // Ensure backdrop-filter is enabled in your tailwind.config.js if using utility class

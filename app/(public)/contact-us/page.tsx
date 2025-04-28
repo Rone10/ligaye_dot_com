@@ -19,6 +19,7 @@ import { Mail, Phone, MapPin } from "lucide-react";
 import { contactFormSchema, type ContactFormValues } from "./_utils/validation"; // Import from utils
 import { sendContactMessage } from "./_actions"; // Import the actual server action
 
+export const dynamic = 'force-static';
 export default function ContactUsPage() {
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [submitStatus, setSubmitStatus] = React.useState<{ success: boolean; message?: string; error?: string } | null>(null); // Allow error message
