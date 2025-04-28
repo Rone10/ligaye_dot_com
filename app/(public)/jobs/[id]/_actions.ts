@@ -4,7 +4,7 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { savedJobs, profiles } from '@/lib/db/schema';
 import { getUser } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 /**
  * Toggle the saved state of a job for the current user
@@ -75,6 +75,7 @@ export async function toggleSaveJob(jobId: string) {
     
     // Revalidate job detail page
     revalidatePath(`/jobs/${jobId}`);
+    revalidateTag('saved-jobs')
     return { success: true, isSaved: existingSave.length ? !existingSave[0].deleted : true };
   } catch (error) {
     console.error('Error toggling job save:', error);

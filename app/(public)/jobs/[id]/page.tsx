@@ -9,8 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { JobActionButton } from './_components/JobActionButton';
 import { getUser } from '@/lib/supabase/server';
 
-// Instead of forcing dynamic rendering, use static rendering with ISR
-export const revalidate = 3600; // Revalidate every hour (cache for 1 hour)
+// Remove the time-based revalidation - rely on tags + on-demand revalidation
+// export const revalidate = 3600; 
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -24,19 +24,19 @@ export default async function JobDetailPage({ params }: PageProps) {
   // Get the current user
   const user = await getUser();
   
-  // Fetch job details - add cache tags for on-demand revalidation
+  // Fetch job details - remove revalidate, keep tags
   const job = await getJobById(id, { 
     next: { 
-      tags: [`job-${id}`],
-      revalidate: 3600 // 1 hour cache
+      tags: [`job-${id}`]
+      // revalidate: 3600 // Remove this
     }
   });
   
-  // Fetch related jobs in parallel with other user-specific data
+  // Fetch related jobs in parallel with other user-specific data - remove revalidate, keep tags
   const relatedJobsPromise = getRelatedJobs(id, 3, { 
     next: { 
-      tags: [`company-${job.companyId}`],
-      revalidate: 3600 // 1 hour cache
+      tags: [`company-${job.companyId}`]
+      // revalidate: 3600 // Remove this
     }
   });
   
