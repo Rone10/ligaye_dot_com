@@ -49,7 +49,7 @@ export default function LocationSelector({ form, locations }: LocationSelectorPr
           name="locationId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Locationss</FormLabel>
+              <FormLabel>Location</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
                 value={field.value || ""}
