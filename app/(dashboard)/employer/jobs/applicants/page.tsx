@@ -194,6 +194,14 @@ export default function EmployerApplicationsPage() {
     })
   }, [router, searchParams])
   
+  // Memoize the debounced function using useMemo
+  const debouncedUpdateUrl = useMemo(
+    () => debounce((term: string) => {
+      updateUrlWithFilter('q', term || null)
+    }, 300),
+    [updateUrlWithFilter] // Recreate if updateUrlWithFilter changes
+  );
+  
   // Handle filter changes
   const handleStatusChange = useCallback((status: string) => {
     updateUrlWithFilter('status', status === 'ALL' ? null : status)
@@ -204,15 +212,12 @@ export default function EmployerApplicationsPage() {
     // No longer need to reload data from server for sorting
   }, [updateUrlWithFilter])
   
-  const handleSearch = useCallback(debounce((term: string) => {
-    updateUrlWithFilter('q', term || null)
-  }, 300), [updateUrlWithFilter])
-  
   const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchValue(value)
-    handleSearch(value)
-  }, [handleSearch])
+    // Directly call the memoized debounced function
+    debouncedUpdateUrl(value)
+  }, [debouncedUpdateUrl]) // Depend on the stable debounced function
   
   const handleClearFilters = useCallback(() => {
     startTransition(() => {
