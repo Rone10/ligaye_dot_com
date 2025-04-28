@@ -13,7 +13,9 @@ import {
   Menu, 
   X,
   LogOut,
-  Search
+  Search,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -54,6 +56,7 @@ const navItems = [
 
 export default function CandidateSidebar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const [userData, setUserData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const pathname = usePathname()
@@ -142,7 +145,7 @@ export default function CandidateSidebar() {
         ref={sidebarRef}
         className={`
           fixed inset-y-0 left-0 z-40
-          w-64 bg-background/95 backdrop-blur-md
+          ${isCollapsed ? 'w-20' : 'w-64'} bg-background/95 backdrop-blur-md
           border-r border-[rgba(255,255,255,0.3)]
           shadow-[0_8px_32px_rgba(31,38,135,0.1)]
           transition-all duration-300 ease-in-out
@@ -153,40 +156,61 @@ export default function CandidateSidebar() {
         <div className="flex flex-col h-full p-4">
           {/* Title & mobile close button */}
           <div className="flex items-center justify-between py-2 px-2">
-            <h2 className="text-xl font-bold text-[#1a1e2d]">Candidate Portal</h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden rounded-full hover:bg-[#4a6cfa]/10"
-              onClick={() => setIsOpen(false)}
-              aria-label="Close menu"
-            >
-              <X className="h-5 w-5 text-[#1a1e2d]" />
-            </Button>
+            {!isCollapsed && <h2 className="text-xl font-bold text-[#1a1e2d]">Candidate Portal</h2>}
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden rounded-full hover:bg-[#4a6cfa]/10"
+                onClick={() => setIsOpen(false)}
+                aria-label="Close menu"
+              >
+                <X className="h-5 w-5 text-[#1a1e2d]" />
+              </Button>
+              
+              {/* Collapse toggle button - only visible on desktop */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="hidden md:flex rounded-full hover:bg-[#4a6cfa]/10 ml-auto"
+                aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                {isCollapsed ? (
+                  <ChevronRight className="h-5 w-5 text-[#1a1e2d]" />
+                ) : (
+                  <ChevronLeft className="h-5 w-5 text-[#1a1e2d]" />
+                )}
+              </Button>
+            </div>
           </div>
           
           {/* User profile section */}
-          <div className="mt-4 mb-6 p-4 rounded-lg bg-[#4a6cfa]/5 border border-[#4a6cfa]/10">
+          <div className={`mt-4 mb-6 p-4 rounded-lg bg-[#4a6cfa]/5 border border-[#4a6cfa]/10 ${isCollapsed ? 'flex justify-center' : ''}`}>
             {loading ? (
-              <div className="flex items-center space-x-3">
+              <div className={`flex ${isCollapsed ? 'justify-center' : 'items-center space-x-3'}`}>
                 <Skeleton className="h-10 w-10 rounded-full" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-24" />
-                </div>
+                {!isCollapsed && (
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="flex items-center space-x-3">
+              <div className={`flex ${isCollapsed ? 'justify-center' : 'items-center space-x-3'}`}>
                 <Avatar className="h-10 w-10 border-2 border-[#4a6cfa]/20">
                   <AvatarImage src={userData?.user_metadata?.avatar_url || ''} />
                   <AvatarFallback className="bg-[#4a6cfa]/10 text-[#4a6cfa]">
                     {getInitials()}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <p className="text-sm font-medium text-[#1a1e2d] line-clamp-1">{userName}</p>
-                  <p className="text-xs text-muted-foreground line-clamp-1">{userEmail}</p>
-                </div>
+                {!isCollapsed && (
+                  <div>
+                    <p className="text-sm font-medium text-[#1a1e2d] line-clamp-1">{userName}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-1">{userEmail}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -204,13 +228,15 @@ export default function CandidateSidebar() {
                     flex items-center px-4 py-3 text-sm
                     rounded-md transition-all duration-300
                     hover:bg-[#4a6cfa]/10 hover:translate-y-[-2px]
+                    ${isCollapsed ? 'justify-center' : ''}
                     ${isActive 
                       ? 'bg-[#4a6cfa]/10 text-[#4a6cfa] font-semibold shadow-sm' 
                       : 'text-[#1a1e2d]'}
                   `}
+                  title={isCollapsed ? item.name : ''}
                 >
-                  <item.icon className="h-5 w-5 mr-3" />
-                  {item.name}
+                  <item.icon className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'}`} />
+                  {!isCollapsed && item.name}
                 </Link>
               )
             })}
@@ -220,11 +246,12 @@ export default function CandidateSidebar() {
           <div className="mt-auto pt-4 border-t border-[rgba(0,0,0,0.1)]">
             <Button
               variant="outline"
-              className="w-full justify-start text-[#1a1e2d] hover:bg-[#4a6cfa]/10 hover:text-[#4a6cfa]"
+              className={`w-full ${isCollapsed ? 'justify-center p-2' : 'justify-start'} text-[#1a1e2d] hover:bg-[#4a6cfa]/10 hover:text-[#4a6cfa]`}
               onClick={handleLogout}
+              title={isCollapsed ? "Logout" : ''}
             >
-              <LogOut className="h-5 w-5 mr-3" />
-              Logout
+              <LogOut className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'}`} />
+              {!isCollapsed && "Logout"}
             </Button>
           </div>
         </div>
