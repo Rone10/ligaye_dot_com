@@ -41,9 +41,10 @@ export default function Navbar({ user }: NavbarProps) {
     
     // Redirecting to appropriate dashboard based on user metadata
     // This is simplified and should be adjusted based on your actual user role management
-    if (user?.user_metadata?.role === 'admin') return '/admin';
+    if (user?.user_metadata?.role === 'admin') return '/admin/users';
+    if (user?.user_metadata?.role === 'candidate') return '/candidate';
     if (user?.user_metadata?.role === 'employer') return '/employer';
-    return '/dashboard'; // Default dashboard for job seekers or unknown roles
+    return '/'; // Default dashboard for job seekers or unknown roles
   };
 
   return (
