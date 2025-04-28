@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: *.tsx
 alwaysApply: false
 ---
 # Fixing `react-hooks/exhaustive-deps` Warnings
