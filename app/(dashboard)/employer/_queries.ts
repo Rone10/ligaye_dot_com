@@ -86,7 +86,6 @@ export const getEmployerDashboardStats = unstable_cache(
   },
   ['employer-dashboard-stats'], // Cache key parts
   {
-    revalidate: 60 * 5, // Revalidate every 5 minutes
     tags: ['employer-dashboard', 'employer-jobs', 'employer-applications'], // Cache tags
   }
 );
@@ -130,7 +129,6 @@ export const getRecentEmployerJobs = unstable_cache(
   },
   ['employer-recent-jobs'], // Cache key parts
   {
-    revalidate: 60 * 5, // Revalidate every 5 minutes
     tags: ['employer-dashboard', 'employer-jobs'], // Cache tags
   }
 );
@@ -172,7 +170,6 @@ export const getRecentApplicationsForEmployer = unstable_cache(
   },
   ['employer-recent-applications'], // Cache key parts
   {
-    revalidate: 60 * 2, // Revalidate applications more frequently (e.g., every 2 minutes)
     tags: ['employer-dashboard', 'employer-applications'], // Cache tags
   }
 );
