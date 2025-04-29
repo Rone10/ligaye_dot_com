@@ -5,9 +5,9 @@ import { experienceLevelEnum } from '@/lib/db/schema';
 export const profileSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters").max(100, "Title must be at most 100 characters").optional(),
   bio: z.string().max(500, "Bio must be at most 500 characters").optional(),
-  linkedinUrl: z.string().url("Please enter a valid LinkedIn URL").optional().or(z.literal('')),
-  githubUrl: z.string().url("Please enter a valid GitHub URL").optional().or(z.literal('')),
-  portfolioUrl: z.string().url("Please enter a valid portfolio URL").optional().or(z.literal('')),
+  linkedinUrl: z.string().min(1, "LinkedIn URL cannot be empty if provided.").optional().or(z.literal('')),
+  githubUrl: z.string().min(1, "GitHub URL cannot be empty if provided.").optional().or(z.literal('')),
+  portfolioUrl: z.string().min(1, "Portfolio URL cannot be empty if provided.").optional().or(z.literal('')),
   experienceLevel: z.enum(experienceLevelEnum.enumValues).optional(),
 });
 
