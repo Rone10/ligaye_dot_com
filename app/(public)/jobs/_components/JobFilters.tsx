@@ -37,6 +37,7 @@ import {
   Slider
 } from '@/components/ui/slider';
 import RiseLoaderSpinner from '@/components/loaders/rise-loader';
+import PropagateLoader from 'react-spinners/PropagateLoader';
 
 interface FilterProps {
   locations: { id: string; region: string; city: string | null }[];
@@ -120,7 +121,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
       {/* Conditionally render spinner overlay */}
       {isPending && (
         <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-[16px]">
-          <RiseLoaderSpinner />
+          <PropagateLoader color="#0041A2" size={15} />
         </div>
       )}
 
