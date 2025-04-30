@@ -61,7 +61,7 @@ export default async function JobDetailPage({ params }: PageProps) {
   console.log('Job application status - hasApplied:', hasApplied);
   
   return (
-    <div className="container max-w-7xl py-8 mx-auto space-y-8">
+    <div className="container max-w-7xl py-8 px-4 mx-auto space-y-8">
       {/* Job Header */}
       <JobHeader job={job} hasApplied={hasApplied} isSaved={isSaved} />
       
