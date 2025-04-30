@@ -14,6 +14,7 @@ import RingLoaderSpinner from '@/components/loaders/ring-loader';
 export default function LandingPage() {
   const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Check if user is logged in on the client side
   useEffect(() => {
@@ -33,7 +34,6 @@ export default function LandingPage() {
   }, []);
 
   if (loading) {
-
     return <div className='flex justify-center items-center h-screen container mx-auto'>
       <RingLoaderSpinner />
     </div>;
@@ -44,103 +44,77 @@ export default function LandingPage() {
     <Navbar user={user} />
     <div className="flex flex-col">
       {/* Hero Section */}
-      <main className="flex-1 pt-16 md:pt-32 pb-16 px-4 md:px-8 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col md:flex-row gap-10 md:gap-16 items-center">
-          <div className="flex-1 space-y-6 animate-appear">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-dark">
+      <main className="flex-1 pt-20 md:pt-32 pb-16 px-4 md:px-8 max-w-7xl mx-auto w-full">
+        <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
+          <div className="space-y-6 animate-appear relative">
+            {/* Decorative elements */}
+            <div className="absolute -top-20 -right-16 w-40 h-40 bg-primary-blue/5 rounded-full blur-3xl z-0"></div>
+            <div className="absolute -bottom-12 left-10 w-32 h-32 bg-secondary-green/5 rounded-full blur-2xl z-0"></div>
+            
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-dark relative z-10">
               Gambia&apos;s Premier <span className="text-primary-blue">Job Board</span>
             </h1>
-            <p className="text-lg text-gray-dark max-w-xl">
+            
+            <p className="text-xl text-gray-dark max-w-2xl mx-auto relative z-10">
               Connecting talented professionals with opportunities across Gambia. Find your dream job or hire the perfect candidate today.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 justify-center relative z-10">
               <Link href="/jobs">
-                <Button size="lg" className="button-primary gap-2 w-full sm:w-auto">
-                  Find Jobs <Search className="h-4 w-4" />
+                <Button size="lg" className="button-primary gap-2 w-full sm:w-auto px-8 py-6 text-lg shadow-level-2 hover:shadow-level-3 transition-all duration-300 hover:translate-y-[-2px]">
+                  Find Jobs <Search className="h-5 w-5 ml-1" />
                 </Button>
               </Link>
               <Link href="/employer/jobs/new">
-                <Button size="lg" variant="outline" className="button-secondary gap-2 w-full sm:w-auto">
-                  Post a Job <ArrowRight className="h-4 w-4" />
+                <Button size="lg" variant="outline" className="button-secondary gap-2 w-full sm:w-auto px-8 py-6 text-lg border-2 hover:bg-primary-blue/5 transition-all duration-300">
+                  Post a Job <ArrowRight className="h-5 w-5 ml-1" />
                 </Button>
               </Link>
             </div>
-          </div>
-          
-          <div className="flex-1 relative animate-appear-zoom">
-            <div className="glass-card p-8 relative z-10 max-w-md mx-auto h-80 flex items-center justify-center">
-              <div className="flex flex-col items-center gap-4">
-                <BriefcaseIcon className="h-24 w-24 text-primary-blue/70" />
-                <p className="text-gray-dark">Job search illustration</p>
-              </div>
-            </div>
-            
-            {/* Decorative elements */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary-blue/10 rounded-full blur-xl z-0"></div>
-            <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-secondary-green/10 rounded-full blur-xl z-0"></div>
           </div>
         </div>
       </main>
 
       {/* Job Search Section */}
-      <section className="py-12 px-4 md:px-8 relative -mt-8 md:-mt-16 mb-12">
+      <section className="py-12 px-4 md:px-8 relative -mt-4 md:-mt-12 mb-12">
         <div className="max-w-5xl mx-auto">
-          <div className="glass-card p-8 shadow-level-3">
+          <div className="glass-card p-8 md:p-10 shadow-level-3 border border-white/30 backdrop-blur-xl">
             <h2 className="text-2xl md:text-3xl font-bold text-center text-dark mb-6">Search Your Dream Job</h2>
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex flex-col md:flex-row gap-4 mb-8">
               <div className="flex-grow relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-dark h-5 w-5" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-dark h-5 w-5" />
                 <Input 
                   placeholder="Job title, keyword, or company" 
-                  className="pl-10 h-12 w-full" 
+                  className="pl-12 h-14 w-full text-base focus:shadow-[0_0_0_3px_rgba(74,108,250,0.15)] transition-all duration-300"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button className="button-primary h-12 px-8 transition-all duration-300 hover:bg-primary-blue-light hover:scale-105">Search Jobs</Button>
+              <Link href={`/jobs${searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''}`}>
+                <Button className="button-primary h-14 px-10 text-base font-semibold transition-all duration-300 hover:bg-primary-blue-light hover:shadow-level-2">
+                  Search Jobs
+                </Button>
+              </Link>
             </div>
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full bg-white/80 hover:bg-white transition-all duration-300 hover:border-primary-blue hover:text-primary-blue hover:shadow-level-1"
-              >
-                Software Engineer
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full bg-white/80 hover:bg-white transition-all duration-300 hover:border-primary-blue hover:text-primary-blue hover:shadow-level-1"
-              >
-                Marketing Manager
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full bg-white/80 hover:bg-white transition-all duration-300 hover:border-primary-blue hover:text-primary-blue hover:shadow-level-1"
-              >
-                Data Scientist
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full bg-white/80 hover:bg-white transition-all duration-300 hover:border-primary-blue hover:text-primary-blue hover:shadow-level-1"
-              >
-                Product Manager
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full bg-white/80 hover:bg-white transition-all duration-300 hover:border-primary-blue hover:text-primary-blue hover:shadow-level-1"
-              >
-                UX Designer
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full bg-white/80 hover:bg-white transition-all duration-300 hover:border-primary-blue hover:text-primary-blue hover:shadow-level-1"
-              >
-                Sales Representative
-              </Button>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {[
+                "Software Engineer",
+                "Marketing Manager",
+                "Data Scientist",
+                "Product Manager",
+                "UX Designer",
+                "Sales Representative"
+              ].map((job, index) => (
+                <Link href={`/jobs?q=${encodeURIComponent(job)}`} key={index}>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="rounded-full bg-white/90 hover:bg-white py-2 px-5 transition-all duration-300 hover:border-primary-blue hover:text-primary-blue hover:shadow-level-1 text-gray-dark/90"
+                  >
+                    {job}
+                  </Button>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
