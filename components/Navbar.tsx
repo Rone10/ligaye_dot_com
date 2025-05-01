@@ -53,11 +53,11 @@ export default function Navbar({ user }: NavbarProps) {
     <header className="sticky top-0 z-50 w-full border-b border-white/10 backdrop-blur-md bg-white/70">
       <div className="flex h-16 items-center justify-between px-4 md:px-8 max-w-7xl mx-auto">
         {/* Logo */}
-        <div className="flex items-center">
-          <Link href="/" className="flex items-center gap-2">
-            <BriefcaseIcon className="h-6 w-6 text-primary-blue" />
-            {/* <Image src="/branding/logo_icon.svg" alt="Ligaye Logo" width={150} height={150} />   */}
-            <span className={`${poppins.className} font-bold text-xl text-[#0041A2]`}>Ligaye.com</span>
+        <div className="flex items-center ">
+          <Link href="/" className="flex items-center gap-1">
+            {/* <BriefcaseIcon className="h-6 w-6 text-primary-blue" /> */}
+            <Image src="/branding/suitcase.svg" alt="Ligaye Logo" width={60} height={60} className='py-2 px-2'/>  
+            <span className={`${poppins.className} font-bold content-baseline text-2xl text-[#0041A2]`}>Ligaye.com</span>
           </Link>
         </div>
         
