@@ -54,10 +54,10 @@ export default function Navbar({ user }: NavbarProps) {
       <div className="flex h-16 items-center justify-between px-4 md:px-8 max-w-7xl mx-auto">
         {/* Logo */}
         <div className="flex items-center ">
-          <Link href="/" className="flex items-center gap-1">
+          <Link href="/" className="flex items-center ">
             {/* <BriefcaseIcon className="h-6 w-6 text-primary-blue" /> */}
-            <Image src="/branding/Suitcase.svg" alt="Ligaye Logo" width={60} height={60} className='py-2 px-2'/>  
-            <span className={`${poppins.className} font-bold content-baseline text-2xl text-[#0041A2]`}>Ligaye.com</span>
+            <Image src="/branding/Suitcase.svg" alt="Ligaye Logo" width={40} height={40} className='py-2 px-2'/>  
+            <span className={`${poppins.className} font-bold content-baseline text-xl text-[#0041A2]`}>Ligaye</span>
           </Link>
         </div>
         
