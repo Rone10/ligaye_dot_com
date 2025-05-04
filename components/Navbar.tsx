@@ -76,6 +76,9 @@ export default function Navbar({ user }: NavbarProps) {
             <Link href="/contact-us" className="text-gray-dark hover:text-dark transition-colors font-medium">
               Contact Us
             </Link>
+            <Link href="/contact-us" className="text-gray-dark hover:text-dark transition-colors font-medium">
+              Blog
+            </Link>
           </div>
         </nav>
         
@@ -131,11 +134,11 @@ export default function Navbar({ user }: NavbarProps) {
               Find Jobs
             </Link>
             <Link 
-              href="/companies" 
+              href="/about-us" 
               className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Companies
+              About Us
             </Link>
             <Link 
               href="/tenders" 
@@ -145,13 +148,19 @@ export default function Navbar({ user }: NavbarProps) {
               Tenders
             </Link>
             <Link 
-              href="/pricing" 
+              href="/blog" 
               className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Pricing
+              Blog
             </Link>
-            
+            <Link 
+              href="/contact-us" 
+              className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Contact Us
+            </Link>
             <div className="border-t border-gray/30 pt-4 mt-2 flex flex-col space-y-3">
               {user ? (
                 <>
