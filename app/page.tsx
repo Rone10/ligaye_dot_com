@@ -52,7 +52,7 @@ export default function LandingPage() {
             <div className="absolute -bottom-12 left-10 w-32 h-32 bg-secondary-green/5 rounded-full blur-2xl z-0"></div>
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-dark relative z-10">
-              Gambia&apos;s Premier <span className="text-primary-blue">Job Board</span>
+              Gambia&apos;s Premier <span className="text-primary-blue">Employment Platform</span>
             </h1>
             
             <p className="text-xl text-gray-dark max-w-2xl mx-auto relative z-10">
@@ -115,6 +115,125 @@ export default function LandingPage() {
                   </Button>
                 </Link>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Use Ligaye Section */}
+      <section className="py-16 px-4 md:px-8 bg-gradient-to-br bg-red-500 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Job Seekers Column */}
+            <div className="glass-card p-8 md:p-10 hover:shadow-level-3 transition-all duration-300">
+              <h3 className="text-lg font-semibold text-primary-blue mb-2">Looking for work?</h3>
+              <h2 className="text-3xl md:text-4xl font-bold text-dark mb-6">Why job seekers love us</h2>
+              
+              <div className="space-y-8">
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                    <Building2 className="text-primary-blue h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-dark mb-1">Connect directly with top Gambian employers</p>
+                    <p className="text-gray-dark">Apply directly to employers without intermediaries.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                    <Search className="text-primary-blue h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-dark mb-1">Full transparency from the start</p>
+                    <p className="text-gray-dark">View salary, location, and requirements before applying.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                    <ArrowRight className="text-primary-blue h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-dark mb-1">One-click applications</p>
+                    <p className="text-gray-dark">Your profile is your CV. Apply with a single click.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                    <Users className="text-primary-blue h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-dark mb-1">Exclusive local opportunities</p>
+                    <p className="text-gray-dark">Find jobs tailored to Gambia's job market.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <Link href="/sign-up">
+                  <Button variant="outline" className="border-2 border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all duration-300">
+                    Create profile
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Employers Column */}
+            <div className="glass-card p-8 md:p-10 hover:shadow-level-3 transition-all duration-300">
+              <h3 className="text-lg font-semibold text-primary-blue mb-2">Need talent?</h3>
+              <h2 className="text-3xl md:text-4xl font-bold text-dark mb-6">Why employers trust us</h2>
+              
+              <div className="space-y-8">
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                    <Users className="text-primary-blue h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-dark mb-1">Access qualified Gambian talent</p>
+                    <p className="text-gray-dark">Reach candidates with skills relevant to the local market.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                    <BriefcaseIcon className="text-primary-blue h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-dark mb-1">Easy job posting & management</p>
+                    <p className="text-gray-dark">Post jobs, manage applications, and track candidates with ease.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                    <Search className="text-primary-blue h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-dark mb-1">Flexible payment options</p>
+                    <p className="text-gray-dark">Choose between online payments or pay with cash locally.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                    <Building2 className="text-primary-blue h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-dark mb-1">Enhanced employer branding</p>
+                    <p className="text-gray-dark">Showcase your company culture to attract the right candidates.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <Link href="/employer/jobs/new">
+                  <Button className="bg-primary-blue text-white hover:bg-primary-blue-light transition-all duration-300">
+                    Post a job
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
