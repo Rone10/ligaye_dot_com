@@ -125,48 +125,50 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Job Seekers Column */}
-            <div className="glass-card p-8 md:p-10 hover:shadow-level-3 transition-all duration-300">
-              <h3 className="text-lg font-semibold text-primary-blue mb-2">Looking for work?</h3>
-              <h2 className="text-3xl md:text-4xl font-bold text-dark mb-6">Why job seekers love us</h2>
-              
-              <div className="space-y-8">
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
-                    <Building2 className="text-primary-blue h-6 w-6" />
+            <div className="glass-card p-8 md:p-10 hover:shadow-level-3 transition-all duration-300 flex flex-col h-full">
+              <div className="flex-grow">
+                <h3 className="text-lg font-semibold text-primary-blue mb-2">Looking for work?</h3>
+                <h2 className="text-3xl md:text-4xl font-bold text-dark mb-6">Why job seekers love us</h2>
+                
+                <div className="space-y-8">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                      <Building2 className="text-primary-blue h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-dark mb-1">Connect directly with top Gambian employers</p>
+                      <p className="text-gray-dark">Apply directly to employers without intermediaries.</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-dark mb-1">Connect directly with top Gambian employers</p>
-                    <p className="text-gray-dark">Apply directly to employers without intermediaries.</p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
-                    <Search className="text-primary-blue h-6 w-6" />
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                      <Search className="text-primary-blue h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-dark mb-1">Full transparency from the start</p>
+                      <p className="text-gray-dark">View salary, location, and requirements before applying.</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-dark mb-1">Full transparency from the start</p>
-                    <p className="text-gray-dark">View salary, location, and requirements before applying.</p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
-                    <ArrowRight className="text-primary-blue h-6 w-6" />
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                      <ArrowRight className="text-primary-blue h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-dark mb-1">One-click applications</p>
+                      <p className="text-gray-dark">Your profile is your CV. Apply with a single click.</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-dark mb-1">One-click applications</p>
-                    <p className="text-gray-dark">Your profile is your CV. Apply with a single click.</p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
-                    <Users className="text-primary-blue h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-dark mb-1">Exclusive local opportunities</p>
-                    <p className="text-gray-dark">Find jobs tailored to Gambia's job market.</p>
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                      <Users className="text-primary-blue h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-dark mb-1">Exclusive local opportunities</p>
+                      <p className="text-gray-dark">Find jobs tailored to Gambia's job market.</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -181,48 +183,50 @@ export default function LandingPage() {
             </div>
 
             {/* Employers Column */}
-            <div className="glass-card p-8 md:p-10 hover:shadow-level-3 transition-all duration-300">
-              <h3 className="text-lg font-semibold text-primary-blue mb-2">Need talent?</h3>
-              <h2 className="text-3xl md:text-4xl font-bold text-dark mb-6">Why employers trust us</h2>
-              
-              <div className="space-y-8">
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
-                    <Users className="text-primary-blue h-6 w-6" />
+            <div className="glass-card p-8 md:p-10 hover:shadow-level-3 transition-all duration-300 flex flex-col h-full">
+              <div className="flex-grow">
+                <h3 className="text-lg font-semibold text-primary-blue mb-2">Need talent?</h3>
+                <h2 className="text-3xl md:text-4xl font-bold text-dark mb-6">Why employers trust us</h2>
+                
+                <div className="space-y-8">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                      <Users className="text-primary-blue h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-dark mb-1">Access qualified Gambian talent</p>
+                      <p className="text-gray-dark">Reach candidates with skills relevant to the local market.</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-dark mb-1">Access qualified Gambian talent</p>
-                    <p className="text-gray-dark">Reach candidates with skills relevant to the local market.</p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
-                    <BriefcaseIcon className="text-primary-blue h-6 w-6" />
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                      <BriefcaseIcon className="text-primary-blue h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-dark mb-1">Easy job posting & management</p>
+                      <p className="text-gray-dark">Post jobs, manage applications, and track candidates with ease.</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-dark mb-1">Easy job posting & management</p>
-                    <p className="text-gray-dark">Post jobs, manage applications, and track candidates with ease.</p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
-                    <Search className="text-primary-blue h-6 w-6" />
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                      <Search className="text-primary-blue h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-dark mb-1">Flexible payment options</p>
+                      <p className="text-gray-dark">Choose between online payments or pay with cash locally.</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-dark mb-1">Flexible payment options</p>
-                    <p className="text-gray-dark">Choose between online payments or pay with cash locally.</p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
-                    <Building2 className="text-primary-blue h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-dark mb-1">Enhanced employer branding</p>
-                    <p className="text-gray-dark">Showcase your company culture to attract the right candidates.</p>
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center shrink-0">
+                      <Building2 className="text-primary-blue h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-dark mb-1">Enhanced employer branding</p>
+                      <p className="text-gray-dark">Showcase your company culture to attract the right candidates.</p>
+                    </div>
                   </div>
                 </div>
               </div>
