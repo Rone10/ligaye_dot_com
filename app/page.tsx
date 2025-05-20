@@ -167,7 +167,7 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <p className="font-semibold text-dark mb-1">Exclusive local opportunities</p>
-                      <p className="text-gray-dark">Find jobs tailored to Gambia's job market.</p>
+                      <p className="text-gray-dark">Find jobs tailored to Gambia&apos;s job market.</p>
                     </div>
                   </div>
                 </div>
