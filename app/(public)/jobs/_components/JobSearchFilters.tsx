@@ -29,7 +29,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [salaryRange, setSalaryRange] = useState<[number, number]>([
     filters.salaryMin || 0,
-    filters.salaryMax || 200000
+    filters.salaryMax || 1000000
   ]);
   const [isPending, startTransition] = useTransition();
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -82,7 +82,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
     if (filters.workLocation && filters.workLocation !== 'all') count++;
     if (filters.experienceLevel && filters.experienceLevel !== 'all') count++;
     if (filters.salaryMin) count++;
-    if (filters.salaryMax && filters.salaryMax < 200000) count++;
+    if (filters.salaryMax && filters.salaryMax < 1000000) count++;
     if (filters.industryId && filters.industryId !== 'all') count++;
     if (filters.sortBy && filters.sortBy !== 'newest') count++;
     setActiveFiltersCount(count);
@@ -122,7 +122,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
     startTransition(() => {
       setFilters({
         salaryMin: salaryRange[0] > 0 ? salaryRange[0] : null,
-        salaryMax: salaryRange[1] < 200000 ? salaryRange[1] : null,
+        salaryMax: salaryRange[1] < 1000000 ? salaryRange[1] : null,
         page: 1
       });
     });
@@ -265,7 +265,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
                 <X className="h-3 w-3" />
               </Badge>
             )}
-            {(filters.salaryMin || (filters.salaryMax && filters.salaryMax < 200000)) && (
+            {(filters.salaryMin || (filters.salaryMax && filters.salaryMax < 1000000)) && (
               <Badge 
                 variant="secondary" 
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e1e5f2] hover:bg-[#d2d8ea]"
@@ -360,7 +360,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             onChange={handleSalaryRangeChange}
             onApply={applySalaryRange}
             min={0}
-            max={200000}
+            max={1000000}
           />
         </FilterSection>
 

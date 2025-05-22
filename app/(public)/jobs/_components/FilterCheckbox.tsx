@@ -42,11 +42,12 @@ export function FilterCheckbox({
           {label}
         </label>
       </div>
-      {count !== undefined && (
+      {/* SHOW COUNT NEXT TO FILTER */}
+      {/* {count !== undefined && (
         <span className="text-xs text-[#9aa3bc] bg-[#f0f2f8] px-2 py-0.5 rounded-full">
           {count}
         </span>
-      )}
+      )} */}
     </div>
   );
 } 
