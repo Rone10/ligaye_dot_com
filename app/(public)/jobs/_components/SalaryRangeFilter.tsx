@@ -104,7 +104,7 @@ export function SalaryRangeFilter({
       
       <div className="flex items-center gap-3">
         <div className="flex-1">
-          <label className="text-xs text-[#9aa3bc] mb-1 block">Min Salary (GMD)</label>
+          <label className="text-xs text-[#9aa3bc] mb-1 block">Min (GMD)</label>
           <Input
             type="text"
             value={minInput}
@@ -114,7 +114,7 @@ export function SalaryRangeFilter({
           />
         </div>
         <div className="flex-1">
-          <label className="text-xs text-[#9aa3bc] mb-1 block">Max Salary (GMD)</label>
+          <label className="text-xs text-[#9aa3bc] mb-1 block">Max (GMD)</label>
           <Input
             type="text"
             value={maxInput}
