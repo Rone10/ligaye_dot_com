@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { useJobFilters } from '../_hooks/useJobFilters';
-import { useMediaQuery } from '../_hooks/useMediaQuery';
+import { useMediaQuery, useDebounce } from '../_hooks/';
 import { 
   jobTypeOptions, 
   workLocationOptions, 
@@ -33,6 +33,37 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
   ]);
   const [isPending, startTransition] = useTransition();
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  
+  // Local state for search input to provide immediate feedback
+  const [searchInput, setSearchInput] = useState(filters.search || '');
+  
+  // Debounce the search input to prevent excessive fetching
+  const debouncedSearchTerm = useDebounce(searchInput, 500);
+  
+  // Update filters when debounced search term changes
+  useEffect(() => {
+    if (debouncedSearchTerm !== filters.search) {
+      handleFilterChange({ search: debouncedSearchTerm || null, page: 1 });
+    }
+  }, [debouncedSearchTerm]);
+  
+  // Local state for location and industry search
+  const [locationSearchInput, setLocationSearchInput] = useState('');
+  const [industrySearchInput, setIndustrySearchInput] = useState('');
+  
+  // Filtered locations and industries based on search input
+  const filteredLocations = locationSearchInput 
+    ? locations.filter(location => 
+        (location.city ? location.city.toLowerCase() : '') + location.region.toLowerCase()
+        .includes(locationSearchInput.toLowerCase())
+      )
+    : locations;
+    
+  const filteredIndustries = industrySearchInput
+    ? industries.filter(industry => 
+        industry.name.toLowerCase().includes(industrySearchInput.toLowerCase())
+      )
+    : industries;
   
   const isMobile = useMediaQuery('(max-width: 767px)');
   
@@ -81,6 +112,9 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
   const handleResetFilters = () => {
     startTransition(() => {
       resetFilters();
+      setSearchInput('');
+      setLocationSearchInput('');
+      setIndustrySearchInput('');
     });
   };
 
@@ -100,6 +134,17 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
   
   const toggleMobileFilter = () => {
     setIsMobileFilterOpen(prev => !prev);
+  };
+
+  // Handle search input change without immediate filtering
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+  };
+  
+  // Clear search immediately when clicking the X button
+  const handleClearSearch = () => {
+    setSearchInput('');
+    handleFilterChange({ search: null, page: 1 });
   };
 
   // Generate counters for filter options
@@ -162,13 +207,13 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
           <Input
             className="pl-10 pr-4 py-2 bg-white/70 border border-[rgba(255,255,255,0.5)] rounded-[10px] w-full focus:border-[#4a6cfa] focus:ring focus:ring-[rgba(74,108,250,0.15)]"
             placeholder="Search job titles, keywords, or companies"
-            value={filters.search || ''}
-            onChange={e => handleFilterChange({ search: e.target.value, page: 1 })}
+            value={searchInput}
+            onChange={handleSearchInputChange}
           />
-          {filters.search && (
+          {searchInput && (
             <button
               className="absolute inset-y-0 right-0 flex items-center pr-3"
-              onClick={() => handleFilterChange({ search: null, page: 1 })}
+              onClick={handleClearSearch}
             >
               <X className="h-4 w-4 text-[#9aa3bc]" />
             </button>
@@ -353,20 +398,26 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             className="mb-3 bg-white/70 border border-[rgba(255,255,255,0.5)] rounded-[10px]"
             placeholder="Search locations..."
             type="text"
+            value={locationSearchInput}
+            onChange={(e) => setLocationSearchInput(e.target.value)}
           />
           <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-            {locations.map(location => (
-              <FilterCheckbox
-                key={location.id}
-                label={location.city ? `${location.city}, ${location.region}` : location.region}
-                count={getLocationCount(location.id)}
-                checked={filters.locationId === location.id}
-                onChange={() => handleFilterChange({ 
-                  locationId: filters.locationId === location.id ? 'all' : location.id, 
-                  page: 1 
-                })}
-              />
-            ))}
+            {filteredLocations.length > 0 ? (
+              filteredLocations.map(location => (
+                <FilterCheckbox
+                  key={location.id}
+                  label={location.city ? `${location.city}, ${location.region}` : location.region}
+                  count={getLocationCount(location.id)}
+                  checked={filters.locationId === location.id}
+                  onChange={() => handleFilterChange({ 
+                    locationId: filters.locationId === location.id ? 'all' : location.id, 
+                    page: 1 
+                  })}
+                />
+              ))
+            ) : (
+              <div className="text-sm text-[#9aa3bc] py-2">No locations match your search</div>
+            )}
           </div>
         </FilterSection>
 
@@ -381,20 +432,26 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             className="mb-3 bg-white/70 border border-[rgba(255,255,255,0.5)] rounded-[10px]"
             placeholder="Search industries..."
             type="text"
+            value={industrySearchInput}
+            onChange={(e) => setIndustrySearchInput(e.target.value)}
           />
           <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-            {industries.map(industry => (
-              <FilterCheckbox
-                key={industry.id}
-                label={industry.name}
-                count={getIndustryCount(industry.id)}
-                checked={filters.industryId === industry.id}
-                onChange={() => handleFilterChange({ 
-                  industryId: filters.industryId === industry.id ? 'all' : industry.id, 
-                  page: 1 
-                })}
-              />
-            ))}
+            {filteredIndustries.length > 0 ? (
+              filteredIndustries.map(industry => (
+                <FilterCheckbox
+                  key={industry.id}
+                  label={industry.name}
+                  count={getIndustryCount(industry.id)}
+                  checked={filters.industryId === industry.id}
+                  onChange={() => handleFilterChange({ 
+                    industryId: filters.industryId === industry.id ? 'all' : industry.id, 
+                    page: 1 
+                  })}
+                />
+              ))
+            ) : (
+              <div className="text-sm text-[#9aa3bc] py-2">No industries match your search</div>
+            )}
           </div>
         </FilterSection>
 
