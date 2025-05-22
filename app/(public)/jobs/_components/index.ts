@@ -1,6 +1,11 @@
-export { JobFilters } from './JobFilters';
-export { JobCard } from './JobCard';
 export { JobList } from './JobList';
 export { JobListWithSaving } from './JobListWithSaving';
+export { JobFilters } from './JobFilters';
+export { JobSearchFilters } from './JobSearchFilters';
+export { FilterSection } from './FilterSection';
+export { FilterCheckbox } from './FilterCheckbox';
+export { SalaryRangeFilter } from './SalaryRangeFilter';
+export { MobileFilterToggle } from './MobileFilterToggle';
+export { JobCard } from './JobCard';
 export { NoResults } from './NoResults';
 export { JobPagination } from './JobPagination'; 
