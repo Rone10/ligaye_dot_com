@@ -56,29 +56,74 @@ export default function Navbar({ user }: NavbarProps) {
         <div className="flex items-center ">
           <Link href="/" className="flex items-center ">
             {/* <BriefcaseIcon className="h-6 w-6 text-primary-blue" /> */}
-            <Image src="/branding/Suitcase.svg" alt="Ligaye Logo" width={40} height={40} className='py-2 px-2'/>  
-            <span className={`${poppins.className} font-bold content-baseline text-xl text-[#0041A2]`}>Ligaye</span>
+            {/* <Image src="/branding/Suitcase.svg" alt="Ligaye Logo" width={40} height={40} className='py-2 px-2'/>   */}
+            <span className={`${poppins.className} font-bold content-baseline text-2xl text-[#0041A2]`}>Ligaye</span>
           </Link>
         </div>
         
         {/* Navigation - Centered */}
         <nav className="hidden md:flex items-center justify-center">
           <div className="flex space-x-6">
-            <Link href="/jobs" className="text-gray-dark hover:text-dark transition-colors font-medium">
+            <Link 
+              href="/jobs" 
+              className={`transition-colors font-medium ${
+                pathname.startsWith('/jobs') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-gray-dark hover:text-dark'
+              }`}
+            >
               Find Jobs
             </Link>
-            <Link href="/tenders" className="text-gray-dark hover:text-dark transition-colors font-medium">
+            <Link 
+              href="/tenders" 
+              className={`transition-colors font-medium ${
+                pathname.startsWith('/tenders') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-gray-dark hover:text-dark'
+              }`}
+            >
               Tenders
             </Link>
-            <Link href="/about-us" className="text-gray-dark hover:text-dark transition-colors font-medium">
-              About Us
+            <Link 
+              href="/about-us" 
+              className={`transition-colors font-medium ${
+                pathname.startsWith('/about-us') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-gray-dark hover:text-dark'
+              }`}
+            >
+              About
             </Link>
-            <Link href="/contact-us" className="text-gray-dark hover:text-dark transition-colors font-medium">
-              Contact Us
+            <Link 
+              href="/contact-us" 
+              className={`transition-colors font-medium ${
+                pathname.startsWith('/contact-us') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-gray-dark hover:text-dark'
+              }`}
+            >
+              Contact
             </Link>
-            <Link href="/blog" className="text-gray-dark hover:text-dark transition-colors font-medium">
+            <Link 
+              href="/blog" 
+              className={`transition-colors font-medium ${
+                pathname.startsWith('/blog') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-gray-dark hover:text-dark'
+              }`}
+            >
               Blog
             </Link>
+            {/* <Link 
+              href="/pricing" 
+              className={`transition-colors font-medium ${
+                pathname.startsWith('/pricing') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-gray-dark hover:text-dark'
+              }`}
+            >
+              Pricing
+            </Link> */}
           </div>
         </nav>
         
@@ -128,38 +173,69 @@ export default function Navbar({ user }: NavbarProps) {
           <nav className="flex flex-col space-y-4">
             <Link 
               href="/jobs" 
-              className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
+              className={`transition-colors font-medium px-2 py-1.5 ${
+                pathname.startsWith('/jobs') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-dark hover:text-primary-blue'
+              }`}
               onClick={() => setMobileMenuOpen(false)}
             >
               Find Jobs
             </Link>
             <Link 
-              href="/about-us" 
-              className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              About Us
-            </Link>
-            <Link 
               href="/tenders" 
-              className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
+              className={`transition-colors font-medium px-2 py-1.5 ${
+                pathname.startsWith('/tenders') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-dark hover:text-primary-blue'
+              }`}
               onClick={() => setMobileMenuOpen(false)}
             >
               Tenders
             </Link>
             <Link 
+              href="/about-us" 
+              className={`transition-colors font-medium px-2 py-1.5 ${
+                pathname.startsWith('/about-us') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-dark hover:text-primary-blue'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              About Us
+            </Link>
+            <Link 
+              href="/contact-us" 
+              className={`transition-colors font-medium px-2 py-1.5 ${
+                pathname.startsWith('/contact-us') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-dark hover:text-primary-blue'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Contact Us
+            </Link>
+            <Link 
               href="/blog" 
-              className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
+              className={`transition-colors font-medium px-2 py-1.5 ${
+                pathname.startsWith('/blog') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-dark hover:text-primary-blue'
+              }`}
               onClick={() => setMobileMenuOpen(false)}
             >
               Blog
             </Link>
             <Link 
-              href="/contact-us" 
-              className="text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
+              href="/pricing" 
+              className={`transition-colors font-medium px-2 py-1.5 ${
+                pathname.startsWith('/pricing') 
+                  ? 'text-[#4a6cfa] font-semibold' 
+                  : 'text-dark hover:text-primary-blue'
+              }`}
               onClick={() => setMobileMenuOpen(false)}
             >
-              Contact Us
+              Pricing
             </Link>
             <div className="border-t border-gray/30 pt-4 mt-2 flex flex-col space-y-3">
               {user ? (
