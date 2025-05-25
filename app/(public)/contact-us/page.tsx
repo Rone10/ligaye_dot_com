@@ -160,7 +160,7 @@ export default function ContactUsPage() {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-dark dark:text-light">Email</h3>
-                                    <p className="text-gray-600 dark:text-gray-400 text-sm">info@ligaye.com</p>
+                                    <p className="text-gray-600 dark:text-gray-400 text-sm">contact@ligaye.com</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-4">
@@ -169,10 +169,10 @@ export default function ContactUsPage() {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-dark dark:text-light">Phone</h3>
-                                    <p className="text-gray-600 dark:text-gray-400 text-sm">+220 123 4567</p>
+                                    <p className="text-gray-600 dark:text-gray-400 text-sm">+220 313 9076 / 301 4290</p>
                                 </div>
                             </div>
-                           <div className="flex items-start gap-4">
+                           {/* <div className="flex items-start gap-4">
                                 <div className="mt-1 flex-shrink-0 bg-primary-blue/10 dark:bg-blue-900/30 p-3 rounded-full">
                                     <MapPin className="h-5 w-5 text-primary-blue dark:text-blue-400" />
                                 </div>
@@ -180,7 +180,7 @@ export default function ContactUsPage() {
                                     <h3 className="font-semibold text-dark dark:text-light">Address</h3>
                                     <p className="text-gray-600 dark:text-gray-400 text-sm">123 Job Lane, Serekunda, The Gambia (Placeholder)</p>
                                 </div>
-                           </div>
+                           </div> */}
                         </div>
                     </div>
                 </div>

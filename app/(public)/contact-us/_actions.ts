@@ -9,7 +9,7 @@ import ContactFormSubmissionEmail from '@/emails/contact-form-submission'
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 // Define the recipient email address (consider using an environment variable)
-const recipientEmail = process.env.CONTACT_EMAIL_RECIPIENT || 'am.diallo1421@gmail.com';
+const recipientEmail = process.env.CONTACT_EMAIL_RECIPIENT || 'contact@ligaye.com';
 const fromEmail = 'Contact Form <contact@ligaye.com>'; // Or your verified Resend domain
 
 export async function sendContactMessage(data: ContactFormValues) {
