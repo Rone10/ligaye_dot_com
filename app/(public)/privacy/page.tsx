@@ -322,7 +322,7 @@ export default function PrivacyPolicyPage() {
             <div className="mb-12">
               <h2 className="text-2xl md:text-3xl font-bold text-dark mb-6 flex items-center gap-3">
                 <Shield className="text-primary-blue h-7 w-7" />
-                Children's Privacy
+                Children&apos;s Privacy
               </h2>
               
               <div className="bg-white/50 p-6 rounded-lg border border-white/30">
@@ -370,7 +370,7 @@ export default function PrivacyPolicyPage() {
                   </p>
                   <ul className="list-disc list-inside space-y-2 ml-4">
                     <li>Post the updated policy on our website</li>
-                    <li>Update the "Last updated" date at the top of this policy</li>
+                    <li>Update the &quot;Last updated&quot; date at the top of this policy</li>
                     <li>Notify you via email or platform notification for significant changes</li>
                     <li>Provide a summary of key changes when appropriate</li>
                   </ul>
