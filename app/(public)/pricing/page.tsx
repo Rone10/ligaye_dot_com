@@ -106,7 +106,7 @@ export default function PricingPage() {
 
           {/* Annual Subscription - Most Popular */}
           <div className="relative group">
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
               <Badge className="bg-[#05ce91] text-white px-4 py-2 text-sm font-semibold shadow-lg">
                 Most Popular
               </Badge>
@@ -116,7 +116,7 @@ export default function PricingPage() {
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-[#1a1e2d] mb-4">Annual Subscription</h3>
                 <div className="mb-2">
-                  <span className="text-5xl font-bold text-[#05ce91]">D35,000</span>
+                  <span className="text-5xl font-bold text-[#05ce91]">D40,000</span>
                   <span className="text-[#9aa3bc] text-lg ml-2">per year</span>
                 </div>
                 <div className="mb-6">
@@ -131,12 +131,12 @@ export default function PricingPage() {
                 <div className="space-y-4 mb-8">
                   <div className="flex items-center">
                     <Check className="w-5 h-5 text-[#05ce91] mr-3 flex-shrink-0" />
-                    <span className="text-[#1a1e2d] font-medium">Unlimited job postings</span>
+                    <span className="text-[#1a1e2d] font-medium">3 job postings per month</span>
                   </div>
-                  <div className="flex items-center">
+                  {/* <div className="flex items-center">
                     <Check className="w-5 h-5 text-[#05ce91] mr-3 flex-shrink-0" />
                     <span className="text-[#1a1e2d]">Extended 60-day visibility</span>
-                  </div>
+                  </div> */}
                   <div className="flex items-center">
                     <Check className="w-5 h-5 text-[#05ce91] mr-3 flex-shrink-0" />
                     <span className="text-[#1a1e2d]">Advanced applicant filtering</span>
@@ -187,15 +187,15 @@ export default function PricingPage() {
                   </div>
                   <div className="flex items-center">
                     <Check className="w-5 h-5 text-[#05ce91] mr-3 flex-shrink-0" />
-                    <span className="text-[#1a1e2d]">API access</span>
+                    <span className="text-[#1a1e2d]">Unlimited job postings</span>
                   </div>
-                  <div className="flex items-center">
+                  {/* <div className="flex items-center">
                     <Check className="w-5 h-5 text-[#05ce91] mr-3 flex-shrink-0" />
                     <span className="text-[#1a1e2d]">Custom integrations</span>
-                  </div>
+                  </div> */}
                   <div className="flex items-center">
                     <Check className="w-5 h-5 text-[#05ce91] mr-3 flex-shrink-0" />
-                    <span className="text-[#1a1e2d]">White-label options</span>
+                    <span className="text-[#1a1e2d]">Access to candidate database</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="w-5 h-5 text-[#05ce91] mr-3 flex-shrink-0" />
