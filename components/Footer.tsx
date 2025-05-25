@@ -15,7 +15,7 @@ export default function Footer() {
               <ul className="space-y-2">
                 <li><Link href="/jobs" className="text-zinc-400 hover:text-white">Find Jobs</Link></li>
                 <li><Link href="/create-profile" className="text-zinc-400 hover:text-white">Create Profile</Link></li>
-                <li><Link href="/job-alerts" className="text-zinc-400 hover:text-white">Job Alerts</Link></li>
+                {/* <li><Link href="/job-alerts" className="text-zinc-400 hover:text-white">Job Alerts</Link></li> */}
               </ul>
             </div>
             
