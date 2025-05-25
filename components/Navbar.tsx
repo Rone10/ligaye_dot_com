@@ -76,7 +76,7 @@ export default function Navbar({ user }: NavbarProps) {
             <Link href="/contact-us" className="text-gray-dark hover:text-dark transition-colors font-medium">
               Contact Us
             </Link>
-            <Link href="/contact-us" className="text-gray-dark hover:text-dark transition-colors font-medium">
+            <Link href="/blog" className="text-gray-dark hover:text-dark transition-colors font-medium">
               Blog
             </Link>
           </div>
