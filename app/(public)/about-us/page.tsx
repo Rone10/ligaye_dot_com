@@ -77,13 +77,13 @@ export default function AboutUsPage() {
         </section>
 
         {/* Team Section (Placeholder) */}
-        <section className={`p-8 md:p-12 rounded-2xl ${glassmorphicCardClass}`}>
+        {/* <section className={`p-8 md:p-12 rounded-2xl ${glassmorphicCardClass}`}>
           <h2 className="text-3xl font-bold text-center text-dark dark:text-light mb-8">Meet the Team (Placeholder)</h2>
           <p className="text-center text-gray-700 dark:text-gray-300 max-w-xl mx-auto">
             We are a passionate team dedicated to realizing the vision of Ligaye.com. More details about our team members will be shared soon!
-          </p>
+          </p> */}
           {/* Placeholder for team member cards/profiles */}
-        </section>
+        {/* </section> */}
       </div>
     </div>
   );
