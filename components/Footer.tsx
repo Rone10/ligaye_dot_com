@@ -7,7 +7,7 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h3 className="text-xl text-white font-semibold mb-4">Ligaye.com</h3>
-              <p className="text-zinc-400">Gambia&apos;s Premier Employment Platform</p>
+              <p className="text-zinc-400">Gambia&apos;s Digital Career Revolution</p>
             </div>
             
             <div>
