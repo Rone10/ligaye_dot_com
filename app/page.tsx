@@ -52,24 +52,60 @@ export default function LandingPage() {
             <div className="absolute -bottom-12 left-10 w-32 h-32 bg-secondary-green/5 rounded-full blur-2xl z-0"></div>
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-dark relative z-10">
-              Gambia&apos;s Premier <span className="text-primary-blue">Employment Platform</span>
+            <span className="text-primary-blue"> Gambia&apos;s  </span>Digital Career
+            <span className="text-primary-blue"> Revolution </span>
             </h1>
             
             <p className="text-xl text-gray-dark max-w-2xl mx-auto relative z-10">
-              Connecting talented professionals with opportunities across Gambia. Find your dream job or hire the perfect candidate today.
+            Whether you&apos;re taking your first career step or your next big leap, we&apos;re here to help you reach new heights.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-6 justify-center relative z-10">
-              <Link href="/jobs">
-                <Button size="lg" className="button-primary gap-2 w-full sm:w-auto px-8 py-6 text-lg shadow-level-2 hover:shadow-level-3 transition-all duration-300 hover:translate-y-[-2px]">
-                  Find Jobs <Search className="h-5 w-5 ml-1" />
-                </Button>
-              </Link>
-              <Link href="/employer/jobs/new">
-                <Button size="lg" variant="outline" className="button-secondary gap-2 w-full sm:w-auto px-8 py-6 text-lg border-2 hover:bg-primary-blue/5 transition-all duration-300">
-                  Post a Job <ArrowRight className="h-5 w-5 ml-1" />
-                </Button>
-              </Link>
+              {user ? (
+                // Show role-specific buttons for logged-in users
+                user.user_metadata?.role === 'candidate' ? (
+                  <>
+                    <Link href="/dashboard">
+                      <Button size="lg" className="button-primary gap-2 w-full sm:w-auto px-8 py-6 text-lg shadow-level-2 hover:shadow-level-3 transition-all duration-300 hover:translate-y-[-2px]">
+                        My Dashboard <Users className="h-5 w-5 ml-1" />
+                      </Button>
+                    </Link>
+                    <Link href="/jobs">
+                      <Button size="lg" variant="outline" className="button-secondary gap-2 w-full sm:w-auto px-8 py-6 text-lg border-2 hover:bg-primary-blue/5 transition-all duration-300">
+                        Find Jobs <Search className="h-5 w-5 ml-1" />
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
+                  // Employer buttons
+                  <>
+                    <Link href="/employer/dashboard">
+                      <Button size="lg" className="button-primary gap-2 w-full sm:w-auto px-8 py-6 text-lg shadow-level-2 hover:shadow-level-3 transition-all duration-300 hover:translate-y-[-2px]">
+                        Employer Dashboard <Building2 className="h-5 w-5 ml-1" />
+                      </Button>
+                    </Link>
+                    <Link href="/employer/jobs/new">
+                      <Button size="lg" variant="outline" className="button-secondary gap-2 w-full sm:w-auto px-8 py-6 text-lg border-2 hover:bg-primary-blue/5 transition-all duration-300">
+                        Post a Job <ArrowRight className="h-5 w-5 ml-1" />
+                      </Button>
+                    </Link>
+                  </>
+                )
+              ) : (
+                // Show general buttons for non-logged-in users
+                <>
+                  <Link href="/jobs">
+                    <Button size="lg" className="button-primary gap-2 w-full sm:w-auto px-8 py-6 text-lg shadow-level-2 hover:shadow-level-3 transition-all duration-300 hover:translate-y-[-2px]">
+                      Find Jobs <Search className="h-5 w-5 ml-1" />
+                    </Button>
+                  </Link>
+                  <Link href="/employer/jobs/new">
+                    <Button size="lg" variant="outline" className="button-secondary gap-2 w-full sm:w-auto px-8 py-6 text-lg border-2 hover:bg-primary-blue/5 transition-all duration-300">
+                      Post a Job <ArrowRight className="h-5 w-5 ml-1" />
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -297,16 +333,58 @@ export default function LandingPage() {
         
         <div className="max-w-4xl mx-auto relative z-10">
           <div className="glass-card p-8 md:p-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-dark mb-4">Ready to Take the Next Step?</h2>
-            <p className="text-gray-dark mb-8 max-w-2xl mx-auto">Whether you&apos;re looking for your next opportunity or seeking talented professionals, Ligaye.com has you covered.</p>
+            {user ? (
+              user.user_metadata?.role === 'candidate' ? (
+                <>
+                  <h2 className="text-3xl md:text-4xl font-bold text-dark mb-4">Welcome back! Ready to find your next opportunity?</h2>
+                  <p className="text-gray-dark mb-8 max-w-2xl mx-auto">Explore new job opportunities and manage your applications from your personalized dashboard.</p>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-3xl md:text-4xl font-bold text-dark mb-4">Welcome back! Ready to find great talent?</h2>
+                  <p className="text-gray-dark mb-8 max-w-2xl mx-auto">Manage your job postings and discover qualified candidates from your employer dashboard.</p>
+                </>
+              )
+            ) : (
+              <>
+                <h2 className="text-3xl md:text-4xl font-bold text-dark mb-4">Ready to Take the Next Step?</h2>
+                <p className="text-gray-dark mb-8 max-w-2xl mx-auto">Whether you&apos;re looking for your next opportunity or seeking talented professionals, Ligaye.com has you covered.</p>
+              </>
+            )}
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/sign-up">
-                <Button size="lg" className="button-primary w-full sm:w-auto">Create an Account</Button>
-              </Link>
-              <Link href="/sign-in">
-                <Button size="lg" variant="outline" className="button-secondary w-full sm:w-auto">Sign In</Button>
-              </Link>
+              {user ? (
+                // Show role-specific dashboard buttons for logged-in users
+                user.user_metadata?.role === 'candidate' ? (
+                  <>
+                    <Link href="/dashboard">
+                      <Button size="lg" className="button-primary w-full sm:w-auto">Go to Dashboard</Button>
+                    </Link>
+                    <Link href="/jobs">
+                      <Button size="lg" variant="outline" className="button-secondary w-full sm:w-auto">Browse Jobs</Button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/employer/dashboard">
+                      <Button size="lg" className="button-primary w-full sm:w-auto">Employer Dashboard</Button>
+                    </Link>
+                    <Link href="/employer/jobs/new">
+                      <Button size="lg" variant="outline" className="button-secondary w-full sm:w-auto">Post a Job</Button>
+                    </Link>
+                  </>
+                )
+              ) : (
+                // Show sign up/sign in buttons for non-logged-in users
+                <>
+                  <Link href="/sign-up">
+                    <Button size="lg" className="button-primary w-full sm:w-auto">Create an Account</Button>
+                  </Link>
+                  <Link href="/sign-in">
+                    <Button size="lg" variant="outline" className="button-secondary w-full sm:w-auto">Sign In</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
