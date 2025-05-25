@@ -57,7 +57,7 @@ export default function Navbar({ user }: NavbarProps) {
           <Link href="/" className="flex items-center ">
             {/* <BriefcaseIcon className="h-6 w-6 text-primary-blue" /> */}
             {/* <Image src="/branding/Suitcase.svg" alt="Ligaye Logo" width={40} height={40} className='py-2 px-2'/>   */}
-            <span className={`${poppins.className} font-bold content-baseline text-2xl text-[#0041A2]`}>Ligaye</span>
+            <span className={`${poppins.className} font-bold content-baseline text-3xl text-primary-blue`}>Ligaye</span>
           </Link>
         </div>
         
