@@ -262,11 +262,11 @@ export function UnifiedSidebar({ userRole }: UnifiedSidebarProps) {
       <Button
         variant="ghost"
         size="icon"
-        className={`fixed top-4 left-4 z-50 md:hidden ${isMobileOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        className={`fixed top-4 left-4 z-50 bg-primary-blue text-white hover:bg-primary-blue/80 md:hidden ${isMobileOpen ? ' pointer-events-none' : 'opacity-100'}`}
         onClick={() => setIsMobileOpen(!isMobileOpen)}
         aria-label="Open menu"
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-5 w-5 text-white" />
       </Button>
       
       {/* Overlay */}
