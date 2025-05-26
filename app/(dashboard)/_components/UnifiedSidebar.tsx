@@ -164,7 +164,7 @@ function SidebarUserProfile({ isSidebarExpanded, userData, loading, onLogout }: 
               variant="ghost"
               size="sm"
               onClick={onLogout}
-              className="mt-1 h-auto p-2 text-xs text-destructive hover:underline bg-slate-950 dark:hover:bg-slate-700"
+              className="mt-1 h-auto py-2 px-4 text-xs text-destructive hover:underline bg-slate-800 dark:hover:bg-slate-700"
             >
               <LogOut className="mr-1.5 h-3 w-3" /> Log out
             </Button>
