@@ -151,7 +151,7 @@ export default function ContactUsPage() {
                     <div className="space-y-6">
                         <h2 className="text-2xl font-semibold text-theme-dark mb-4">Contact Information</h2>
                         <p className="text-theme-gray-dark">
-                            Alternatively, you can reach us through the following channels (details are placeholders):
+                            Alternatively, you can reach us through the following channels:
                         </p>
                         <div className="space-y-4">
                              <div className="flex items-start gap-4">

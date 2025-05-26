@@ -16,7 +16,7 @@ export default async function PricingPage() {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))]">
-      <Navbar user={user} />
+      {/* <Navbar user={user} /> */}
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="relative overflow-hidden">
