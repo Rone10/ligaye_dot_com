@@ -76,7 +76,7 @@ export function RequestResetForm() {
   
   if (isSuccess) {
     return (
-      <Card className="w-full max-w-md mx-auto bg-white/70 backdrop-blur-lg border border-gray/30 shadow-md">
+      <Card className="w-full max-w-md mx-auto glass-card">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-2">
             <CheckCircle2 className="h-12 w-12 text-green-500" />
@@ -87,7 +87,7 @@ export function RequestResetForm() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <Button asChild className="bg-primary-blue hover:bg-primary-blue-light">
+          <Button asChild className="bg-primary hover:bg-primary/90">
             <Link href="/sign-in">Return to Sign In</Link>
           </Button>
         </CardContent>
@@ -96,7 +96,7 @@ export function RequestResetForm() {
   }
   
   return (
-    <Card className="w-full max-w-md mx-auto bg-white/70 backdrop-blur-lg border border-gray/30 shadow-md">
+    <Card className="w-full max-w-md mx-auto glass-card">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">Reset Password</CardTitle>
         <CardDescription className="text-center">
@@ -128,7 +128,7 @@ export function RequestResetForm() {
           
           <Button 
             type="submit" 
-            className="w-full bg-primary-blue hover:bg-primary-blue-light"
+            className="w-full bg-primary hover:bg-primary/90"
             disabled={isLoading}
           >
             {isLoading ? 'Sending...' : 'Send Reset Link'}
@@ -136,9 +136,9 @@ export function RequestResetForm() {
         </form>
       </CardContent>
       <CardFooter className="flex justify-center">
-        <p className="text-sm text-gray-dark">
+        <p className="text-sm text-muted-foreground">
           Remember your password?{' '}
-          <Link href="/sign-in" className="text-primary-blue hover:underline">
+          <Link href="/sign-in" className="text-primary hover:underline">
             Sign In
           </Link>
         </p>

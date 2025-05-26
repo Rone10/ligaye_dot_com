@@ -72,14 +72,14 @@ export default function ApplicationsList({ applications }: ApplicationsListProps
   return (
     <div className="space-y-6">
       {/* Search and filter controls */}
-      <div className="bg-white/70 backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.3)] p-4 shadow-[0_8px_32px_rgba(31,38,135,0.1)]">
+      <div className="glass-card p-4">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
           {/* Search input */}
           <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
               placeholder="Search by job title or company..." 
-              className="pl-9 h-10 bg-white/50"
+              className="pl-9 h-10 bg-background/50"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -89,19 +89,19 @@ export default function ApplicationsList({ applications }: ApplicationsListProps
                 onClick={() => setSearchTerm('')}
                 aria-label="Clear search"
               >
-                <X className="h-4 w-4 text-gray-500 hover:text-gray-900" />
+                <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               </button>
             )}
           </div>
           
           {/* Status filter */}
           <div className="flex items-center gap-3">
-            <Filter className="h-4 w-4 text-[#4a6cfa]" />
+            <Filter className="h-4 w-4 text-primary" />
             <Select
               value={statusFilter}
               onValueChange={setStatusFilter}
             >
-              <SelectTrigger className="w-[180px] bg-white/50 h-10">
+              <SelectTrigger className="w-[180px] bg-background/50 h-10">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -130,15 +130,15 @@ export default function ApplicationsList({ applications }: ApplicationsListProps
           ))}
         </div>
       ) : (
-        <div className="bg-white/70 backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.3)] p-8 text-center shadow-[0_8px_32px_rgba(31,38,135,0.1)]">
-          <p className="text-[#9aa3bc]">No applications match your search criteria.</p>
+        <div className="glass-card p-8 text-center">
+          <p className="text-muted-foreground">No applications match your search criteria.</p>
           <Button 
             variant="link" 
             onClick={() => {
               setSearchTerm('')
               setStatusFilter('all')
             }}
-            className="text-[#4a6cfa] mt-2"
+            className="text-primary mt-2"
           >
             Clear filters
           </Button>

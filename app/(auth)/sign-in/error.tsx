@@ -17,8 +17,8 @@ export default function SignInError({
   }, [error])
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#e9efff] to-[#f4f7ff]">
-      <Card className="w-full max-w-md mx-auto bg-white/70 backdrop-blur-lg border border-gray/30 shadow-md">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))]">
+      <Card className="w-full max-w-md mx-auto glass-card">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center text-red-600">Oops! Something went wrong</CardTitle>
           <CardDescription className="text-center">
@@ -27,7 +27,7 @@ export default function SignInError({
         </CardHeader>
         <CardContent>
           <div className="text-center mb-4">
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               {error.message || 'An unexpected error occurred. Please try again.'}
             </p>
           </div>
@@ -35,7 +35,7 @@ export default function SignInError({
         <CardFooter className="flex justify-center">
           <Button
             onClick={reset}
-            className="bg-primary-blue hover:bg-primary-blue-light"
+            className="bg-primary hover:bg-primary/90"
           >
             Try Again
           </Button>

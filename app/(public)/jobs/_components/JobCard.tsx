@@ -135,9 +135,9 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
               </div>
             </div>
             <Link href={`/jobs/${job.id}/apply`} passHref>
-              <Button className="bg-[#4a6cfa] hover:bg-[#7b90ff] text-white px-6 py-2.5 rounded-[10px] font-semibold text-base">
-                Apply Now
-              </Button>
+                      <Button className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-[10px] font-semibold text-base">
+          Apply Now
+        </Button>
             </Link>
           </div>
         </div>

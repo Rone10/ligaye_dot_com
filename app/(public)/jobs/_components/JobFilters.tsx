@@ -129,10 +129,10 @@ export function JobFilters({ locations, industries }: FilterProps) {
       <div className="p-5 border-b border-[rgba(255,255,255,0.5)]">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Search className="h-4 w-4 text-[#9aa3bc]" />
+            <Search className="h-4 w-4 text-muted-foreground" />
           </div>
           <Input
-            className="pl-10 pr-4 py-2 bg-white/70 border border-[rgba(255,255,255,0.5)] rounded-[10px] w-full focus:border-[#4a6cfa] focus:ring focus:ring-[rgba(74,108,250,0.15)]"
+                          className="pl-10 pr-4 py-2 bg-card border border-border rounded-[10px] w-full focus:border-primary focus:ring focus:ring-primary/15"
             placeholder="Search job titles, keywords, or companies"
             value={filters.search || ''}
             onChange={e => handleFilterChange({ search: e.target.value, page: 1 })}
@@ -142,7 +142,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
               className="absolute inset-y-0 right-0 flex items-center pr-3"
               onClick={() => handleFilterChange({ search: null, page: 1 })}
             >
-              <X className="h-4 w-4 text-[#9aa3bc]" />
+                              <X className="h-4 w-4 text-muted-foreground" />
             </button>
           )}
         </div>
@@ -155,7 +155,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
           value={filters.locationId || 'all'} 
           onValueChange={value => handleFilterChange({ locationId: value as string, page: 1 })}
         >
-          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
+          <SelectTrigger className="w-[160px] bg-card border-border rounded-[10px]">
             <SelectValue placeholder="Location" />
           </SelectTrigger>
           <SelectContent className="rounded-[10px]">
@@ -173,7 +173,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
           value={filters.jobType || 'all'} 
           onValueChange={value => handleFilterChange({ jobType: value as any, page: 1 })}
         >
-          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
+          <SelectTrigger className="w-[160px] bg-card border-border rounded-[10px]">
             <SelectValue placeholder="Job Type" />
           </SelectTrigger>
           <SelectContent className="rounded-[10px]">
@@ -191,7 +191,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
           value={filters.workLocation || 'all'} 
           onValueChange={value => handleFilterChange({ workLocation: value as any, page: 1 })}
         >
-          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
+          <SelectTrigger className="w-[160px] bg-card border-border rounded-[10px]">
             <SelectValue placeholder="Work Location" />
           </SelectTrigger>
           <SelectContent className="rounded-[10px]">
@@ -209,7 +209,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
           value={filters.experienceLevel || 'all'} 
           onValueChange={value => handleFilterChange({ experienceLevel: value as any, page: 1 })}
         >
-          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
+          <SelectTrigger className="w-[160px] bg-card border-border rounded-[10px]">
             <SelectValue placeholder="Experience Level" />
           </SelectTrigger>
           <SelectContent className="rounded-[10px]">
@@ -227,7 +227,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
           value={filters.industryId || 'all'} 
           onValueChange={value => handleFilterChange({ industryId: value as string, page: 1 })}
         >
-          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
+          <SelectTrigger className="w-[160px] bg-card border-border rounded-[10px]">
             <SelectValue placeholder="Industry" />
           </SelectTrigger>
           <SelectContent className="rounded-[10px]">
@@ -245,7 +245,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
           value={filters.sortBy || 'newest'} 
           onValueChange={value => handleFilterChange({ sortBy: value as 'newest' | 'oldest', page: 1 })}
         >
-          <SelectTrigger className="w-[160px] bg-white/70 border-[rgba(255,255,255,0.5)] rounded-[10px]">
+          <SelectTrigger className="w-[160px] bg-card border-border rounded-[10px]">
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
           <SelectContent className="rounded-[10px]">
@@ -300,7 +300,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
                       value={filters.locationId || 'all'} 
                       onValueChange={value => handleFilterChange({ locationId: value as string, page: 1 })}
                     >
-                      <SelectTrigger className="w-full bg-white">
+                      <SelectTrigger className="w-full bg-card">
                         <SelectValue placeholder="Any Location" />
                       </SelectTrigger>
                       <SelectContent>
@@ -322,7 +322,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
                       value={filters.jobType || 'all'} 
                       onValueChange={value => handleFilterChange({ jobType: value as any, page: 1 })}
                     >
-                      <SelectTrigger className="w-full bg-white">
+                      <SelectTrigger className="w-full bg-card">
                         <SelectValue placeholder="Any Type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -344,7 +344,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
                       value={filters.workLocation || 'all'} 
                       onValueChange={value => handleFilterChange({ workLocation: value as any, page: 1 })}
                     >
-                      <SelectTrigger className="w-full bg-white">
+                      <SelectTrigger className="w-full bg-card">
                         <SelectValue placeholder="Any Work Location" />
                       </SelectTrigger>
                       <SelectContent>
@@ -366,7 +366,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
                       value={filters.experienceLevel || 'all'} 
                       onValueChange={value => handleFilterChange({ experienceLevel: value as any, page: 1 })}
                     >
-                      <SelectTrigger className="w-full bg-white">
+                      <SelectTrigger className="w-full bg-card">
                         <SelectValue placeholder="Any Experience" />
                       </SelectTrigger>
                       <SelectContent>
@@ -415,7 +415,7 @@ export function JobFilters({ locations, industries }: FilterProps) {
                       value={filters.industryId || 'all'} 
                       onValueChange={value => handleFilterChange({ industryId: value as string, page: 1 })}
                     >
-                      <SelectTrigger className="w-full bg-white">
+                      <SelectTrigger className="w-full bg-card">
                         <SelectValue placeholder="Any Industry" />
                       </SelectTrigger>
                       <SelectContent>

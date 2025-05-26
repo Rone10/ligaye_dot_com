@@ -80,47 +80,47 @@ export default function ApplicationCard({ application, job, employer }: Applicat
     .toUpperCase()
   
   return (
-    <div className="bg-white/70 backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.3)] overflow-hidden shadow-[0_8px_32px_rgba(31,38,135,0.1)] transition-all duration-200 hover:translate-y-[-2px] hover:shadow-[0_12px_36px_rgba(31,38,135,0.15)]">
+    <div className="glass-card overflow-hidden transition-all duration-200 hover:translate-y-[-2px] hover:shadow-level-3">
       <div className="p-6">
         {/* Application status & timestamp */}
         <div className="flex justify-between items-center mb-4">
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${status.color}`}>
             {status.label}
           </span>
-          <span className="text-xs text-gray-500">Applied {timeAgo}</span>
+          <span className="text-xs text-muted-foreground">Applied {timeAgo}</span>
         </div>
         
         {/* Job title and company */}
         <div className="flex items-start gap-4">
-          <Avatar className="h-12 w-12 rounded-md border border-gray-100 flex-shrink-0">
+          <Avatar className="h-12 w-12 rounded-md border border-border flex-shrink-0">
             <AvatarImage src={employer.companyLogoUrl || ''} alt={employer.companyName} />
-            <AvatarFallback className="bg-[#4a6cfa]/10 text-[#4a6cfa] rounded-md">
+            <AvatarFallback className="bg-primary/10 text-primary rounded-md">
               {companyInitials}
             </AvatarFallback>
           </Avatar>
           
           <div>
-            <h3 className="text-lg font-semibold text-[#1a1e2d] line-clamp-1">{job.title}</h3>
-            <p className="text-sm text-[#9aa3bc] mb-2 line-clamp-1">{employer.companyName}</p>
+            <h3 className="text-lg font-semibold text-foreground line-clamp-1">{job.title}</h3>
+            <p className="text-sm text-muted-foreground mb-2 line-clamp-1">{employer.companyName}</p>
             
             {/* Job details */}
-            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 text-sm text-[#1a1e2d]">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 text-sm text-foreground">
               <div className="flex items-center">
-                <Building className="h-4 w-4 mr-1.5 text-[#4a6cfa]" />
+                <Building className="h-4 w-4 mr-1.5 text-primary" />
                 <span>{jobType}</span>
               </div>
               <div className="flex items-center">
-                <MapPin className="h-4 w-4 mr-1.5 text-[#4a6cfa]" />
+                <MapPin className="h-4 w-4 mr-1.5 text-primary" />
                 <span>{workLocation}</span>
               </div>
               <div className="flex items-center">
-                <Briefcase className="h-4 w-4 mr-1.5 text-[#4a6cfa]" />
+                <Briefcase className="h-4 w-4 mr-1.5 text-primary" />
                 <span>{salary}</span>
               </div>
               
               {application.interviewDate && (
                 <div className="flex items-center w-full mt-1">
-                  <CalendarClock className="h-4 w-4 mr-1.5 text-[#4a6cfa]" />
+                  <CalendarClock className="h-4 w-4 mr-1.5 text-primary" />
                   <span className="font-medium">Interview: {formatDate(application.interviewDate)}</span>
                 </div>
               )}
@@ -130,11 +130,11 @@ export default function ApplicationCard({ application, job, employer }: Applicat
         
         {/* Expanded content - will show when expanded state is true */}
         {expanded && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="mt-4 pt-4 border-t border-border">
             {application.notes && (
               <div className="mb-3">
                 <h4 className="text-sm font-medium mb-1">Employer Notes:</h4>
-                <p className="text-sm text-[#1a1e2d]">{application.notes}</p>
+                <p className="text-sm text-foreground">{application.notes}</p>
               </div>
             )}
             
@@ -144,7 +144,7 @@ export default function ApplicationCard({ application, job, employer }: Applicat
                   href={application.resumeUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-1 px-3 rounded-full transition-colors"
+                  className="text-xs bg-muted hover:bg-muted/80 text-muted-foreground font-medium py-1 px-3 rounded-full transition-colors"
                 >
                   View Resume
                 </a>
@@ -155,7 +155,7 @@ export default function ApplicationCard({ application, job, employer }: Applicat
                   href={application.coverLetterUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-1 px-3 rounded-full transition-colors"
+                  className="text-xs bg-muted hover:bg-muted/80 text-muted-foreground font-medium py-1 px-3 rounded-full transition-colors"
                 >
                   View Cover Letter
                 </a>
@@ -183,7 +183,7 @@ export default function ApplicationCard({ application, job, employer }: Applicat
             </Link>
             
             <Link href={`/candidate/applications/${application.id}`} passHref>
-              <Button size="sm" className="text-xs bg-[#4a6cfa] hover:bg-[#3a5be9] text-white">
+              <Button size="sm" className="text-xs bg-primary hover:bg-primary/90 text-white">
                 View Details
               </Button>
             </Link>

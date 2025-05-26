@@ -236,9 +236,9 @@ export function SignUpForm() {
                     />
                     <Label
                       htmlFor="candidate"
-                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-md hover:bg-gray/10 hover:border-gray-dark transition-all duration-standard peer-data-[state=checked]:border-primary-blue [&:has([data-state=checked])]:border-primary-blue"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-background p-md hover:bg-muted/50 hover:border-muted-foreground transition-all duration-standard peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                     >
-                      <UserIcon className="mb-xs h-6 w-6 text-primary-blue" />
+                      <UserIcon className="mb-xs h-6 w-6 text-primary" />
                       <span className="text-base font-medium">Job Seeker</span>
                     </Label>
                   </div>
@@ -252,9 +252,9 @@ export function SignUpForm() {
                     />
                     <Label
                       htmlFor="employer"
-                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-md hover:bg-gray/10 hover:border-gray-dark transition-all duration-standard peer-data-[state=checked]:border-primary-blue [&:has([data-state=checked])]:border-primary-blue"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-background p-md hover:bg-muted/50 hover:border-muted-foreground transition-all duration-standard peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                     >
-                      <BriefcaseIcon className="mb-xs h-6 w-6 text-primary-blue" />
+                      <BriefcaseIcon className="mb-xs h-6 w-6 text-primary" />
                       <span className="text-base font-medium">Employer</span>
                     </Label>
                   </div>

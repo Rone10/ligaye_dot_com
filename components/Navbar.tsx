@@ -54,10 +54,10 @@ export default function Navbar({ user }: NavbarProps) {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-lg bg-primary-blue flex items-center justify-center">
+          {/* <div className="h-8 w-8 rounded-lg bg-primary-blue flex items-center justify-center">
             <span className="text-white font-bold text-lg">L</span>
-          </div>
-          <span className="text-xl font-bold text-theme-dark">Ligaye</span>
+          </div> */}
+          <span className="text-2xl font-bold text-primary-blue">Ligaye</span>
         </Link>
         
         {/* Desktop Navigation */}

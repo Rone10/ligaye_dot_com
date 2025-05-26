@@ -228,7 +228,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {filters.jobType && filters.jobType !== 'all' && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e1e5f2] hover:bg-[#d2d8ea]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
                 onClick={() => handleFilterChange({ jobType: 'all', page: 1 })}
               >
                 {jobTypeOptions.find(opt => opt.value === filters.jobType)?.label}
@@ -238,7 +238,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {filters.workLocation && filters.workLocation !== 'all' && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e1e5f2] hover:bg-[#d2d8ea]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
                 onClick={() => handleFilterChange({ workLocation: 'all', page: 1 })}
               >
                 {workLocationOptions.find(opt => opt.value === filters.workLocation)?.label}
@@ -248,7 +248,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {filters.experienceLevel && filters.experienceLevel !== 'all' && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e1e5f2] hover:bg-[#d2d8ea]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
                 onClick={() => handleFilterChange({ experienceLevel: 'all', page: 1 })}
               >
                 {experienceLevelOptions.find(opt => opt.value === filters.experienceLevel)?.label}
@@ -258,7 +258,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {filters.locationId && filters.locationId !== 'all' && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e1e5f2] hover:bg-[#d2d8ea]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
                 onClick={() => handleFilterChange({ locationId: 'all', page: 1 })}
               >
                 {getLocationLabel(filters.locationId)}
@@ -268,7 +268,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {(filters.salaryMin || (filters.salaryMax && filters.salaryMax < 1000000)) && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e1e5f2] hover:bg-[#d2d8ea]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
                 onClick={() => handleFilterChange({ salaryMin: null, salaryMax: null, page: 1 })}
               >
                 {filters.salaryMin && filters.salaryMax 
@@ -282,7 +282,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {filters.industryId && filters.industryId !== 'all' && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e1e5f2] hover:bg-[#d2d8ea]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
                 onClick={() => handleFilterChange({ industryId: 'all', page: 1 })}
               >
                 {getIndustryLabel(filters.industryId)}
@@ -416,7 +416,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
                 />
               ))
             ) : (
-              <div className="text-sm text-[#9aa3bc] py-2">No locations match your search</div>
+              <div className="text-sm text-muted-foreground py-2">No locations match your search</div>
             )}
           </div>
         </FilterSection>
@@ -450,7 +450,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
                 />
               ))
             ) : (
-              <div className="text-sm text-[#9aa3bc] py-2">No industries match your search</div>
+              <div className="text-sm text-muted-foreground py-2">No industries match your search</div>
             )}
           </div>
         </FilterSection>
@@ -489,7 +489,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             Clear All
           </Button>
           <Button
-            className="flex-1 bg-[#4a6cfa] hover:bg-[#3a5de9] text-white"
+            className="flex-1 bg-primary hover:bg-primary/90 text-white"
             onClick={toggleMobileFilter}
           >
             Apply Filters
@@ -538,12 +538,12 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             className={`fixed inset-y-0 left-0 w-[85%] max-w-[350px] bg-[rgba(255,255,255,0.95)] backdrop-blur-[10px] shadow-[0_8px_32px_rgba(31,38,135,0.15)] z-50 transition-transform duration-300 ease-in-out ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full'}`}
           >
             <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.5)] p-5">
-              <h2 className="font-semibold text-[#1a1e2d]">Filters</h2>
+              <h2 className="font-semibold text-foreground">Filters</h2>
               <button 
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e1e5f2]"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted"
                 onClick={toggleMobileFilter}
               >
-                <X className="h-5 w-5 text-[#1a1e2d]" />
+                                  <X className="h-5 w-5 text-foreground" />
               </button>
             </div>
             {filterContent}

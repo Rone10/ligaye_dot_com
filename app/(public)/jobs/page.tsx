@@ -59,7 +59,7 @@ export default async function JobsPage({ searchParams }: PageProps) {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))]">
-      <Navbar user={user} />
+      {/* <Navbar user={user} /> */}
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8 text-theme-dark text-center">Find Your Perfect Job</h1>
         

@@ -127,7 +127,7 @@ export function SalaryRangeFilter({
       
       <Button 
         onClick={handleApply}
-        className="w-full bg-[#4a6cfa] hover:bg-[#3a5de9] text-white"
+                    className="w-full bg-primary hover:bg-primary/90 text-white"
       >
         Apply Range
       </Button>

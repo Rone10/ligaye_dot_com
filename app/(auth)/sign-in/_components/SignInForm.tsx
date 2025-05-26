@@ -80,7 +80,7 @@ export function SignInForm() {
   }
   
   return (
-    <Card className="w-full max-w-md mx-auto bg-white/70 backdrop-blur-lg border border-gray/30 shadow-md">
+          <Card className="w-full max-w-md mx-auto glass-card">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
         <CardDescription className="text-center">

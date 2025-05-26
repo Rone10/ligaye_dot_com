@@ -14,14 +14,14 @@ export function MobileFilterToggle({ count, onClick }: MobileFilterToggleProps) 
     <div className="fixed top-20 right-6 z-30">
       <Button
         onClick={onClick}
-        className="rounded-full w-14 h-14 shadow-[0_8px_32px_rgba(31,38,135,0.2)] bg-[#4a6cfa] hover:bg-[#3a5de9] text-white relative"
+        className="rounded-full w-14 h-14 shadow-level-2 bg-primary hover:bg-primary/90 text-white relative"
         size="icon"
         aria-label="Filter jobs"
       >
         <Filter className="h-5 w-5" />
         {count > 0 && (
           <Badge
-            className="absolute -top-2 -right-2 h-6 min-w-6 rounded-full bg-[#05ce91] text-white border-2 border-white text-xs flex items-center justify-center p-0"
+            className="absolute -top-2 -right-2 h-6 min-w-6 rounded-full bg-secondary text-white border-2 border-background text-xs flex items-center justify-center p-0"
           >
             {count}
           </Badge>

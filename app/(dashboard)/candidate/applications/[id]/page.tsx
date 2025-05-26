@@ -33,7 +33,7 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
       {/* Breadcrumb navigation */}
       <Link 
         href="/candidate/applications" 
-        className="inline-flex items-center text-sm text-[#9aa3bc] hover:text-[#4a6cfa] mb-2"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-2"
       >
         <ChevronLeft className="h-4 w-4 mr-1" />
         Back to Applications
@@ -63,9 +63,9 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
         
         <div className="space-y-6">
           {/* Application status & actions */}
-          <div className="bg-white/70 backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.3)] overflow-hidden shadow-[0_8px_32px_rgba(31,38,135,0.1)]">
+          <div className="glass-card overflow-hidden">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-[#1a1e2d] mb-4">Application Actions</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-4">Application Actions</h2>
               
               <div className="space-y-4">
                 {/* Action buttons */}
@@ -81,7 +81,7 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
                   
                   {/* View job listings link */}
                   <Link href={`/jobs/${job.id}`} passHref>
-                    <button className="w-full py-2 px-4 bg-[#4a6cfa] hover:bg-[#3a5be9] text-white font-medium rounded-lg transition-colors">
+                    <button className="w-full py-2 px-4 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg transition-colors">
                       View Full Job Listing
                     </button>
                   </Link>
@@ -89,7 +89,7 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
                 
                 {/* Status message for withdrawn/rejected applications */}
                 {isWithdrawnOrRejected && (
-                  <div className="p-3 bg-gray-50 rounded-lg text-sm text-[#9aa3bc] text-center">
+                  <div className="p-3 bg-muted rounded-lg text-sm text-muted-foreground text-center">
                     {application.status === 'WITHDRAWN' 
                       ? 'You have withdrawn this application.' 
                       : 'This application was not selected by the employer.'}

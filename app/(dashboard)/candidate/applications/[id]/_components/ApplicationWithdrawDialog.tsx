@@ -61,11 +61,11 @@ export default function ApplicationWithdrawDialog({
           Withdraw Application
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="bg-white backdrop-blur-md border-[rgba(255,255,255,0.3)] shadow-[0_8px_32px_rgba(31,38,135,0.1)]">
+      <AlertDialogContent className="glass-card">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-[#1a1e2d]">Withdraw Application</AlertDialogTitle>
-          <AlertDialogDescription className="text-[#9aa3bc]">
-            Are you sure you want to withdraw your application for <span className="font-medium text-[#1a1e2d]">{jobTitle}</span> at <span className="font-medium text-[#1a1e2d]">{employerName}</span>?
+          <AlertDialogTitle className="text-foreground">Withdraw Application</AlertDialogTitle>
+          <AlertDialogDescription className="text-muted-foreground">
+            Are you sure you want to withdraw your application for <span className="font-medium text-foreground">{jobTitle}</span> at <span className="font-medium text-foreground">{employerName}</span>?
             <br /><br />
             This action cannot be undone. You will need to apply again if you change your mind.
           </AlertDialogDescription>
@@ -79,7 +79,7 @@ export default function ApplicationWithdrawDialog({
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="bg-transparent border border-gray-200 text-[#1a1e2d] hover:bg-gray-50 hover:text-[#1a1e2d]">
+          <AlertDialogCancel className="bg-transparent border border-border text-foreground hover:bg-muted hover:text-foreground">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction

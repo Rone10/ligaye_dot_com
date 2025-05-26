@@ -27,8 +27,8 @@ export function FilterCheckbox({
           onCheckedChange={onChange}
           disabled={disabled}
           className={cn(
-            "data-[state=checked]:bg-[#4a6cfa] data-[state=checked]:border-[#4a6cfa]",
-            "focus-visible:ring-[#4a6cfa]"
+            "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
+            "focus-visible:ring-primary"
           )}
         />
         <label
@@ -44,7 +44,7 @@ export function FilterCheckbox({
       </div>
       {/* SHOW COUNT NEXT TO FILTER */}
       {/* {count !== undefined && (
-        <span className="text-xs text-[#9aa3bc] bg-[#f0f2f8] px-2 py-0.5 rounded-full">
+        <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
           {count}
         </span>
       )} */}

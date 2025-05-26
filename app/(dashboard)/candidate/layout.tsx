@@ -27,7 +27,7 @@ export default async function CandidateDashboardLayout({
   }
   
   return (
-    <div className="h-screen flex overflow-hidden bg-gradient-to-br from-[#e9efff] to-[#f4f7ff]">
+    <div className="h-screen flex overflow-hidden bg-gradient-from-theme-light to-theme-gray dark:bg-gradient-from-theme-dark dark:to-theme-gray">
       <UnifiedSidebar userRole="candidate" />
       <main className="flex-1 overflow-y-auto p-6 lg:px-8">
         <div className="container mx-auto">
