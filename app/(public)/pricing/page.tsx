@@ -222,7 +222,7 @@ export default async function PricingPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-white/70 backdrop-blur-[10px] border border-white/30 rounded-xl p-6 text-left">
                   <h3 className="font-semibold text-[#1a1e2d] mb-3">What payment methods do you accept?</h3>
-                  <p className="text-[#9aa3bc] leading-relaxed">We accept Stripe payments (credit/debit cards) and cash payments. For cash payments, please contact our sales team.</p>
+                  <p className="text-[#9aa3bc] leading-relaxed">We accept Stripe payments (credit/debit cards) and cash payments (bank transfers, Wave, etc). For cash payments, please contact our sales team.</p>
                 </div>
                 <div className="bg-white/70 backdrop-blur-[10px] border border-white/30 rounded-xl p-6 text-left">
                   <h3 className="font-semibold text-[#1a1e2d] mb-3">Can I upgrade or downgrade my plan?</h3>
