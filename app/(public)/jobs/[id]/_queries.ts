@@ -26,21 +26,29 @@ type CacheOptions = {
 };
 
 /**
- * Get detailed job information by ID
+ * Get detailed job information by ID with optional filtering
  * React cache wrapping to prevent duplicate queries within the same render
  */
-export const getJobById = cache(async function getJobByIdInternal(jobId: string, options?: CacheOptions): Promise<JobDetail> {
+export const getJobById = cache(async function getJobByIdInternal(
+  jobId: string, 
+  options?: CacheOptions & { skipStatusFilter?: boolean }
+): Promise<JobDetail> {
+  const skipStatusFilter = options?.skipStatusFilter || false;
+  
+  // Build the where conditions based on whether we should filter by status
+  const whereConditions = skipStatusFilter 
+    ? eq(jobs.id, jobId)
+    : and(
+        eq(jobs.id, jobId),
+        eq(jobs.status, 'ACTIVE'),
+        gte(jobs.expiresAt, new Date())
+      );
+
   // Get the job with basic company and location information
   const jobQuery = await db()
     .select()
     .from(jobs)
-    .where(
-      and(
-        eq(jobs.id, jobId),
-        eq(jobs.status, 'ACTIVE'),
-        gte(jobs.expiresAt, new Date())
-      )
-    )
+    .where(whereConditions)
     .leftJoin(employerProfiles, eq(jobs.companyId, employerProfiles.id))
     .leftJoin(locations, eq(jobs.locationId, locations.id));
     

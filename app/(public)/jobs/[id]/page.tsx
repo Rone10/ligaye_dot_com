@@ -14,22 +14,27 @@ import { getUser } from '@/lib/supabase/server';
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function JobDetailPage({ params }: PageProps) {
-  // Extract the job ID from params
+export default async function JobDetailPage({ params, searchParams }: PageProps) {
+  // Extract the job ID from params and search params
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const id = resolvedParams.id;
+  
+  // Check if we're coming from an application view
+  const fromApplication = resolvedSearchParams.from === 'application';
   
   // Get the current user
   const user = await getUser();
   
-  // Fetch job details - remove revalidate, keep tags
+  // Fetch job details - skip status filter if coming from application
   const job = await getJobById(id, { 
     next: { 
       tags: [`job-${id}`]
-      // revalidate: 3600 // Remove this
-    }
+    },
+    skipStatusFilter: fromApplication
   });
   
   // Fetch related jobs in parallel with other user-specific data - remove revalidate, keep tags
@@ -62,8 +67,26 @@ export default async function JobDetailPage({ params }: PageProps) {
   
   return (
     <div className="container max-w-7xl py-8 px-4 mx-auto space-y-8">
+      {/* Notice when viewing from application */}
+      {fromApplication && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-blue-700">
+                You're viewing this job from your application history. The job status or availability may have changed since you applied.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Job Header */}
-      <JobHeader job={job} hasApplied={hasApplied} isSaved={isSaved} />
+      <JobHeader job={job} hasApplied={hasApplied} isSaved={isSaved} fromApplication={fromApplication} />
       
       {/* Add Apply Button */}
       <div className="mt-6">

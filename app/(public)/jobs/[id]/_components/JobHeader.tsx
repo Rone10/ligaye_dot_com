@@ -15,9 +15,10 @@ interface JobHeaderProps {
   job: any
   hasApplied?: boolean
   isSaved?: boolean
+  fromApplication?: boolean
 }
 
-export default function JobHeader({ job, hasApplied = false, isSaved = false }: JobHeaderProps) {
+export default function JobHeader({ job, hasApplied = false, isSaved = false, fromApplication = false }: JobHeaderProps) {
   // Local state to handle optimistic updates
   const [isSaving, setIsSaving] = useState(false)
   const [savedState, setSavedState] = useState(isSaved)
@@ -112,6 +113,19 @@ export default function JobHeader({ job, hasApplied = false, isSaved = false }: 
             {job.status && job.status === 'ACTIVE' && (
               <Badge variant="outline" className="ml-2 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700">
                 Active
+              </Badge>
+            )}
+            {job.status && job.status !== 'ACTIVE' && fromApplication && (
+              <Badge variant="outline" className="ml-2 bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-700">
+                {job.status === 'EXPIRED' ? 'Expired' : 
+                 job.status === 'FILLED' ? 'Position Filled' : 
+                 job.status === 'DELETED' ? 'No Longer Available' : 
+                 job.status}
+              </Badge>
+            )}
+            {fromApplication && job.expiresAt && new Date(job.expiresAt) < new Date() && job.status === 'ACTIVE' && (
+              <Badge variant="outline" className="ml-2 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700">
+                Expired
               </Badge>
             )}
           </div>

@@ -80,7 +80,7 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
                   )}
                   
                   {/* View job listings link */}
-                  <Link href={`/jobs/${job.id}`} passHref>
+                  <Link href={`/jobs/${job.id}?from=application`} passHref>
                     <button className="w-full py-2 px-4 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg transition-colors">
                       View Full Job Listing
                     </button>
