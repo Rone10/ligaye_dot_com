@@ -120,6 +120,7 @@ function SidebarUserProfile({ isSidebarExpanded, userData, loading, onLogout }: 
                    'User';
   
   const userEmail = userData?.email || '';
+  const fullName = userData?.user_metadata?.first_name + ' ' + userData?.user_metadata?.last_name;
   
   const getInitials = () => {
     if (!userName) return 'U';
@@ -157,13 +158,13 @@ function SidebarUserProfile({ isSidebarExpanded, userData, loading, onLogout }: 
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p className="font-medium">{userName}</p>
-            {userEmail && <p className="text-xs text-muted-foreground">{userEmail}</p>}
+            <p className="font-medium">{fullName}</p>
+            {userEmail && <p className="text-xs text-white">{userEmail}</p>}
             <Button
               variant="ghost"
               size="sm"
               onClick={onLogout}
-              className="mt-1 h-auto p-0 text-xs text-destructive hover:underline"
+              className="mt-1 h-auto p-2 text-xs text-destructive hover:underline bg-slate-950 dark:hover:bg-slate-700"
             >
               <LogOut className="mr-1.5 h-3 w-3" /> Log out
             </Button>
@@ -182,7 +183,7 @@ function SidebarUserProfile({ isSidebarExpanded, userData, loading, onLogout }: 
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1 flex-col">
-        <p className="truncate text-sm font-medium leading-tight text-theme-dark">{userName}</p>
+        <p className="truncate text-sm font-medium leading-tight text-theme-dark">{fullName}</p>
         {userEmail && (
           <p className="truncate text-xs leading-tight text-theme-gray-dark">
             {userEmail}
