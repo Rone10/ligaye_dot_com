@@ -229,7 +229,7 @@ export default function EmployerApplicationsPage() {
   if (isLoading || isPending) {
     return (
     <div className="container mx-auto py-10">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+      <div className="glass-card p-8 text-center">
         <PropagateLoaderSpinner />
       </div>
     </div>
@@ -239,115 +239,115 @@ export default function EmployerApplicationsPage() {
   return (
     <div className="container mx-auto py-10">
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-semibold text-[#1a1e2d]">Job Applications</h1>
-        <p className="text-[#9aa3bc] mt-1">Manage and track candidates applying to your job postings</p>
+        <h1 className="text-2xl md:text-3xl font-semibold text-theme-dark">Job Applications</h1>
+        <p className="text-theme-gray-dark mt-1">Manage and track candidates applying to your job postings</p>
       </div>
       
       {/* Redesigned filter section with better styling */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+      <div className="glass-card overflow-hidden mb-6">
         {/* Status tabs with scrollable container */}
-        <div className="border-b border-gray-100">
+        <div className="border-b border-border">
           <div className="px-4 py-3">
             <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
               <button
                 onClick={() => handleStatusChange('ALL')}
                 className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
                   filters.status === 'ALL' 
-                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
+                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
                 }`}>
                 <span>All</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.all}</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.all}</span>
               </button>
               <button
                 onClick={() => handleStatusChange('APPLIED')}
                 className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
                   filters.status === 'APPLIED' 
-                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
+                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
                 }`}>
                 <span>Applied</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.applied}</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.applied}</span>
               </button>
               <button
                 onClick={() => handleStatusChange('REVIEWING')}
                 className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
                   filters.status === 'REVIEWING' 
-                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
+                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
                 }`}>
                 <span>Reviewing</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.reviewing}</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.reviewing}</span>
               </button>
               <button
                 onClick={() => handleStatusChange('SHORTLISTED')}
                 className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
                   filters.status === 'SHORTLISTED' 
-                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
+                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
                 }`}>
                 <span>Shortlisted</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.shortlisted}</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.shortlisted}</span>
               </button>
               <button
                 onClick={() => handleStatusChange('INTERVIEW_SCHEDULED')}
                 className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
                   filters.status === 'INTERVIEW_SCHEDULED' 
-                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
+                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
                 }`}>
                 <span>Interview</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.interview}</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.interview}</span>
               </button>
               <button
                 onClick={() => handleStatusChange('INTERVIEWED')}
                 className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
                   filters.status === 'INTERVIEWED' 
-                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
+                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
                 }`}>
                 <span>Interviewed</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.interviewed}</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.interviewed}</span>
               </button>
               <button
                 onClick={() => handleStatusChange('OFFER_EXTENDED')}
                 className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
                   filters.status === 'OFFER_EXTENDED' 
-                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
+                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
                 }`}>
                 <span>Offered</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.offered}</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.offered}</span>
               </button>
               <button
                 onClick={() => handleStatusChange('HIRED')}
                 className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
                   filters.status === 'HIRED' 
-                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
+                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
                 }`}>
                 <span>Hired</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.hired}</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.hired}</span>
               </button>
               <button
                 onClick={() => handleStatusChange('REJECTED')}
                 className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
                   filters.status === 'REJECTED' 
-                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
+                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
                 }`}>
                 <span>Rejected</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.rejected}</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.rejected}</span>
               </button>
               <button
                 onClick={() => handleStatusChange('WITHDRAWN')}
                 className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
                   filters.status === 'WITHDRAWN' 
-                    ? 'bg-blue-50 text-blue-600 font-medium border border-blue-100' 
-                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
+                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
                 }`}>
                 <span>Withdrawn</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white border border-gray-200 text-gray-700">{counts.withdrawn}</span>
+                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.withdrawn}</span>
               </button>
             </div>
           </div>
@@ -356,7 +356,7 @@ export default function EmployerApplicationsPage() {
         {/* Search and filter controls */}
         <div className="px-4 py-3 flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
             <Input
               type="text"
               placeholder="Search by job title or candidate name"
@@ -369,7 +369,7 @@ export default function EmployerApplicationsPage() {
             <select
               value={filters.sort}
               onChange={handleSortChange}
-              className="border border-gray-200 h-10 rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="border border-border h-10 rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-blue bg-background text-foreground"
             >
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
@@ -383,17 +383,17 @@ export default function EmployerApplicationsPage() {
         {filteredApplications.length > 0 ? (
           <ApplicationsDataTable applications={filteredApplications} />
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-10 text-center">
+          <div className="glass-card p-10 text-center">
             <div className="flex flex-col items-center">
-              <div className="h-16 w-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                <Search className="text-blue-500" size={24} />
+              <div className="h-16 w-16 bg-primary-blue/10 rounded-full flex items-center justify-center mb-4">
+                <Search className="text-primary-blue" size={24} />
               </div>
-              <h3 className="text-gray-800 font-medium text-lg mb-2">No applications found</h3>
-              <p className="text-gray-500 max-w-md mb-6">There are no applications matching your current filters. Try changing your search terms or filter criteria.</p>
+              <h3 className="text-theme-dark font-medium text-lg mb-2">No applications found</h3>
+              <p className="text-theme-gray-dark max-w-md mb-6">There are no applications matching your current filters. Try changing your search terms or filter criteria.</p>
               <Button 
                 onClick={handleClearFilters}
                 variant="outline" 
-                className="border-gray-200"
+                className="border-border"
               >
                 Clear all filters
               </Button>

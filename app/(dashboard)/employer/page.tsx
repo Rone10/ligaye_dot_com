@@ -53,7 +53,7 @@ export default async function EmployerDashboard() {
       value: statsData.activeJobs.toString(), 
       icon: BriefcaseIcon,
       href: '/employer/jobs',
-      color: 'bg-blue-500/10 text-blue-600'
+      color: 'bg-primary-blue/10 text-primary-blue'
     },
     { 
       title: 'Total Applicants', // Note: Uses placeholder logic in query
@@ -151,7 +151,7 @@ export default async function EmployerDashboard() {
                     <Avatar className="h-10 w-10 border">
                       <AvatarImage src={app.candidateAvatarUrl ?? undefined} alt={app.candidateName ?? 'Candidate'} />
                       <AvatarFallback>
-                        <UsersIcon className="h-5 w-5 text-gray-500" />
+                        <UsersIcon className="h-5 w-5 text-muted-foreground" />
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
@@ -194,8 +194,8 @@ export default async function EmployerDashboard() {
               <div className="space-y-2">
                 {recentJobs.map((job) => (
                   <div key={job.id} className="flex items-center gap-4 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
-                    <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                      <BriefcaseIcon className="h-5 w-5 text-blue-600" />
+                    <div className="h-10 w-10 rounded-full bg-primary-blue/10 flex items-center justify-center">
+                      <BriefcaseIcon className="h-5 w-5 text-primary-blue" />
                     </div>
                     <div className="flex-1">
                       <Link href={`/employer/jobs/${job.id}`} className="hover:underline">

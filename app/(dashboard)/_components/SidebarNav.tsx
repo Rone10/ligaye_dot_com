@@ -96,8 +96,8 @@ export function SidebarNav({ mainNavItems, groupNavItems, additionalNavItems = [
                         className={cn(
                           "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200 ease-in-out",
                           pathname === item.href
-                            ? "bg-[#4a6cfa] text-white"
-                            : "text-[#9aa3bc] hover:bg-[#4a6cfa]/10 hover:text-[#1a1e2d]",
+                            ? "bg-primary-blue text-white"
+                            : "text-theme-gray-dark hover:bg-primary-blue/10 hover:text-theme-dark",
                           !isSidebarExpanded && "justify-center"
                         )}
                       >
@@ -129,6 +129,9 @@ export function SidebarNav({ mainNavItems, groupNavItems, additionalNavItems = [
       {/* Group Section - only shown if expanded */}
       {isSidebarExpanded && groupNavItems.length > 0 && (
         <div>
+          {/* Separator line between MENU and GROUP */}
+          <div className="mx-2 my-4 border-t border-theme-gray"></div>
+          
           <h3 className="mb-2 px-2 text-xs font-semibold uppercase text-muted-foreground">
             Group
           </h3>
@@ -143,8 +146,8 @@ export function SidebarNav({ mainNavItems, groupNavItems, additionalNavItems = [
                         className={cn(
                           "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200 ease-in-out",
                           pathname === item.href
-                            ? "bg-[#4a6cfa] text-white"
-                            : "text-[#9aa3bc] hover:bg-[#4a6cfa]/10 hover:text-[#1a1e2d]",
+                            ? "bg-primary-blue text-white"
+                            : "text-theme-gray-dark hover:bg-primary-blue/10 hover:text-theme-dark",
                            !isSidebarExpanded && "justify-center"
                         )}
                       >
@@ -176,7 +179,7 @@ export function SidebarNav({ mainNavItems, groupNavItems, additionalNavItems = [
       {isSidebarExpanded && additionalNavItems.length > 0 && (
         <div>
           {/* Separator line */}
-          <div className="mx-2 my-4 border-t border-[rgba(255,255,255,0.3)]"></div>
+          <div className="mx-2 my-4 border-t border-theme-gray"></div>
           
           <ul className="space-y-0.5">
             {additionalNavItems.map((item) => {
@@ -191,8 +194,8 @@ export function SidebarNav({ mainNavItems, groupNavItems, additionalNavItems = [
                           className={cn(
                             "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200 ease-in-out",
                             pathname === item.href
-                              ? "bg-[#4a6cfa] text-white"
-                              : "text-[#9aa3bc] hover:bg-[#4a6cfa]/10 hover:text-[#1a1e2d]",
+                              ? "bg-primary-blue text-white"
+                              : "text-theme-gray-dark hover:bg-primary-blue/10 hover:text-theme-dark",
                             !isSidebarExpanded && "justify-center"
                           )}
                         >

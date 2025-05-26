@@ -4,20 +4,29 @@
 
 @layer base {
   :root {
-    /* Base colors from style guide */
-    --primary-blue: #4a6cfa;
-    --primary-blue-light: #7b90ff;
-    --secondary-green: #05ce91;
-    --dark: #1a1e2d;
-    --light: #f8faff;
-    --gray: #e1e5f2;
-    --gray-dark: #9aa3bc;
+    /* Base colors from style guide - now as HSL for better CSS variable support */
+    --primary-blue: 229 95% 64%;
+    --primary-blue-light: 229 100% 73%;
+    --secondary-green: 162 96% 41%;
+    --theme-dark: 230 25% 14%;
+    --theme-light: 226 100% 97%;
+    --theme-gray: 226 25% 92%;
+    --theme-gray-dark: 225 17% 67%;
 
-    /* Shadows */
+    /* Adaptive background gradients */
+    --bg-gradient-from: 226 100% 97%;
+    --bg-gradient-to: 225 97% 98%;
+
+    /* Shadows - adaptive */
     --shadow-level-1: 0 2px 10px rgba(31, 38, 135, 0.05);
     --shadow-level-2: 0 8px 32px rgba(31, 38, 135, 0.1);
     --shadow-level-3: 0 15px 35px rgba(31, 38, 135, 0.15);
     --shadow-level-4: 0 24px 48px rgba(31, 38, 135, 0.2);
+
+    /* Glassmorphic effects - adaptive */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-backdrop: blur(10px);
 
     /* Map style guide colors to Shadcn variables */
     --background: 0 0% 100%;
@@ -48,6 +57,27 @@
   }
  
   .dark {
+    /* Dark mode adaptive colors */
+    --theme-dark: 0 0% 100%;
+    --theme-light: 230 25% 14%;
+    --theme-gray: 225 17% 25%;
+    --theme-gray-dark: 225 17% 67%;
+
+    /* Dark mode background gradients */
+    --bg-gradient-from: 230 25% 14%;
+    --bg-gradient-to: 225 25% 16%;
+
+    /* Dark mode shadows */
+    --shadow-level-1: 0 2px 10px rgba(0, 0, 0, 0.2);
+    --shadow-level-2: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --shadow-level-3: 0 15px 35px rgba(0, 0, 0, 0.4);
+    --shadow-level-4: 0 24px 48px rgba(0, 0, 0, 0.5);
+
+    /* Dark mode glassmorphic effects */
+    --glass-bg: rgba(30, 30, 30, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+
+    /* Shadcn dark mode variables */
     --background: 230 25% 14%;
     --foreground: 0 0% 100%;
     --card: 230 25% 14%;
@@ -58,14 +88,14 @@
     --primary-foreground: 0 0% 100%;
     --secondary: 162 96% 41%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 225 17% 67%;
-    --muted-foreground: 210 40% 98%;
+    --muted: 225 17% 25%;
+    --muted-foreground: 225 17% 67%;
     --accent: 229 95% 64%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 225 17% 67%;
-    --input: 225 17% 67%;
+    --border: 225 17% 25%;
+    --input: 225 17% 25%;
     --ring: 229 95% 64%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -79,32 +109,35 @@
   }
 
   body {
-    @apply bg-gradient-to-br from-[#e9efff] to-[#f4f7ff] text-foreground min-h-screen;
+    @apply bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))] text-foreground min-h-screen;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 }
 
-/* Glassmorphic component styling */
+/* Glassmorphic component styling - now adaptive */
 @layer components {
   .glass-card {
-    @apply bg-white/70 backdrop-blur-md border border-white/30 rounded-2xl shadow-level-2;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-backdrop);
+    border: 1px solid var(--glass-border);
+    @apply rounded-2xl shadow-level-2;
   }
   
   .button-primary {
-    @apply bg-primary-blue text-white font-semibold py-3 px-6 rounded-md hover:bg-primary-blue-light transition-all duration-300;
+    @apply bg-[hsl(var(--primary-blue))] text-white font-semibold py-3 px-6 rounded-md hover:bg-[hsl(var(--primary-blue-light))] transition-all duration-300;
   }
   
   .button-secondary {
-    @apply bg-white text-dark font-semibold py-3 px-5 rounded-md border border-gray hover:bg-gray/10 transition-all duration-300;
+    @apply bg-card text-[hsl(var(--theme-dark))] font-semibold py-3 px-5 rounded-md border border-[hsl(var(--theme-gray))] hover:bg-[hsl(var(--theme-gray))]/10 transition-all duration-300;
   }
   
   .input-field {
-    @apply h-[46px] px-4 rounded-md border border-gray focus:border-primary-blue focus:shadow-[0_0_0_3px_rgba(74,108,250,0.15)] focus:outline-none;
+    @apply h-[46px] px-4 rounded-md border border-[hsl(var(--theme-gray))] focus:border-[hsl(var(--primary-blue))] focus:shadow-[0_0_0_3px_rgba(74,108,250,0.15)] focus:outline-none;
   }
 }
 
 @layer utilities {
-  /* Shadows based on style guide */
+  /* Shadows based on style guide - now adaptive */
   .shadow-level-1 {
     box-shadow: var(--shadow-level-1);
   }

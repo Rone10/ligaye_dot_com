@@ -7,18 +7,18 @@ export default function TendersPage() {
     'bg-white/70 dark:bg-black/60 backdrop-blur-lg border border-white/30 dark:border-black/40 rounded-2xl shadow-lg';
 
   return (
-    <div className="min-h-[calc(100vh-theme(spacing.16))] flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-slate-900 dark:to-black py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-[calc(100vh-theme(spacing.16))] flex items-center justify-center bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))] py-12 px-4 sm:px-6 lg:px-8">
       <Card className={`${glassmorphicCardClass} max-w-md w-full text-center p-8 md:p-12`}>
         <CardHeader className="items-center">
-           <div className="mb-6 inline-flex items-center justify-center p-4 bg-primary-blue/10 dark:bg-blue-900/30 rounded-full">
-              <Briefcase className="h-10 w-10 text-primary-blue dark:text-blue-400" />
+           <div className="mb-6 inline-flex items-center justify-center p-4 bg-primary-blue/10 rounded-full">
+              <Briefcase className="h-10 w-10 text-primary-blue" />
            </div>
-          <CardTitle className="text-3xl font-bold text-dark dark:text-light mb-3">
+          <CardTitle className="text-3xl font-bold text-theme-dark mb-3">
             Tenders Coming Soon!
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-lg text-gray-700 dark:text-gray-300">
+          <p className="text-lg text-theme-gray-dark">
             We are working hard to bring you a dedicated section for tender opportunities. Stay tuned for updates!
           </p>
         </CardContent>

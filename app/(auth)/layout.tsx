@@ -12,7 +12,7 @@ export default async function AuthLayout({
 }) {
   const user = await getUser()
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#e9efff] to-[#f4f7ff]">
+    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))]">
       <Navbar user={user} />
       <div className="container mx-auto px-4 py-8">
         {/* Header with logo */}

@@ -50,26 +50,25 @@ export default function Navbar({ user }: NavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 backdrop-blur-md bg-white/70">
-      <div className="flex h-16 items-center justify-between px-4 md:px-8 max-w-7xl mx-auto">
+    <header className="sticky top-0 z-50 w-full border-b border-theme-gray bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <div className="flex items-center ">
-          <Link href="/" className="flex items-center ">
-            {/* <BriefcaseIcon className="h-6 w-6 text-primary-blue" /> */}
-            {/* <Image src="/branding/Suitcase.svg" alt="Ligaye Logo" width={40} height={40} className='py-2 px-2'/>   */}
-            <span className={`${poppins.className} font-bold content-baseline text-3xl text-primary-blue`}>Ligaye</span>
-          </Link>
-        </div>
+        <Link href="/" className="flex items-center space-x-2">
+          <div className="h-8 w-8 rounded-lg bg-primary-blue flex items-center justify-center">
+            <span className="text-white font-bold text-lg">L</span>
+          </div>
+          <span className="text-xl font-bold text-theme-dark">Ligaye</span>
+        </Link>
         
-        {/* Navigation - Centered */}
-        <nav className="hidden md:flex items-center justify-center">
-          <div className="flex space-x-6">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-8">
+          <div className="flex items-center space-x-6">
             <Link 
               href="/jobs" 
               className={`transition-colors font-medium ${
                 pathname.startsWith('/jobs') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-gray-dark hover:text-dark'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-gray-dark hover:text-theme-dark'
               }`}
             >
               Find Jobs
@@ -78,8 +77,8 @@ export default function Navbar({ user }: NavbarProps) {
               href="/tenders" 
               className={`transition-colors font-medium ${
                 pathname.startsWith('/tenders') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-gray-dark hover:text-dark'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-gray-dark hover:text-theme-dark'
               }`}
             >
               Tenders
@@ -88,8 +87,8 @@ export default function Navbar({ user }: NavbarProps) {
               href="/about-us" 
               className={`transition-colors font-medium ${
                 pathname.startsWith('/about-us') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-gray-dark hover:text-dark'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-gray-dark hover:text-theme-dark'
               }`}
             >
               About
@@ -98,8 +97,8 @@ export default function Navbar({ user }: NavbarProps) {
               href="/contact-us" 
               className={`transition-colors font-medium ${
                 pathname.startsWith('/contact-us') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-gray-dark hover:text-dark'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-gray-dark hover:text-theme-dark'
               }`}
             >
               Contact
@@ -108,8 +107,8 @@ export default function Navbar({ user }: NavbarProps) {
               href="/blog" 
               className={`transition-colors font-medium ${
                 pathname.startsWith('/blog') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-gray-dark hover:text-dark'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-gray-dark hover:text-theme-dark'
               }`}
             >
               Blog
@@ -118,8 +117,8 @@ export default function Navbar({ user }: NavbarProps) {
               href="/pricing" 
               className={`transition-colors font-medium ${
                 pathname.startsWith('/pricing') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-gray-dark hover:text-dark'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-gray-dark hover:text-theme-dark'
               }`}
             >
               Pricing
@@ -131,15 +130,15 @@ export default function Navbar({ user }: NavbarProps) {
         <div className="flex items-center gap-4">
           {user ? (
             <div className="hidden md:flex items-center gap-3">
-              <Link href={getDashboardLink()} className="text-dark font-medium hover:text-primary-blue transition-colors">
-              <Button variant="default" size="sm" className="text-white hover:text-gray-200">
+              <Link href={getDashboardLink()} className="text-theme-dark font-medium hover:text-primary-blue transition-colors">
+              <Button variant="default" size="sm" className="text-white hover:text-white/90">
                 Dashboard
               </Button>
               </Link>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="text-dark hover:text-primary-blue"
+                className="text-theme-dark hover:text-primary-blue"
                 onClick={handleLogout}
               >
                 {/* <LogOut className="h-4 w-4 mr-2" /> */}
@@ -148,7 +147,7 @@ export default function Navbar({ user }: NavbarProps) {
             </div>
           ) : (
             <>
-              <Link href="/sign-in" className="text-dark font-medium hover:text-primary-blue transition-colors hidden md:block">
+              <Link href="/sign-in" className="text-theme-dark font-medium hover:text-primary-blue transition-colors hidden md:block">
                 Sign In
               </Link>
               <Link href="/sign-up">
@@ -159,7 +158,7 @@ export default function Navbar({ user }: NavbarProps) {
             </>
           )}
           <button 
-            className="md:hidden text-dark hover:text-primary-blue transition-colors"
+            className="md:hidden text-theme-dark hover:text-primary-blue transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -169,14 +168,14 @@ export default function Navbar({ user }: NavbarProps) {
       
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-sm shadow-level-2 py-4 px-4 animate-appear">
+        <div className="md:hidden bg-background/95 backdrop-blur-sm shadow-level-2 py-4 px-4 animate-appear">
           <nav className="flex flex-col space-y-4">
             <Link 
               href="/jobs" 
               className={`transition-colors font-medium px-2 py-1.5 ${
                 pathname.startsWith('/jobs') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-dark hover:text-primary-blue'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-dark hover:text-primary-blue'
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -186,8 +185,8 @@ export default function Navbar({ user }: NavbarProps) {
               href="/tenders" 
               className={`transition-colors font-medium px-2 py-1.5 ${
                 pathname.startsWith('/tenders') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-dark hover:text-primary-blue'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-dark hover:text-primary-blue'
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -197,8 +196,8 @@ export default function Navbar({ user }: NavbarProps) {
               href="/about-us" 
               className={`transition-colors font-medium px-2 py-1.5 ${
                 pathname.startsWith('/about-us') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-dark hover:text-primary-blue'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-dark hover:text-primary-blue'
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -208,8 +207,8 @@ export default function Navbar({ user }: NavbarProps) {
               href="/contact-us" 
               className={`transition-colors font-medium px-2 py-1.5 ${
                 pathname.startsWith('/contact-us') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-dark hover:text-primary-blue'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-dark hover:text-primary-blue'
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -219,8 +218,8 @@ export default function Navbar({ user }: NavbarProps) {
               href="/blog" 
               className={`transition-colors font-medium px-2 py-1.5 ${
                 pathname.startsWith('/blog') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-dark hover:text-primary-blue'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-dark hover:text-primary-blue'
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -230,19 +229,19 @@ export default function Navbar({ user }: NavbarProps) {
               href="/pricing" 
               className={`transition-colors font-medium px-2 py-1.5 ${
                 pathname.startsWith('/pricing') 
-                  ? 'text-[#4a6cfa] font-semibold' 
-                  : 'text-dark hover:text-primary-blue'
+                  ? 'text-primary-blue font-semibold' 
+                  : 'text-theme-dark hover:text-primary-blue'
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
               Pricing
             </Link>
-            <div className="border-t border-gray/30 pt-4 mt-2 flex flex-col space-y-3">
+            <div className="border-t border-theme-gray/30 pt-4 mt-2 flex flex-col space-y-3">
               {user ? (
                 <>
                   <Link 
                     href={getDashboardLink()} 
-                    className="w-full text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
+                    className="w-full text-theme-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Dashboard
@@ -260,7 +259,7 @@ export default function Navbar({ user }: NavbarProps) {
                 <>
                   <Link 
                     href="/sign-in" 
-                    className="w-full text-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
+                    className="w-full text-theme-dark hover:text-primary-blue transition-colors font-medium px-2 py-1.5"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Sign In

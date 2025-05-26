@@ -92,27 +92,27 @@ export default function JobFilters({ counts, currentFilters }: JobFiltersProps) 
         className="w-full"
       >
         <TabsList className="grid grid-cols-3 md:grid-cols-6 h-auto bg-muted">
-          <TabsTrigger value="ALL" className="data-[state=active]:bg-[#4a6cfa]/10 data-[state=active]:text-[#4a6cfa]">
+          <TabsTrigger value="ALL" className="data-[state=active]:bg-primary-blue/10 data-[state=active]:text-primary-blue">
             All
             <Badge variant="outline" className="ml-2 h-5 min-w-5 flex justify-center bg-background">{counts.all}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="DRAFT" className="data-[state=active]:bg-[#4a6cfa]/10 data-[state=active]:text-[#4a6cfa]">
+          <TabsTrigger value="DRAFT" className="data-[state=active]:bg-primary-blue/10 data-[state=active]:text-primary-blue">
             Draft
             <Badge variant="outline" className="ml-2 h-5 min-w-5 flex justify-center bg-background">{counts.draft}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="PENDING_PAYMENT" className="data-[state=active]:bg-[#4a6cfa]/10 data-[state=active]:text-[#4a6cfa]">
+          <TabsTrigger value="PENDING_PAYMENT" className="data-[state=active]:bg-primary-blue/10 data-[state=active]:text-primary-blue">
             Pending
             <Badge variant="outline" className="ml-2 h-5 min-w-5 flex justify-center bg-background">{counts.pending}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="ACTIVE" className="data-[state=active]:bg-[#4a6cfa]/10 data-[state=active]:text-[#4a6cfa]">
+          <TabsTrigger value="ACTIVE" className="data-[state=active]:bg-primary-blue/10 data-[state=active]:text-primary-blue">
             Active
             <Badge variant="outline" className="ml-2 h-5 min-w-5 flex justify-center bg-background">{counts.active}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="EXPIRED" className="data-[state=active]:bg-[#4a6cfa]/10 data-[state=active]:text-[#4a6cfa]">
+          <TabsTrigger value="EXPIRED" className="data-[state=active]:bg-primary-blue/10 data-[state=active]:text-primary-blue">
             Expired
             <Badge variant="outline" className="ml-2 h-5 min-w-5 flex justify-center bg-background">{counts.expired}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="FILLED" className="data-[state=active]:bg-[#4a6cfa]/10 data-[state=active]:text-[#4a6cfa]">
+          <TabsTrigger value="FILLED" className="data-[state=active]:bg-primary-blue/10 data-[state=active]:text-primary-blue">
             Filled
             <Badge variant="outline" className="ml-2 h-5 min-w-5 flex justify-center bg-background">{counts.filled}</Badge>
           </TabsTrigger>

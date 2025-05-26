@@ -76,8 +76,8 @@ function SidebarHeader({ isExpanded, onToggle, userRole, isMobileOpen, onMobileC
   return (
     <div className={cn("flex h-16 shrink-0 items-center border-b px-3", isExpanded ? "justify-between" : "justify-center")}>
       {isExpanded && (
-        <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-[#1a1e2d]">
-          <Sparkles className="h-7 w-7 text-[#4a6cfa]" />
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-theme-dark">
+          <Sparkles className="h-7 w-7 text-primary-blue" />
           <span>{title}</span>
         </Link>
       )}
@@ -85,18 +85,18 @@ function SidebarHeader({ isExpanded, onToggle, userRole, isMobileOpen, onMobileC
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden rounded-full hover:bg-[#4a6cfa]/10"
+          className="md:hidden rounded-full hover:bg-primary-blue/10"
           onClick={onMobileClose}
           aria-label="Close menu"
         >
-          <X className="h-5 w-5 text-[#1a1e2d]" />
+          <X className="h-5 w-5 text-theme-dark" />
         </Button>
         
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={onToggle} 
-          className="hidden md:flex rounded-lg hover:bg-[#4a6cfa]/10 ml-auto"
+          className="hidden md:flex rounded-lg hover:bg-primary-blue/10 ml-auto"
         >
           {isExpanded ? <PanelLeft className="h-5 w-5" /> : <PanelRight className="h-5 w-5" />}
           <span className="sr-only">Toggle sidebar</span>
@@ -106,8 +106,6 @@ function SidebarHeader({ isExpanded, onToggle, userRole, isMobileOpen, onMobileC
   );
 }
 
-
-
 interface SidebarUserProfileProps {
   isSidebarExpanded: boolean;
   userData: any;
@@ -116,7 +114,7 @@ interface SidebarUserProfileProps {
 }
 
 function SidebarUserProfile({ isSidebarExpanded, userData, loading, onLogout }: SidebarUserProfileProps) {
-  const userName = userData?.user_metadata?.first_name || 
+  const userName = userData?.user_metadata?.full_name || 
                    userData?.user_metadata?.name || 
                    userData?.email?.split('@')[0] || 
                    'User';
@@ -152,7 +150,7 @@ function SidebarUserProfile({ isSidebarExpanded, userData, loading, onLogout }: 
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
               <Avatar className="h-full w-full">
                 <AvatarImage src={userData?.user_metadata?.avatar_url} alt={userName} />
-                <AvatarFallback className="bg-[#4a6cfa]/10 text-[#4a6cfa] text-xs font-semibold">
+                <AvatarFallback className="bg-primary-blue/10 text-primary-blue text-xs font-semibold">
                   {getInitials()}
                 </AvatarFallback>
               </Avatar>
@@ -179,14 +177,14 @@ function SidebarUserProfile({ isSidebarExpanded, userData, loading, onLogout }: 
     <div className="flex w-full items-center gap-2.5">
       <Avatar className="h-8 w-8 shrink-0">
         <AvatarImage src={userData?.user_metadata?.avatar_url} alt={userName} />
-        <AvatarFallback className="bg-[#4a6cfa]/10 text-[#4a6cfa] text-xs font-semibold">
+        <AvatarFallback className="bg-primary-blue/10 text-primary-blue text-xs font-semibold">
           {getInitials()}
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1 flex-col">
-        <p className="truncate text-sm font-medium leading-tight text-[#1a1e2d]">{userName}</p>
+        <p className="truncate text-sm font-medium leading-tight text-theme-dark">{userName}</p>
         {userEmail && (
-          <p className="truncate text-xs leading-tight text-[#9aa3bc]">
+          <p className="truncate text-xs leading-tight text-theme-gray-dark">
             {userEmail}
           </p>
         )}
@@ -198,9 +196,9 @@ function SidebarUserProfile({ isSidebarExpanded, userData, loading, onLogout }: 
               variant="ghost" 
               size="icon" 
               onClick={onLogout}
-              className="ml-auto shrink-0 rounded-lg hover:bg-[#4a6cfa]/10"
+              className="ml-auto shrink-0 rounded-lg hover:bg-primary-blue/10"
             >
-              <LogOut className="h-5 w-5 text-[#9aa3bc]" />
+              <LogOut className="h-5 w-5 text-theme-gray-dark" />
               <span className="sr-only">Log out</span>
             </Button>
           </TooltipTrigger>
@@ -281,7 +279,7 @@ export function UnifiedSidebar({ userRole }: UnifiedSidebarProps) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r border-[rgba(255,255,255,0.3)] bg-background/95 backdrop-blur-md shadow-[0_8px_32px_rgba(31,38,135,0.1)] transition-all duration-300 ease-in-out",
+          "fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r border-theme-gray/30 bg-background/95 backdrop-blur-md shadow-level-2 transition-all duration-300 ease-in-out",
           "md:static",
           isExpanded ? "w-64" : "w-16",
           isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
@@ -304,7 +302,7 @@ export function UnifiedSidebar({ userRole }: UnifiedSidebarProps) {
         />
       </ScrollArea>
       
-      <div className={cn("mt-auto space-y-2 border-t border-[rgba(255,255,255,0.3)] p-2", !isExpanded && "items-center flex flex-col")}>
+      <div className={cn("mt-auto space-y-2 border-t border-theme-gray/30 p-2", !isExpanded && "items-center flex flex-col")}>
         <SidebarThemeToggle isSidebarExpanded={isExpanded} />
         <SidebarUserProfile 
           isSidebarExpanded={isExpanded} 

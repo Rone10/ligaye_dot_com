@@ -2,46 +2,46 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-dark text-white py-10 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl text-white font-semibold mb-4">Ligaye.com</h3>
-              <p className="text-zinc-400">Gambia&apos;s Digital Career Revolution</p>
-            </div>
-            
-            <div>
-              <h4 className="text-lg text-white font-medium mb-3">For Job Seekers</h4>
-              <ul className="space-y-2">
-                <li><Link href="/jobs" className="text-zinc-400 hover:text-white">Find Jobs</Link></li>
-                <li><Link href="/sign-up" className="text-zinc-400 hover:text-white">Create Profile</Link></li>
-                {/* <li><Link href="/job-alerts" className="text-zinc-400 hover:text-white">Job Alerts</Link></li> */}
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg text-white font-medium mb-3 ">For Employers</h4>
-              <ul className="space-y-2">
-                <li><Link href="/employer/jobs/new" className="text-zinc-400 hover:text-white">Post a Job</Link></li>
-                <li><Link href="/pricing" className="text-zinc-400 hover:text-white">Pricing</Link></li>
-                {/* <li><Link href="/resources" className="text-zinc-400 hover:text-white">Resources</Link></li> */}
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg text-white font-medium mb-3">Contact</h4>
-              <ul className="space-y-2">
-                {/* <li><Link href="/about" className="text-zinc-400 hover:text-white">About Us</Link></li> */}
-                <li><Link href="/contact" className="text-zinc-400 hover:text-white">Support</Link></li>
-                <li><Link href="/privacy" className="text-zinc-400 hover:text-white">Privacy Policy</Link></li>
-              </ul>
-            </div>
+    <footer className="bg-theme-dark text-theme-light py-10 px-4 md:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 className="text-xl text-theme-light font-semibold mb-4">Ligaye.com</h3>
+            <p className="text-theme-gray-dark">Connecting talent with opportunity across The Gambia.</p>
           </div>
           
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; {new Date().getFullYear()} Ligaye.com. All rights reserved.</p>
+          <div>
+            <h4 className="text-lg text-theme-light font-medium mb-3">For Job Seekers</h4>
+            <ul className="space-y-2">
+              <li><Link href="/jobs" className="text-theme-gray-dark hover:text-theme-light">Find Jobs</Link></li>
+              <li><Link href="/sign-up" className="text-theme-gray-dark hover:text-theme-light">Create Profile</Link></li>
+              {/* <li><Link href="/job-alerts" className="text-theme-gray-dark hover:text-theme-light">Job Alerts</Link></li> */}
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="text-lg text-theme-light font-medium mb-3 ">For Employers</h4>
+            <ul className="space-y-2">
+              <li><Link href="/employer/jobs/new" className="text-theme-gray-dark hover:text-theme-light">Post a Job</Link></li>
+              <li><Link href="/pricing" className="text-theme-gray-dark hover:text-theme-light">Pricing</Link></li>
+              {/* <li><Link href="/resources" className="text-theme-gray-dark hover:text-theme-light">Resources</Link></li> */}
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="text-lg text-theme-light font-medium mb-3">Contact</h4>
+            <ul className="space-y-2">
+              {/* <li><Link href="/about" className="text-theme-gray-dark hover:text-theme-light">About Us</Link></li> */}
+              <li><Link href="/contact" className="text-theme-gray-dark hover:text-theme-light">Support</Link></li>
+              <li><Link href="/privacy" className="text-theme-gray-dark hover:text-theme-light">Privacy Policy</Link></li>
+            </ul>
           </div>
         </div>
-      </footer>
+        
+        <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} Ligaye.com. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
   );
 }

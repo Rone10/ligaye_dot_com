@@ -91,29 +91,29 @@ export default function JobHeader({ job, applicationsCount }: JobHeaderProps) {
     <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold text-[#1a1e2d] sm:text-3xl">{job.title}</h1>
+          <h1 className="text-2xl font-semibold text-theme-dark sm:text-3xl">{job.title}</h1>
           <Badge variant="outline" className={`ml-2 ${statusInfo.color}`}>
             {statusInfo.label}
           </Badge>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3 text-sm bg-gray-50/70 p-2.5 rounded-lg border border-gray-100 shadow-sm">
+        <div className="flex flex-wrap items-center gap-3 text-sm bg-muted/70 p-2.5 rounded-lg border border-border shadow-sm">
           {job.publishedAt && (
-            <div className="flex items-center px-2.5 py-1 rounded-full bg-white border border-gray-200">
-              <Calendar className="mr-1.5 h-4 w-4 text-[#4a6cfa]" />
+            <div className="flex items-center px-2.5 py-1 rounded-full bg-background border border-border">
+              <Calendar className="mr-1.5 h-4 w-4 text-primary-blue" />
               <span className="font-medium">Posted: {formatDate(job.publishedAt)}</span>
             </div>
           )}
           
           {job.expiresAt && (
-            <div className="flex items-center px-2.5 py-1 rounded-full bg-white border border-gray-200">
-              <Clock className="mr-1.5 h-4 w-4 text-[#4a6cfa]" />
+            <div className="flex items-center px-2.5 py-1 rounded-full bg-background border border-border">
+              <Clock className="mr-1.5 h-4 w-4 text-primary-blue" />
               <span className="font-medium">Expires: {formatDate(job.expiresAt)}</span>
             </div>
           )}
           
-          <div className="flex items-center px-2.5 py-1 rounded-full bg-white border border-gray-200">
-            <Users className="mr-1.5 h-4 w-4 text-[#4a6cfa]" />
+          <div className="flex items-center px-2.5 py-1 rounded-full bg-background border border-border">
+            <Users className="mr-1.5 h-4 w-4 text-primary-blue" />
             <span className="font-medium">{applicationsCount} Applications</span>
           </div>
         </div>
@@ -128,14 +128,14 @@ export default function JobHeader({ job, applicationsCount }: JobHeaderProps) {
         </Link>
         
         <Link href={`/employer/jobs/${job.id}/edit`}>
-          <Button variant="outline" size="sm" className="flex items-center gap-1 bg-white">
+          <Button variant="outline" size="sm" className="flex items-center gap-1 bg-background">
             <Edit className="h-4 w-4" />
             <span>Edit</span>
           </Button>
         </Link>
         
         <Link href={`/employer/jobs/${job.id}/applications`}>
-          <Button size="sm" className="flex items-center gap-1 bg-[#4a6cfa] hover:bg-[#7b90ff] text-white">
+          <Button size="sm" className="flex items-center gap-1 bg-primary-blue hover:bg-primary-blue-light text-white">
             <FileText className="h-4 w-4" />
             <span>Applications</span>
           </Button>

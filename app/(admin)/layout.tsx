@@ -28,12 +28,14 @@ export default async function AdminLayout({
   
   // New layout structure with Sidebar
   return (
-    <div className="h-screen flex overflow-hidden bg-gradient-to-br from-blue-50 to-gray-50">
-      <AdminSidebar /> 
-      <main className="flex-1 overflow-y-auto p-6 lg:px-8">
-        {/* Render children directly within the main scrollable area */}
-        {children}
-      </main>
+    <div className="h-screen flex overflow-hidden bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))]">
+      <AdminSidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 overflow-y-auto p-6 lg:px-8">
+          {/* Render children directly within the main scrollable area */}
+          {children}
+        </main>
+      </div>
     </div>
   );
 } 

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { getAllUsers } from "./_queries";
 import UsersTable from "./_components/users-table";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "Manage Users - Ligaye Admin",
@@ -27,44 +28,58 @@ export default async function UsersPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold">Manage Users</h1>
-        <p className="text-gray-500">View and manage all users on the platform</p>
+        <p className="text-muted-foreground">View and manage all users on the platform</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-6 rounded-lg bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100">
-          <div className="text-xl font-bold text-blue-600">{totalUsers}</div>
-          <div className="text-sm text-gray-500">Total Users</div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-xl font-bold text-primary-blue">{totalUsers}</div>
+            <div className="text-sm text-muted-foreground">Total Users</div>
+          </CardContent>
+        </Card>
         
-        <div className="p-6 rounded-lg bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100">
-          <div className="flex gap-4">
-            <div>
-              <div className="text-xl font-bold text-green-600">{activeUsers}</div>
-              <div className="text-sm text-gray-500">Active</div>
-            </div>
-            <div className="border-l border-gray-200 pl-4">
-              <div className="text-xl font-bold text-red-600">{deletedUsers}</div>
-              <div className="text-sm text-gray-500">Deleted</div>
-            </div>
-          </div>
-        </div>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-xl font-bold text-secondary-green">{activeUsers}</div>
+            <div className="text-sm text-muted-foreground">Active</div>
+          </CardContent>
+        </Card>
         
-        <div className="p-6 rounded-lg bg-white/80 backdrop-blur-sm shadow-sm border border-gray-100">
-          <div className="flex gap-4">
-            <div>
-              <div className="text-xl font-bold text-green-600">{candidateCount}</div>
-              <div className="text-sm text-gray-500">Candidates</div>
-            </div>
-            <div className="border-l border-gray-200 pl-4">
-              <div className="text-xl font-bold text-blue-600">{employerCount}</div>
-              <div className="text-sm text-gray-500">Employers</div>
-            </div>
-            <div className="border-l border-gray-200 pl-4">
-              <div className="text-xl font-bold text-purple-600">{adminCount}</div>
-              <div className="text-sm text-gray-500">Admins</div>
-            </div>
-          </div>
-        </div>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-xl font-bold text-destructive">{deletedUsers}</div>
+            <div className="text-sm text-muted-foreground">Deleted</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-xl font-bold text-theme-dark">{adminCount}</div>
+            <div className="text-sm text-muted-foreground">Admins</div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-xl font-bold text-primary-blue">{candidateCount}</div>
+            <div className="text-sm text-muted-foreground">Candidates</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-xl font-bold text-primary-blue">{employerCount}</div>
+            <div className="text-sm text-muted-foreground">Employers</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-xl font-bold text-theme-dark">{adminCount}</div>
+            <div className="text-sm text-muted-foreground">Admins</div>
+          </CardContent>
+        </Card>
       </div>
       
       <UsersTable users={users} />

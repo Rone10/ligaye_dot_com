@@ -55,14 +55,14 @@ export default function ContactUsPage() {
     "bg-white/70 dark:bg-black/60 backdrop-blur-lg border border-white/30 dark:border-black/40 rounded-2xl shadow-lg";
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-slate-900 dark:to-black py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))] py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <section className="text-center mb-12">
-                    <h1 className="text-4xl sm:text-5xl font-bold text-primary-blue dark:text-blue-400 mb-4">
+                    <h1 className="text-4xl sm:text-5xl font-bold text-primary-blue mb-4">
                         Get In Touch
                     </h1>
-                    <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+                    <p className="text-lg text-theme-gray-dark max-w-2xl mx-auto">
                         Have questions or want to collaborate? Send us a message, and we&apos;ll get back to you soon.
                     </p>
                 </section>
@@ -72,7 +72,7 @@ export default function ContactUsPage() {
                      {/* Contact Form Card */}
                     <Card className={glassmorphicCardClass}>
                         <CardHeader>
-                            <CardTitle className="text-2xl font-semibold text-dark dark:text-light">Send Us a Message</CardTitle>
+                            <CardTitle className="text-2xl font-semibold text-theme-dark">Send Us a Message</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Form {...form}>
@@ -82,9 +82,9 @@ export default function ContactUsPage() {
                                         name="name"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-gray-700 dark:text-gray-300">Name</FormLabel>
+                                                <FormLabel className="text-theme-gray-dark">Name</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Your Name" {...field} className="bg-white/80 dark:bg-black/70 border-gray-300 dark:border-gray-600 focus:border-primary-blue focus:ring-primary-blue/50 rounded-lg" />
+                                                    <Input placeholder="Your Name" {...field} className="bg-background border-border focus:border-primary-blue focus:ring-primary-blue/50 rounded-lg" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -95,9 +95,9 @@ export default function ContactUsPage() {
                                         name="email"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-gray-700 dark:text-gray-300">Email</FormLabel>
+                                                <FormLabel className="text-theme-gray-dark">Email</FormLabel>
                                                 <FormControl>
-                                                    <Input type="email" placeholder="your.email@example.com" {...field} className="bg-white/80 dark:bg-black/70 border-gray-300 dark:border-gray-600 focus:border-primary-blue focus:ring-primary-blue/50 rounded-lg" />
+                                                    <Input type="email" placeholder="your.email@example.com" {...field} className="bg-background border-border focus:border-primary-blue focus:ring-primary-blue/50 rounded-lg" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -108,9 +108,9 @@ export default function ContactUsPage() {
                                         name="subject"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-gray-700 dark:text-gray-300">Subject</FormLabel>
+                                                <FormLabel className="text-theme-gray-dark">Subject</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Subject of your message" {...field} className="bg-white/80 dark:bg-black/70 border-gray-300 dark:border-gray-600 focus:border-primary-blue focus:ring-primary-blue/50 rounded-lg" />
+                                                    <Input placeholder="Subject of your message" {...field} className="bg-background border-border focus:border-primary-blue focus:ring-primary-blue/50 rounded-lg" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -121,26 +121,26 @@ export default function ContactUsPage() {
                                         name="message"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-gray-700 dark:text-gray-300">Message</FormLabel>
+                                                <FormLabel className="text-theme-gray-dark">Message</FormLabel>
                                                 <FormControl>
                                                     <Textarea
                                                         placeholder="Type your message here..."
                                                         rows={5}
                                                         {...field}
-                                                        className="bg-white/80 dark:bg-black/70 border-gray-300 dark:border-gray-600 focus:border-primary-blue focus:ring-primary-blue/50 rounded-lg resize-none"
+                                                        className="bg-background border-border focus:border-primary-blue focus:ring-primary-blue/50 rounded-lg resize-none"
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-                                    <Button type="submit" disabled={isSubmitting} className="w-full bg-primary-blue hover:bg-primary-blue/90 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold py-3 rounded-lg">
+                                    <Button type="submit" disabled={isSubmitting} className="w-full bg-primary-blue hover:bg-primary-blue-light text-white font-semibold py-3 rounded-lg">
                                         {isSubmitting ? "Sending..." : "Send Message"}
                                     </Button>
                                 </form>
                             </Form>
                              {submitStatus && (
-                                <p className={`mt-4 text-center text-sm font-medium ${submitStatus.success ? 'text-secondary-green dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                <p className={`mt-4 text-center text-sm font-medium ${submitStatus.success ? 'text-secondary-green' : 'text-destructive'}`}>
                                     {submitStatus.success ? submitStatus.message : submitStatus.error}
                                 </p>
                             )}
@@ -149,27 +149,27 @@ export default function ContactUsPage() {
 
                      {/* Contact Info Section */}
                     <div className="space-y-6">
-                        <h2 className="text-2xl font-semibold text-dark dark:text-light mb-4">Contact Information</h2>
-                        <p className="text-gray-700 dark:text-gray-300">
+                        <h2 className="text-2xl font-semibold text-theme-dark mb-4">Contact Information</h2>
+                        <p className="text-theme-gray-dark">
                             Alternatively, you can reach us through the following channels (details are placeholders):
                         </p>
                         <div className="space-y-4">
                              <div className="flex items-start gap-4">
-                                <div className="mt-1 flex-shrink-0 bg-primary-blue/10 dark:bg-blue-900/30 p-3 rounded-full">
-                                    <Mail className="h-5 w-5 text-primary-blue dark:text-blue-400" />
+                                <div className="mt-1 flex-shrink-0 bg-primary-blue/10 p-3 rounded-full">
+                                    <Mail className="h-5 w-5 text-primary-blue" />
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-dark dark:text-light">Email</h3>
-                                    <p className="text-gray-600 dark:text-gray-400 text-sm">contact@ligaye.com</p>
+                                    <h3 className="font-semibold text-theme-dark">Email</h3>
+                                    <p className="text-theme-gray-dark text-sm">contact@ligaye.com</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-4">
-                                 <div className="mt-1 flex-shrink-0 bg-primary-blue/10 dark:bg-blue-900/30 p-3 rounded-full">
-                                    <Phone className="h-5 w-5 text-primary-blue dark:text-blue-400" />
+                                 <div className="mt-1 flex-shrink-0 bg-primary-blue/10 p-3 rounded-full">
+                                    <Phone className="h-5 w-5 text-primary-blue" />
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-dark dark:text-light">Phone</h3>
-                                    <p className="text-gray-600 dark:text-gray-400 text-sm">+220 313 9076 / 301 4290</p>
+                                    <h3 className="font-semibold text-theme-dark">Phone</h3>
+                                    <p className="text-theme-gray-dark text-sm">+220 313 9076 / 301 4290</p>
                                 </div>
                             </div>
                            {/* <div className="flex items-start gap-4">

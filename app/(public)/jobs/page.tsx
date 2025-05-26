@@ -15,6 +15,7 @@ import {
   JobListWithSaving,
 } from './_components';
 import type { JobFilters as JobFiltersType } from './_utils/types';
+import Navbar from '@/components/Navbar';
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -57,9 +58,10 @@ export default async function JobsPage({ searchParams }: PageProps) {
   const savedJobIds = user ? await getSavedJobIdsForUser(user.id) : [];
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#e9efff] to-[#f4f7ff]">
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-8 text-[#1a1e2d] text-center">Find Your Perfect Job</h1>
+    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))]">
+      <Navbar user={user} />
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8 text-theme-dark text-center">Find Your Perfect Job</h1>
         
         {/* Grid Layout for desktop, single column for mobile */}
         <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 ">

@@ -12,7 +12,7 @@ const config: Config = {
   		backgroundImage: {
   			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
   			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-  			'gradient-bg': 'linear-gradient(135deg, #e9efff 0%, #f4f7ff 100%)',
+  			'gradient-bg': 'linear-gradient(135deg, hsl(var(--bg-gradient-from)), hsl(var(--bg-gradient-to)))',
   		},
   		borderRadius: {
   			'sm': '4px',
@@ -35,14 +35,19 @@ const config: Config = {
   				foreground: 'hsl(var(--primary-foreground))'
   			},
   			'primary-blue': {
-  				DEFAULT: '#4a6cfa',
-  				light: '#7b90ff'
+  				DEFAULT: 'hsl(var(--primary-blue))',
+  				light: 'hsl(var(--primary-blue-light))'
   			},
-  			'secondary-green': '#05ce91',
-  			dark: '#1a1e2d',
-  			light: '#f8faff',
-  			gray: '#e1e5f2',
-  			'gray-dark': '#9aa3bc',
+  			'secondary-green': 'hsl(var(--secondary-green))',
+  			'theme-dark': 'hsl(var(--theme-dark))',
+  			'theme-light': 'hsl(var(--theme-light))',
+  			'theme-gray': 'hsl(var(--theme-gray))',
+  			'theme-gray-dark': 'hsl(var(--theme-gray-dark))',
+  			// Legacy color names for backward compatibility
+  			dark: 'hsl(var(--theme-dark))',
+  			light: 'hsl(var(--theme-light))',
+  			gray: 'hsl(var(--theme-gray))',
+  			'gray-dark': 'hsl(var(--theme-gray-dark))',
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
   				foreground: 'hsl(var(--secondary-foreground))'
