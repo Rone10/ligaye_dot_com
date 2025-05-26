@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
+import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,9 +20,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
+      <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
         <NuqsAdapter> 
           {children} 
         </NuqsAdapter>
+        </ThemeProvider>
         <Toaster position="top-right" richColors />
       </body>
     </html>

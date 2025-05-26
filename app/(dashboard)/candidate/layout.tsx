@@ -1,6 +1,6 @@
 import { getUser } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import CandidateSidebar from './_components/CandidateSidebar'
+import { UnifiedSidebar } from '../_components/UnifiedSidebar'
 
 export default async function CandidateDashboardLayout({
   children
@@ -28,7 +28,7 @@ export default async function CandidateDashboardLayout({
   
   return (
     <div className="h-screen flex overflow-hidden bg-gradient-to-br from-[#e9efff] to-[#f4f7ff]">
-      <CandidateSidebar />
+      <UnifiedSidebar userRole="candidate" />
       <main className="flex-1 overflow-y-auto p-6 lg:px-8">
         <div className="container mx-auto">
           {children}
