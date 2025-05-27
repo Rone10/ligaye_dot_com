@@ -127,10 +127,10 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
           {/* Salary and Details */}
           <div className="mt-6 flex flex-wrap justify-between items-center gap-3">
             <div>
-              <div className="text-[#9aa3bc]">
-                <span className="font-semibold text-[#1a1e2d] text-base">{salaryDisplay}</span>
+              <div className="">
+                <span className="font-semibold  text-base">{salaryDisplay}</span>
               </div>
-              <div className="text-sm text-[#9aa3bc] mt-1.5">
+              <div className="text-sm  mt-1.5">
                 Posted {publishedDate}
               </div>
             </div>
