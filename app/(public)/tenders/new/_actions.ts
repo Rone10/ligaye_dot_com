@@ -4,17 +4,13 @@ import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/supabase/server';
 import { newTenderSchema, type NewTenderSchemaType } from './_utils/validation';
 import { insertTender } from './_queries';
-import { Tender } from '@/lib/db/schema';
-import { toast } from 'sonner';
 
 export async function createTenderAction(formData: NewTenderSchemaType): Promise<{
   success: boolean;
   tenderId?: string;
   error?: string;
 }> {
-  let tender: Tender | null = null;
   try {
-   
     // Get current user from Supabase Auth
     const user = await getUser();
     if (!user) {
@@ -25,9 +21,10 @@ export async function createTenderAction(formData: NewTenderSchemaType): Promise
     const validatedData = newTenderSchema.parse(formData);
 
     // Insert tender into database (user.id is the Supabase Auth user ID)
-    tender = await insertTender(validatedData, user.id);
+    const tender = await insertTender(validatedData, user.id);
 
-    // Redirect to tender detail page on success
+    // Return success with tender ID for client-side handling
+    return { success: true, tenderId: tender.id };
 
   } catch (error) {
     console.error('Error creating tender:', error);
@@ -38,7 +35,4 @@ export async function createTenderAction(formData: NewTenderSchemaType): Promise
     
     return { success: false, error: 'Failed to create tender' };
   }
-  // show toast notification
-  toast.success('Tender created successfully');
-  redirect(`/tenders/${tender.id}`);
 } 

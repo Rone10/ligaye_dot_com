@@ -43,7 +43,7 @@ export default async function RootLayout({
           <Footer />
         </div>
       </div>
-      <Toaster />
+      {/* <Toaster /> */}
     </div>
   );
 }

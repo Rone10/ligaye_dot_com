@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,6 +26,7 @@ interface NewTenderFormProps {
 export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const form = useForm<NewTenderSchemaType>({
     resolver: zodResolver(newTenderSchema),
@@ -48,12 +51,20 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
     try {
       const result = await createTenderAction(data);
       
-      if (!result.success && result.error) {
+      if (result.success && result.tenderId) {
+        // Show success toast
+        toast.success('Tender created successfully!');
+        // Navigate to the tender detail page
+        router.push(`/tenders/${result.tenderId}`);
+      } else if (result.error) {
+        // Show error toast
+        toast.error(result.error);
         setError(result.error);
       }
-      // If successful, the action will redirect, so no need to handle success here
     } catch (err) {
-      setError('An unexpected error occurred');
+      const errorMessage = 'An unexpected error occurred';
+      toast.error(errorMessage);
+      setError(errorMessage);
       console.error('Form submission error:', err);
     } finally {
       setIsSubmitting(false);
