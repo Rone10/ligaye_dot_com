@@ -26,7 +26,7 @@ export default async function RootLayout({
   const isCandidate = user?.user_metadata.role === 'candidate';
 
   return (
-    <div className="bg-gradient-to-br from-[#e9efff] to-[#f4f7ff] min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-from-theme-light to-theme-gray dark:bg-gradient-from-theme-dark dark:to-theme-gray">
       <Navbar user={user} />
       <div className="flex flex-1 overflow-hidden">
         {/* {(isEmployer || isCandidate) && (
@@ -37,7 +37,7 @@ export default async function RootLayout({
         )} */}
 
         <div className="flex flex-1 flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:px-8">
+          <main className="flex-1 overflow-y-auto ">
             {children}
           </main>
           <Footer />
