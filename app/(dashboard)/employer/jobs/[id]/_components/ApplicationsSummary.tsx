@@ -50,7 +50,7 @@ export default function ApplicationsSummary({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[#9aa3bc]">Total Applications</p>
-                <h3 className="text-2xl font-semibold text-[#1a1e2d] mt-1">
+                <h3 className="text-2xl font-semibold mt-1">
                   {applicationStats.total}
                 </h3>
               </div>
@@ -67,7 +67,7 @@ export default function ApplicationsSummary({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[#9aa3bc]">New Applications</p>
-                <h3 className="text-2xl font-semibold text-[#1a1e2d] mt-1">
+                <h3 className="text-2xl font-semibold  mt-1">
                   {applicationStats.byStatus.find(s => s.status === 'APPLIED')?.count || 0}
                 </h3>
               </div>
@@ -84,7 +84,7 @@ export default function ApplicationsSummary({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[#9aa3bc]">Shortlisted</p>
-                <h3 className="text-2xl font-semibold text-[#1a1e2d] mt-1">
+                <h3 className="text-2xl font-semibold  mt-1">
                   {applicationStats.byStatus.find(s => s.status === 'SHORTLISTED')?.count || 0}
                 </h3>
               </div>
@@ -101,7 +101,7 @@ export default function ApplicationsSummary({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[#9aa3bc]">Interviews</p>
-                <h3 className="text-2xl font-semibold text-[#1a1e2d] mt-1">
+                <h3 className="text-2xl font-semibold  mt-1">
                   {(applicationStats.byStatus.find(s => s.status === 'INTERVIEW_SCHEDULED')?.count || 0) +
                    (applicationStats.byStatus.find(s => s.status === 'INTERVIEWED')?.count || 0)}
                 </h3>
