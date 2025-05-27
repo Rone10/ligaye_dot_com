@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useCallback } from 'react';
 import { useJobFilters } from '../_hooks/useJobFilters';
 import { useMediaQuery, useDebounce } from '../_hooks/';
 import { 
@@ -40,12 +40,19 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
   // Debounce the search input to prevent excessive fetching
   const debouncedSearchTerm = useDebounce(searchInput, 500);
   
+  // --- Wrapped state update functions ---
+  const handleFilterChange = useCallback((update: Parameters<typeof setFilters>[0]) => {
+    startTransition(() => {
+      setFilters(update);
+    });
+  }, [setFilters, startTransition]);
+  
   // Update filters when debounced search term changes
   useEffect(() => {
     if (debouncedSearchTerm !== filters.search) {
       handleFilterChange({ search: debouncedSearchTerm || null, page: 1 });
     }
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, filters.search, handleFilterChange]);
   
   // Local state for location and industry search
   const [locationSearchInput, setLocationSearchInput] = useState('');
@@ -100,13 +107,6 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
     if (industryId === 'all') return 'Any Industry';
     const industry = industries.find(ind => ind.id === industryId);
     return industry ? industry.name : '';
-  };
-
-  // --- Wrapped state update functions ---
-  const handleFilterChange = (update: Parameters<typeof setFilters>[0]) => {
-    startTransition(() => {
-      setFilters(update);
-    });
   };
 
   const handleResetFilters = () => {

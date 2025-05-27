@@ -78,7 +78,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
             </div>
             <div className="ml-3">
               <p className="text-sm text-blue-700">
-                You're viewing this job from your application history. The job status or availability may have changed since you applied.
+                You&apos;re viewing this job from your application history. The job status or availability may have changed since you applied.
               </p>
             </div>
           </div>

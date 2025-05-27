@@ -156,7 +156,7 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
             <div className="flex flex-wrap gap-2">
               {search && (
                 <div className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                  Search: "{search}"
+                  Search: &quot;{search}&quot;
                   <button
                     onClick={() => setSearch('')}
                     className="ml-1 hover:bg-blue-200 rounded-full p-0.5"
