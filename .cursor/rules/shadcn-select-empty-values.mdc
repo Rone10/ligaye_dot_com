@@ -1,0 +1,100 @@
+---
+description: 
+globs: Shadcn Select Component: Empty Values Handling
+alwaysApply: false
+---
+# Shadcn Select Component: Empty Values Handling
+
+## Problem
+
+Shadcn's Select component throws an error when `SelectItem` components have empty string values:
+
+```
+Error: A <Select.Item /> must have a value prop that is not an empty string. 
+This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+```
+
+## ❌ Incorrect Implementation
+
+```tsx
+// This will cause an error
+<Select value={filterValue} onValueChange={setFilterValue}>
+  <SelectTrigger>
+    <SelectValue placeholder="All items" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="">All items</SelectItem>  {/* ❌ Empty string not allowed */}
+    <SelectItem value="option1">Option 1</SelectItem>
+    <SelectItem value="option2">Option 2</SelectItem>
+  </SelectContent>
+</Select>
+```
+
+## ✅ Correct Implementation
+
+Use a placeholder value (like "all") and convert it back to empty string in the change handler:
+
+```tsx
+// Handle value conversion
+const handleFilterChange = (value: string) => {
+  setFilterValue(value === 'all' ? '' : value);
+};
+
+// Select component
+<Select value={filterValue || 'all'} onValueChange={handleFilterChange}>
+  <SelectTrigger>
+    <SelectValue placeholder="All items" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="all">All items</SelectItem>  {/* ✅ Non-empty placeholder */}
+    <SelectItem value="option1">Option 1</SelectItem>
+    <SelectItem value="option2">Option 2</SelectItem>
+  </SelectContent>
+</Select>
+```
+
+## Complete Pattern for Filters
+
+When implementing filters with "All" options:
+
+```tsx
+const [filter, setFilter] = useQueryState('filter', { defaultValue: '' });
+
+const handleFilterChange = (value: string) => {
+  setFilter(value === 'all' ? '' : value);
+};
+
+return (
+  <Select value={filter || 'all'} onValueChange={handleFilterChange}>
+    <SelectTrigger>
+      <SelectValue placeholder="All categories" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="all">All categories</SelectItem>
+      {categories.map((category) => (
+        <SelectItem key={category.id} value={category.id}>
+          {category.name}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+);
+```
+
+## Benefits of This Pattern
+
+1. **URL State**: Keeps clean URLs with empty strings for "no filter" state
+2. **Database Queries**: Backend receives empty strings as expected
+3. **User Experience**: Shows clear "All" options in the UI
+4. **Type Safety**: Maintains consistent string types throughout
+
+## Key Points
+
+- Never use `value=""` in `SelectItem` components
+- Use placeholder values like "all", "none", or "default"
+- Convert placeholder values back to empty strings in change handlers
+- Display the placeholder value when the actual value is empty (`value || 'all'`)
+
+## Example from Tenders Implementation
+
+See [app/(public)/tenders/_components/TenderFilters.tsx](mdc:app/(public)/tenders/_components/TenderFilters.tsx) for a complete working example of this pattern with multiple filter selects.

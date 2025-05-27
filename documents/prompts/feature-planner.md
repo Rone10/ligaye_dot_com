@@ -4,7 +4,7 @@ You have been provided with a `base-knowledge.md` in documents/base-knowledge.md
 
 Your role is to:
 
-1.  Analyze the requested changes (`<user instructions>` below) within the context of the project's VSA and conventions as defined in `base-knowledge.md`.
+1.  Analyze the requested changes (`<user_instructions>` below) within the context of the project's VSA and conventions as defined in `base-knowledge.md`.
 2.  Break the changes down into clear, actionable technical steps.
 3.  Create a detailed implementation plan outlining **WHERE** and **HOW** changes should be made, including:
     *   **Files:** Files to be created or modified, specifying their **exact path within the correct feature slice and route segment** (e.g., `app/[feature]/[sub-route]/_components/NewComponent.tsx` or `app/[feature]/_queries.ts`). Adhere to the project's file naming conventions.
@@ -35,78 +35,118 @@ Focus solely on the **technical implementation plan**. Exclude detailed testing 
 Please proceed with your analysis and implementation plan based on the following instructions:
 
 
-`<user instructions>`
+<user_instructions>
 
-Implement the Job Application feature for Ligaye.com, allowing logged-in candidates to apply for specific jobs. This includes navigating from the job detail page to a dedicated application form, handling resume and cover letter submission (using profile defaults, new uploads, or text input), and providing user feedback upon successful submission. Ensure strict adherence to the project's VSA, conventions (`base-knowledge.md`), database schema (`schema.ts`), and the specific requirements below.
+Implement a comprehensive Tenders feature for Ligaye.com, allowing authenticated users to create, read, update, and delete (soft delete) tender listings. This feature must strictly adhere to the project's Vertical Slice Architecture (VSA), conventions outlined in `base-knowledge.md`, the existing database schema (`schema.ts`), and UI guidelines from `style-guide.md`.
 
 **General Requirements:**
 
-1.  **Architecture:** Implement using granular Vertical Slice Architecture.
-    *   The primary application form and logic will reside in a new slice, e.g., `app/jobs/[slug]/apply/`. The `[slug]` parameter identifies the job being applied for.
-    *   The trigger ("Apply" button) will likely be on the job detail page (`app/jobs/[slug]/`).
-2.  **Data:** Use Drizzle ORM via functions in slice-specific `_queries.ts` to insert application records into the `applications` table (`schema.ts`). Ensure the `jobCandidateUniqueIdx` constraint (preventing duplicate applications) is handled gracefully.
-3.  **Technology:**
-    *   **Forms:** Use React Hook Form (RHF) and Zod (`_utils/validation.ts` within the `apply/` slice) for the application form.
-    *   **Rich Text Editor:** Utilize the pre-configured Syncfusion Rich Text Editor component (`@/components/RichTextEditor/editor`) for the optional cover letter text input.
-    *   **Mutations:** Use a Server Action (`_actions.ts` within the `apply/` slice) to handle form submission, process data (including file uploads), and interact with the database.
-    *   **File Handling:** Implement file uploads for resumes and cover letters, likely using Supabase Storage. Store the resulting URL and original filename in the `applications` table.
-    *   **UI:** Use Shadcn UI components (`components/ui/`) for form elements, buttons, and the success modal. Adhere to `style-guide.md`.
-    *   **Responsiveness:** Ensure the application form and modal are fully responsive.
-4.  **Authentication:** The application route must be protected, ensuring only logged-in users with the 'candidate' role can access it. The Server Action must retrieve the candidate's `profileId` and `candidateProfileId`.
+1.  **Architecture & VSA:**
+    *   Organize the feature within the `app/(public)/tenders/` directory using granular VSA.
+    *   List View: `app/(public)/tenders/page.tsx`
+    *   Create View: `app/(public)/tenders/new/page.tsx`
+    *   Detail View: `app/(public)/tenders/[id]/page.tsx` (`[id]` is the tender UUID)
+    *   Edit View: `app/(public)/tenders/[id]/edit/page.tsx`
+    *   Each route segment must contain its own `_components/`, `_actions.ts`, `_queries.ts`, `_utils/` (e.g., for validation), and `_hooks/` as needed, following project conventions.
+
+2.  **Authentication & Authorization:**
+    *   All tender-related routes and actions must be protected, requiring user authentication.
+    *   The `userId` from the logged-in user's profile (`profiles.id`) must be associated with created tenders.
+    *   Update and Delete operations must be authorized: only the user who created the tender (matching `tenders.userId`) or an admin (if admin roles are implemented for this) can perform these actions. This check should happen within the Server Actions.
+    *   Tenders can be viewed by everyone (authenticated or not)
+
+3.  **Data Management (Drizzle ORM & `_queries.ts`):**
+    *   All database interactions must use Drizzle ORM, invoked via functions defined in slice-specific `_queries.ts` files.
+    *   Reference the `tenders` table schema provided in `lib/db/schema.ts`.
+    *   Soft Deletes: Deleting a tender should set its `deleted` flag to `true`, not remove the record.
+
+4.  **Technology & UI:**
+    *   **Forms:** Use React Hook Form (RHF) with Zod for validation in slice-specific `_utils/validation.ts` files.
+    *   **UI Components:** Leverage Shadcn UI components from `components/ui/` for forms, tables, dialogs, buttons, etc. Adhere to `style-guide.md`.
+    *   **Server Actions:** Use Next.js Server Actions (in slice-specific `_actions.ts`) for all CUD operations.
+    *   **Date Handling:** Use `date-fns` for date formatting if needed; date inputs should be user-friendly (e.g., Shadcn Date Picker).
+    *   **Icons:** Use Lucide React icons.
+    *   **Feedback:** Provide clear user feedback for all operations (e.g., toast notifications for success/error, loading states).
 
 **Specific Feature Implementations:**
 
-**1. Trigger Application Flow (on `app/jobs/[slug]/`)**
+**1. List Tenders (`app/(public)/tenders/`)**
 
-*   **Location:** Job Detail Page (`app/jobs/[slug]/page.tsx` or a component within it).
-*   **Functionality:** Include an "Apply" button. This button should navigate the user to the dedicated application page (`/jobs/[slug]/apply`). Ensure the `slug` is passed correctly. Check if the job's `applicationMethod` allows platform applications (if relevant).
+*   **Purpose:** Display a paginated and filterable list of active (not soft-deleted) tenders.
+*   **Route Slice:** `app/(public)/tenders/`
+*   **Key Components & Files:**
+    *   `page.tsx`: Server Component. Fetches initial tenders list using `./_queries.ts`.
+        *   Should include a "Create New Tender" button linking to `/tenders/new`.
+    *   `_components/TendersDataTable.tsx` (`'use client'`): Displays tenders in a table (using Shadcn Table).
+        *   Columns: Title, Organization, Sector, Location, Deadline, Status.
+        *   Actions per row: "View" (links to `app/(public)/tenders/[id]/`), "Edit" (links to `app/(public)/tenders/[id]/edit/`, conditional on ownership), "Delete" (triggers delete action, conditional on ownership).
+    *   `_components/TenderFilters.tsx` (`'use client'`): (Optional, if complex filtering is needed) Component for filtering by sector, location, status, etc. Uses `nuqs` for URL state.
+    *   `_queries.ts`:
+        *   `getTenders(params: { page?: number, limit?: number, filters?: TenderFiltersType }): Promise<Tender[]>`: Fetches a list of non-deleted tenders with pagination and filtering.
+        *   `getTendersCount(params: { filters?: TenderFiltersType }): Promise<number>`: For pagination.
+        *   `getSectorsForFilter(): Promise<Sector[]>`: Fetches sectors for filter dropdown.
+        *   `getLocationsForFilter(): Promise<Location[]>`: Fetches locations for filter dropdown.
+    *   `_actions.ts`:
+        *   `deleteTenderAction(tenderId: string): Promise<{ success: boolean, error?: string }>`: Handles soft-deletion. Triggered from `TendersDataTable.tsx`. Requires confirmation dialog.
 
-**2. Job Application Page (`app/jobs/[slug]/apply/`)**
+**2. Create Tender (`app/(public)/tenders/new/`)**
 
-*   **Purpose:** Provide the interface for a candidate to submit their application for the specific job identified by `[slug]`.
-*   **Target Route Slice:** `app/jobs/[slug]/apply/`
-*   **Key Functionality:**
-    *   **Fetch Context Data:** On page load, fetch details of the job (`jobs` table via `slug`) and the logged-in candidate's profile (`profiles`, `candidateProfiles`), including their default `resumeUrl` and `resumeFilename`.
-    *   **Display Job Context:** Show minimal job details (e.g., Title, Company) for user orientation.
-    *   **Application Form:** Present a form with the following sections:
-        *   **Resume Selection:**
-            *   Radio button/toggle: "Use profile resume ([filename])".
-            *   Radio button/toggle: "Upload a new resume".
-            *   Conditional file input field for uploading a new resume (`.pdf`, `.docx`, etc.).
-        *   **Cover Letter Selection:**
-            *   Radio button/toggle: "Upload cover letter file".
-            *   Radio button/toggle: "Paste cover letter text".
-            *   Radio button/toggle: "No cover letter" (Optional, based on requirements).
-            *   Conditional file input field for uploading a cover letter file.
-            *   Conditional Rich Text Editor (`@/components/RichTextEditor/editor`) for pasting cover letter text.
-        *   **Submit Button.**
-*   **UI Structure:**
-    *   `page.tsx`: Server Component. Reads `slug` from `params`. Fetches job and candidate profile data using `./_queries.ts`. Passes data to the form component.
-    *   `_components/ApplicationForm.tsx` (`'use client'`): The main form using RHF/Zod. Manages state for resume/cover letter choices and inputs. Handles conditional display of file inputs/editor. On submit, calls the `submitApplication` Server Action. Manages display of the success modal upon successful submission.
-    *   `_components/ApplicationSuccessModal.tsx` (`'use client'`): A modal component displayed upon successful application submission.
-    *   `_utils/validation.ts`: Zod schema for form validation (potentially optional fields for cover letter/resume depending on choices).
-*   **Data Flow (Load):** `page.tsx` reads `slug`, gets `userId` -> `./_queries.ts` (`getApplicationContextData`) -> DB (fetch job by slug, fetch candidate profile by userId) -> Pass data to `ApplicationForm.tsx`.
+*   **Purpose:** Provide a form for authenticated users to create a new tender.
+*   **Route Slice:** `app/(public)/tenders/new/`
+*   **Key Components & Files:**
+    *   `page.tsx`: Server Component. Fetches necessary data for dropdowns (sectors, locations) using `./_queries.ts` and passes it to the form component.
+    *   `_components/NewTenderForm.tsx` (`'use client'`):
+        *   RHF form with fields corresponding to `tenders` table: `title`, `description` (use `@/components/RichTextEditor/editor`), `organizationName`, `tenderType` (Shadcn Select using `tenderTypeEnum` from schema), `sectorId` (Shadcn Select), `locationId` (Shadcn Select), `deadline` (Shadcn Date Picker), `budgetRange`, `contactInformation` (Shadcn Textarea), `externalLink`, `status` (Shadcn Select, default to 'DRAFT' or 'OPEN').
+        *   Handles form submission by calling `createTenderAction`.
+        *   Displays validation errors.
+    *   `_utils/validation.ts`: Zod schema for new tender validation.
+    *   `_actions.ts`:
+        *   `createTenderAction(formData: NewTenderSchemaType): Promise<{ success: boolean, tenderId?: string, error?: string }>`: Validates data, gets `userId`, calls `insertTender` from `./_queries.ts`. Redirects to the new tender's detail page (`/tenders/[tenderId]`) or list page on success.
+    *   `_queries.ts`:
+        *   `insertTender(data: NewTenderDataType, userId: string): Promise<Tender>`: Inserts a new tender into the database.
+        *   `getSectors(): Promise<Sector[]>`: Fetches all active sectors for the dropdown.
+        *   `getLocations(): Promise<Location[]>`: Fetches all active locations for the dropdown.
 
-**3. Application Submission Logic (`app/jobs/[slug]/apply/`)**
+**3. View Tender Details (`app/(public)/tenders/[id]/`)**
 
-*   **Target Files:** `_actions.ts`, `_queries.ts`
-*   **Server Action (`_actions.ts` -> `submitApplication`):**
-    *   Accepts validated form data, `jobId` (derived from slug lookup), `candidateProfileId` (from logged-in user).
-    *   **File Upload Handling:**
-        *   If a new resume was uploaded, upload it to Supabase Storage (e.g., under a path like `resumes/[candidateProfileId]/[jobId]/[filename]`). Get the `resumeUrl` and `resumeFilename`.
-        *   If a cover letter file was uploaded, upload it similarly. Get `coverLetterUrl` and `coverLetterFilename`.
-    *   **Data Preparation:** Construct the `NewApplication` object for insertion:
-        *   Set `jobId`, `candidateProfileId`.
-        *   Determine `resumeUrl`/`resumeFilename` based on user choice (profile default or new upload).
-        *   Determine `coverLetterUrl`/`coverLetterFilename` or `coverLetterText` based on user choice.
-        *   Set initial `status` to `'APPLIED'`.
-    *   **Database Insertion:** Call the `insertApplication` function from `./_queries.ts`.
-    *   **Error Handling:** Catch potential errors, especially unique constraint violations (user already applied). Return structured success/error states to the form.
-*   **Query (`_queries.ts` -> `insertApplication`):**
-    *   Accepts the `NewApplication` object.
-    *   Uses Drizzle (`await db()`) to insert the record into the `applications` table.
-*   **Query (`_queries.ts` -> `getApplicationContextData`):**
-    *   Fetches job details by slug and candidate profile details by user ID. Needed for the application page load.
+*   **Purpose:** Display detailed information for a specific tender.
+*   **Route Slice:** `app/(public)/tenders/[id]/`
+*   **Key Components & Files:**
+    *   `page.tsx`: Server Component. Reads `id` from `params`. Fetches tender details using `./_queries.ts`.
+        *   Displays all relevant tender fields.
+        *   Includes "Edit Tender" and "Delete Tender" buttons, visible only to the tender owner (or admin).
+    *   `_components/TenderDetailDisplay.tsx`: Component to render the tender details.
+    *   `_components/DeleteTenderDialog.tsx` (`'use client'`): A confirmation dialog for the delete action.
+    *   `_queries.ts`:
+        *   `getTenderById(id: string): Promise<Tender | null>`: Fetches a single non-deleted tender by its ID, potentially joining with `sectors` and `locations` for display names.
+    *   `_actions.ts`:
+        *   `deleteTenderAction(tenderId: string): Promise<{ success: boolean, error?: string }>`: (Can be shared with list view if structured appropriately, or duplicated for slice isolation). Handles soft-deletion. Triggered from this page.
 
+**4. Edit Tender (`app/(public)/tenders/[id]/edit/`)**
 
-`</user instructions>`
+*   **Purpose:** Provide a form for the tender owner to update an existing tender.
+*   **Route Slice:** `app/(public)/tenders/[id]/edit/`
+*   **Key Components & Files:**
+    *   `page.tsx`: Server Component. Reads `id` from `params`. Fetches tender data and data for dropdowns (sectors, locations) using `./_queries.ts`. Passes data to the form.
+        *   Handles cases where the tender is not found or the user is not authorized.
+    *   `_components/EditTenderForm.tsx` (`'use client'`):
+        *   Similar to `NewTenderForm.tsx` but pre-filled with existing tender data.
+        *   Handles form submission by calling `updateTenderAction`.
+    *   `_utils/validation.ts`: Zod schema for updating a tender (can be similar to or inherit from the create schema).
+    *   `_actions.ts`:
+        *   `updateTenderAction(tenderId: string, formData: UpdateTenderSchemaType): Promise<{ success: boolean, error?: string }>`: Validates data, verifies ownership (fetches `userId` of current user and compares with `tender.userId`), calls `updateTender` from `./_queries.ts`. Redirects to the tender's detail page on success.
+    *   `_queries.ts`:
+        *   `getTenderByIdForEdit(id: string): Promise<Tender | null>`: Fetches tender data for form pre-filling.
+        *   `updateTender(id: string, data: UpdateTenderDataType, userId: string): Promise<Tender | null>`: Updates an existing tender in the database. Ensure `updatedAt` is set. The `userId` parameter is for an authorization check if needed at the query level, though primary auth is in the action.
+        *   `getSectors(): Promise<Sector[]>`: Fetches all active sectors.
+        *   `getLocations(): Promise<Location[]>`: Fetches all active locations.
+
+**5. Data Structures & Types (within respective slices):**
+
+*   Define Zod schemas for form validation in `_utils/validation.ts` for `new` and `edit` slices.
+*   Use inferred types from `lib/db/schema.ts` (e.g., `Tender`, `NewTender`) where possible. Create local specific types if needed (e.g., form data types before they match `NewTender`).
+*   Types for filter parameters in `app/(public)/tenders/_queries.ts` or a local `_types.ts`.
+
+Ensure all UI elements are responsive and provide appropriate loading states (e.g., using Next.js `loading.tsx` per segment, or client-side loading indicators within components for actions).
+
+</userinstructions>
