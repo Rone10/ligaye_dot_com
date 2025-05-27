@@ -56,10 +56,10 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
   const companyInitial = job.companyName ? job.companyName.charAt(0).toUpperCase() : 'C';
 
   return (
-    <div className="bg-[rgba(255,255,255,0.7)] backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] p-7 shadow-[0_8px_32px_rgba(31,38,135,0.1)] transition-all duration-300 hover:shadow-[0_15px_35px_rgba(31,38,135,0.15)] hover:translate-y-[-2px]">
+    <div className=" backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] p-7 shadow-[0_8px_32px_rgba(31,38,135,0.1)] transition-all duration-300 hover:shadow-[0_15px_35px_rgba(31,38,135,0.15)] hover:translate-y-[-2px]">
       <div className="flex items-start gap-5">
         {/* Company Logo/Initial */}
-        <div className="flex-shrink-0 w-16 h-16 rounded-[12px] overflow-hidden flex items-center justify-center text-white font-semibold text-xl" 
+        <div className="flex-shrink-0 w-16 h-16 rounded-[12px] overflow-hidden flex items-center justify-center  font-semibold text-xl" 
              style={{ 
                backgroundColor: job.companyLogoUrl ? '#f8faff' : job.companyName?.toLowerCase().includes('google') ? '#4285F4' : 
                                job.companyName?.toLowerCase().includes('amazon') ? '#FF9900' : '#4a6cfa'
@@ -81,7 +81,7 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
         <div className="flex-grow">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-semibold text-[#1a1e2d]">
+              <h3 className="text-xl font-semibold ">
                 <Link 
                   href={`/jobs/${job.id}`}
                   className="hover:text-[#4a6cfa] transition-colors"
@@ -89,7 +89,7 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
                   {job.title}
                 </Link>
               </h3>
-              <div className="mt-1.5 text-[#1a1e2d] font-medium">{job.companyName} • {job.locationName || (job.workLocation === 'REMOTE' ? 'Remote' : 'Location Not Specified')}</div>
+              <div className="mt-1.5  font-medium">{job.companyName} • {job.locationName || (job.workLocation === 'REMOTE' ? 'Remote' : 'Location Not Specified')}</div>
             </div>
             
             {/* Save Button */}
@@ -98,7 +98,7 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
               disabled={saving}
               className={cn(
                 "flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors",
-                saved ? "text-[#4a6cfa]" : "text-[#9aa3bc] hover:text-[#1a1e2d]"
+                saved ? "text-[#4a6cfa]" : "text-[#9aa3bc] hover:text-primary-blue-light"
               )}
               aria-label={saved ? "Unsave job" : "Save job"}
             >
