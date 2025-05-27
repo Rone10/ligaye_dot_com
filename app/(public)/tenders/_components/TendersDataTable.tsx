@@ -103,7 +103,7 @@ export function TendersDataTable({
 
   if (tenders.length === 0) {
     return (
-      <Card className="bg-white/70 backdrop-blur-lg border border-white/30 rounded-2xl shadow-lg">
+      <Card className=" backdrop-blur-lg border border-white/30 rounded-2xl shadow-lg">
         <CardContent className="flex flex-col items-center justify-center py-12">
           <div className="text-center">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No tenders found</h3>
@@ -123,7 +123,7 @@ export function TendersDataTable({
 
   return (
     <>
-      <Card className="bg-white/70 backdrop-blur-lg border border-white/30 rounded-2xl shadow-lg">
+      <Card className=" backdrop-blur-lg border border-white/30 rounded-2xl shadow-lg">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>

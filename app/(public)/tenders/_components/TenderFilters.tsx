@@ -53,7 +53,7 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
   };
 
   return (
-    <Card className="bg-white/70 backdrop-blur-lg border border-white/30 rounded-2xl shadow-lg">
+    <Card className="   backdrop-blur-lg border border-white/30 rounded-2xl shadow-lg">
       <CardContent className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <Filter className="h-5 w-5 text-gray-600" />

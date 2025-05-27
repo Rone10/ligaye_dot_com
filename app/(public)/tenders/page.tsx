@@ -43,7 +43,7 @@ export default async function TendersPage({ searchParams }: PageProps) {
   ]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#e9efff] to-[#f4f7ff] py-8">
+    <div className="min-h-screen bg-gradient-from-theme-light to-theme-gray dark:bg-gradient-from-theme-dark dark:to-theme-gray py-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
@@ -55,10 +55,10 @@ export default async function TendersPage({ searchParams }: PageProps) {
               </p>
             </div>
             {user && (
-              <Button asChild className="bg-[#4a6cfa] hover:bg-[#7b90ff]">
+              <Button asChild className="bg-primary hover:bg-primary/80">
                 <Link href="/tenders/new">
                   <Plus className="h-4 w-4 mr-2" />
-                  Create New Tender
+                  Create New Tendersss
                 </Link>
               </Button>
             )}
