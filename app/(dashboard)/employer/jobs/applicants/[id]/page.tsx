@@ -213,7 +213,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         </div>
         
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <div className="bg-white dark:bg-theme-light p-6 rounded-lg border shadow-sm">
             <StatusUpdateForm 
               applicationId={applicationId} 
               currentStatus={application.application.status} 
