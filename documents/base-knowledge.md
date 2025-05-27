@@ -143,6 +143,7 @@
 *   **Environment Variables:** Refer to `.env`. Access using `process.env.VARIABLE_NAME` (server-side) or `process.env.NEXT_PUBLIC_VARIABLE_NAME` (client-side).
 *   **Package Manager:** Always use `pnpm` for installing or managing dependencies.
 *   **Code Style:** Adhere to the project's ESLint and Prettier configurations. Run `pnpm lint` and `pnpm format` as needed.
+*   **Do Not Restart The Dev Server:** After completing a task, never try to restart the dev server unless explicityly asked to do so
 *   **"Do Not Touch":**
     *   Core Drizzle client setup (`lib/db/index.ts`) and config (`drizzle.config.ts`).
     *   Database schema definition (`lib/db/schema.ts`).

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { BriefcaseIcon, Menu, Search, User, X, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 
 const poppins = Poppins({
@@ -128,6 +129,11 @@ export default function Navbar({ user }: NavbarProps) {
         
         {/* Auth Buttons */}
         <div className="flex items-center gap-4">
+          {/* Theme Toggle - Desktop */}
+          <div className="hidden md:block">
+            <ThemeToggle />
+          </div>
+          
           {user ? (
             <div className="hidden md:flex items-center gap-3">
               <Link href={getDashboardLink()} className="text-theme-dark font-medium hover:text-primary-blue transition-colors">
@@ -237,6 +243,12 @@ export default function Navbar({ user }: NavbarProps) {
               Pricing
             </Link>
             <div className="border-t border-theme-gray/30 pt-4 mt-2 flex flex-col space-y-3">
+              {/* Theme Toggle - Mobile */}
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <span className="text-theme-dark font-medium">Theme</span>
+                <ThemeToggle />
+              </div>
+              
               {user ? (
                 <>
                   <Link 
