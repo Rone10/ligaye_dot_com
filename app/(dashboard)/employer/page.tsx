@@ -74,24 +74,24 @@ export default async function EmployerDashboard() {
   return (
     <div className="space-y-8 py-4">
       {/* Welcome section */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#4a6cfa] to-[#2d4eff] p-8 text-white">
+      <div className="relative overflow-hidden rounded-xl  p-8 bg-primary-blue">
         <div className="absolute right-0 top-0 -translate-y-1/2 translate-x-1/3">
-          <div className="h-96 w-96 rounded-full bg-white/10 blur-3xl"></div>
+          <div className="h-96 w-96 rounded-full blur-3xl"></div>
         </div>
-        <div className="relative">
+        <div className="relative text-white">
           <div className="mb-2 flex items-center">
             <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
-              <BriefcaseIcon className="h-6 w-6 text-white" />
+              <BriefcaseIcon className="h-6 w-6" />
             </div>
-            <p className="text-sm font-medium text-white/80">Employer Portal</p>
+            <p className="text-sm font-medium ">Employer Portal</p>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight  md:text-4xl">
             Welcome back, <span className="relative inline-block">
               {userName}
               <span className="absolute -bottom-1 left-0 h-1 w-full bg-white/40 rounded"></span>
             </span>
           </h1>
-          <p className="mt-3 max-w-lg text-white/80">
+          <p className="mt-3 max-w-lg ">
             Manage your job postings, review applications, and grow your team with Ligaye&apos;s comprehensive employer tools.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
