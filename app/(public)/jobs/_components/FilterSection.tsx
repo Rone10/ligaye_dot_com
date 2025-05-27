@@ -26,16 +26,16 @@ export function FilterSection({
   };
 
   return (
-    <div className="bg-white/20 rounded-[12px] overflow-hidden">
+    <div className=" rounded-[12px] overflow-hidden">
       <div 
         className="flex items-center justify-between p-3 cursor-pointer"
         onClick={toggleExpanded}
       >
-        <h3 className="font-semibold text-[#1a1e2d]">{title}</h3>
+        <h3 className="font-semibold ">{title}</h3>
         <div className="flex items-center gap-2">
           {showClear && onClear && (
             <button
-              className="text-[#9aa3bc] hover:text-[#1a1e2d] transition-colors p-1 rounded-full"
+              className=" hover:text-[#1a1e2d] transition-colors p-1 rounded-full"
               onClick={(e) => {
                 e.stopPropagation(); // Prevent section from collapsing when clearing
                 onClear();
@@ -47,7 +47,7 @@ export function FilterSection({
           )}
           <ChevronDown 
             className={cn(
-              "w-5 h-5 text-[#9aa3bc] transition-transform duration-200",
+              "w-5 h-5  transition-transform duration-200",
               isExpanded && "transform rotate-180"
             )} 
           />

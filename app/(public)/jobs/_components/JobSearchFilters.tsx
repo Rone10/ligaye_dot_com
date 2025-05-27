@@ -205,7 +205,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             <Search className="h-4 w-4 text-[#9aa3bc]" />
           </div>
           <Input
-            className="pl-10 pr-4 py-2 bg-white/70 border border-[rgba(255,255,255,0.5)] rounded-[10px] w-full focus:border-[#4a6cfa] focus:ring focus:ring-[rgba(74,108,250,0.15)]"
+            className="pl-10 pr-4 py-2  border border-[rgba(255,255,255,0.5)] rounded-[10px] w-full focus:border-[#4a6cfa] focus:ring focus:ring-[rgba(74,108,250,0.15)]"
             placeholder="Search job titles, keywords, or companies"
             value={searchInput}
             onChange={handleSearchInputChange}
@@ -215,7 +215,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
               className="absolute inset-y-0 right-0 flex items-center pr-3"
               onClick={handleClearSearch}
             >
-              <X className="h-4 w-4 text-[#9aa3bc]" />
+              <X className="h-4 w-4 " />
             </button>
           )}
         </div>
@@ -228,7 +228,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {filters.jobType && filters.jobType !== 'all' && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
                 onClick={() => handleFilterChange({ jobType: 'all', page: 1 })}
               >
                 {jobTypeOptions.find(opt => opt.value === filters.jobType)?.label}
@@ -238,7 +238,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {filters.workLocation && filters.workLocation !== 'all' && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
                 onClick={() => handleFilterChange({ workLocation: 'all', page: 1 })}
               >
                 {workLocationOptions.find(opt => opt.value === filters.workLocation)?.label}
@@ -248,7 +248,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {filters.experienceLevel && filters.experienceLevel !== 'all' && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
                 onClick={() => handleFilterChange({ experienceLevel: 'all', page: 1 })}
               >
                 {experienceLevelOptions.find(opt => opt.value === filters.experienceLevel)?.label}
@@ -258,7 +258,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {filters.locationId && filters.locationId !== 'all' && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
                 onClick={() => handleFilterChange({ locationId: 'all', page: 1 })}
               >
                 {getLocationLabel(filters.locationId)}
@@ -268,7 +268,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {(filters.salaryMin || (filters.salaryMax && filters.salaryMax < 1000000)) && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
                 onClick={() => handleFilterChange({ salaryMin: null, salaryMax: null, page: 1 })}
               >
                 {filters.salaryMin && filters.salaryMax 
@@ -282,7 +282,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             {filters.industryId && filters.industryId !== 'all' && (
               <Badge 
                 variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
                 onClick={() => handleFilterChange({ industryId: 'all', page: 1 })}
               >
                 {getIndustryLabel(filters.industryId)}
@@ -395,7 +395,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
           showClear={filters.locationId !== 'all' && filters.locationId !== null}
         >
           <Input
-            className="mb-3 bg-white/70 border border-[rgba(255,255,255,0.5)] rounded-[10px]"
+            className="mb-3  border border-[rgba(255,255,255,0.5)] rounded-[10px]"
             placeholder="Search locations..."
             type="text"
             value={locationSearchInput}
@@ -429,7 +429,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
           showClear={filters.industryId !== 'all' && filters.industryId !== null}
         >
           <Input
-            className="mb-3 bg-white/70 border border-[rgba(255,255,255,0.5)] rounded-[10px]"
+            className="mb-3  border border-[rgba(255,255,255,0.5)] rounded-[10px]"
             placeholder="Search industries..."
             type="text"
             value={industrySearchInput}
@@ -512,10 +512,10 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
     <>
       {/* Desktop sidebar - always visible */}
       {!isMobile && (
-        <div className={`relative bg-[rgba(255,255,255,0.7)] backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] shadow-[0_8px_32px_rgba(31,38,135,0.1)] transition-opacity duration-300 h-[calc(100vh-180px)] sticky top-[100px] ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+        <div className={`relative  backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] shadow-[0_8px_32px_rgba(31,38,135,0.1)] transition-opacity duration-300 h-[calc(100vh-180px)] sticky top-[100px] ${isPending ? 'opacity-70' : 'opacity-100'}`}>
           {/* Loading overlay */}
           {isPending && (
-            <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-[16px]">
+            <div className="absolute inset-0  flex items-center justify-center z-10 rounded-[16px]">
               <PropagateLoader color="#4a6cfa" size={15} />
             </div>
           )}

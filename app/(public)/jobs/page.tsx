@@ -66,7 +66,7 @@ export default async function JobsPage({ searchParams }: PageProps) {
         {/* Grid Layout for desktop, single column for mobile */}
         <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 ">
           {/* Filter Sidebar - Desktop shows as sidebar, mobile uses slide-out */}
-          <Suspense fallback={<div className="bg-[rgba(255,255,255,0.7)] backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] p-6 mb-8 shadow-[0_8px_32px_rgba(31,38,135,0.1)] h-[300px] flex items-center justify-center">Loading filter options...</div>}>
+          <Suspense fallback={<div className=" backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] p-6 mb-8 shadow-[0_8px_32px_rgba(31,38,135,0.1)] h-[300px] flex items-center justify-center">Loading filter options...</div>}>
             <JobSearchFilters 
               locations={locations} 
               industries={industries}
