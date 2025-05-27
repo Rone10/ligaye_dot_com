@@ -141,7 +141,7 @@ export default function EmployerProfileForm({
               variant="outline"
               onClick={goToPreviousTab}
               disabled={isFirstTab}
-              className={isFirstTab ? 'invisible' : 'bg-blue-100'} // Hide instead of just disabling for layout consistency
+              className={`text-white ${isLastTab ? 'invisible' : 'bg-primary-blue'}`} // Hide instead of just disabling for layout consistency
             >
               Previous
             </Button>
@@ -151,7 +151,7 @@ export default function EmployerProfileForm({
               variant="ghost"
               onClick={goToNextTab}
               disabled={isLastTab}
-              className={isLastTab ? 'invisible' : 'bg-blue-100'} // Hide instead of just disabling for layout consistency
+              className={`text-white ${isLastTab ? 'invisible' : 'bg-primary-blue'}`} // Hide instead of just disabling for layout consistency
             >
               Next
             </Button>

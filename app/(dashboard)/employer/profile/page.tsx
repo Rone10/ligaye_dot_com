@@ -45,7 +45,7 @@ export default async function EmployerProfilePage({ params }: PageProps) {
         </p>
       </div>
       
-      <div className="bg-white/70 backdrop-blur-lg rounded-2xl border border-gray-100 shadow-md p-6">
+      <div className=" backdrop-blur-lg rounded-2xl border border-gray-100 shadow-level-4 p-6">
         <EmployerProfileForm 
           initialData={profileData || undefined} 
           industries={industries} 
