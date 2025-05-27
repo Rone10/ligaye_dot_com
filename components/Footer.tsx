@@ -2,17 +2,17 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-theme-dark text-theme-light py-10 px-4 md:px-8">
+    <footer className=" bg-gradient-from-theme-dark to-theme-gray py-10 px-4 md:px-8 border-t border-theme-gray dark:border-theme-gray">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl text-theme-light font-semibold mb-4">Ligaye.com</h3>
+            <h3 className="text-xl  font-semibold mb-4">Ligaye.com</h3>
             <p className="text-theme-gray-dark">Connecting talent with </p>
             <p className="text-theme-gray-dark">opportunity across The Gambia.</p>
           </div>
           
           <div>
-            <h4 className="text-lg text-theme-light font-medium mb-3">For Job Seekers</h4>
+            <h4 className="text-lg  font-medium mb-3">For Job Seekers</h4>
             <ul className="space-y-2">
               <li><Link href="/jobs" className="text-theme-gray-dark hover:text-theme-light">Find Jobs</Link></li>
               <li><Link href="/sign-up" className="text-theme-gray-dark hover:text-theme-light">Create Profile</Link></li>
@@ -21,7 +21,7 @@ export default function Footer() {
           </div>
           
           <div>
-            <h4 className="text-lg text-theme-light font-medium mb-3 ">For Employers</h4>
+            <h4 className="text-lg  font-medium mb-3 ">For Employers</h4>
             <ul className="space-y-2">
               <li><Link href="/employer/jobs/new" className="text-theme-gray-dark hover:text-theme-light">Post a Job</Link></li>
               <li><Link href="/pricing" className="text-theme-gray-dark hover:text-theme-light">Pricing</Link></li>
@@ -30,7 +30,7 @@ export default function Footer() {
           </div>
           
           <div>
-            <h4 className="text-lg text-theme-light font-medium mb-3">Contact</h4>
+            <h4 className="text-lg  font-medium mb-3">Contact</h4>
             <ul className="space-y-2">
               {/* <li><Link href="/about" className="text-theme-gray-dark hover:text-theme-light">About Us</Link></li> */}
               <li><Link href="/contact" className="text-theme-gray-dark hover:text-theme-light">Support</Link></li>

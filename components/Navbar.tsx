@@ -51,14 +51,14 @@ export default function Navbar({ user }: NavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-theme-gray bg-background/95 dark:bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-theme-gray  backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
           {/* <div className="h-8 w-8 rounded-lg bg-primary-blue flex items-center justify-center">
             <span className="text-white font-bold text-lg">L</span>
           </div> */}
-          <span className="text-2xl font-bold text-primary-blue">Ligaye</span>
+          <span className="text-2xl md:text-3xl font-bold text-primary-blue">Ligaye</span>
         </Link>
         
         {/* Desktop Navigation */}
