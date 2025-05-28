@@ -48,7 +48,7 @@ export default function TenderDetailDisplay({ tender }: TenderDetailDisplayProps
   const TenderTypeIcon = getTenderTypeIcon(tender.tenderType);
 
   return (
-    <div className="space-y-2xl animate-appear">
+    <div className="space-y-2xl animate-appear max-w-6xl mx-auto">
       {/* Hero Section */}
       <div className="glass-card p-2xl rounded-xl shadow-level-3 hover:shadow-level-4 duration-standard">
         <div className="space-y-xl">
@@ -77,8 +77,8 @@ export default function TenderDetailDisplay({ tender }: TenderDetailDisplayProps
                 </div>
               </div>
               
-              <div className="flex flex-col gap-sm">
-                <Badge className={`${getStatusColor(tender.status)} px-lg py-sm text-sm font-semibold`}>
+              <div className="flex flex-col gap-sm ">
+                <Badge className={`${getStatusColor(tender.status)} px-md py-sm text-sm font-semibold`}>
                   {tender.status}
                 </Badge>
                 {tender.deadline && (
@@ -99,9 +99,9 @@ export default function TenderDetailDisplay({ tender }: TenderDetailDisplayProps
               <div className="h-1 w-8 bg-primary-blue rounded-full"></div>
               <h2 className="text-xl font-semibold text-theme-dark">Description</h2>
             </div>
-            <div className="bg-theme-light/50 rounded-lg p-lg border border-theme-gray/30">
+            <div className=" rounded-lg p-xl border border-theme-gray/30 shadow-level-1">
               <div 
-                className="prose-rich-text max-w-none text-theme-gray-dark leading-relaxed"
+                className="prose-rich-text max-w-none text-theme-dark leading-relaxed text-base [&>p]:mb-md [&>p:last-child]:mb-0 [&>ul]:mb-md [&>ol]:mb-md [&>ul]:text-theme-dark [&>ol]:text-theme-dark [&>li]:text-theme-dark"
                 dangerouslySetInnerHTML={{ __html: tender.description }}
               />
             </div>
@@ -110,9 +110,9 @@ export default function TenderDetailDisplay({ tender }: TenderDetailDisplayProps
       </div>
 
       {/* Information Grid with enhanced cards */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-xl">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-xl">
         {/* Key Details Card */}
-        <div className="xl:col-span-2">
+        <div className="lg:col-span-2">
           <Card className="glass-card p-xl h-full shadow-level-2 hover:shadow-level-3 duration-standard">
             <div className="space-y-xl">
               <div className="flex items-center gap-sm">
@@ -120,7 +120,7 @@ export default function TenderDetailDisplay({ tender }: TenderDetailDisplayProps
                 <h3 className="text-xl font-semibold text-theme-dark">Key Information</h3>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-lg">
                 {/* Sector */}
                 {tender.sector && (
                   <div className="group">
@@ -156,7 +156,7 @@ export default function TenderDetailDisplay({ tender }: TenderDetailDisplayProps
 
                 {/* Budget Range */}
                 {tender.budgetRange && (
-                  <div className="group md:col-span-2">
+                  <div className="group sm:col-span-2">
                     <div className="flex items-start gap-md p-lg bg-theme-light/30 rounded-lg border border-theme-gray/20 hover:border-secondary-green/30 duration-standard">
                       <div className="p-sm bg-secondary-green/10 rounded-lg group-hover:bg-secondary-green/20 duration-standard">
                         <DollarSign className="h-5 w-5 text-secondary-green" />
@@ -174,8 +174,8 @@ export default function TenderDetailDisplay({ tender }: TenderDetailDisplayProps
         </div>
 
         {/* Contact & Meta Information Card */}
-        <div className="space-y-xl">
-          <Card className="glass-card p-xl shadow-level-2 hover:shadow-level-3 duration-standard">
+        <div className="lg:col-span-1">
+          <Card className="glass-card p-xl h-full shadow-level-2 hover:shadow-level-3 duration-standard">
             <div className="space-y-xl">
               <div className="flex items-center gap-sm">
                 <div className="h-1 w-8 bg-primary-blue rounded-full"></div>

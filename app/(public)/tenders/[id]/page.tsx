@@ -32,7 +32,7 @@ export default async function TenderDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gradient-bg">
-      <div className="container mx-auto px-md sm:px-lg md:px-xl lg:px-2xl py-xl">
+      <div className="container mx-auto max-w-6xl px-md sm:px-lg md:px-xl lg:px-2xl py-xl">
         {/* Enhanced Header Section */}
         <div className="space-y-xl mb-2xl">
           {/* Back Navigation */}
