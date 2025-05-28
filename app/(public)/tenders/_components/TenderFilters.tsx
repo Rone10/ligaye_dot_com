@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
 import type { Sector, Location } from '@/lib/db/schema';
 import { tenderStatusEnum } from '@/lib/db/schema';
 
@@ -53,49 +52,55 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
   };
 
   return (
-    <Card className="   backdrop-blur-lg border border-white/30 rounded-2xl shadow-lg">
-      <CardContent className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter className="h-5 w-5 text-gray-600" />
-          <h3 className="text-lg font-semibold text-gray-900">Filter Tenders</h3>
+    <div className="glass-card p-xl rounded-xl shadow-level-2 hover:shadow-level-3 duration-standard">
+      <div className="space-y-lg">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-sm">
+            <div className="p-sm bg-primary-blue/10 rounded-lg">
+              <Filter className="h-5 w-5 text-primary-blue" />
+            </div>
+            <h3 className="text-xl font-semibold text-theme-dark">Filter Tenders</h3>
+          </div>
           {hasActiveFilters && (
             <Button
               variant="ghost"
               size="sm"
               onClick={clearAllFilters}
-              className="ml-auto"
+              className="gap-xs text-theme-gray-dark hover:text-theme-dark"
             >
-              <X className="h-4 w-4 mr-1" />
+              <X className="h-4 w-4" />
               Clear all
             </Button>
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Filter Controls */}
+        <div className="space-y-lg">
           {/* Search */}
-          <div className="space-y-2">
-            <label htmlFor="search" className="text-sm font-medium text-gray-700">
+          <div className="space-y-sm">
+            <label htmlFor="search" className="text-sm font-medium text-theme-dark">
               Search
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-md top-1/2 transform -translate-y-1/2 h-4 w-4 text-theme-gray-dark" />
               <Input
                 id="search"
                 placeholder="Search tenders..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard"
               />
             </div>
           </div>
 
           {/* Sector Filter */}
-          <div className="space-y-2">
-            <label htmlFor="sector" className="text-sm font-medium text-gray-700">
+          <div className="space-y-sm">
+            <label htmlFor="sector" className="text-sm font-medium text-theme-dark">
               Sector
             </label>
             <Select value={sectorId || 'all'} onValueChange={handleSectorChange}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard">
                 <SelectValue placeholder="All sectors" />
               </SelectTrigger>
               <SelectContent>
@@ -110,12 +115,12 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
           </div>
 
           {/* Location Filter */}
-          <div className="space-y-2">
-            <label htmlFor="location" className="text-sm font-medium text-gray-700">
+          <div className="space-y-sm">
+            <label htmlFor="location" className="text-sm font-medium text-theme-dark">
               Location
             </label>
             <Select value={locationId || 'all'} onValueChange={handleLocationChange}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard">
                 <SelectValue placeholder="All locations" />
               </SelectTrigger>
               <SelectContent>
@@ -130,12 +135,12 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
           </div>
 
           {/* Status Filter */}
-          <div className="space-y-2">
-            <label htmlFor="status" className="text-sm font-medium text-gray-700">
+          <div className="space-y-sm">
+            <label htmlFor="status" className="text-sm font-medium text-theme-dark">
               Status
             </label>
             <Select value={status || 'all'} onValueChange={handleStatusChange}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard">
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -152,56 +157,59 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
 
         {/* Active filters summary */}
         {hasActiveFilters && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="flex flex-wrap gap-2">
-              {search && (
-                <div className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                  Search: &quot;{search}&quot;
-                  <button
-                    onClick={() => setSearch('')}
-                    className="ml-1 hover:bg-blue-200 rounded-full p-0.5"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
-              {sectorId && (
-                <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                  Sector: {sectors.find(s => s.id === sectorId)?.name}
-                  <button
-                    onClick={() => setSectorId('')}
-                    className="ml-1 hover:bg-green-200 rounded-full p-0.5"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
-              {locationId && (
-                <div className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                  Location: {formatLocationName(locations.find(l => l.id === locationId)!)}
-                  <button
-                    onClick={() => setLocationId('')}
-                    className="ml-1 hover:bg-purple-200 rounded-full p-0.5"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
-              {status && (
-                <div className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">
-                  Status: {status}
-                  <button
-                    onClick={() => setStatus('')}
-                    className="ml-1 hover:bg-orange-200 rounded-full p-0.5"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
+          <div className="pt-lg border-t border-theme-gray/30">
+            <div className="space-y-sm">
+              <p className="text-sm font-medium text-theme-dark">Active Filters:</p>
+              <div className="flex flex-wrap gap-sm">
+                {search && (
+                  <div className="inline-flex items-center gap-xs px-md py-xs bg-primary-blue/10 text-primary-blue rounded-full text-sm border border-primary-blue/20">
+                    Search: &quot;{search}&quot;
+                    <button
+                      onClick={() => setSearch('')}
+                      className="ml-xs hover:bg-primary-blue/20 rounded-full p-xs duration-standard"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+                {sectorId && (
+                  <div className="inline-flex items-center gap-xs px-md py-xs bg-secondary-green/10 text-secondary-green rounded-full text-sm border border-secondary-green/20">
+                    Sector: {sectors.find(s => s.id === sectorId)?.name}
+                    <button
+                      onClick={() => setSectorId('')}
+                      className="ml-xs hover:bg-secondary-green/20 rounded-full p-xs duration-standard"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+                {locationId && (
+                  <div className="inline-flex items-center gap-xs px-md py-xs bg-theme-gray/20 text-theme-gray-dark rounded-full text-sm border border-theme-gray/30">
+                    Location: {formatLocationName(locations.find(l => l.id === locationId)!)}
+                    <button
+                      onClick={() => setLocationId('')}
+                      className="ml-xs hover:bg-theme-gray/30 rounded-full p-xs duration-standard"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+                {status && (
+                  <div className="inline-flex items-center gap-xs px-md py-xs bg-orange-500/10 text-orange-600 rounded-full text-sm border border-orange-500/20">
+                    Status: {status}
+                    <button
+                      onClick={() => setStatus('')}
+                      className="ml-xs hover:bg-orange-500/20 rounded-full p-xs duration-standard"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 } 

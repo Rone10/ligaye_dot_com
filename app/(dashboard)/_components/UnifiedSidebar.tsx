@@ -35,6 +35,7 @@ import { createClient } from '@/lib/supabase/client';
 
 // Navigation items for different user roles
 const candidateNavItems: MainNavItem[] = [
+  { href: "/", label: "Home", iconName: "Home" },
   { href: "/candidate", label: "Dashboard Overview", iconName: "LayoutDashboard" },
   { href: "/jobs", label: "Browse Jobs", iconName: "Search" },
   { href: "/candidate/applications", label: "My Applications", iconName: "Briefcase" },
@@ -44,6 +45,7 @@ const candidateNavItems: MainNavItem[] = [
 ];
 
 const employerNavItems: MainNavItem[] = [
+  { href: "/", label: "Home", iconName: "Home" },
   { href: "/employer", label: "Dashboard Overview", iconName: "LayoutDashboard" },
   { href: "/employer/jobs/new", label: "Post a Job", iconName: "FileText" },
   { href: "/employer/jobs", label: "My Job Postings", iconName: "Briefcase" },
