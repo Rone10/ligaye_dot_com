@@ -33,10 +33,10 @@ export default async function TendersPage({ searchParams }: PageProps) {
   };
 
   // Get current user (for showing create button and edit/delete actions)
-  const user = await getUser();
+  // const user = await getUser();
 
-  // get user profile
-  const profile = await getUserProfile(user?.id || '');
+  // // get user profile
+  // const profile = await getUserProfile(user?.id || '');
 
   // Fetch data in parallel
   const [tenders, totalCount, sectors, locations] = await Promise.all([
@@ -63,14 +63,14 @@ export default async function TendersPage({ searchParams }: PageProps) {
             </p>
           </div>
           
-          {user && (
+          {/* {user && ( */}
             <Button asChild className="shadow-level-2 hover:shadow-level-3 duration-standard">
               <Link href="/tenders/new" className="gap-xs">
                 <Plus className="h-4 w-4" />
                 Create New Tender
               </Link>
             </Button>
-          )}
+          {/* )} */}
         </div>
 
         {/* Grid Layout for desktop, single column for mobile */}
@@ -103,7 +103,7 @@ export default async function TendersPage({ searchParams }: PageProps) {
             >
               <TenderList
                 tenders={tenders}
-                currentUserId={profile?.id}
+                // currentUserId={profile?.id}
                 totalCount={totalCount}
                 currentPage={page}
                 limit={limit}

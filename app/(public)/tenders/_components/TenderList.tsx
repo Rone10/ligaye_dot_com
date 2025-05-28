@@ -11,7 +11,7 @@ import type { TenderWithRelations } from '../_queries';
 
 interface TenderListProps {
   tenders: TenderWithRelations[];
-  currentUserId?: string;
+  // currentUserId?: string;
   totalCount: number;
   currentPage: number;
   limit: number;
@@ -19,7 +19,7 @@ interface TenderListProps {
 
 export function TenderList({
   tenders,
-  currentUserId,
+  // currentUserId,
   totalCount,
   currentPage,
   limit,
@@ -55,14 +55,14 @@ export function TenderList({
                 There are no tenders matching your current filters.
               </p>
             </div>
-            {currentUserId && (
+            {/* {currentUserId && ( */}
               <Button asChild className="shadow-level-2 hover:shadow-level-3 duration-standard">
                 <Link href="/tenders/new" className="gap-xs">
                   <Plus className="h-4 w-4" />
                   Create New Tender
                 </Link>
               </Button>
-            )}
+            {/* )} */}
           </div>
         </CardContent>
       </Card>
@@ -79,7 +79,7 @@ export function TenderList({
           <TenderCard 
             key={tender.id} 
             tender={tender} 
-            currentUserId={currentUserId}
+            // currentUserId={currentUserId}
             onDelete={handleDelete}
           />
         ))}
