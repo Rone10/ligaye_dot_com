@@ -8,6 +8,43 @@
 @import '@syncfusion/ej2-popups/styles/material.css';
 @import '@syncfusion/ej2-richtexteditor/styles/material.css';
 
+/* Auto-grow editor content area */
+.e-richtexteditor .e-rte-content {
+  min-height: 200px !important;
+  height: auto !important;
+  overflow-y: auto !important;
+}
+
+/* Make the content area expand with content */
+.e-richtexteditor .e-content {
+  min-height: 200px !important;
+  height: auto !important;
+}
+
+/* Improve the content area styling */
+.e-richtexteditor .e-content .e-rte-content {
+  padding: 12px !important;
+  line-height: 1.6 !important;
+  font-size: 14px !important;
+}
+
+/* Ensure the editor container can grow */
+.e-richtexteditor {
+  height: auto !important;
+  min-height: 250px !important;
+}
+
+/* Style the toolbar */
+.e-richtexteditor .e-rte-toolbar {
+  border-bottom: 1px solid #e1e5f2 !important;
+  background-color: #f8faff !important;
+}
+
+/* Focus state styling */
+.e-richtexteditor.e-focused .e-rte-content {
+  border-color: #4a6cfa !important;
+  box-shadow: 0 0 0 3px rgba(74, 108, 250, 0.15) !important;
+}
 
 /* @media (prefers-color-scheme: dark) {
     .e-richtexteditor .e-rte-content,

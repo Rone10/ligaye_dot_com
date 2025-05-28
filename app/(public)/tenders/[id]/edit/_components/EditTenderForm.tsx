@@ -258,6 +258,8 @@ export function EditTenderForm({ tender, sectors, locations }: EditTenderFormPro
                     <Editor
                       value={field.value}
                       onChange={field.onChange}
+                      height="auto"
+                      minHeight={350}
                     />
                   </FormControl>
                   <FormMessage />

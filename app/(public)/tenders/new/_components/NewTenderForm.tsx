@@ -218,6 +218,8 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
                     <Editor
                       value={field.value}
                       onChange={field.onChange}
+                      height="auto"
+                      minHeight={350}
                     />
                   </FormControl>
                   <FormMessage />

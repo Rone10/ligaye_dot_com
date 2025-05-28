@@ -13,9 +13,18 @@ registerLicense(process.env.NEXT_PUBLIC_SYNCFUSION_LICENSE_KEY as string);
 interface EditorProps {
   value: string;
   onChange: (content: string) => void;
+  height?: number | string;
+  minHeight?: number | string;
+  className?: string;
 }
 
-export const Editor: React.FC<EditorProps> = ({ value, onChange }) => {
+export const Editor: React.FC<EditorProps> = ({ 
+  value, 
+  onChange, 
+  height = 'auto',
+  minHeight = 200,
+  className = ''
+}) => {
   const rteRef = useRef<RichTextEditorComponent>(null);
   const toolbarSettings: object = {
     items: ['Bold', '|', 'Italic','|', 'Underline', '|',
@@ -28,11 +37,30 @@ export const Editor: React.FC<EditorProps> = ({ value, onChange }) => {
     }
   };
 
+  // Configure the editor to auto-resize
+  const editorSettings = {
+    height: height,
+    autoSaveOnIdle: true,
+    enableAutoUrl: true,
+    enableResize: true,
+    resizeByPercent: true,
+    showCharCount: true,
+    maxLength: 15000,
+    placeholder: 'Start typing...'
+  };
+
 return (
-    <div className='container mx-auto max-w-screen-lg mt-10'>
-    <RichTextEditorComponent ref={rteRef} height={450} value={value} toolbarSettings={toolbarSettings} change={handleChange}>
-      <Inject services={[Toolbar, HtmlEditor, QuickToolbar]} />
-    </RichTextEditorComponent>
+    <div className={`w-full ${className}`} style={{ minHeight: minHeight }}>
+      <RichTextEditorComponent 
+        ref={rteRef} 
+        height={height}
+        value={value} 
+        toolbarSettings={toolbarSettings} 
+        change={handleChange}
+        placeholder="Start typing..."
+      >
+        <Inject services={[Toolbar, HtmlEditor, QuickToolbar]} />
+      </RichTextEditorComponent>
     </div>
   );
 }
