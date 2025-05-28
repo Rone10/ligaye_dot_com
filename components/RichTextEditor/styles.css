@@ -7,3 +7,13 @@
 @import '@syncfusion/ej2-navigations/styles/material.css';
 @import '@syncfusion/ej2-popups/styles/material.css';
 @import '@syncfusion/ej2-richtexteditor/styles/material.css';
+
+
+/* @media (prefers-color-scheme: dark) {
+    .e-richtexteditor .e-rte-content,
+.e-richtexteditor .e-source-content  {
+      background-color: #1a1e2d; Tailwind's red-500 */
+      /* color: #fff; */
+    /* } */
+
+/* } */
