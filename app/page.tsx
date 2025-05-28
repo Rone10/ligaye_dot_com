@@ -230,37 +230,43 @@ export default function LandingPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
             {/* Job Seekers */}
-            <div className="glass-card p-6 md:p-8 text-center hover:shadow-level-3 transition-all duration-300">
-              <div className="bg-primary-blue/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <User className="text-primary-blue h-8 w-8" />
+            <div className="glass-card p-6 md:p-8 text-center hover:shadow-level-3 transition-all duration-300 flex flex-col h-full">
+              <div className="flex-grow">
+                <div className="bg-primary-blue/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <User className="text-primary-blue h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold text-theme-dark mb-4">For Job Seekers</h3>
+                <p className="text-theme-gray-dark mb-4">Create a profile, upload your resume, and apply to jobs with a single click. Get notified about new opportunities that match your skills.</p>
               </div>
-              <h3 className="text-xl font-bold text-theme-dark mb-4">For Job Seekers</h3>
-              <p className="text-theme-gray-dark mb-4">Create a profile, upload your resume, and apply to jobs with a single click. Get notified about new opportunities that match your skills.</p>
-              <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all duration-300">
+              <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all duration-300 mt-auto">
                 Get Started
               </Button>
             </div>
 
             {/* Employers */}
-            <div className="glass-card p-6 md:p-8 text-center hover:shadow-level-3 transition-all duration-300">
-              <div className="bg-secondary-green/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Building className="text-secondary-green h-8 w-8" />
+            <div className="glass-card p-6 md:p-8 text-center hover:shadow-level-3 transition-all duration-300 flex flex-col h-full">
+              <div className="flex-grow">
+                <div className="bg-secondary-green/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Building className="text-secondary-green h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold text-theme-dark mb-4">For Employers</h3>
+                <p className="text-theme-gray-dark mb-4">Post job openings, manage applications, and find the perfect candidates for your company. Easy payment options via Stripe or cash.</p>
               </div>
-              <h3 className="text-xl font-bold text-theme-dark mb-4">For Employers</h3>
-              <p className="text-theme-gray-dark mb-4">Post job openings, manage applications, and find the perfect candidates for your company. Easy payment options via Stripe or cash.</p>
-              <Button variant="outline" className="border-secondary-green text-secondary-green hover:bg-secondary-green hover:text-white transition-all duration-300">
+              <Button variant="outline" className="border-secondary-green text-secondary-green hover:bg-secondary-green hover:text-white transition-all duration-300 mt-auto">
                 Post Jobs
               </Button>
             </div>
 
             {/* Browse Jobs */}
-            <div className="glass-card p-6 md:p-8 text-center hover:shadow-level-3 transition-all duration-300">
-              <div className="bg-primary-blue/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Search className="text-primary-blue h-8 w-8" />
+            <div className="glass-card p-6 md:p-8 text-center hover:shadow-level-3 transition-all duration-300 flex flex-col h-full">
+              <div className="flex-grow">
+                <div className="bg-primary-blue/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Search className="text-primary-blue h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold text-theme-dark mb-4">Browse Opportunities</h3>
+                <p className="text-theme-gray-dark mb-4">Browse through hundreds of job listings across various industries and experience levels throughout Gambia.</p>
               </div>
-              <h3 className="text-xl font-bold text-theme-dark mb-4">Browse Opportunities</h3>
-              <p className="text-theme-gray-dark mb-4">Browse through hundreds of job listings across various industries and experience levels throughout Gambia.</p>
-              <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all duration-300">
+              <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all duration-300 mt-auto">
                 Browse Jobs
               </Button>
             </div>
@@ -273,13 +279,16 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto">
           <div className="glass-card p-8 md:p-12 text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-theme-dark mb-6">Ready to Get Started?</h2>
-            <p className="text-theme-gray-dark mb-8 max-w-2xl mx-auto">Explore new job opportunities and manage your applications from your personalized dashboard.</p>
             
-            <p className="text-theme-gray-dark mb-8 max-w-2xl mx-auto">Manage your job postings and discover qualified candidates from your employer dashboard.</p>
+            <div className="space-y-4 mb-8">
+              <p className="text-theme-gray-dark max-w-2xl mx-auto">Explore new job opportunities and manage your applications from your personalized dashboard.</p>
+              
+              <p className="text-theme-gray-dark max-w-2xl mx-auto">Manage your job postings and discover qualified candidates from your employer dashboard.</p>
+              
+              <p className="text-theme-gray-dark max-w-2xl mx-auto">Whether you&apos;re looking for your next opportunity or seeking talented professionals, Ligaye.com has you covered.</p>
+            </div>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <p className="text-theme-gray-dark mb-8 max-w-2xl mx-auto">Whether you&apos;re looking for your next opportunity or seeking talented professionals, Ligaye.com has you covered.</p>
-              
               <Button className="bg-primary-blue hover:bg-primary-blue-light text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl">
                 Join as Job Seeker
               </Button>
