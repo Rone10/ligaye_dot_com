@@ -7,7 +7,7 @@ export default async function NewTenderPage() {
   // Verify user authentication
   const user = await getUser();
   if (!user) {
-    redirect('/login');
+    redirect('/sign-in?redirect=/tenders/new');
   }
 
   // Fetch required data for dropdowns

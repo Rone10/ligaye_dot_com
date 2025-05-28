@@ -16,7 +16,11 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
-export function SignInForm() {
+interface SignInFormProps {
+  redirectTo?: string
+}
+
+export function SignInForm({ redirectTo }: SignInFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
@@ -43,6 +47,11 @@ export function SignInForm() {
       formData.append('email', data.email)
       formData.append('password', data.password)
       
+      // Add redirect parameter if provided
+      if (redirectTo) {
+        formData.append('redirectTo', redirectTo)
+      }
+      
       const result = await signInUser(formData)
       
       if (!result.success) {
@@ -67,8 +76,8 @@ export function SignInForm() {
       // Handle success
       toast.success('Signed in successfully!')
       
-      // Redirect to dashboard
-      router.push('/')
+      // The redirect is now handled by the server action
+      // But we still refresh the router to ensure client state is updated
       router.refresh()
       
     } catch (error) {

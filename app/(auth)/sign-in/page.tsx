@@ -8,19 +8,26 @@ export const metadata: Metadata = {
   description: 'Sign in to your Ligaye.com account',
 }
 
-export default async function SignInPage() {
+interface SignInPageProps {
+  searchParams: Promise<{ redirect?: string }>
+}
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
   // Check if user is already logged in
   const user = await getUser()
   
-  // Redirect to home if already authenticated
+  // Get the redirect parameter
+  const { redirect: redirectTo } = await searchParams
+  
+  // Redirect to the specified page or home if already authenticated
   if (user) {
-    redirect('/')
+    redirect(redirectTo || '/')
   }
   
   return (
     <div className="flex items-center justify-center">
       <div className="w-full max-w-md">
-        <SignInForm />
+        <SignInForm redirectTo={redirectTo} />
       </div>
     </div>
   )

@@ -16,7 +16,7 @@ export default async function CandidateProfilePage({ params, searchParams }: Pag
   
   // Handle unauthorized access
   if (!user) {
-    redirect('/sign-in');
+    redirect('/sign-in?redirect=/candidate/profile');
   }
   
   // Get tab from search params

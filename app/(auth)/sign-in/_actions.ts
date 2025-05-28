@@ -83,55 +83,64 @@ export async function signInUser(formData: FormData): Promise<SignInActionResult
     }
   }
 
+  // Get the redirect parameter from form data
+  const redirectTo = formData.get('redirectTo') as string | null
+
   const userId = authUser.id; // This is the Supabase Auth User ID
   const userRole = authUser.user_metadata?.role;
   let redirectPath = '/' // Default fallback
 
-  try {
-    const database = await db();
+  // If a specific redirect URL was provided, use it (but validate it's safe)
+  if (redirectTo && redirectTo.startsWith('/')) {
+    redirectPath = redirectTo
+  } else {
+    // Use the existing role-based redirect logic
+    try {
+      const database = await db();
 
-    // 1. Find the base profile using the Supabase Auth User ID
-    const baseProfile = await database.query.profiles.findFirst({
-      where: eq(profiles.userId, userId),
-      columns: { id: true } // We need the profiles.id
-    });
+      // 1. Find the base profile using the Supabase Auth User ID
+      const baseProfile = await database.query.profiles.findFirst({
+        where: eq(profiles.userId, userId),
+        columns: { id: true } // We need the profiles.id
+      });
 
-    if (!baseProfile) {
-      // This should not happen if signup creates a base profile correctly
-      console.error(`Base profile not found for userId: ${userId}. Redirecting to home.`);
-      redirectPath = '/'
-    } else {
-      const profileId = baseProfile.id; // The ID from the profiles table
-
-      // 2. Check for specific profile existence based on role
-      if (userRole === 'candidate') {
-        const existingSpecificProfile = await database.query.candidateProfiles.findFirst({
-          // Assuming the FK column in candidateProfiles is named 'profileId'
-          where: eq(candidateProfiles.profileId, profileId),
-        });
-        redirectPath = existingSpecificProfile ? '/candidate' : '/candidate/profile';
-      } else if (userRole === 'employer') {
-        const existingSpecificProfile = await database.query.employerProfiles.findFirst({
-          // Assuming the FK column in employerProfiles is named 'profileId'
-          where: eq(employerProfiles.profileId, profileId),
-        });
-        redirectPath = existingSpecificProfile ? '/employer' : '/employer/profile';
-      } else if (userRole === 'admin') {
-        redirectPath = '/admin/users'
-      } else {
-        console.warn(`Unknown role ('${userRole}') found for userId: ${userId}. Redirecting to home.`);
+      if (!baseProfile) {
+        // This should not happen if signup creates a base profile correctly
+        console.error(`Base profile not found for userId: ${userId}. Redirecting to home.`);
         redirectPath = '/'
+      } else {
+        const profileId = baseProfile.id; // The ID from the profiles table
+
+        // 2. Check for specific profile existence based on role
+        if (userRole === 'candidate') {
+          const existingSpecificProfile = await database.query.candidateProfiles.findFirst({
+            // Assuming the FK column in candidateProfiles is named 'profileId'
+            where: eq(candidateProfiles.profileId, profileId),
+          });
+          redirectPath = existingSpecificProfile ? '/candidate' : '/candidate/profile';
+        } else if (userRole === 'employer') {
+          const existingSpecificProfile = await database.query.employerProfiles.findFirst({
+            // Assuming the FK column in employerProfiles is named 'profileId'
+            where: eq(employerProfiles.profileId, profileId),
+          });
+          redirectPath = existingSpecificProfile ? '/employer' : '/employer/profile';
+        } else if (userRole === 'admin') {
+          redirectPath = '/admin/users'
+        } else {
+          console.warn(`Unknown role ('${userRole}') found for userId: ${userId}. Redirecting to home.`);
+          redirectPath = '/'
+        }
       }
-    }
-  } catch (dbError) {
-    console.error(`Database error during profile check for userId ${userId} (Role: ${userRole}):`, dbError);
-    // Fallback strategy: Redirect to profile page, as we don't know if it exists
-    if (userRole === 'candidate') {
-      redirectPath = '/candidate/profile';
-    } else if (userRole === 'employer') {
-      redirectPath = '/employer/profile';
-    } else {
-      redirectPath = '/' // Fallback to home if role is unknown
+    } catch (dbError) {
+      console.error(`Database error during profile check for userId ${userId} (Role: ${userRole}):`, dbError);
+      // Fallback strategy: Redirect to profile page, as we don't know if it exists
+      if (userRole === 'candidate') {
+        redirectPath = '/candidate/profile';
+      } else if (userRole === 'employer') {
+        redirectPath = '/employer/profile';
+      } else {
+        redirectPath = '/' // Fallback to home if role is unknown
+      }
     }
   }
 

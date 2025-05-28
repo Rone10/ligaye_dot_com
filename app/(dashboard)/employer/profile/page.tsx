@@ -12,7 +12,7 @@ export default async function EmployerProfilePage({ params }: PageProps) {
   const user = await getUser()
 
   if (!user) {
-    redirect('/sign-in')
+    redirect('/sign-in?redirect=/employer/profile')
   }
   // TODO: check if user is admin then grant access otherwise redirect to employer profile page
 

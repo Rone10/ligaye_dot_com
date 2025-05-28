@@ -18,7 +18,7 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
   const user = await getUser()
 
   if (!user) {
-    redirect('/sign-in')
+    redirect(`/sign-in?redirect=/employer/jobs/${jobId}/edit`)
   }
 
   // Check if user is employer
