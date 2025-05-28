@@ -137,6 +137,39 @@
 *   **Data Mutations:** Primarily use **Next.js Server Actions** defined within the specific route segment's slice (e.g., `app/transactions/new/_actions.ts`). These actions **must** import and call the necessary data mutation functions from their **sibling `_queries.ts` file**. API routes (`route.ts`) are **NOT** used for application database interactions.
 *   **Authentication:** Access the current logged-in user server-side via `const user  = await getUser()` imported from `import { getUser } from '@/lib/supabase/server';`. Do not destructure user, access it directly like so: `const user = await getUser()` For client-side Supabase interactions, helpers/client instances can be imported from `lib/supabase/client.ts`.
 *   **Styling & UI:** Use Tailwind CSS and leverage existing Shadcn UI components from `components/ui/` for form elements and layout. Follow the design principles, color palette, typography, spacing, and other UI specifications defined in `documents/style-guide.md` to ensure consistent styling throughout the project. This includes using the glassmorphic effects, proper elevation/shadow system, border radius values, and interactive states as specified in the style guide.
+    
+    **CRITICAL: Always use the custom Tailwind CSS classes defined in the project's configuration instead of hardcoded values:**
+    
+    **Implementation Guidelines:**
+    - **Consult `app/globals.css`** to identify available CSS custom properties and their corresponding Tailwind class names
+    - **Reference `documents/style-guide.md`** for the specific class names and usage patterns defined for this project
+    - **Use `tailwind.config.ts`** to understand the custom theme extensions and available class variants
+    
+    **General Principles:**
+    - **Colors**: Use semantic color classes (e.g., `bg-primary-*`, `text-theme-*`) instead of hardcoded hex values in square brackets
+    - **Spacing**: Use the project's custom spacing scale instead of arbitrary pixel values
+    - **Shadows**: Use predefined shadow levels instead of hardcoded shadow values
+    - **Typography**: Use custom font size, weight, and line-height classes
+    - **Border Radius**: Use the project's border radius scale
+    - **Transitions**: Use predefined duration classes for consistent timing
+    
+    **Example Pattern (adapt to project's specific class names):**
+    ```tsx
+    // CORRECT - Use project's custom Tailwind classes
+    <button className="bg-primary text-white px-md py-sm rounded-md shadow-level-2 hover:bg-primary-light duration-standard">
+      Submit
+    </button>
+    
+    // INCORRECT - Don't use hardcoded values
+    <button className="bg-[#4a6cfa] text-white px-[20px] py-[16px] rounded-[10px] shadow-[0_8px_32px_rgba(31,38,135,0.1)]">
+      Submit
+    </button>
+    ```
+    
+    **Before implementing any component, always:**
+    1. Check `documents/style-guide.md` for the specific class names and patterns
+    2. Verify available classes in `app/globals.css` and `tailwind.config.ts`
+    3. Use the project's design system classes consistently throughout
 *   **Component Naming:** PascalCase for React components.
 *   **File Naming:** Generally kebab-case (e.g., `transaction-card.tsx`). Use Next.js conventions where required (`page.tsx`, `layout.tsx`, etc.). Use `_actions.ts`, `_queries.ts`, and `_` prefixed folders (`_components/`, `_hooks/`, `_utils/`) within feature slices.
 *   **Error Handling:** Implement appropriate try/catch blocks within Server Actions and `_queries.ts` functions. Use Next.js `error.tsx` boundaries for route-level UI error handling. Return specific error states/objects from actions/queries where applicable for finer-grained client-side handling.

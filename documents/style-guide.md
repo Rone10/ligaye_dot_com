@@ -14,206 +14,314 @@ The Ligaye.com interface embodies a modern, professional aesthetic with a focus 
 ## 2. Color Palette
 
 ### Primary Colors
-- **Primary Blue**: `#4a6cfa` - Used for primary actions, key UI elements, and emphasis
-- **Primary Blue (Light)**: `#7b90ff` - Used for hover states, secondary actions related to primary blue
-- **Secondary Green**: `#05ce91` - Used for success states, highlights, and complementary accents
+- **Primary Blue**: Use `bg-primary-blue`, `text-primary-blue`, `border-primary-blue` - Used for primary actions, key UI elements, and emphasis
+- **Primary Blue (Light)**: Use `bg-primary-blue-light`, `text-primary-blue-light` - Used for hover states, secondary actions related to primary blue
+- **Secondary Green**: Use `bg-secondary-green`, `text-secondary-green` - Used for success states, highlights, and complementary accents
 
 ### Neutrals
-- **Dark**: `#1a1e2d` - Primary text color, icons, and other key elements
-- **Light**: `#f8faff` - Page backgrounds, cards, and other container elements
-- **Gray**: `#e1e5f2` - Borders, dividers, and subtle backgrounds
-- **Gray Dark**: `#9aa3bc` - Secondary text, hints, and less important elements
+- **Dark**: Use `bg-theme-dark`, `text-theme-dark` - Primary text color, icons, and other key elements
+- **Light**: Use `bg-theme-light`, `text-theme-light` - Page backgrounds, cards, and other container elements
+- **Gray**: Use `bg-theme-gray`, `text-theme-gray`, `border-theme-gray` - Borders, dividers, and subtle backgrounds
+- **Gray Dark**: Use `bg-theme-gray-dark`, `text-theme-gray-dark` - Secondary text, hints, and less important elements
 
 ### Gradients
-- **Background Gradient**: `linear-gradient(135deg, #e9efff 0%, #f4f7ff 100%)` - Used for page backgrounds to add subtle dimension
+- **Background Gradient**: Use `bg-gradient-bg` - Used for page backgrounds to add subtle dimension
+
+### Tailwind Class Usage
+**CRITICAL:** Always use the custom Tailwind classes defined in `tailwind.config.ts` instead of hardcoded hex values:
+```tsx
+// CORRECT - Use custom Tailwind classes
+<div className="bg-primary-blue text-white">Primary Action</div>
+<div className="bg-theme-gray border-theme-gray">Card Background</div>
+
+// INCORRECT - Don't use hardcoded values
+<div className="bg-[#4a6cfa] text-white">Primary Action</div>
+<div className="bg-[#e1e5f2] border-[#e1e5f2]">Card Background</div>
+```
 
 ## 3. Typography
 
-### Font Family
-- Primary Font: `'Segoe UI', Tahoma, Geneva, Verdana, sans-serif` - A clean, modern sans-serif that works well at various sizes
-
 ### Font Sizes
-- **Extra Large (Headers)**: `24px`
-- **Large (Subheaders)**: `18px` - `20px`
-- **Medium (Standard)**: `15px` - `16px`
-- **Small (Secondary)**: `13px` - `14px`
-- **Extra Small (Tertiary)**: `12px`
+Use the custom Tailwind font size classes:
+- **Extra Large (Headers)**: `text-3xl` (24px)
+- **Large (Subheaders)**: `text-xl` - `text-2xl` (18px - 20px)
+- **Medium (Standard)**: `text-base` - `text-lg` (15px - 16px)
+- **Small (Secondary)**: `text-sm` (13px)
+- **Extra Small (Tertiary)**: `text-xs` (12px)
 
 ### Font Weights
-- **Regular**: `400` - Used for body text and general content
-- **Medium**: `500` - Used for emphasis within body text
-- **Semi-Bold**: `600` - Used for subheadings, labels, and important UI elements
-- **Bold**: `700` - Used for main headings and key interactive elements
+Use the custom Tailwind font weight classes:
+- **Regular**: `font-normal` (400) - Used for body text and general content
+- **Medium**: `font-medium` (500) - Used for emphasis within body text
+- **Semi-Bold**: `font-semibold` (600) - Used for subheadings, labels, and important UI elements
+- **Bold**: `font-bold` (700) - Used for main headings and key interactive elements
 
 ### Line Heights
-- **Tight**: `1.2` - For headings and short text elements
-- **Standard**: `1.5` - For body text and general content
-- **Relaxed**: `1.8` - For improved readability in dense paragraphs
+Use the custom Tailwind line height classes:
+- **Tight**: `leading-tight` (1.2) - For headings and short text elements
+- **Standard**: `leading-normal` (1.5) - For body text and general content
+- **Relaxed**: `leading-relaxed` (1.8) - For improved readability in dense paragraphs
+
+### Typography Usage Examples
+```tsx
+// CORRECT - Use custom Tailwind classes
+<h1 className="text-3xl font-bold leading-tight text-theme-dark">Main Heading</h1>
+<p className="text-base font-normal leading-normal text-theme-dark">Body text</p>
+<span className="text-sm font-medium text-theme-gray-dark">Secondary text</span>
+
+// INCORRECT - Don't use hardcoded values
+<h1 className="text-[24px] font-[700] leading-[1.2]">Main Heading</h1>
+```
 
 ## 4. Spacing System
 
-The spacing system uses a 4-point grid as its foundation, with common spacing values being multiples of 4px.
+The spacing system uses a 4-point grid with custom Tailwind spacing classes.
 
 ### Key Spacing Values
-- **Extra Small**: `4px` - `8px` - For tight relationships between elements
-- **Small**: `10px` - `15px` - For related elements within a component
-- **Medium**: `20px` - `25px` - For separating components or sections
-- **Large**: `30px` - `40px` - For major section breaks
-- **Extra Large**: `50px` - `60px` - For page-level spacing
+Use the custom Tailwind spacing classes:
+- **Extra Small**: `p-xxs`, `m-xxs` (4px), `p-xs`, `m-xs` (8px) - For tight relationships between elements
+- **Small**: `p-sm`, `m-sm` (12px), `p-md`, `m-md` (16px) - For related elements within a component
+- **Medium**: `p-lg`, `m-lg` (20px), `p-xl`, `m-xl` (25px) - For separating components or sections
+- **Large**: `p-2xl`, `m-2xl` (30px), `p-3xl`, `m-3xl` (40px) - For major section breaks
+- **Extra Large**: `p-4xl`, `m-4xl` (50px), `p-5xl`, `m-5xl` (60px) - For page-level spacing
+
+### Spacing Usage Examples
+```tsx
+// CORRECT - Use custom Tailwind spacing classes
+<div className="p-lg m-xl">Content with proper spacing</div>
+<div className="px-md py-sm">Form element spacing</div>
+
+// INCORRECT - Don't use hardcoded values
+<div className="p-[20px] m-[25px]">Content with hardcoded spacing</div>
+```
 
 ## 5. Glassmorphic Effects
 
-The interface uses a distinctive glassmorphic style that creates a sense of layered depth.
+The interface uses a distinctive glassmorphic style. Use the predefined `.glass-card` class from `globals.css`:
 
-### Glass Element Specifications
-- **Background**: `rgba(255, 255, 255, 0.7)` - 70% opaque white
-- **Backdrop Filter**: `blur(10px)` - Creates the frosted glass effect
-- **Border**: `1px solid rgba(255, 255, 255, 0.3)` - Subtle highlight on edges
-- **Border Radius**: `16px` - Consistent rounded corners
-- **Box Shadow**: `0 8px 32px rgba(31, 38, 135, 0.1)` - Soft, subtle shadow for depth
+```tsx
+// CORRECT - Use the predefined glass-card class
+<div className="glass-card p-xl">
+  Glassmorphic content container
+</div>
+
+// The glass-card class includes:
+// - Adaptive background opacity
+// - Backdrop blur effect
+// - Subtle border
+// - Proper border radius and shadow
+```
 
 ## 6. Elevation & Shadow System
 
-Shadows are used consistently to create a sense of elevation and hierarchy.
+Use the custom Tailwind shadow classes for consistent elevation:
 
 ### Shadow Levels
-- **Level 1 (Subtle)**: `0 2px 10px rgba(31, 38, 135, 0.05)` - For subtle elevation
-- **Level 2 (Standard)**: `0 8px 32px rgba(31, 38, 135, 0.1)` - Standard component elevation
-- **Level 3 (Elevated)**: `0 15px 35px rgba(31, 38, 135, 0.15)` - For elevated or highlighted elements
-- **Level 4 (Floating)**: `0 24px 48px rgba(31, 38, 135, 0.2)` - For modals, dropdowns, and floating elements
+- **Level 1 (Subtle)**: `shadow-level-1` - For subtle elevation
+- **Level 2 (Standard)**: `shadow-level-2` - Standard component elevation
+- **Level 3 (Elevated)**: `shadow-level-3` - For elevated or highlighted elements
+- **Level 4 (Floating)**: `shadow-level-4` - For modals, dropdowns, and floating elements
+- **Focus Shadow**: `shadow-focus` - For focus states
+
+### Shadow Usage Examples
+```tsx
+// CORRECT - Use custom shadow classes
+<div className="shadow-level-2 rounded-lg">Standard card</div>
+<div className="shadow-level-4 rounded-lg">Modal or dropdown</div>
+<input className="focus:shadow-focus" />
+
+// INCORRECT - Don't use hardcoded shadow values
+<div className="shadow-[0_8px_32px_rgba(31,38,135,0.1)]">Card</div>
+```
 
 ## 7. Border Radius System
 
-Rounded corners are applied consistently throughout the interface.
+Use the custom Tailwind border radius classes:
 
 ### Border Radius Values
-- **Small**: `4px` - `8px` - For small elements like checkboxes, chips
-- **Medium**: `10px` - `12px` - For buttons, input fields, and cards
-- **Large**: `16px` - `20px` - For major containers and sections
-- **Circular**: `50%` - For avatars, icons, and circular elements
+- **Small**: `rounded-sm` (4px) - For small elements like checkboxes, chips
+- **Medium**: `rounded-md` (10px) - For buttons, input fields, and cards
+- **Large**: `rounded-lg` (16px) - For major containers and sections
+- **Extra Large**: `rounded-xl` (20px) - For prominent containers
+- **Circular**: `rounded-full` - For avatars, icons, and circular elements
+
+### Border Radius Usage Examples
+```tsx
+// CORRECT - Use custom border radius classes
+<button className="rounded-md">Standard button</button>
+<div className="rounded-lg">Card container</div>
+<img className="rounded-full" />
+
+// INCORRECT - Don't use hardcoded values
+<button className="rounded-[10px]">Button</button>
+```
 
 ## 8. Input Elements & Forms
 
 ### Input Fields
-- **Height**: `46px` - Standard height for text inputs
-- **Padding**: `14px` horizontal, with additional space for icons
-- **Border**: `1px solid var(--gray)`
-- **Border Radius**: `10px`
-- **Focus State**: Border color changes to primary blue with a subtle shadow glow
-- **Shadow on Focus**: `0 0 0 3px rgba(74, 108, 250, 0.15)` - Subtle highlight
+Use the predefined `.input-field` class or build with custom Tailwind classes:
+
+```tsx
+// Option 1: Use predefined class
+<input className="input-field" />
+
+// Option 2: Build with custom Tailwind classes
+<input className="h-[46px] px-md rounded-md border border-theme-gray focus:border-primary-blue focus:shadow-focus" />
+```
 
 ### Buttons
-- **Primary Button**:
-  - Background: Primary blue
-  - Text: White
-  - Padding: `12px 25px`
-  - Border Radius: `10px`
-  - Font Weight: 600
-  - Hover: Slightly lighter blue shade
-  
-- **Secondary Button**:
-  - Background: White
-  - Text: Dark color
-  - Border: `1px solid var(--gray)`
-  - Padding: `10px 20px`
-  - Border Radius: `8px`
-  - Hover: Slight background color change
+Use the predefined button classes or build with custom Tailwind classes:
+
+```tsx
+// Primary Button - Use predefined class or custom classes
+<button className="button-primary">Submit</button>
+// OR
+<button className="bg-primary-blue text-white px-lg py-md rounded-md shadow-level-2 hover:bg-primary-blue-light duration-standard font-semibold">
+  Submit
+</button>
+
+// Secondary Button
+<button className="button-secondary">Cancel</button>
+// OR
+<button className="bg-theme-light text-theme-dark px-md py-sm rounded-md border border-theme-gray hover:bg-theme-gray/10 duration-standard font-semibold">
+  Cancel
+</button>
+```
 
 ## 9. Component Styling
 
 ### Cards
-- **Background**: Glassmorphic effect (as specified in section 5)
-- **Padding**: `25px`
-- **Border Radius**: `16px`
-- **Transition**: `all 0.3s` - Smooth transitions for hover effects
-- **Hover Effect**: Subtle elevation change (slight y-axis translation upward) and increased shadow
+```tsx
+// CORRECT - Use glassmorphic card with proper spacing
+<div className="glass-card p-xl rounded-lg">
+  <h2 className="text-xl font-semibold text-theme-dark mb-md">Card Title</h2>
+  <p className="text-base text-theme-gray-dark">Card content</p>
+</div>
+```
 
 ### Tags & Chips
-- **Padding**: `5px 12px` for small tags, `6px 15px` for standard tags
-- **Border Radius**: `20px` - `30px` (pronounced rounded ends)
-- **Background**: Subtle variations of primary colors at low opacity
-- **Text**: Related to the background color but more saturated for contrast
-- **Border**: Often `1px solid` matching the text color at lower opacity
+```tsx
+// CORRECT - Use custom classes for tags
+<span className="bg-primary-blue/10 text-primary-blue px-sm py-xxs rounded-full text-sm font-medium border border-primary-blue/20">
+  Tag Label
+</span>
+```
 
 ### Dropdowns & Select Elements
-- **Background**: White
-- **Border**: `1px solid var(--gray)`
-- **Border Radius**: `8px`
-- **Padding**: `10px 15px`
-- **Arrow Indicator**: Subtle downward-pointing arrow in muted gray
+```tsx
+// CORRECT - Use custom classes for dropdowns
+<select className="bg-theme-light border border-theme-gray rounded-md px-md py-sm text-theme-dark">
+  <option>Select option</option>
+</select>
+```
 
 ## 10. Interactive States
 
 ### Hover States
-- **Color Shift**: Elements darken or lighten slightly when hovered
-- **Scale**: Some elements grow very slightly (105%) on hover
-- **Elevation**: Shadow may increase or element may rise slightly
-- **Transition**: All hover effects use smooth transitions (`transition: all 0.3s`)
-
-### Active/Pressed States
-- **Depth Change**: Elements appear to be pressed inward
-- **Color Change**: Slightly more pronounced than hover state
+```tsx
+// CORRECT - Use custom classes for hover effects
+<button className="bg-primary-blue hover:bg-primary-blue-light hover:scale-105 duration-standard">
+  Hover me
+</button>
+```
 
 ### Focus States
-- **Outline**: Replaced with a subtle glow effect using box-shadow
-- **Color Change**: Primary elements take on a slightly more saturated hue
+```tsx
+// CORRECT - Use focus shadow class
+<input className="border border-theme-gray focus:border-primary-blue focus:shadow-focus" />
+```
 
 ## 11. Animations & Transitions
 
 ### Timing
-- **Fast**: `0.15s` - For small UI responses
-- **Standard**: `0.3s` - For most transitions
-- **Deliberate**: `0.5s` - For more attention-grabbing animations
+Use the custom Tailwind duration classes:
+- **Fast**: `duration-fast` (150ms) - For small UI responses
+- **Standard**: `duration-standard` (300ms) - For most transitions
+- **Slow**: `duration-slow` (500ms) - For more attention-grabbing animations
 
-### Easing Functions
-- **Standard**: `ease` or `ease-in-out` - Smooth, natural feeling transitions
-- **Emphasis**: `cubic-bezier(0.2, 0.8, 0.2, 1)` - For more dramatic animations
+### Transition Usage Examples
+```tsx
+// CORRECT - Use custom duration classes
+<button className="bg-primary-blue hover:bg-primary-blue-light duration-standard">
+  Smooth transition
+</button>
 
-## 12. Icon System
+<div className="transform hover:scale-105 duration-fast">
+  Quick hover effect
+</div>
+```
 
-### Icon Sizing
-- **Small**: `16px` - For inline use with text
-- **Medium**: `18px` - `20px` - For standard UI elements
-- **Large**: `24px` - For primary navigation or emphasis
+## 12. Complete Component Examples
 
-### Icon Treatment
-- **Stroke Width**: Consistent 1.5px to 2px stroke width
-- **Corner Radius**: Slightly rounded corners on iconic elements
-- **Color**: Either in neutral tones or primary brand colors
-- **States**: Icons change color on hover/active states to match text elements
+### Primary Action Button
+```tsx
+<button className="bg-primary-blue text-white px-lg py-md rounded-md shadow-level-2 hover:bg-primary-blue-light hover:shadow-level-3 duration-standard font-semibold">
+  Primary Action
+</button>
+```
 
-## 13. Responsive Design Principles
+### Card Component
+```tsx
+<div className="glass-card p-xl rounded-lg shadow-level-2 hover:shadow-level-3 duration-standard">
+  <h3 className="text-xl font-semibold text-theme-dark mb-md">Card Title</h3>
+  <p className="text-base text-theme-gray-dark leading-normal mb-lg">
+    Card description with proper typography and spacing.
+  </p>
+  <button className="bg-primary-blue text-white px-md py-sm rounded-md hover:bg-primary-blue-light duration-standard">
+    Action
+  </button>
+</div>
+```
 
-### Breakpoints
-- **Small**: `576px` - Mobile devices
-- **Medium**: `768px` - Tablets and small desktops
-- **Large**: `992px` - Desktops
-- **Extra Large**: `1200px` - Large desktop displays
+### Form Input
+```tsx
+<div className="mb-lg">
+  <label className="block text-sm font-medium text-theme-dark mb-xs">
+    Input Label
+  </label>
+  <input 
+    type="text"
+    className="w-full h-[46px] px-md rounded-md border border-theme-gray focus:border-primary-blue focus:shadow-focus duration-standard"
+    placeholder="Enter text..."
+  />
+</div>
+```
 
-### Adaptation Principles
-- **Simplified Layout**: Single-column layouts for small screens
-- **Touch Targets**: Minimum 44px × 44px for touch interfaces
-- **Spacing Reduction**: Reduced margins and padding (by ~25-40%) on small screens
-- **Font Size Adjustments**: Slight reduction in font sizes for mobile (typically ~10-15% smaller)
+## 13. Key Reminders for Developers
 
-## 14. Examples & Applications
+### ✅ DO:
+- Use `bg-primary-blue` instead of `bg-[#4a6cfa]`
+- Use `p-lg` instead of `p-[20px]`
+- Use `shadow-level-2` instead of `shadow-[0_8px_32px_rgba(31,38,135,0.1)]`
+- Use `rounded-md` instead of `rounded-[10px]`
+- Use `duration-standard` instead of `duration-[300ms]`
 
-### Primary Content Containers
-- Full-width glassmorphic panels with consistent padding
-- Subtle shadows that increase on interaction
-- Clean, hierarchical typography with proper spacing
+### ❌ DON'T:
+- Use hardcoded hex values in square brackets
+- Use hardcoded pixel values for spacing
+- Use hardcoded shadow values
+- Use hardcoded border radius values
+- Use hardcoded transition durations
 
-### Action Elements
-- Blue primary buttons with appropriate hover effects
-- White/transparent secondary buttons
-- Interactive elements with clear affordances
+### Quick Reference
+```tsx
+// Colors
+bg-primary-blue, bg-primary-blue-light, bg-secondary-green
+bg-theme-dark, bg-theme-light, bg-theme-gray, bg-theme-gray-dark
 
-### Information Hierarchy
-- Clear typographic scale with proper weight differences
-- Consistent spacing between related and unrelated elements
-- Color used strategically to guide attention
+// Spacing
+p-xxs (4px), p-xs (8px), p-sm (12px), p-md (16px), p-lg (20px), p-xl (25px)
 
-### Visual Feedback
-- Clear hover and active states for interactive elements
-- Transitions that feel natural and enhance understanding
-- Focus states that are both accessible and aesthetically pleasing
+// Typography
+text-xs, text-sm, text-base, text-lg, text-xl, text-2xl, text-3xl
+font-normal, font-medium, font-semibold, font-bold
+
+// Shadows
+shadow-level-1, shadow-level-2, shadow-level-3, shadow-level-4, shadow-focus
+
+// Border Radius
+rounded-sm, rounded-md, rounded-lg, rounded-xl, rounded-full
+
+// Transitions
+duration-fast, duration-standard, duration-slow
+```
