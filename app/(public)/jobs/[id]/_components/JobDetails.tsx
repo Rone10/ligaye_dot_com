@@ -145,7 +145,7 @@ export default function JobDetails({ job, location, skills = [], industries = []
             <CardTitle>Job Description</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="prose max-w-none">
+            <div className="prose-rich-text max-w-none">
               <div 
                 className="text-gray-800" 
                 dangerouslySetInnerHTML={{ __html: parseJobDescription(job.description) }}
@@ -168,7 +168,7 @@ export default function JobDetails({ job, location, skills = [], industries = []
               </h3>
               {job.educationRequirements ? (
                 <div 
-                  className="prose max-w-none"
+                  className="prose-rich-text max-w-none"
                   dangerouslySetInnerHTML={{ __html: parseJobDescription(job.educationRequirements) }}
                 />
               ) : (
@@ -189,7 +189,7 @@ export default function JobDetails({ job, location, skills = [], industries = []
               )}
               {job.experienceRequirements ? (
                 <div 
-                  className="prose max-w-none"
+                  className="prose-rich-text max-w-none"
                   dangerouslySetInnerHTML={{ __html: parseJobDescription(job.experienceRequirements) }}
                 />
               ) : (

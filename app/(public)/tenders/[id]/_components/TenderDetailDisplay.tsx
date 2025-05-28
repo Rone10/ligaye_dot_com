@@ -68,7 +68,7 @@ export default function TenderDetailDisplay({ tender }: TenderDetailDisplayProps
           <div className="space-y-sm">
             <h3 className="text-lg font-semibold text-theme-dark">Description</h3>
             <div 
-              className="prose prose-sm max-w-none text-theme-gray-dark"
+              className="prose-rich-text max-w-none text-theme-gray-dark"
               dangerouslySetInnerHTML={{ __html: tender.description }}
             />
           </div>

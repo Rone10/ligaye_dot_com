@@ -46,11 +46,114 @@
   box-shadow: 0 0 0 3px rgba(74, 108, 250, 0.15) !important;
 }
 
-/* @media (prefers-color-scheme: dark) {
-    .e-richtexteditor .e-rte-content,
-.e-richtexteditor .e-source-content  {
-      background-color: #1a1e2d; Tailwind's red-500 */
-      /* color: #fff; */
-    /* } */
+/* Fix bullet list and ordered list display */
+.e-richtexteditor .e-rte-content ul {
+  list-style-type: disc !important;
+  margin-left: 20px !important;
+  padding-left: 10px !important;
+}
 
-/* } */
+.e-richtexteditor .e-rte-content ol {
+  list-style-type: decimal !important;
+  margin-left: 20px !important;
+  padding-left: 10px !important;
+}
+
+.e-richtexteditor .e-rte-content ul li {
+  display: list-item !important;
+  list-style-type: disc !important;
+  margin-bottom: 4px !important;
+}
+
+.e-richtexteditor .e-rte-content ol li {
+  display: list-item !important;
+  list-style-type: decimal !important;
+  margin-bottom: 4px !important;
+}
+
+/* Nested lists */
+.e-richtexteditor .e-rte-content ul ul {
+  list-style-type: circle !important;
+}
+
+.e-richtexteditor .e-rte-content ul ul ul {
+  list-style-type: square !important;
+}
+
+/* Dark mode styles */
+.dark-mode .e-richtexteditor,
+.dark .e-richtexteditor {
+  background-color: hsl(230, 25%, 14%) !important;
+  border-color: hsl(225, 17%, 25%) !important;
+}
+
+.dark-mode .e-richtexteditor .e-rte-toolbar,
+.dark .e-richtexteditor .e-rte-toolbar {
+  background-color: hsl(225, 17%, 25%) !important;
+  border-bottom: 1px solid hsl(225, 17%, 35%) !important;
+  color: hsl(0, 0%, 100%) !important;
+}
+
+.dark-mode .e-richtexteditor .e-rte-content,
+.dark .e-richtexteditor .e-rte-content {
+  background-color: hsl(230, 25%, 14%) !important;
+  color: hsl(0, 0%, 100%) !important;
+  border-color: hsl(225, 17%, 25%) !important;
+}
+
+.dark-mode .e-richtexteditor .e-content .e-rte-content,
+.dark .e-richtexteditor .e-content .e-rte-content {
+  background-color: hsl(230, 25%, 14%) !important;
+  color: hsl(0, 0%, 100%) !important;
+}
+
+/* Dark mode toolbar buttons */
+.dark-mode .e-richtexteditor .e-toolbar-item .e-btn,
+.dark .e-richtexteditor .e-toolbar-item .e-btn {
+  color: hsl(0, 0%, 100%) !important;
+  background-color: transparent !important;
+}
+
+.dark-mode .e-richtexteditor .e-toolbar-item .e-btn:hover,
+.dark .e-richtexteditor .e-toolbar-item .e-btn:hover {
+  background-color: hsl(225, 17%, 35%) !important;
+  color: hsl(229, 95%, 64%) !important;
+}
+
+.dark-mode .e-richtexteditor .e-toolbar-item .e-btn.e-active,
+.dark .e-richtexteditor .e-toolbar-item .e-btn.e-active {
+  background-color: hsl(229, 95%, 64%) !important;
+  color: hsl(0, 0%, 100%) !important;
+}
+
+/* Dark mode focus state */
+.dark-mode .e-richtexteditor.e-focused .e-rte-content,
+.dark .e-richtexteditor.e-focused .e-rte-content {
+  border-color: hsl(229, 95%, 64%) !important;
+  box-shadow: 0 0 0 3px rgba(74, 108, 250, 0.25) !important;
+}
+
+/* Dark mode placeholder text */
+.dark-mode .e-richtexteditor .e-rte-placeholder,
+.dark .e-richtexteditor .e-rte-placeholder {
+  color: hsl(225, 17%, 67%) !important;
+}
+
+/* Dark mode list styles */
+.dark-mode .e-richtexteditor .e-rte-content ul li,
+.dark .e-richtexteditor .e-rte-content ul li {
+  color: hsl(0, 0%, 100%) !important;
+}
+
+.dark-mode .e-richtexteditor .e-rte-content ol li,
+.dark .e-richtexteditor .e-rte-content ol li {
+  color: hsl(0, 0%, 100%) !important;
+}
+
+/* Ensure proper text color in dark mode */
+.dark-mode .e-richtexteditor .e-rte-content p,
+.dark .e-richtexteditor .e-rte-content p,
+.dark-mode .e-richtexteditor .e-rte-content div,
+.dark .e-richtexteditor .e-rte-content div {
+  color: hsl(0, 0%, 100%) !important;
+}

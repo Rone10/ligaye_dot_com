@@ -134,6 +134,60 @@
   .input-field {
     @apply h-[46px] px-4 rounded-md border border-[hsl(var(--theme-gray))] focus:border-[hsl(var(--primary-blue))] focus:shadow-[0_0_0_3px_rgba(74,108,250,0.15)] focus:outline-none;
   }
+
+  /* Rich text content styling for rendered HTML */
+  .prose-rich-text ul {
+    list-style-type: disc !important;
+    margin-left: 1.5rem !important;
+    padding-left: 0.5rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .prose-rich-text ol {
+    list-style-type: decimal !important;
+    margin-left: 1.5rem !important;
+    padding-left: 0.5rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .prose-rich-text ul li {
+    display: list-item !important;
+    list-style-type: disc !important;
+    margin-bottom: 0.25rem !important;
+    line-height: 1.6 !important;
+  }
+
+  .prose-rich-text ol li {
+    display: list-item !important;
+    list-style-type: decimal !important;
+    margin-bottom: 0.25rem !important;
+    line-height: 1.6 !important;
+  }
+
+  .prose-rich-text ul ul {
+    list-style-type: circle !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .prose-rich-text ul ul ul {
+    list-style-type: square !important;
+  }
+
+  .prose-rich-text p {
+    margin-bottom: 1rem !important;
+    line-height: 1.6 !important;
+  }
+
+  .prose-rich-text p:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  /* Dark mode support for rich text content */
+  .dark .prose-rich-text ul li,
+  .dark .prose-rich-text ol li,
+  .dark .prose-rich-text p {
+    color: hsl(var(--foreground)) !important;
+  }
 }
 
 @layer utilities {
