@@ -295,8 +295,7 @@ export function EditTenderForm({ tender, sectors, locations }: EditTenderFormPro
                   <FormLabel>External Link</FormLabel>
                   <FormControl>
                     <Input
-                      type="url"
-                      placeholder="https://example.com/tender-details"
+                      placeholder="example.com or https://example.com/tender-details"
                       {...field}
                     />
                   </FormControl>
