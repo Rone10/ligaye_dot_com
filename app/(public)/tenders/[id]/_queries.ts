@@ -82,3 +82,19 @@ export async function getTenderById(id: string): Promise<TenderWithRelations | n
     throw new Error('Failed to fetch tender details');
   }
 } 
+
+
+// get user profile
+export async function getUserProfile(userId: string): Promise<Profile | null> {
+  try {
+    const database = await db();
+    const profile = await database
+      .select()
+      .from(profiles)
+      .where(eq(profiles.userId, userId));
+    return profile[0] || null;
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    throw new Error('Failed to fetch user profile');
+  }
+}

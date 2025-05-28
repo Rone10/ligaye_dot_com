@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { tenders } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { getUserProfile } from './_queries';
 
 export async function deleteTenderAction(tenderId: string): Promise<{
   success: boolean;
@@ -16,6 +17,8 @@ export async function deleteTenderAction(tenderId: string): Promise<{
     if (!user) {
       return { success: false, error: 'Authentication required' };
     }
+
+    
 
     const database = await db();
 
@@ -29,11 +32,16 @@ export async function deleteTenderAction(tenderId: string): Promise<{
       ))
       .limit(1);
 
+    
+      const profile = await getUserProfile(user?.id || '');
+  // const isOwner = profile?.id === existingTender[0].userId;
+  
+
     if (existingTender.length === 0) {
       return { success: false, error: 'Tender not found' };
     }
 
-    if (existingTender[0].userId !== user.id) {
+    if (existingTender[0].userId !== profile?.id) {
       return { success: false, error: 'Unauthorized to delete this tender' };
     }
 

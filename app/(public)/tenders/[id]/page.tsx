@@ -6,6 +6,7 @@ import DeleteTenderDialog from './_components/DeleteTenderDialog';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit } from 'lucide-react';
+import { getUserProfile } from './_queries';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -23,8 +24,12 @@ export default async function TenderDetailPage({ params }: PageProps) {
   
   // Get current user for authorization
   const user = await getUser();
-  const isOwner = user?.id === tender.userId;
+  // get user profile
+  const profile = await getUserProfile(user?.id || '');
+  const isOwner = profile?.id === tender.userId;
   
+  console.log('profile', profile);
+
   return (
     <div className="container mx-auto px-xxs sm:px-xs md:px-sm lg:px-md py-lg">
       {/* Back button */}
