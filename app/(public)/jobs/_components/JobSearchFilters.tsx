@@ -60,10 +60,10 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
   
   // Filtered locations and industries based on search input
   const filteredLocations = locationSearchInput 
-    ? locations.filter(location => 
-        (location.city ? location.city.toLowerCase() : '') + location.region.toLowerCase()
-        .includes(locationSearchInput.toLowerCase())
-      )
+    ? locations.filter(location => {
+        const locationText = (location.city ? location.city.toLowerCase() : '') + ' ' + location.region.toLowerCase();
+        return locationText.includes(locationSearchInput.toLowerCase());
+      })
     : locations;
     
   const filteredIndustries = industrySearchInput
