@@ -24,11 +24,13 @@ export default async function TenderDetailPage({ params }: PageProps) {
   
   // Get current user for authorization
   const user = await getUser();
-  // get user profile
-  const profile = await getUserProfile(user?.id || '');
-  const isOwner = profile?.id === tender.userId;
-  
-  console.log('profile', profile);
+  let isOwner = false;
+  if(user){
+    // get user profile
+    const profile = await getUserProfile(user?.id || '');
+    isOwner = profile?.id === tender.userId;
+    console.log('profile', profile);
+  }
 
   return (
     <div className="min-h-screen bg-gradient-bg">

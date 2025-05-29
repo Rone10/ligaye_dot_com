@@ -36,7 +36,7 @@ async function getFilteredJobsData(
   );
   
   // Build additional filter conditions
-  const conditions = [];
+  const conditions: any[] = [];
   
   // Text search condition (search across multiple fields)
   if (search && search.trim() !== '') {
@@ -68,13 +68,18 @@ async function getFilteredJobsData(
     ? (await db()
         .select({ jobId: jobIndustries.jobId })
         .from(jobIndustries)
-        .where(eq(jobIndustries.industryId, industryId)))
+        .where(and(
+          eq(jobIndustries.industryId, industryId),
+          eq(jobIndustries.deleted, false)
+        )))
         .map(row => row.jobId)
     : null;
     
-  // Apply industry filter if needed
-  const finalWhereCondition = jobIdsInIndustry
+  // Apply industry filter if needed - handle empty array case
+  const finalWhereCondition = jobIdsInIndustry && jobIdsInIndustry.length > 0
     ? and(whereCondition, inArray(jobs.id, jobIdsInIndustry))
+    : jobIdsInIndustry && jobIdsInIndustry.length === 0
+    ? and(whereCondition, sql`false`) // No jobs match this industry
     : whereCondition;
     
   // Determine sort order based on sortBy param (default to newest first)
@@ -123,11 +128,7 @@ async function getFilteredJobsData(
     
     // Ensure totalCount is a number before calculation
     const totalCount = Number(countResult[0]?.count || 0);
-    // Add logs for pagination debugging
-    console.log("[Debug Pagination] totalCount:", totalCount, "(Type:", typeof totalCount, ")");
-    console.log("[Debug Pagination] pageSize:", pageSize, "(Type:", typeof pageSize, ")");
     const pageCount = Math.ceil(totalCount / pageSize);
-    console.log("[Debug Pagination] calculated pageCount:", pageCount);
   
   // Process the results to ensure they match the expected types
   const processedJobs = jobsQuery.map(job => ({
