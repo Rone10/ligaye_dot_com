@@ -1,4 +1,4 @@
-import { sql, and, eq, gte, lte, like, or, inArray, ilike, asc, desc } from 'drizzle-orm';
+import { sql, and, eq, gte, lte, like, or, inArray, ilike, asc, desc, isNull } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { 
   jobs, 
@@ -13,6 +13,7 @@ import {
 } from '@/lib/db/schema';
 import type { JobFilters, JobsQueryResult } from './_utils/types';
 import { unstable_cache } from 'next/cache';
+import { getEffectiveSalaryRange } from './_utils/salary-utils';
 
 /**
  * Get a filtered and paginated list of jobs based on search criteria
@@ -23,7 +24,7 @@ async function getFilteredJobsData(
 ): Promise<JobsQueryResult> {
   const { 
     search, locationId, jobType, workLocation, 
-    experienceLevel, salaryMin, salaryMax, industryId, sortBy 
+    experienceLevel, salaryMin, salaryMax, industryId, sortBy, includeNegotiable = true 
   } = filters;
   
   const { page, pageSize } = pagination;
@@ -32,7 +33,10 @@ async function getFilteredJobsData(
   // Base condition: only active, non-expired jobs
   const baseConditions = and(
     eq(jobs.status, 'ACTIVE'),
-    gte(jobs.expiresAt, new Date())
+    or(
+      isNull(jobs.expiresAt),
+      gte(jobs.expiresAt, new Date())
+    )
   );
   
   // Build additional filter conditions
@@ -55,8 +59,139 @@ async function getFilteredJobsData(
   if (jobType) conditions.push(eq(jobs.jobType, jobType));
   if (workLocation) conditions.push(eq(jobs.workLocation, workLocation));
   if (experienceLevel) conditions.push(eq(jobs.experienceLevel, experienceLevel));
-  if (salaryMin) conditions.push(gte(jobs.salaryRangeMin, salaryMin));
-  if (salaryMax) conditions.push(lte(jobs.salaryRangeMax, salaryMax));
+  
+  // Enhanced salary filtering
+  if (salaryMin !== null || salaryMax !== null) {
+    const salaryConditions = [];
+    
+    // Handle negotiable salaries
+    if (includeNegotiable) {
+      salaryConditions.push(eq(jobs.salaryDisplayType, 'NEGOTIABLE'));
+    }
+    
+    // Handle jobs with actual salary ranges
+    if (salaryMin !== null || salaryMax !== null) {
+      const rangeConditions = [];
+      
+      // For jobs with salary information, we need to check different display types
+      if (salaryMin !== null) {
+        // Job's effective maximum should be >= filter minimum
+        rangeConditions.push(
+          or(
+            // RANGE: use salaryRangeMax
+            and(
+              eq(jobs.salaryDisplayType, 'RANGE'),
+              gte(sql`
+                CASE 
+                  WHEN ${jobs.salaryFrequency} = 'HOUR' THEN ${jobs.salaryRangeMax} * 40 * 52
+                  WHEN ${jobs.salaryFrequency} = 'DAY' THEN ${jobs.salaryRangeMax} * 5 * 52
+                  WHEN ${jobs.salaryFrequency} = 'WEEK' THEN ${jobs.salaryRangeMax} * 52
+                  WHEN ${jobs.salaryFrequency} = 'MONTH' THEN ${jobs.salaryRangeMax} * 12
+                  ELSE COALESCE(${jobs.salaryRangeMax}, ${jobs.salaryRangeMin})
+                END
+              `, salaryMin)
+            ),
+            // FIXED: use salaryRangeMin
+            and(
+              eq(jobs.salaryDisplayType, 'FIXED'),
+              gte(sql`
+                CASE 
+                  WHEN ${jobs.salaryFrequency} = 'HOUR' THEN ${jobs.salaryRangeMin} * 40 * 52
+                  WHEN ${jobs.salaryFrequency} = 'DAY' THEN ${jobs.salaryRangeMin} * 5 * 52
+                  WHEN ${jobs.salaryFrequency} = 'WEEK' THEN ${jobs.salaryRangeMin} * 52
+                  WHEN ${jobs.salaryFrequency} = 'MONTH' THEN ${jobs.salaryRangeMin} * 12
+                  ELSE ${jobs.salaryRangeMin}
+                END
+              `, salaryMin)
+            ),
+            // STARTING_AMOUNT: no upper limit, always matches if has starting amount
+            and(
+              eq(jobs.salaryDisplayType, 'STARTING_AMOUNT'),
+              gte(sql`
+                CASE 
+                  WHEN ${jobs.salaryFrequency} = 'HOUR' THEN ${jobs.salaryRangeMin} * 40 * 52
+                  WHEN ${jobs.salaryFrequency} = 'DAY' THEN ${jobs.salaryRangeMin} * 5 * 52
+                  WHEN ${jobs.salaryFrequency} = 'WEEK' THEN ${jobs.salaryRangeMin} * 52
+                  WHEN ${jobs.salaryFrequency} = 'MONTH' THEN ${jobs.salaryRangeMin} * 12
+                  ELSE ${jobs.salaryRangeMin}
+                END
+              `, salaryMin)
+            ),
+            // MAXIMUM_AMOUNT: use salaryRangeMax
+            and(
+              eq(jobs.salaryDisplayType, 'MAXIMUM_AMOUNT'),
+              gte(sql`
+                CASE 
+                  WHEN ${jobs.salaryFrequency} = 'HOUR' THEN ${jobs.salaryRangeMax} * 40 * 52
+                  WHEN ${jobs.salaryFrequency} = 'DAY' THEN ${jobs.salaryRangeMax} * 5 * 52
+                  WHEN ${jobs.salaryFrequency} = 'WEEK' THEN ${jobs.salaryRangeMax} * 52
+                  WHEN ${jobs.salaryFrequency} = 'MONTH' THEN ${jobs.salaryRangeMax} * 12
+                  ELSE ${jobs.salaryRangeMax}
+                END
+              `, salaryMin)
+            )
+          )
+        );
+      }
+      
+      if (salaryMax !== null) {
+        // Job's effective minimum should be <= filter maximum
+        rangeConditions.push(
+          or(
+            // RANGE: use salaryRangeMin
+            and(
+              eq(jobs.salaryDisplayType, 'RANGE'),
+              lte(sql`
+                CASE 
+                  WHEN ${jobs.salaryFrequency} = 'HOUR' THEN ${jobs.salaryRangeMin} * 40 * 52
+                  WHEN ${jobs.salaryFrequency} = 'DAY' THEN ${jobs.salaryRangeMin} * 5 * 52
+                  WHEN ${jobs.salaryFrequency} = 'WEEK' THEN ${jobs.salaryRangeMin} * 52
+                  WHEN ${jobs.salaryFrequency} = 'MONTH' THEN ${jobs.salaryRangeMin} * 12
+                  ELSE ${jobs.salaryRangeMin}
+                END
+              `, salaryMax)
+            ),
+            // FIXED: use salaryRangeMin
+            and(
+              eq(jobs.salaryDisplayType, 'FIXED'),
+              lte(sql`
+                CASE 
+                  WHEN ${jobs.salaryFrequency} = 'HOUR' THEN ${jobs.salaryRangeMin} * 40 * 52
+                  WHEN ${jobs.salaryFrequency} = 'DAY' THEN ${jobs.salaryRangeMin} * 5 * 52
+                  WHEN ${jobs.salaryFrequency} = 'WEEK' THEN ${jobs.salaryRangeMin} * 52
+                  WHEN ${jobs.salaryFrequency} = 'MONTH' THEN ${jobs.salaryRangeMin} * 12
+                  ELSE ${jobs.salaryRangeMin}
+                END
+              `, salaryMax)
+            ),
+            // STARTING_AMOUNT: use salaryRangeMin
+            and(
+              eq(jobs.salaryDisplayType, 'STARTING_AMOUNT'),
+              lte(sql`
+                CASE 
+                  WHEN ${jobs.salaryFrequency} = 'HOUR' THEN ${jobs.salaryRangeMin} * 40 * 52
+                  WHEN ${jobs.salaryFrequency} = 'DAY' THEN ${jobs.salaryRangeMin} * 5 * 52
+                  WHEN ${jobs.salaryFrequency} = 'WEEK' THEN ${jobs.salaryRangeMin} * 52
+                  WHEN ${jobs.salaryFrequency} = 'MONTH' THEN ${jobs.salaryRangeMin} * 12
+                  ELSE ${jobs.salaryRangeMin}
+                END
+              `, salaryMax)
+            ),
+            // MAXIMUM_AMOUNT: no lower limit, always matches
+            eq(jobs.salaryDisplayType, 'MAXIMUM_AMOUNT')
+          )
+        );
+      }
+      
+      if (rangeConditions.length > 0) {
+        salaryConditions.push(and(...rangeConditions));
+      }
+    }
+    
+    if (salaryConditions.length > 0) {
+      conditions.push(or(...salaryConditions));
+    }
+  }
   
   // Full filter condition
   const whereCondition = conditions.length > 0

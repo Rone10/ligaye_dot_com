@@ -57,6 +57,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
   // Local state for location and industry search
   const [locationSearchInput, setLocationSearchInput] = useState('');
   const [industrySearchInput, setIndustrySearchInput] = useState('');
+  const [includeNegotiable, setIncludeNegotiable] = useState(filters.includeNegotiable ?? true);
   
   // Filtered locations and industries based on search input
   const filteredLocations = locationSearchInput 
@@ -123,6 +124,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
       setFilters({
         salaryMin: salaryRange[0] > 0 ? salaryRange[0] : null,
         salaryMax: salaryRange[1] < 1000000 ? salaryRange[1] : null,
+        includeNegotiable: includeNegotiable,
         page: 1
       });
     });
@@ -130,6 +132,17 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
   
   const handleSalaryRangeChange = (value: [number, number]) => {
     setSalaryRange(value);
+  };
+
+  const handleIncludeNegotiableChange = (include: boolean) => {
+    setIncludeNegotiable(include);
+    // Apply the change immediately
+    startTransition(() => {
+      setFilters({
+        includeNegotiable: include,
+        page: 1
+      });
+    });
   };
   
   const toggleMobileFilter = () => {
@@ -349,11 +362,12 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
         </FilterSection>
 
         {/* Salary Range Filter */}
-        <FilterSection 
+        {/* <FilterSection 
           title="Salary Range" 
           defaultExpanded={true}
           onClear={() => handleFilterChange({ salaryMin: null, salaryMax: null, page: 1 })}
           showClear={filters.salaryMin !== null || filters.salaryMax !== null}
+          maxHeight="max-h-[800px] overflow-y-auto"
         >
           <SalaryRangeFilter
             value={salaryRange}
@@ -361,8 +375,10 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
             onApply={applySalaryRange}
             min={0}
             max={1000000}
+            includeNegotiable={includeNegotiable}
+            onIncludeNegotiableChange={handleIncludeNegotiableChange}
           />
-        </FilterSection>
+        </FilterSection> */}
 
         {/* Work Location Filter */}
         <FilterSection 

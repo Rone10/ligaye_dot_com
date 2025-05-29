@@ -10,6 +10,7 @@ interface FilterSectionProps {
   defaultExpanded?: boolean;
   onClear?: () => void;
   showClear?: boolean;
+  maxHeight?: string; // Allow custom max height
 }
 
 export function FilterSection({
@@ -17,7 +18,8 @@ export function FilterSection({
   children,
   defaultExpanded = false,
   onClear,
-  showClear = false
+  showClear = false,
+  maxHeight = "max-h-[500px]" // Default max height
 }: FilterSectionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
@@ -26,16 +28,16 @@ export function FilterSection({
   };
 
   return (
-    <div className=" rounded-[12px] overflow-hidden">
+    <div className="rounded-[12px] overflow-hidden">
       <div 
         className="flex items-center justify-between p-3 cursor-pointer"
         onClick={toggleExpanded}
       >
-        <h3 className="font-semibold ">{title}</h3>
+        <h3 className="font-semibold">{title}</h3>
         <div className="flex items-center gap-2">
           {showClear && onClear && (
             <button
-              className=" hover:text-[#1a1e2d] transition-colors p-1 rounded-full"
+              className="hover:text-[#1a1e2d] transition-colors p-1 rounded-full"
               onClick={(e) => {
                 e.stopPropagation(); // Prevent section from collapsing when clearing
                 onClear();
@@ -47,7 +49,7 @@ export function FilterSection({
           )}
           <ChevronDown 
             className={cn(
-              "w-5 h-5  transition-transform duration-200",
+              "w-5 h-5 transition-transform duration-200",
               isExpanded && "transform rotate-180"
             )} 
           />
@@ -57,10 +59,10 @@ export function FilterSection({
       <div 
         className={cn(
           "overflow-hidden transition-all duration-300 ease-in-out",
-          isExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          isExpanded ? `${maxHeight} opacity-100` : "max-h-0 opacity-0"
         )}
       >
-        <div className="p-3 pt-0 border-t border-[rgba(255,255,255,0.15)]">
+        <div className="p-3 pt-0 border-t border-[rgba(255,255,255,0.15)] overflow-y-auto">
           {children}
         </div>
       </div>

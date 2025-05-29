@@ -15,6 +15,7 @@ export interface JobFilters {
   experienceLevel: typeof experienceLevelEnum.enumValues[number] | null;
   salaryMin: number | null;
   salaryMax: number | null;
+  includeNegotiable?: boolean;
   industryId: string | null;
   sortBy?: SortOption;
 }

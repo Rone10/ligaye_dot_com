@@ -2,6 +2,7 @@ import {
   parseAsString, 
   parseAsInteger, 
   parseAsStringLiteral, 
+  parseAsBoolean,
   createParser,
   type UrlKeys
 } from 'nuqs/server'; 
@@ -33,6 +34,7 @@ export const jobFiltersParsers = {
   experienceLevel: parseAsStringLiteral([...experienceLevelEnum.enumValues, 'all'] as const).withDefault('all'),
   salaryMin: parseAsInteger,
   salaryMax: parseAsInteger,
+  includeNegotiable: parseAsBoolean.withDefault(true),
   industryId: parseAsStringOrAll,
   sortBy: parseAsStringLiteral(['newest', 'oldest'] as const).withDefault('newest'),
   page: parseAsInteger.withDefault(1),
@@ -48,6 +50,7 @@ export const jobFiltersUrlKeys: UrlKeys<typeof jobFiltersParsers> = {
   experienceLevel: 'exp',
   salaryMin: 'smin',
   salaryMax: 'smax',
+  includeNegotiable: 'negotiable',
   industryId: 'ind',
   sortBy: 'sort',
   page: 'p',
