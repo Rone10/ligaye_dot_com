@@ -12,9 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DatePicker } from '@/components/ui/date-picker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Editor } from '@/components/RichTextEditor/editor';
 import { newTenderSchema, type NewTenderSchemaType } from '../_utils/validation';
-import { createTenderAction } from '../_actions';
+import { createTenderWithDocumentsAction } from '../_actions';
+import { FileUpload } from './FileUpload';
 import type { Sector, Location } from '@/lib/db/schema';
 import { tenderTypeEnum, tenderStatusEnum } from '@/lib/db/schema';
 
@@ -26,6 +28,8 @@ interface NewTenderFormProps {
 export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [documentsArePaid, setDocumentsArePaid] = useState(false);
   const router = useRouter();
 
   const form = useForm<NewTenderSchemaType>({
@@ -41,6 +45,9 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
       contactInformation: '',
       externalLink: '',
       status: 'DRAFT',
+      documentsArePaid: false,
+      documentPrice: undefined,
+      documentCurrency: 'GMD',
     },
   });
 
@@ -49,7 +56,26 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
     setError(null);
 
     try {
-      const result = await createTenderAction(data);
+      // Create FormData to include files
+      const formData = new FormData();
+      
+      // Add form data
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (key === 'deadline' && value instanceof Date) {
+            formData.append(key, value.toISOString());
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      // Add files
+      selectedFiles.forEach((file) => {
+        formData.append('files', file);
+      });
+
+      const result = await createTenderWithDocumentsAction(formData);
       
       if (result.success && result.tenderId) {
         // Show success toast
@@ -296,6 +322,82 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
                 </FormItem>
               )}
             />
+
+            {/* Document Upload Section */}
+            <div className="space-y-lg border-t border-theme-gray pt-lg">
+              <h3 className="text-xl font-semibold text-theme-dark">Document Upload</h3>
+              
+              <FileUpload
+                files={selectedFiles}
+                onFilesChange={setSelectedFiles}
+                maxFiles={5}
+                maxSize={25 * 1024 * 1024} // 25MB
+              />
+              
+              {/* Document Payment Settings */}
+              <div className="space-y-md">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="documentsArePaid"
+                    checked={documentsArePaid}
+                    onCheckedChange={(checked) => {
+                      setDocumentsArePaid(checked as boolean);
+                      form.setValue('documentsArePaid', checked as boolean);
+                    }}
+                  />
+                  <label htmlFor="documentsArePaid" className="text-sm font-medium">
+                    Charge for document access
+                  </label>
+                </div>
+                
+                {documentsArePaid && (
+                  <div className="grid grid-cols-2 gap-md">
+                    <FormField
+                      control={form.control}
+                      name="documentPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Document Price *</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="documentCurrency"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Currency</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="GMD">GMD (Gambian Dalasi)</SelectItem>
+                              <SelectItem value="USD">USD (US Dollar)</SelectItem>
+                              <SelectItem value="EUR">EUR (Euro)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Status */}
             <FormField

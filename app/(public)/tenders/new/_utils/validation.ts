@@ -30,6 +30,7 @@ const flexibleUrlSchema = z
     message: 'Please enter a valid URL (e.g., example.com or https://example.com)'
   });
 
+// Update existing schema to include document fields
 export const newTenderSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be 200 characters or less'),
   description: z.string().min(1, 'Description is required'),
@@ -42,6 +43,18 @@ export const newTenderSchema = z.object({
   contactInformation: z.string().optional(),
   externalLink: flexibleUrlSchema,
   status: z.enum(tenderStatusEnum.enumValues).default('DRAFT'),
+  documentsArePaid: z.boolean().default(false),
+  documentPrice: z.number().positive().optional(),
+  documentCurrency: z.string().default('GMD'),
+}).refine((data) => {
+  // If documents are paid, price must be provided
+  if (data.documentsArePaid && !data.documentPrice) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Document price is required when documents are paid",
+  path: ["documentPrice"]
 });
 
 export type NewTenderSchemaType = z.infer<typeof newTenderSchema>; 
