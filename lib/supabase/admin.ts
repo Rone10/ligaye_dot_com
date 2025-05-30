@@ -13,7 +13,7 @@ if (!hasServiceRoleKey) {
 }
 
 // Create a Supabase client with admin privileges if the service role key is available
-const supabaseAdmin = hasServiceRoleKey
+export const supabaseAdmin = hasServiceRoleKey
   ? createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,

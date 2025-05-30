@@ -76,6 +76,10 @@ export async function getTenders(params: GetTendersParams): Promise<TenderWithRe
         deleted: tenders.deleted,
         createdAt: tenders.createdAt,
         updatedAt: tenders.updatedAt,
+        // New document-related fields
+        documentsArePaid: tenders.documentsArePaid,
+        documentPrice: tenders.documentPrice,
+        documentCurrency: tenders.documentCurrency,
         // Related fields
         sector: {
           id: sectors.id,
@@ -117,6 +121,10 @@ export async function getTenders(params: GetTendersParams): Promise<TenderWithRe
       deleted: row.deleted,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+      // New document-related fields
+      documentsArePaid: row.documentsArePaid,
+      documentPrice: row.documentPrice,
+      documentCurrency: row.documentCurrency,
       sector: row.sector?.id ? row.sector : undefined,
       location: row.location?.id ? row.location : undefined,
       user: row.user?.id ? row.user : undefined,

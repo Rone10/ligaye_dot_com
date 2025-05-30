@@ -196,14 +196,14 @@ ON storage.objects FOR DELETE USING (
 ```
 
 ### 2.3 Supabase Service Role Client
-Create `lib/supabase/service.ts`:
+Create `lib/supabase/admin.ts`:
 ```typescript
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseAdminKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+export const supabaseAdmin = createClient(supabaseUrl, supabaseAdminKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
@@ -217,7 +217,7 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 ### 3.1 File Upload Utility (`lib/utils/file-upload.ts`)
 ```typescript
-import { supabaseService } from '@/lib/supabase/service';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface UploadFileParams {
@@ -250,7 +250,7 @@ export async function uploadTenderDocument({
     const storagePath = `${tenderId}/${documentId}-${file.name}`;
 
     // Upload to Supabase Storage
-    const { data, error } = await supabaseService.storage
+    const { data, error } = await supabaseAdmin.storage
       .from(bucket)
       .upload(storagePath, file, {
         cacheControl: '3600',
@@ -296,7 +296,7 @@ export function validateFile(file: File): { valid: boolean; error?: string } {
 
 export async function deleteTenderDocument(storagePath: string): Promise<boolean> {
   try {
-    const { error } = await supabaseService.storage
+    const { error } = await supabaseAdmin.storage
       .from('tender-documents')
       .remove([storagePath]);
 
@@ -314,7 +314,7 @@ export async function deleteTenderDocument(storagePath: string): Promise<boolean
 
 export async function generateSignedUrl(storagePath: string, expiresIn: number = 900): Promise<string | null> {
   try {
-    const { data, error } = await supabaseService.storage
+    const { data, error } = await supabaseAdmin.storage
       .from('tender-documents')
       .createSignedUrl(storagePath, expiresIn);
 
