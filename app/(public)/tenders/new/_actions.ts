@@ -7,6 +7,11 @@ import { newTenderSchema, type NewTenderSchemaType } from './_utils/validation';
 import { insertTender, createTenderWithDocuments, saveTenderDocumentMetadata } from './_queries';
 import { uploadTenderDocument } from '@/lib/utils/file-upload';
 
+// Simple test action to verify Server Actions are working
+export async function testAction(): Promise<{ success: boolean; message: string }> {
+  return { success: true, message: 'Server Action is working!' };
+}
+
 export async function createTenderAction(formData: NewTenderSchemaType): Promise<{
   success: boolean;
   tenderId?: string;
@@ -50,22 +55,39 @@ export async function createTenderWithDocumentsAction(
     }
 
     // Extract form data
-    const tenderData = Object.fromEntries(formData.entries());
+    const rawData = Object.fromEntries(formData.entries());
     const files = formData.getAll('files') as File[];
 
+    console.log('Raw form data:', rawData);
+    console.log('Files:', files.length);
+
+    // Parse and transform form data to match schema expectations
+    const tenderData: Partial<NewTenderSchemaType> = {
+      title: rawData.title as string,
+      description: rawData.description as string,
+      organizationName: rawData.organizationName as string,
+      tenderType: rawData.tenderType as any,
+      sectorId: rawData.sectorId ? (rawData.sectorId as string) : '',
+      locationId: rawData.locationId ? (rawData.locationId as string) : '',
+      budgetRange: rawData.budgetRange ? (rawData.budgetRange as string) : '',
+      contactInformation: rawData.contactInformation ? (rawData.contactInformation as string) : '',
+      externalLink: rawData.externalLink ? (rawData.externalLink as string) : '',
+      status: (rawData.status as any) || 'DRAFT',
+      documentsArePaid: rawData.documentsArePaid === 'true',
+      documentPrice: rawData.documentPrice ? parseFloat(rawData.documentPrice as string) : undefined,
+      documentCurrency: (rawData.documentCurrency as string) || 'GMD',
+    };
+
     // Parse deadline if provided
-    let deadline: Date | undefined;
-    if (tenderData.deadline && typeof tenderData.deadline === 'string') {
-      deadline = new Date(tenderData.deadline);
+    if (rawData.deadline && typeof rawData.deadline === 'string') {
+      tenderData.deadline = new Date(rawData.deadline);
     }
 
+    console.log('Parsed tender data:', tenderData);
+
     // Validate tender data
-    const validatedData = newTenderSchema.parse({
-      ...tenderData,
-      deadline,
-      documentsArePaid: tenderData.documentsArePaid === 'true',
-      documentPrice: tenderData.documentPrice ? parseFloat(tenderData.documentPrice as string) : undefined,
-    });
+    const validatedData = newTenderSchema.parse(tenderData);
+    console.log('Validated data:', validatedData);
 
     // Create tender first
     const tender = await createTenderWithDocuments({
@@ -74,11 +96,15 @@ export async function createTenderWithDocumentsAction(
     });
 
     if (!tender.success || !tender.tenderId) {
+      console.error('Tender creation failed:', tender.error);
       return { success: false, error: tender.error || 'Failed to create tender' };
     }
 
+    console.log('Tender created successfully:', tender.tenderId);
+
     // Upload documents if any
     if (files.length > 0) {
+      console.log('Uploading files...');
       const uploadResults = await Promise.allSettled(
         files.map(file => uploadTenderDocument({
           file,
@@ -111,6 +137,7 @@ export async function createTenderWithDocumentsAction(
 
       if (successfulUploads.length > 0) {
         await saveTenderDocumentMetadata(successfulUploads);
+        console.log('Document metadata saved');
       }
     }
 
@@ -120,6 +147,17 @@ export async function createTenderWithDocumentsAction(
     return { success: true, tenderId: tender.tenderId };
   } catch (error) {
     console.error('Create tender with documents error:', error);
+    
+    // Provide more detailed error information for debugging
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      return { success: false, error: error.message };
+    }
+    
     return { success: false, error: 'Failed to create tender' };
   }
 } 

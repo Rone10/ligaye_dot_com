@@ -63,7 +63,7 @@ export async function insertTender(data: NewTenderSchemaType, supabaseUserId: st
 }
 
 export async function createTenderWithDocuments(
-  tenderData: Omit<NewTender, 'id' | 'createdAt' | 'updatedAt'> & { userId: string }
+  data: NewTenderSchemaType & { userId: string }
 ): Promise<{ success: boolean; tenderId?: string; error?: string }> {
   try {
     const database = await db();
@@ -73,21 +73,35 @@ export async function createTenderWithDocuments(
       const [profile] = await tx
         .select()
         .from(profiles)
-        .where(eq(profiles.userId, tenderData.userId));
+        .where(eq(profiles.userId, data.userId));
 
       if (!profile) {
         throw new Error('User profile not found');
       }
 
+      // Prepare the tender data for insertion
+      const tenderData: NewTender = {
+        title: data.title,
+        description: data.description,
+        organizationName: data.organizationName,
+        tenderType: data.tenderType,
+        sectorId: data.sectorId || null,
+        locationId: data.locationId || null,
+        deadline: data.deadline || null,
+        budgetRange: data.budgetRange || null,
+        contactInformation: data.contactInformation || null,
+        externalLink: data.externalLink || null,
+        status: data.status,
+        userId: profile.id, // Use the profile.id for the tender's userId field
+        documentsArePaid: data.documentsArePaid,
+        documentPrice: data.documentPrice || null,
+        documentCurrency: data.documentCurrency,
+      };
+
       // Insert tender
       const [tender] = await tx
         .insert(tenders)
-        .values({
-          ...tenderData,
-          userId: profile.id, // Use the profile.id for the tender's userId field
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
+        .values(tenderData)
         .returning({ id: tenders.id });
 
       return tender;
@@ -96,6 +110,12 @@ export async function createTenderWithDocuments(
     return { success: true, tenderId: result.id };
   } catch (error) {
     console.error('Database error creating tender:', error);
+    
+    // Provide more detailed error information
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    
     return { success: false, error: 'Database error' };
   }
 }
