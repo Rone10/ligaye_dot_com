@@ -37,116 +37,120 @@ Please proceed with your analysis and implementation plan based on the following
 
 <user_instructions>
 
-Implement a comprehensive Tenders feature for Ligaye.com, allowing authenticated users to create, read, update, and delete (soft delete) tender listings. This feature must strictly adhere to the project's Vertical Slice Architecture (VSA), conventions outlined in `base-knowledge.md`, the existing database schema (`schema.ts`), and UI guidelines from `style-guide.md`.
+
+Implement a feature enabling users (typically employers/admins) to upload documents associated with tenders. These documents can either be free to download or require a one-time payment via Stripe for access. This feature needs to integrate with existing tender creation/editing flows and introduce a new purchase flow for paid documents, accessible to both authenticated and unauthenticated users.
 
 **General Requirements:**
 
 1.  **Architecture & VSA:**
-    *   Organize the feature within the `app/(public)/tenders/` directory using granular VSA.
-    *   List View: `app/(public)/tenders/page.tsx`
-    *   Create View: `app/(public)/tenders/new/page.tsx`
-    *   Detail View: `app/(public)/tenders/[id]/page.tsx` (`[id]` is the tender UUID)
-    *   Edit View: `app/(public)/tenders/[id]/edit/page.tsx`
-    *   Each route segment must contain its own `_components/`, `_actions.ts`, `_queries.ts`, `_utils/` (e.g., for validation), and `_hooks/` as needed, following project conventions.
+    *   Strictly adhere to the project's granular Vertical Slice Architecture (VSA).
+    *   Modifications will occur in existing tender slices (e.g., `app/(public)/tenders/new/`, `app/(public)/tenders/[id]/edit/`, `app/(public)/tenders/[id]/`).
+    *   A new slice will be required for the document purchase flow (e.g., `app/(public)/tenders/[id]/purchase/`).
+    *   All new VSA slices must follow established conventions for `_components/`, `_actions.ts`, `_queries.ts`, etc.
 
-2.  **Authentication & Authorization:**
-    *   All tender-related routes and actions must be protected, requiring user authentication.
-    *   The `userId` from the logged-in user's profile (`profiles.id`) must be associated with created tenders.
-    *   Update and Delete operations must be authorized: only the user who created the tender (matching `tenders.userId`) or an admin (if admin roles are implemented for this) can perform these actions. This check should happen within the Server Actions.
-    *   Tenders can be viewed by everyone (authenticated or not)
+2.  **Database Modifications:**
+    *   **Critical:** This feature requires significant database schema changes.
+    *   **New Tables:**
+        *   `tenderDocuments`: Stores metadata for uploaded documents.
+        *   `tenderPayments`: Records payment transactions specifically for tender documents.
+        *   `tenderDocumentPurchases`: Tracks successful document purchases, linking tenders to payments.
+    *   **Modify `tenders` Table:** Add fields for `documentsArePaid` (boolean), `documentPrice` (real), and `documentCurrency` (text).
+    *   **Drizzle Relations:** Define new relations between `tenders`, `tenderDocuments`, `tenderPayments`, and `tenderDocumentPurchases`.
+    *   **Migrations:** Generate and apply Drizzle migrations after schema updates.
+    *   **(Refer to the detailed schema provided in internal documentation for exact field definitions and relations.)**
 
-3.  **Data Management (Drizzle ORM & `_queries.ts`):**
-    *   All database interactions must use Drizzle ORM, invoked via functions defined in slice-specific `_queries.ts` files.
-    *   Reference the `tenders` table schema provided in `lib/db/schema.ts`.
-    *   Soft Deletes: Deleting a tender should set its `deleted` flag to `true`, not remove the record.
+3.  **Supabase Storage & RLS:**
+    *   Utilize a **private** Supabase Storage bucket (e.g., `tender-documents`).
+    *   Implement Row Level Security (RLS) policies for this bucket:
+        *   Uploads: Handled by Server Actions using service_role (bypassing RLS for write, authorization in action).
+        *   Downloads:
+            *   Tender owners can read their own documents.
+            *   Backend (service_role) can generate signed URLs for free documents.
+            *   Paid documents accessed *only* via short-lived signed URLs generated post-payment.
 
 4.  **Technology & UI:**
-    *   **Forms:** Use React Hook Form (RHF) with Zod for validation in slice-specific `_utils/validation.ts` files.
-    *   **UI Components:** Leverage Shadcn UI components from `components/ui/` for forms, tables, dialogs, buttons, etc. Adhere to `style-guide.md`.
-    *   **Server Actions:** Use Next.js Server Actions (in slice-specific `_actions.ts`) for all CUD operations.
-    *   **Date Handling:** Use `date-fns` for date formatting if needed; date inputs should be user-friendly (e.g., Shadcn Date Picker).
-    *   **Icons:** Use Lucide React icons.
-    *   **Feedback:** Provide clear user feedback for all operations (e.g., toast notifications for success/error, loading states).
+    *   **Forms:** React Hook Form (RHF) + Zod for tender forms and purchaser information.
+    *   **File Uploads:** Handle `File[]` objects in Server Actions, upload to Supabase Storage.
+    *   **Payments:** Integrate Stripe Checkout for paid document access.
+    *   **UI Components:** Use Shadcn UI components. Adhere to `style-guide.md`.
+    *   **Server Actions:** For all mutations (tender creation/update with documents, initiating purchase).
+    *   **Webhooks:** Update existing Stripe webhook to handle tender document payment success.
 
 **Specific Feature Implementations:**
 
-**1. List Tenders (`app/(public)/tenders/`)**
+**1. Tender Creation/Update with Document Uploads (Modifying `app/(public)/tenders/new/` & `app/(public)/tenders/[id]/edit/`)**
 
-*   **Purpose:** Display a paginated and filterable list of active (not soft-deleted) tenders.
-*   **Route Slice:** `app/(public)/tenders/`
-*   **Key Components & Files:**
-    *   `page.tsx`: Server Component. Fetches initial tenders list using `./_queries.ts`.
-        *   Should include a "Create New Tender" button linking to `/tenders/new`.
-    *   `_components/TendersDataTable.tsx` (`'use client'`): Displays tenders in a table (using Shadcn Table).
-        *   Columns: Title, Organization, Sector, Location, Deadline, Status.
-        *   Actions per row: "View" (links to `app/(public)/tenders/[id]/`), "Edit" (links to `app/(public)/tenders/[id]/edit/`, conditional on ownership), "Delete" (triggers delete action, conditional on ownership).
-    *   `_components/TenderFilters.tsx` (`'use client'`): (Optional, if complex filtering is needed) Component for filtering by sector, location, status, etc. Uses `nuqs` for URL state.
-    *   `_queries.ts`:
-        *   `getTenders(params: { page?: number, limit?: number, filters?: TenderFiltersType }): Promise<Tender[]>`: Fetches a list of non-deleted tenders with pagination and filtering.
-        *   `getTendersCount(params: { filters?: TenderFiltersType }): Promise<number>`: For pagination.
-        *   `getSectorsForFilter(): Promise<Sector[]>`: Fetches sectors for filter dropdown.
-        *   `getLocationsForFilter(): Promise<Location[]>`: Fetches locations for filter dropdown.
-    *   `_actions.ts`:
-        *   `deleteTenderAction(tenderId: string): Promise<{ success: boolean, error?: string }>`: Handles soft-deletion. Triggered from `TendersDataTable.tsx`. Requires confirmation dialog.
+*   **UI Enhancements (`_components/NewTenderForm.tsx`, `_components/EditTenderForm.tsx`):**
+    *   Add multi-file input for document uploads.
+    *   Include UI elements (checkbox/radio) to mark documents as "Free" or "Paid".
+    *   If "Paid", add inputs for `documentPrice` and `documentCurrency`.
+*   **Server Actions (`_actions.ts` - `createTenderAction`, `updateTenderAction`):**
+    *   Accept `FormData` including files.
+    *   Perform authorization.
+    *   **Transactional DB Operations:**
+        1.  Create/update the `tenders` record (with `documentsArePaid`, `price`, `currency`).
+        2.  For each uploaded file:
+            *   Upload to Supabase Storage (path like `tender-documents/[tenderId]/[file_uuid_filename]`).
+            *   Create a corresponding record in `tenderDocuments`.
+        3.  Handle deletion of existing documents during an update (soft delete in DB, optional physical delete from storage).
+*   **Queries (`_queries.ts`):**
+    *   New/updated functions to create/update tenders along with their associated `tenderDocuments`.
+    *   Fetch tender details including its `tenderDocuments` for edit forms.
 
-**2. Create Tender (`app/(public)/tenders/new/`)**
+**2. Document Purchase Flow (New Slice: `app/(public)/tenders/[id]/purchase/`)**
 
-*   **Purpose:** Provide a form for authenticated users to create a new tender.
-*   **Route Slice:** `app/(public)/tenders/new/`
-*   **Key Components & Files:**
-    *   `page.tsx`: Server Component. Fetches necessary data for dropdowns (sectors, locations) using `./_queries.ts` and passes it to the form component.
-    *   `_components/NewTenderForm.tsx` (`'use client'`):
-        *   RHF form with fields corresponding to `tenders` table: `title`, `description` (use `@/components/RichTextEditor/editor`), `organizationName`, `tenderType` (Shadcn Select using `tenderTypeEnum` from schema), `sectorId` (Shadcn Select), `locationId` (Shadcn Select), `deadline` (Shadcn Date Picker), `budgetRange`, `contactInformation` (Shadcn Textarea), `externalLink`, `status` (Shadcn Select, default to 'DRAFT' or 'OPEN').
-        *   Handles form submission by calling `createTenderAction`.
-        *   Displays validation errors.
-    *   `_utils/validation.ts`: Zod schema for new tender validation.
-    *   `_actions.ts`:
-        *   `createTenderAction(formData: NewTenderSchemaType): Promise<{ success: boolean, tenderId?: string, error?: string }>`: Validates data, gets `userId`, calls `insertTender` from `./_queries.ts`. Redirects to the new tender's detail page (`/tenders/[tenderId]`) or list page on success.
-    *   `_queries.ts`:
-        *   `insertTender(data: NewTenderDataType, userId: string): Promise<Tender>`: Inserts a new tender into the database.
-        *   `getSectors(): Promise<Sector[]>`: Fetches all active sectors for the dropdown.
-        *   `getLocations(): Promise<Location[]>`: Fetches all active locations for the dropdown.
+*   **Purpose:** Allow any user (authenticated or not) to purchase access to paid tender documents.
+*   **Purchase Page (`.../purchase/page.tsx`):**
+    *   Fetch tender details (title, price, currency).
+    *   If documents are free or price not set, display an appropriate message.
+    *   Present a form for purchaser info (Full Name, Email, optional Phone).
+    *   "Proceed to Payment" button.
+*   **Server Action (`.../purchase/_actions.ts` - `initiateDocumentPurchaseAction`):**
+    *   Validate purchaser info.
+    *   Fetch tender price.
+    *   Create a Stripe Checkout Session with relevant `line_items`, `metadata` (including `tenderId`, `purchaseType: 'TENDER_DOCUMENT'`, purchaser details), `success_url`, and `cancel_url`.
+    *   Redirect user to Stripe.
+*   **Stripe Webhook Update (`app/api/webhooks/stripe/route.ts`):**
+    *   Modify the `checkout.session.completed` event handler.
+    *   If `session.metadata.purchaseType === 'TENDER_DOCUMENT'` and `session.payment_status === 'paid'`:
+        *   Extract `tenderId` and purchaser details from metadata.
+        *   Call a new query/handler (e.g., `recordTenderDocumentPurchase`).
+*   **Query/Handler for Webhook (`_queries.ts` or `lib/stripe/tender-stripe-actions.ts` - `recordTenderDocumentPurchase`):**
+    *   **Transactional DB Operations:**
+        1.  Create a record in `tenderPayments` (status 'succeeded', Stripe IDs, amount, purchaser info).
+        2.  Create a record in `tenderDocumentPurchases` linking `tenderId` to the new `tenderPayments.id`.
+    *   (Optional: Trigger confirmation email).
+*   **Success Page (`.../purchase/success/page.tsx`):**
+    *   Verify Stripe `session_id` from `searchParams`.
+    *   Confirm purchase record exists in `tenderDocumentPurchases` via `_queries.ts`.
+    *   If verified, fetch `tenderDocuments` for the tender.
+    *   Generate and display short-lived Supabase Storage signed URLs for each document.
+*   **Cancel Page (`.../purchase/cancel/page.tsx`):**
+    *   Display a "Purchase Cancelled" message.
 
-**3. View Tender Details (`app/(public)/tenders/[id]/`)**
+**3. Document Download Logic (Modifying `app/(public)/tenders/[id]/page.tsx`)**
 
-*   **Purpose:** Display detailed information for a specific tender.
-*   **Route Slice:** `app/(public)/tenders/[id]/`
-*   **Key Components & Files:**
-    *   `page.tsx`: Server Component. Reads `id` from `params`. Fetches tender details using `./_queries.ts`.
-        *   Displays all relevant tender fields.
-        *   Includes "Edit Tender" and "Delete Tender" buttons, visible only to the tender owner (or admin).
-    *   `_components/TenderDetailDisplay.tsx`: Component to render the tender details.
-    *   `_components/DeleteTenderDialog.tsx` (`'use client'`): A confirmation dialog for the delete action.
-    *   `_queries.ts`:
-        *   `getTenderById(id: string): Promise<Tender | null>`: Fetches a single non-deleted tender by its ID, potentially joining with `sectors` and `locations` for display names.
-    *   `_actions.ts`:
-        *   `deleteTenderAction(tenderId: string): Promise<{ success: boolean, error?: string }>`: (Can be shared with list view if structured appropriately, or duplicated for slice isolation). Handles soft-deletion. Triggered from this page.
+*   **Displaying Documents:**
+    *   Fetch tender details along with its `tenderDocuments` (filenames, IDs, sizes).
+*   **Free Documents (`tender.documentsArePaid === false`):**
+    *   For each document, provide a download mechanism (e.g., a button).
+    *   Clicking the button should call a Server Action (`app/(public)/tenders/[id]/_actions.ts` - e.g., `getFreeDocumentDownloadUrl(documentId)`).
+    *   This action verifies the document is free, generates a Supabase Storage signed URL, and returns it for client-side download.
+*   **Paid Documents (`tender.documentsArePaid === true`):**
+    *   Display "Documents available for purchase: [Price] [Currency]".
+    *   Link to the purchase page (`/tenders/[id]/purchase/`).
+    *   Do NOT provide direct download links. Access is granted only via the purchase success page.
 
-**4. Edit Tender (`app/(public)/tenders/[id]/edit/`)**
+**4. Type Definitions (`lib/db/schema.ts`):**
 
-*   **Purpose:** Provide a form for the tender owner to update an existing tender.
-*   **Route Slice:** `app/(public)/tenders/[id]/edit/`
-*   **Key Components & Files:**
-    *   `page.tsx`: Server Component. Reads `id` from `params`. Fetches tender data and data for dropdowns (sectors, locations) using `./_queries.ts`. Passes data to the form.
-        *   Handles cases where the tender is not found or the user is not authorized.
-    *   `_components/EditTenderForm.tsx` (`'use client'`):
-        *   Similar to `NewTenderForm.tsx` but pre-filled with existing tender data.
-        *   Handles form submission by calling `updateTenderAction`.
-    *   `_utils/validation.ts`: Zod schema for updating a tender (can be similar to or inherit from the create schema).
-    *   `_actions.ts`:
-        *   `updateTenderAction(tenderId: string, formData: UpdateTenderSchemaType): Promise<{ success: boolean, error?: string }>`: Validates data, verifies ownership (fetches `userId` of current user and compares with `tender.userId`), calls `updateTender` from `./_queries.ts`. Redirects to the tender's detail page on success.
-    *   `_queries.ts`:
-        *   `getTenderByIdForEdit(id: string): Promise<Tender | null>`: Fetches tender data for form pre-filling.
-        *   `updateTender(id: string, data: UpdateTenderDataType, userId: string): Promise<Tender | null>`: Updates an existing tender in the database. Ensure `updatedAt` is set. The `userId` parameter is for an authorization check if needed at the query level, though primary auth is in the action.
-        *   `getSectors(): Promise<Sector[]>`: Fetches all active sectors.
-        *   `getLocations(): Promise<Location[]>`: Fetches all active locations.
+*   Ensure `InferSelectModel` and `InferInsertModel` types are defined for `tenderDocuments`, `tenderPayments`, and `tenderDocumentPurchases`.
 
-**5. Data Structures & Types (within respective slices):**
+**Key Considerations for Planning:**
 
-*   Define Zod schemas for form validation in `_utils/validation.ts` for `new` and `edit` slices.
-*   Use inferred types from `lib/db/schema.ts` (e.g., `Tender`, `NewTender`) where possible. Create local specific types if needed (e.g., form data types before they match `NewTender`).
-*   Types for filter parameters in `app/(public)/tenders/_queries.ts` or a local `_types.ts`.
+*   **Transactionality:** Ensure database operations for creating/updating tenders with documents, and for recording purchases, are transactional to maintain data integrity.
+*   **Security:** Rigorous server-side authorization for all mutations. Stripe webhook signature verification. Secure handling of signed URLs (short-lived, not exposing raw paths).
+*   **User Experience:** Clear feedback during uploads, payment, and download. Handling of edge cases (e.g., payment failure, webhook delay).
+*   **Modularity:** Design webhook handlers and Stripe interaction logic to be maintainable, potentially in dedicated files within `lib/stripe/` if complexity warrants, but ensure data access still goes through appropriate `_queries.ts` files.
 
-Ensure all UI elements are responsive and provide appropriate loading states (e.g., using Next.js `loading.tsx` per segment, or client-side loading indicators within components for actions).
 
-</userinstructions>
+</user_instructions>
