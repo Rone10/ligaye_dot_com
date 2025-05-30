@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
-import { tenders, sectors, locations, profiles } from '@/lib/db/schema';
-import type { Tender, Sector, Location, Profile } from '@/lib/db/schema';
+import { tenders, sectors, locations, profiles, tenderDocuments } from '@/lib/db/schema';
+import type { Tender, Sector, Location, Profile, TenderDocument } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 export interface TenderWithRelations extends Tender {
@@ -104,5 +104,24 @@ export async function getUserProfile(userId: string): Promise<Profile | null> {
   } catch (error) {
     console.error('Error fetching user profile:', error);
     throw new Error('Failed to fetch user profile');
+  }
+}
+
+export async function getTenderDocuments(tenderId: string): Promise<TenderDocument[]> {
+  try {
+    const database = await db();
+    
+    const documents = await database
+      .select()
+      .from(tenderDocuments)
+      .where(and(
+        eq(tenderDocuments.tenderId, tenderId),
+        eq(tenderDocuments.deleted, false)
+      ));
+
+    return documents;
+  } catch (error) {
+    console.error('Error fetching tender documents:', error);
+    return [];
   }
 }

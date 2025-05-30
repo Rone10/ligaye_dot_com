@@ -16,6 +16,7 @@ import {
   Award
 } from 'lucide-react';
 import type { TenderWithRelations } from '../_queries';
+import { DocumentSection } from './DocumentSection';
 
 interface TenderDetailDisplayProps {
   tender: TenderWithRelations;
@@ -257,6 +258,9 @@ export default function TenderDetailDisplay({ tender }: TenderDetailDisplayProps
           </Card>
         </div>
       </div>
+
+      {/* Document Section */}
+      <DocumentSection tender={tender} />
     </div>
   );
 } 
