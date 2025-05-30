@@ -467,6 +467,10 @@ export const tenders = pgTable('tenders', {
   deleted: boolean('deleted').default(false).notNull(), // Standard soft delete
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  // Add to existing tenders table
+  documentsArePaid: boolean('documents_are_paid').default(false).notNull(),
+  documentPrice: real('document_price'), // Nullable: Price if documentsArePaid is true
+  documentCurrency: text('document_currency').default('GMD'), // Default currency
 }, (table) => {
   return {
     titleIdx: index('tenders_title_idx').on(table.title),
@@ -480,6 +484,106 @@ export const tenders = pgTable('tenders', {
     deletedIdx: index('tenders_deleted_idx').on(table.deleted)
   };
 });
+
+// Tender Documents Table
+export const tenderDocuments = pgTable('tender_documents', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenderId: uuid('tender_id').notNull().references(() => tenders.id, { onDelete: 'cascade' }),
+  storagePath: text('storage_path').notNull(), // e.g., tender-documents/tender_uuid/document_uuid_filename.pdf
+  originalFilename: text('original_filename').notNull(),
+  fileSize: integer('file_size'), // In bytes
+  mimeType: text('mime_type'), // E.g., 'application/pdf'
+  deleted: boolean('deleted').default(false).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    tenderIdIdx: index('tender_documents_tender_id_idx').on(table.tenderId),
+    deletedIdx: index('tender_documents_deleted_idx').on(table.deleted),
+  };
+});
+
+// Tender Payments Table
+export const tenderPayments = pgTable('tender_payments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenderId: uuid('tender_id').notNull().references(() => tenders.id, { onDelete: 'cascade' }),
+  amount: integer('amount').notNull(), // Amount in smallest currency unit
+  currency: text('currency').notNull().default('GMD'),
+  method: text('method').notNull().default('stripe'), // 'stripe'
+  status: text('status').notNull(), // 'pending', 'succeeded', 'failed'
+  transactionId: text('transaction_id').unique(), // Stripe Payment Intent ID
+  stripeSessionId: text('stripe_session_id').unique(), // Stripe Checkout Session ID
+  purchaserFullName: text('purchaser_full_name').notNull(),
+  purchaserEmail: text('purchaser_email').notNull(),
+  purchaserPhone: text('purchaser_phone'), // Optional
+  deleted: boolean('deleted').default(false).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    tenderIdIdx: index('tender_payments_tender_id_idx').on(table.tenderId),
+    transactionIdIdx: index('tender_payments_transaction_id_idx').on(table.transactionId),
+    stripeSessionIdIdx: index('tender_payments_stripe_session_id_idx').on(table.stripeSessionId),
+    purchaserEmailIdx: index('tender_payments_purchaser_email_idx').on(table.purchaserEmail),
+    statusIdx: index('tender_payments_status_idx').on(table.status),
+    deletedIdx: index('tender_payments_deleted_idx').on(table.deleted),
+  };
+});
+
+// Tender Document Purchases Table
+export const tenderDocumentPurchases = pgTable('tender_document_purchases', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenderId: uuid('tender_id').notNull().references(() => tenders.id, { onDelete: 'cascade' }),
+  tenderPaymentId: uuid('tender_payment_id').notNull().unique().references(() => tenderPayments.id, { onDelete: 'cascade' }),
+  deleted: boolean('deleted').default(false).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    tenderPaymentUniqueIdx: uniqueIndex('tender_doc_purchase_payment_unique_idx').on(table.tenderPaymentId),
+    tenderIdIdx: index('tender_doc_purchase_tender_id_idx').on(table.tenderId),
+    deletedIdx: index('tender_doc_purchase_deleted_idx').on(table.deleted),
+  };
+});
+
+
+
+// New relations
+export const tenderDocumentsRelations = relations(tenderDocuments, ({ one }) => ({
+  tender: one(tenders, {
+    fields: [tenderDocuments.tenderId],
+    references: [tenders.id],
+    relationName: 'tenderToDocuments'
+  }),
+}));
+
+export const tenderPaymentsRelations = relations(tenderPayments, ({ one }) => ({
+  tender: one(tenders, {
+    fields: [tenderPayments.tenderId],
+    references: [tenders.id],
+    relationName: 'tenderToPayments'
+  }),
+  purchaseRecord: one(tenderDocumentPurchases, {
+    fields: [tenderPayments.id],
+    references: [tenderDocumentPurchases.tenderPaymentId],
+    relationName: 'paymentToPurchaseRecord'
+  })
+}));
+
+export const tenderDocumentPurchasesRelations = relations(tenderDocumentPurchases, ({ one }) => ({
+  tender: one(tenders, {
+    fields: [tenderDocumentPurchases.tenderId],
+    references: [tenders.id],
+    relationName: 'tenderToPurchases'
+  }),
+  payment: one(tenderPayments, {
+    fields: [tenderDocumentPurchases.tenderPaymentId],
+    references: [tenderPayments.id],
+    relationName: 'paymentToPurchaseRecord'
+  }),
+}));
+
+
 
 // Payments Table (No changes needed from original good design)
 export const payments = pgTable('payments', {
@@ -660,7 +764,7 @@ export const savedJobsRelations = relations(savedJobs, ({ one }) => ({
   }),
 }));
 
-export const tendersRelations = relations(tenders, ({ one }) => ({
+export const tendersRelations = relations(tenders, ({ one, many }) => ({
   user: one(profiles, { // Link to the user who posted the tender
     fields: [tenders.userId],
     references: [profiles.id],
@@ -673,6 +777,9 @@ export const tendersRelations = relations(tenders, ({ one }) => ({
     fields: [tenders.sectorId],
     references: [sectors.id],
   }),
+  documents: many(tenderDocuments, { relationName: 'tenderToDocuments' }),
+  payments: many(tenderPayments, { relationName: 'tenderToPayments' }),
+  purchases: many(tenderDocumentPurchases, { relationName: 'tenderToPurchases' }),
 }));
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
@@ -759,3 +866,15 @@ export type NewTender = InferInsertModel<typeof tenders>;
 // Payment Types
 export type Payment = InferSelectModel<typeof payments>;
 export type NewPayment = InferInsertModel<typeof payments>;
+
+// Tender Document Types
+export type TenderDocument = InferSelectModel<typeof tenderDocuments>;
+export type NewTenderDocument = InferInsertModel<typeof tenderDocuments>;
+
+// Tender Payment Types
+export type TenderPayment = InferSelectModel<typeof tenderPayments>;
+export type NewTenderPayment = InferInsertModel<typeof tenderPayments>;
+
+// Tender Document Purchase Types
+export type TenderDocumentPurchase = InferSelectModel<typeof tenderDocumentPurchases>;
+export type NewTenderDocumentPurchase = InferInsertModel<typeof tenderDocumentPurchases>;

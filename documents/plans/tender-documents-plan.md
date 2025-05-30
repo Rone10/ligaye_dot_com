@@ -147,7 +147,7 @@ export type NewTenderDocumentPurchase = InferInsertModel<typeof tenderDocumentPu
 
 ### 1.4 Migration Generation
 ```bash
-pnpm drizzle-kit generate:pg
+pnpm drizzle-kit generate
 pnpm drizzle-kit migrate
 ```
 
@@ -203,7 +203,7 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-export const supabaseService = createClient(supabaseUrl, supabaseServiceKey, {
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
