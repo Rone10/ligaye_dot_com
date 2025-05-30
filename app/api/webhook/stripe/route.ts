@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import stripe from '@/lib/stripe';
 import { handleSuccessfulPayment } from '@/lib/stripe/stripe-actions';
+import { handleTenderDocumentPurchase } from '@/lib/stripe/tender-stripe-actions';
 import { db } from '@/lib/db';
 import { payments, jobs } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -40,9 +41,16 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed':
         const session = event.data.object;
         
-        // Process the successful payment
         if (session.payment_status === 'paid') {
-          await handleSuccessfulPayment(session.id);
+          const metadata = session.metadata;
+          
+          if (metadata?.purchaseType === 'TENDER_DOCUMENT') {
+            // Handle Tender Document Purchase
+            await handleTenderDocumentPurchase(session);
+          } else {
+            // Existing job payment logic
+            await handleSuccessfulPayment(session.id);
+          }
         }
         break;
 
