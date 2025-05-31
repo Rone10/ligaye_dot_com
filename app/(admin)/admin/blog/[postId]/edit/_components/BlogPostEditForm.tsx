@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Save, Eye } from 'lucide-react';
 import type { BlogPost } from '@/lib/db/schema';
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 const blogPostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
@@ -299,10 +300,10 @@ export function BlogPostForm({ blogPost }: BlogPostFormProps) {
               className="w-full border-theme-gray text-theme-dark hover:bg-theme-gray/10 duration-standard"
               asChild
             >
-              <a href={`/blog/${blogPost.slug}`} target="_blank">
+              <Link href={`/admin/blog/${blogPost.id}`} target="_blank">
                 <Eye className="w-4 h-4 mr-sm" />
                 Preview Post
-              </a>
+              </Link>
             </Button>
             
             <Button

@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import Link from 'next/link';
 
 interface AdminBlogPostsTableProps {
   blogPosts: BlogPostWithAuthor[];
@@ -142,22 +143,22 @@ export function AdminBlogPostsTable({ blogPosts }: AdminBlogPostsTableProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="glass-card border border-theme-gray">
                     <DropdownMenuItem asChild>
-                      <a
-                        href={`/admin/blog/${post.slug}`}
+                      <Link
+                        href={`/admin/blog/${post.id}`}
                         className="flex items-center gap-xs cursor-pointer"
                       >
                         <Eye className="h-4 w-4" />
                         View Post
-                      </a>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <a
+                      <Link
                         href={`/admin/blog/${post.id}/edit`}
                         className="flex items-center gap-xs cursor-pointer"
                       >
                         <Pencil className="h-4 w-4" />
                         Edit
-                      </a>
+                        </Link>
                     </DropdownMenuItem>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
