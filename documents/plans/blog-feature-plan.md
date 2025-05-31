@@ -10,7 +10,7 @@
 
 This plan outlines the implementation of a blog feature for Ligaye.com following the Vertical Slice Architecture (VSA) pattern. The implementation is divided into two main areas:
 
-1. **Admin Management Routes** (`app/(admin)/blog/*`) - For admin users to manage blog posts
+1. **Admin Management Routes** (`app/(admin)admin/blog/*`) - For admin users to manage blog posts
 2. **Public Blog Routes** (`app/(public)/blog/*`) - For public viewing of published blog posts
 
 ---
@@ -18,7 +18,7 @@ This plan outlines the implementation of a blog feature for Ligaye.com following
 ## Phase 1: Admin Panel Implementation
 
 ### 1.1 Admin Blog List View
-**Route:** `app/(admin)/blog/page.tsx`
+**Route:** `app/(admin)admin/blog/page.tsx`
 
 **Implementation Steps:**
 
@@ -48,13 +48,13 @@ This plan outlines the implementation of a blog feature for Ligaye.com following
    ```
 
 **Files to Create:**
-- `app/(admin)/blog/page.tsx`
-- `app/(admin)/blog/_queries.ts`
-- `app/(admin)/blog/_components/AdminBlogPostsTable.tsx`
-- `app/(admin)/blog/_actions.ts`
+- `app/(admin)admin/blog/page.tsx`
+- `app/(admin)admin/blog/_queries.ts`
+- `app/(admin)admin/blog/_components/AdminBlogPostsTable.tsx`
+- `app/(admin)admin/blog/_actions.ts`
 
 ### 1.2 Create New Blog Post
-**Route:** `app/(admin)/blog/new/page.tsx`
+**Route:** `app/(admin)admin/blog/new/page.tsx`
 
 **Implementation Steps:**
 
@@ -96,14 +96,14 @@ This plan outlines the implementation of a blog feature for Ligaye.com following
    ```
 
 **Files to Create:**
-- `app/(admin)/blog/new/page.tsx`
-- `app/(admin)/blog/new/_components/BlogPostForm.tsx`
-- `app/(admin)/blog/new/_actions.ts`
-- `app/(admin)/blog/new/_queries.ts`
-- `app/(admin)/blog/new/_utils/slugify.ts`
+- `app/(admin)admin/blog/new/page.tsx`
+- `app/(admin)admin/blog/new/_components/BlogPostForm.tsx`
+- `app/(admin)admin/blog/new/_actions.ts`
+- `app/(admin)admin/blog/new/_queries.ts`
+- `app/(admin)admin/blog/new/_utils/slugify.ts`
 
 ### 1.3 Edit Blog Post
-**Route:** `app/(admin)/blog/[postId]/edit/page.tsx`
+**Route:** `app/(admin)admin/blog/[postId]/edit/page.tsx`
 
 **Implementation Steps:**
 
@@ -130,9 +130,9 @@ This plan outlines the implementation of a blog feature for Ligaye.com following
    - Handle image replacement logic
 
 **Files to Create:**
-- `app/(admin)/blog/[postId]/edit/page.tsx`
-- `app/(admin)/blog/[postId]/edit/_queries.ts`
-- `app/(admin)/blog/[postId]/edit/_actions.ts`
+- `app/(admin)admin/blog/[postId]/edit/page.tsx`
+- `app/(admin)admin/blog/[postId]/edit/_queries.ts`
+- `app/(admin)admin/blog/[postId]/edit/_actions.ts`
 
 ---
 
@@ -254,6 +254,16 @@ This plan outlines the implementation of a blog feature for Ligaye.com following
 ---
 
 ## Implementation Guidelines
+
+## User Role Check
+1. **Admin role:** use `user.user_metadata.role !== 'admin'` when checking for admin role
+```typescript
+  const user = await getUser();
+  
+  if (!user || user?.user_metadata?.role !== 'admin') {
+    redirect('/not-found');
+  }
+```
 
 ### Security Considerations
 1. **Admin role verification** in all admin routes and actions
