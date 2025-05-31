@@ -139,7 +139,7 @@ export async function submitApplication({
           const formattedDate = format(applicationDate, 'd MMMM yyyy')
           
           // Send the confirmation email to the candidate
-          console.log('user.user_metadata', user.user_metadata)
+          // console.log('user.user_metadata', user.user_metadata)
           const candidateFullName = user.user_metadata?.first_name + ' ' + user.user_metadata?.last_name
           const { error: emailError } = await resend.emails.send({
             from: 'Ligaye.com <no-reply@ligaye.com>',

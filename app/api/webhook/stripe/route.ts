@@ -36,32 +36,64 @@ export async function POST(request: NextRequest) {
       webhookSecret
     );
 
+    console.log(`Received Stripe webhook: ${event.type}`);
+
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object;
         
+        console.log(`Processing checkout session: ${session.id}`);
+        console.log(`Payment status: ${session.payment_status}`);
+        console.log(`Metadata:`, session.metadata);
+        
         if (session.payment_status === 'paid') {
           const metadata = session.metadata;
           
           if (metadata?.purchaseType === 'TENDER_DOCUMENT') {
-            // Handle Tender Document Purchase
-            await handleTenderDocumentPurchase(session);
+            console.log(`Processing tender document purchase for tender: ${metadata.tenderId}`);
+            try {
+              // Handle Tender Document Purchase
+              await handleTenderDocumentPurchase(session);
+              console.log(`Successfully processed tender document purchase`);
+            } catch (error) {
+              console.error('Error processing tender document purchase:', error);
+              // Don't throw here to avoid webhook retry loops
+              return NextResponse.json(
+                { error: 'Failed to process tender document purchase' },
+                { status: 500 }
+              );
+            }
           } else {
-            // Existing job payment logic
-            await handleSuccessfulPayment(session.id);
+            console.log(`Processing job payment for session: ${session.id}`);
+            try {
+              // Existing job payment logic
+              await handleSuccessfulPayment(session.id);
+              console.log(`Successfully processed job payment`);
+            } catch (error) {
+              console.error('Error processing job payment:', error);
+              // Don't throw here to avoid webhook retry loops
+              return NextResponse.json(
+                { error: 'Failed to process job payment' },
+                { status: 500 }
+              );
+            }
           }
+        } else {
+          console.log(`Payment not completed, status: ${session.payment_status}`);
         }
         break;
 
       case 'payment_intent.succeeded':
         // This event can be used for additional payment confirmation if needed
-        console.log('Payment succeeded:', event.data.object);
+        console.log('Payment succeeded:', event.data.object.id);
         break;
 
       case 'payment_intent.payment_failed':
         const paymentIntent = event.data.object;
         const paymentIntentId = paymentIntent.id;
+        
+        console.log(`Payment failed for intent: ${paymentIntentId}`);
         
         // Handle failed payment by updating records
         await db().transaction(async (tx) => {

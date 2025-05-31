@@ -42,8 +42,9 @@ export function PurchaseForm({ tender }: PurchaseFormProps) {
 
   const onSubmit = async (data: PurchaseSchemaType) => {
     setIsSubmitting(true);
-
+    console.log('inside onSubmit of PurchaseForm');
     try {
+      console.log('inside try onSubmit of PurchaseForm');
       const result = await initiateDocumentPurchaseAction({
         tenderId: tender.id,
         purchaserInfo: data,

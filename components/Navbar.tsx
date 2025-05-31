@@ -40,7 +40,7 @@ export default function Navbar({ user }: NavbarProps) {
   const getDashboardLink = () => {
     if (!user) return '/sign-in';
 
-    console.log('user_metadata', user?.user_metadata);
+    // console.log('user_metadata', user?.user_metadata);
     
     // Redirecting to appropriate dashboard based on user metadata
     // This is simplified and should be adjusted based on your actual user role management

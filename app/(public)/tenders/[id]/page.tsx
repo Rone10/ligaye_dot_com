@@ -29,7 +29,7 @@ export default async function TenderDetailPage({ params }: PageProps) {
     // get user profile
     const profile = await getUserProfile(user?.id || '');
     isOwner = profile?.id === tender.userId;
-    console.log('profile', profile);
+    // console.log('profile', profile);
   }
 
   return (

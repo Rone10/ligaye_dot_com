@@ -16,6 +16,7 @@ export async function initiateDocumentPurchaseAction({
   tenderId,
   purchaserInfo,
 }: PurchaseParams): Promise<{ success: boolean; checkoutUrl?: string; error?: string }> {
+  console.log('inside initiateDocumentPurchaseAction');
   try {
     // Get tender details
     const tender = await getTenderPurchaseInfo(tenderId);
@@ -30,6 +31,9 @@ export async function initiateDocumentPurchaseAction({
 
     // Convert price to smallest currency unit (e.g., bututs for GMD)
     const amountInSmallestUnit = Math.round(tender.documentPrice * 100);
+
+    // Get base URL with fallback
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
@@ -49,8 +53,8 @@ export async function initiateDocumentPurchaseAction({
       ],
       mode: 'payment',
       customer_email: purchaserInfo.email,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/tenders/${tenderId}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/tenders/${tenderId}/purchase/cancel`,
+      success_url: `${baseUrl}/tenders/${tenderId}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/tenders/${tenderId}/purchase/cancel`,
       metadata: {
         tenderId,
         purchaseType: 'TENDER_DOCUMENT',
