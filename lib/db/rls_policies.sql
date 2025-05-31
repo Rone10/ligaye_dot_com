@@ -16,6 +16,9 @@ ALTER TABLE saved_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sectors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tenders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tender_documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tender_payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tender_document_purchases ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for profiles table
 CREATE POLICY "Users can view their own profile" 
@@ -365,4 +368,28 @@ TO authenticated
 USING (
   bucket_id = 'cover-letters' AND
   (storage.foldername(name))[1] = auth.uid()::text
+);
+
+
+-- ########################################################
+CREATE POLICY "Tender owners can read their documents"
+ON storage.objects FOR SELECT USING (
+  bucket_id = 'tender-documents' AND
+  auth.role() = 'authenticated' AND
+  auth.uid() = (
+    SELECT t.user_id FROM public.tenders t
+    WHERE t.id = (string_to_array(storage.objects.name, '/'))[1]::uuid
+  )
+);
+
+CREATE POLICY "Service role can upload documents"
+ON storage.objects FOR INSERT WITH CHECK (
+  bucket_id = 'tender-documents' AND
+  auth.role() = 'service_role'
+);
+
+CREATE POLICY "Service role can delete documents"
+ON storage.objects FOR DELETE USING (
+  bucket_id = 'tender-documents' AND
+  auth.role() = 'service_role'
 );
