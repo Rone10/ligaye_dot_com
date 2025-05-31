@@ -44,6 +44,11 @@ const navItems = [
     icon: Building2
   },
   {
+    name: 'Blog',
+    href: '/admin/blog',
+    icon: FileText
+  },
+  {
     name: 'Settings',
     href: '/admin/settings',
     icon: Settings
