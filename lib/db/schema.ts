@@ -24,6 +24,7 @@ export const workLocationEnum = pgEnum('work_location', ['REMOTE', 'HYBRID', 'ON
 export const salaryFrequencyEnum = pgEnum('salary_frequency', ['HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR']);
 export const companySizeEnum = pgEnum('company_size', ['1-10', '11-50', '51-200', '201-500', '500+']);
 export const experienceLevelEnum = pgEnum('experience_level', ['Entry', 'Junior', 'Mid-Level', 'Senior', 'Director', 'Executive']);
+export const blogPostStatusEnum = pgEnum('blog_post_status', ['DRAFT', 'PUBLISHED', 'ARCHIVED']);
 
 // Job Specific Enums (Refined)
 export const jobTypeEnum = pgEnum('job_type', [
@@ -626,7 +627,8 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   postedJobs: many(jobs), // Jobs posted by this profile (if employer) - Requires adjusted relation definition
   postedTenders: many(tenders), // Tenders posted by this profile
   savedJobs: many(savedJobs), // Jobs saved by this profile (if candidate)
-  submittedApplications: many(applications) // Applications submitted by this profile (if candidate) - Requires adjusted relation definition
+  submittedApplications: many(applications), // Applications submitted by this profile (if candidate) - Requires adjusted relation definition
+  authoredBlogPosts: many(blogPosts, { relationName: 'blogPostAuthor' }),
 }));
 
 export const locationsRelations = relations(locations, ({ many }) => ({
@@ -793,6 +795,41 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   }),
 }));
 
+
+export const blogPosts = pgTable('blog_posts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: text('title').notNull(),
+  slug: text('slug').notNull().unique(), // For SEO-friendly URLs
+  content: text('content').notNull(), // HTML content from Rich Text Editor
+  excerpt: text('excerpt'), // Optional short summary for list views
+  featuredImageUrl: text('featured_image_url'), // URL to Supabase Storage (publicly accessible or signed)
+  status: blogPostStatusEnum('status').default('DRAFT').notNull(),
+  authorId: uuid('author_id').notNull().references(() => profiles.id, { onDelete: 'set null' }), // Link to the admin profile who wrote it
+  publishedAt: timestamp('published_at'), // Set when status changes to 'PUBLISHED'
+  deleted: boolean('deleted').default(false).notNull(), // Standard soft delete
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    slugIdx: index('blog_posts_slug_idx').on(table.slug),
+    statusIdx: index('blog_posts_status_idx').on(table.status),
+    authorIdIdx: index('blog_posts_author_id_idx').on(table.authorId),
+    publishedAtIdx: index('blog_posts_published_at_idx').on(table.publishedAt),
+    deletedIdx: index('blog_posts_deleted_idx').on(table.deleted),
+  };
+});
+
+
+   // For blogPosts
+   export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
+    author: one(profiles, {
+      fields: [blogPosts.authorId],
+      references: [profiles.id],
+      relationName: 'blogPostAuthor'
+    }),
+  }));
+
+
 // --- Type Definitions (Using InferSelectModel for read types) ---
 
 // Enum Types (Export if needed in application code)
@@ -878,3 +915,8 @@ export type NewTenderPayment = InferInsertModel<typeof tenderPayments>;
 // Tender Document Purchase Types
 export type TenderDocumentPurchase = InferSelectModel<typeof tenderDocumentPurchases>;
 export type NewTenderDocumentPurchase = InferInsertModel<typeof tenderDocumentPurchases>;
+
+// Blog Post Types
+export type BlogPost = InferSelectModel<typeof blogPosts>;
+export type NewBlogPost = InferInsertModel<typeof blogPosts>;
+

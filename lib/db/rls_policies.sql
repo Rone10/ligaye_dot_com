@@ -393,3 +393,46 @@ ON storage.objects FOR DELETE USING (
   bucket_id = 'tender-documents' AND
   auth.role() = 'service_role'
 );
+
+
+-- ########################################################
+
+ -- Allow admin users to upload to the blog-images bucket
+     CREATE POLICY "Admin users can upload blog images"
+     ON storage.objects FOR INSERT
+     TO authenticated
+     WITH CHECK (
+       bucket_id = 'blog-images' AND
+       auth.uid() IN (SELECT user_id FROM public.profiles WHERE role = 'admin') -- Check against profiles.userId which links to auth.uid()
+     );
+
+     -- Allow public read access to blog-images (if bucket is public, this is often default, but explicit is good)
+     CREATE POLICY "Public can read blog images"
+     ON storage.objects FOR SELECT
+     USING ( bucket_id = 'blog-images' );
+
+     -- Allow public read for PUBLISHED and not deleted posts
+     CREATE POLICY "Public can read published blog posts"
+     ON public.blog_posts FOR SELECT
+     USING (status = 'PUBLISHED' AND deleted = false);
+
+     -- Allow admin users to read all blog posts
+     CREATE POLICY "Admins can read all blog posts"
+     ON public.blog_posts FOR SELECT
+     TO authenticated
+     USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE role = 'admin'));
+
+   -- Allow admins to create blog posts
+
+     CREATE POLICY "Admins can create blog posts"
+     ON public.blog_posts FOR INSERT
+     TO authenticated
+     WITH CHECK (auth.uid() IN (SELECT user_id FROM public.profiles WHERE role = 'admin'));
+
+   -- Allow admins to update blog posts
+
+     CREATE POLICY "Admins can update blog posts"
+     ON public.blog_posts FOR UPDATE
+     TO authenticated
+     USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE role = 'admin'))
+     WITH CHECK (auth.uid() IN (SELECT user_id FROM public.profiles WHERE role = 'admin'));
