@@ -37,7 +37,7 @@ export async function verifyPurchaseAndGetDocuments(tenderId: string, sessionId:
           console.log('Payment confirmed with Stripe, updating local records...');
           
                      // Get payment intent ID for transaction reference
-           let transactionId = null;
+           let transactionId: string | null = null;
            if (stripeSession.payment_intent) {
              transactionId = typeof stripeSession.payment_intent === 'string' 
                ? stripeSession.payment_intent 
