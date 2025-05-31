@@ -1,102 +1,73 @@
+import stripe from './index';
 import { db } from '@/lib/db';
+import { and, eq } from 'drizzle-orm';
 import { tenderPayments, tenderDocumentPurchases } from '@/lib/db/schema';
-import stripe from '@/lib/stripe';
 
+/**
+ * Handles a successful Stripe payment completion for tender documents
+ */
 export async function handleTenderDocumentPurchase(session: any) {
   try {
-    console.log('Starting tender document purchase processing...');
-    console.log('Session data:', {
-      id: session.id,
-      amount_total: session.amount_total,
-      currency: session.currency,
-      payment_status: session.payment_status,
-      metadata: session.metadata
-    });
+    console.log(`Processing tender document purchase for session: ${session.id}`);
+    
+    if (!session?.metadata?.tenderId) {
+      throw new Error('Missing tender ID in Stripe session metadata');
+    }
 
-    const metadata = session.metadata;
-    const tenderId = metadata.tenderId;
-    const purchaserFullName = metadata.purchaserFullName;
-    const purchaserEmail = metadata.purchaserEmail;
-    const purchaserPhone = metadata.purchaserPhone;
-
-    console.log('Extracted metadata:', {
-      tenderId,
-      purchaserFullName,
-      purchaserEmail,
-      purchaserPhone
-    });
-
-    if (!tenderId || !purchaserFullName || !purchaserEmail) {
-      const missingFields = [];
-      if (!tenderId) missingFields.push('tenderId');
-      if (!purchaserFullName) missingFields.push('purchaserFullName');
-      if (!purchaserEmail) missingFields.push('purchaserEmail');
+    const tenderId = session.metadata.tenderId;
+    const sessionId = session.id;
+    
+    // Update the payment record in the database
+    await db().transaction(async (tx) => {
+      // Find the payment record
+      const paymentRecord = await tx
+        .select()
+        .from(tenderPayments)
+        .where(and(
+          eq(tenderPayments.stripeSessionId, sessionId),
+          eq(tenderPayments.method, 'stripe'),
+          eq(tenderPayments.status, 'pending'),
+          eq(tenderPayments.deleted, false)
+        ))
+        .limit(1)
+        .then(res => res[0]);
       
-      throw new Error(`Missing required metadata for tender document purchase: ${missingFields.join(', ')}`);
-    }
-
-    // Get payment intent ID
-    const paymentIntentId = typeof session.payment_intent === 'string' 
-      ? session.payment_intent 
-      : session.payment_intent?.id;
-
-    console.log('Payment intent ID:', paymentIntentId);
-
-    if (!paymentIntentId) {
-      throw new Error('Missing payment intent ID');
-    }
-
-    // Record the purchase in database
-    console.log('Starting database transaction...');
-    const database = await db();
-    await database.transaction(async (tx) => {
-      console.log('Creating payment record...');
-      // Create payment record
-      const [payment] = await tx
-        .insert(tenderPayments)
-        .values({
-          tenderId,
-          amount: session.amount_total,
-          currency: session.currency.toUpperCase(),
-          method: 'stripe',
+      if (!paymentRecord) {
+        throw new Error('Payment record not found for this session');
+      }
+      
+      // Get the payment intent from the session to get the transaction ID
+      let transactionId = null;
+      if (session.payment_intent) {
+        transactionId = typeof session.payment_intent === 'string' 
+          ? session.payment_intent 
+          : session.payment_intent.id;
+      }
+      
+      // Update the payment status
+      await tx
+        .update(tenderPayments)
+        .set({
           status: 'succeeded',
-          transactionId: paymentIntentId,
-          stripeSessionId: session.id,
-          purchaserFullName,
-          purchaserEmail,
-          purchaserPhone: purchaserPhone || null,
-          deleted: false,
-          createdAt: new Date(),
+          transactionId: transactionId,
           updatedAt: new Date(),
         })
-        .returning({ id: tenderPayments.id });
-
-      console.log('Payment record created with ID:', payment.id);
-
-      console.log('Creating purchase entitlement record...');
-      // Create purchase entitlement record
-      await tx
-        .insert(tenderDocumentPurchases)
-        .values({
-          tenderId,
-          tenderPaymentId: payment.id,
-          deleted: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-
-      console.log('Purchase entitlement record created');
+        .where(eq(tenderPayments.id, paymentRecord.id));
+      
+      // Create a purchase record to grant access to documents
+      await tx.insert(tenderDocumentPurchases).values({
+        tenderId: tenderId,
+        tenderPaymentId: paymentRecord.id,
+        deleted: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
     });
 
-    console.log(`Tender document purchase completed successfully for tender ${tenderId}`);
+    console.log(`Successfully processed tender document purchase for tender: ${tenderId}`);
+    return { success: true };
   } catch (error) {
     console.error('Error handling tender document purchase:', error);
-    console.error('Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      sessionId: session?.id,
-      tenderId: session?.metadata?.tenderId
-    });
-    throw error;
+    throw new Error('Failed to process tender document purchase completion');
   }
 } 

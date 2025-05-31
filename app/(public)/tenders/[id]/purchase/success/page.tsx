@@ -20,7 +20,7 @@ export default async function PurchaseSuccessPage({ params, searchParams }: Page
   }
 
   const purchaseData = await verifyPurchaseAndGetDocuments(id, session_id);
-  
+  console.log('purchaseData inside purchase success page', purchaseData);
   if (!purchaseData) {
     notFound();
   }
