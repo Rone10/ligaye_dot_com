@@ -29,6 +29,7 @@ import type { BlogPostWithAuthorDetail } from '../_queries';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 interface BlogPostDetailViewProps {
   blogPost: BlogPostWithAuthorDetail;
@@ -225,10 +226,12 @@ export function BlogPostDetailView({ blogPost }: BlogPostDetailViewProps) {
             <div className="flex flex-wrap items-center gap-lg text-sm text-theme-gray-dark mb-lg">
               <div className="flex items-center gap-xs">
                 {blogPost.author.avatarUrl ? (
-                  <img
+                  <Image
                     src={blogPost.author.avatarUrl}
                     alt={blogPost.author.fullName}
                     className="w-6 h-6 rounded-full object-cover"
+                    width={24}
+                    height={24}
                   />
                 ) : (
                   <div className="w-6 h-6 rounded-full bg-primary-blue/20 flex items-center justify-center">
@@ -275,10 +278,12 @@ export function BlogPostDetailView({ blogPost }: BlogPostDetailViewProps) {
             <div className="glass-card p-xl rounded-lg shadow-level-2">
               <h3 className="text-lg font-semibold text-theme-dark mb-md">Featured Image</h3>
               <div className="rounded-md overflow-hidden">
-                <img
+                <Image
                   src={blogPost.featuredImageUrl}
                   alt={blogPost.title}
                   className="w-full h-auto object-cover"
+                  width={24}
+                  height={24}
                 />
               </div>
             </div>

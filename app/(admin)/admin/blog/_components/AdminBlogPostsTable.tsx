@@ -32,6 +32,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface AdminBlogPostsTableProps {
   blogPosts: BlogPostWithAuthor[];
@@ -113,10 +114,12 @@ export function AdminBlogPostsTable({ blogPosts }: AdminBlogPostsTableProps) {
               <TableCell>
                 <div className="flex items-center gap-xs">
                   {post.author.avatarUrl ? (
-                    <img
+                    <Image
                       src={post.author.avatarUrl}
                       alt={post.author.fullName}
                       className="w-8 h-8 rounded-full object-cover"
+                      width={32}
+                      height={32}
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-primary-blue/20 flex items-center justify-center">
