@@ -23,6 +23,15 @@ export async function createBlogPostAction(formData: FormData): Promise<{success
     const status = formData.get('status') as 'DRAFT' | 'PUBLISHED';
     let slug = formData.get('slug') as string;
     
+    // Debug logging
+    console.log('Creating blog post with data:', {
+      title,
+      content: content?.substring(0, 100) + '...',
+      excerpt,
+      status,
+      slug
+    });
+    
     // Basic validation
     if (!title || !content) {
       return { success: false, error: 'Title and content are required.' };
@@ -37,6 +46,15 @@ export async function createBlogPostAction(formData: FormData): Promise<{success
       return { success: false, error: 'User profile not found.' };
     }
 
+    // Determine publishedAt value
+    const publishedAt = status === 'PUBLISHED' ? new Date() : null;
+    
+    console.log('Setting publishedAt:', {
+      status,
+      publishedAt,
+      isPublished: status === 'PUBLISHED'
+    });
+
     // Prepare blog post data
     const blogPostData: Omit<NewBlogPost, 'id' | 'createdAt' | 'updatedAt'> = {
       title,
@@ -46,7 +64,7 @@ export async function createBlogPostAction(formData: FormData): Promise<{success
       featuredImageUrl: null, // Will be implemented later with file upload
       status: status || 'DRAFT',
       authorId: profileIdFromAuth,
-      publishedAt: status === 'PUBLISHED' ? new Date() : null,
+      publishedAt,
       deleted: false,
     };
 

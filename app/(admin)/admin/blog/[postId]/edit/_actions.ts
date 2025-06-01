@@ -1,7 +1,7 @@
 'use server';
 
 import { getUser } from '@/lib/supabase/server';
-import { updateBlogPost } from './_queries';
+import { updateBlogPost, getBlogPostByIdForEdit } from './_queries';
 import { ensureUniqueSlug } from '../../new/_utils/slugify';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -39,6 +39,28 @@ export async function updateBlogPostAction(
       slug = await ensureUniqueSlug(slug, postId);
     }
 
+    // Get current post data to check existing publishedAt
+    const currentPost = await getBlogPostByIdForEdit(postId);
+    if (!currentPost) {
+      return { success: false, error: 'Blog post not found.' };
+    }
+
+    // Determine publishedAt value:
+    // - If post is being published for the first time, set current date
+    // - If post was already published, preserve original date
+    // - If post is being changed to DRAFT/ARCHIVED, set to null
+    let publishedAtValue: Date | null = null;
+    
+    if (status === 'PUBLISHED') {
+      if (currentPost.status === 'PUBLISHED' && currentPost.publishedAt) {
+        // Keep the original published date
+        publishedAtValue = currentPost.publishedAt;
+      } else {
+        // First time publishing - set current date
+        publishedAtValue = new Date();
+      }
+    }
+
     // Prepare update data
     const updateData = {
       title,
@@ -46,7 +68,7 @@ export async function updateBlogPostAction(
       content,
       excerpt: excerpt || null,
       status: status || 'DRAFT',
-      publishedAt: status === 'PUBLISHED' ? new Date() : null,
+      publishedAt: publishedAtValue,
     };
 
     // Update blog post

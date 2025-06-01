@@ -199,7 +199,10 @@ export function BlogPostForm() {
                 <Label htmlFor="status" className="text-sm font-medium text-theme-dark">
                   Status
                 </Label>
-                <Select onValueChange={(value) => setValue('status', value as 'DRAFT' | 'PUBLISHED')}>
+                <Select 
+                  defaultValue="DRAFT"
+                  onValueChange={(value) => setValue('status', value as 'DRAFT' | 'PUBLISHED')}
+                >
                   <SelectTrigger className="mt-xs">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
