@@ -47,7 +47,7 @@ export async function insertTender(data: NewTenderSchemaType, supabaseUserId: st
     budgetRange: data.budgetRange || null,
     contactInformation: data.contactInformation || null,
     externalLink: data.externalLink || null,
-    status: data.status,
+    status: 'DRAFT', // Always set to DRAFT for new tenders - admins will manually publish
     userId: profile.id, // Use the profile.id for the tender's userId field
     documentsArePaid: data.documentsArePaid,
     documentPrice: data.documentPrice || null,
@@ -91,7 +91,7 @@ export async function createTenderWithDocuments(
         budgetRange: data.budgetRange || null,
         contactInformation: data.contactInformation || null,
         externalLink: data.externalLink || null,
-        status: data.status,
+        status: 'DRAFT', // Always set to DRAFT for new tenders - admins will manually publish
         userId: profile.id, // Use the profile.id for the tender's userId field
         documentsArePaid: data.documentsArePaid,
         documentPrice: data.documentPrice || null,

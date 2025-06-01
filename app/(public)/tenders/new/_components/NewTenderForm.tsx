@@ -18,7 +18,7 @@ import { newTenderSchema, type NewTenderSchemaType } from '../_utils/validation'
 import { createTenderWithDocumentsAction } from '../_actions';
 import { FileUpload } from './FileUpload';
 import type { Sector, Location } from '@/lib/db/schema';
-import { tenderTypeEnum, tenderStatusEnum } from '@/lib/db/schema';
+import { tenderTypeEnum } from '@/lib/db/schema';
 
 interface NewTenderFormProps {
   sectors: Sector[];
@@ -44,7 +44,6 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
       budgetRange: '',
       contactInformation: '',
       externalLink: '',
-      status: 'DRAFT',
       documentsArePaid: false,
       documentPrice: undefined,
       documentCurrency: 'GMD',
@@ -79,7 +78,7 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
       
       if (result.success && result.tenderId) {
         // Show success toast
-        toast.success('Tender created successfully!');
+        toast.success('Tender saved as draft successfully! It will be reviewed by administrators.');
         // Navigate to the tender detail page
         router.push(`/tenders/${result.tenderId}`);
       } else if (result.error) {
@@ -101,6 +100,9 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">Create New Tender</CardTitle>
+        <p className="text-theme-gray-dark mt-xs">
+          Your tender will be saved as a draft and manually reviewed by administrators before being published.
+        </p>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -399,32 +401,6 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
               </div>
             </div>
 
-            {/* Status */}
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {tenderStatusEnum.enumValues.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status.replace('_', ' ')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {/* Submit Button */}
             <div className="flex gap-4 pt-6">
               <Button
@@ -432,7 +408,7 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
                 disabled={isSubmitting}
                 className="flex-1"
               >
-                {isSubmitting ? 'Creating...' : 'Create Tender'}
+                {isSubmitting ? 'Saving Draft...' : 'Save as Draft'}
               </Button>
               <Button
                 type="button"
