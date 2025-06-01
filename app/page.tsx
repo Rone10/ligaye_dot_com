@@ -10,11 +10,13 @@ import Footer from '@/components/Footer';
 import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
 import RingLoaderSpinner from '@/components/loaders/ring-loader';
+import { useRouter } from 'next/navigation';
 
 export default function LandingPage() {
   const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
   
   // Check if user is logged in on the client side
   useEffect(() => {
@@ -32,6 +34,23 @@ export default function LandingPage() {
     
     checkUser();
   }, []);
+
+  const handleSearch = (query: string = searchQuery) => {
+    if (query.trim()) {
+      router.push(`/jobs?search=${encodeURIComponent(query.trim())}`);
+    } else {
+      router.push('/jobs');
+    }
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearch();
+  };
+
+  const handleKeywordClick = (keyword: string) => {
+    handleSearch(keyword);
+  };
 
   if (loading) {
     return <div className='flex justify-center items-center h-screen container mx-auto'>
@@ -61,12 +80,16 @@ export default function LandingPage() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-              <Button className="bg-primary-blue hover:bg-primary-blue-light text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl">
-                Find Jobs
-              </Button>
-              <Button variant="outline" className="bg-background/50 text-theme-dark border border-theme-gray hover:bg-background/80 transition-all duration-300 font-semibold py-3 px-8 rounded-xl">
-                Post a Job
-              </Button>
+              <Link href="/jobs">
+                <Button className="bg-primary-blue hover:bg-primary-blue-light text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl">
+                  Find Jobs
+                </Button>
+              </Link>
+              <Link href={user ? "/employer/jobs/new" : "/sign-up"}>
+                <Button variant="outline" className="bg-background/50 text-theme-dark border border-theme-gray hover:bg-background/80 transition-all duration-300 font-semibold py-3 px-8 rounded-xl">
+                  Post a Job
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -80,19 +103,22 @@ export default function LandingPage() {
               Start Your Job Search
             </h2>
             
-            <div className="relative max-w-2xl mx-auto">
+            <form onSubmit={handleSearchSubmit} className="relative max-w-2xl mx-auto">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-theme-gray-dark h-5 w-5" />
               <input
                 type="text"
                 placeholder="Search for jobs, companies, or keywords..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 rounded-xl border border-theme-gray focus:border-primary-blue focus:outline-none focus:ring-2 focus:ring-primary-blue/20 text-lg bg-background"
               />
-            </div>
+            </form>
             
             <div className="flex flex-wrap justify-center gap-3 mt-6">
               {['Software Developer', 'Marketing Manager', 'Teacher', 'Accountant', 'Sales Representative'].map((term) => (
                 <button
                   key={term}
+                  onClick={() => handleKeywordClick(term)}
                   className="rounded-full bg-background/90 hover:bg-background py-2 px-5 transition-all duration-300 hover:border-primary-blue hover:text-primary-blue hover:shadow-level-1 text-theme-gray-dark/90"
                 >
                   {term}
@@ -157,9 +183,11 @@ export default function LandingPage() {
               </div>
               
               <div className="mt-8">
-                <Button className="bg-primary-blue hover:bg-primary-blue-light text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl w-full">
-                  Start Job Search
-                </Button>
+                <Link href="/jobs" className="block">
+                  <Button className="bg-primary-blue hover:bg-primary-blue-light text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl w-full">
+                    Start Job Search
+                  </Button>
+                </Link>
               </div>
             </div>
 
@@ -213,9 +241,11 @@ export default function LandingPage() {
               </div>
               
               <div className="mt-8">
-                <Button className="bg-secondary-green hover:bg-secondary-green/90 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl w-full">
-                  Post Your First Job
-                </Button>
+                <Link href={user ? "/employer/jobs/new" : "/sign-up"} className="block">
+                  <Button className="bg-secondary-green hover:bg-secondary-green/90 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl w-full">
+                    Post Your First Job
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -238,9 +268,11 @@ export default function LandingPage() {
                 <h3 className="text-xl font-bold text-theme-dark mb-4">For Job Seekers</h3>
                 <p className="text-theme-gray-dark mb-4">Create a profile, upload your resume, and apply to jobs with a single click. Get notified about new opportunities that match your skills.</p>
               </div>
-              <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all duration-300 mt-auto">
-                Get Started
-              </Button>
+              <Link href={user ? "/jobs" : "/sign-up"}>
+                <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all duration-300 mt-auto">
+                  Get Started
+                </Button>
+              </Link>
             </div>
 
             {/* Employers */}
@@ -252,9 +284,11 @@ export default function LandingPage() {
                 <h3 className="text-xl font-bold text-theme-dark mb-4">For Employers</h3>
                 <p className="text-theme-gray-dark mb-4">Post job openings, manage applications, and find the perfect candidates for your company. Easy payment options via Stripe or cash.</p>
               </div>
-              <Button variant="outline" className="border-secondary-green text-secondary-green hover:bg-secondary-green hover:text-white transition-all duration-300 mt-auto">
-                Post Jobs
-              </Button>
+              <Link href={user ? "/employer/jobs/new" : "/sign-up"}>
+                <Button variant="outline" className="border-secondary-green text-secondary-green hover:bg-secondary-green hover:text-white transition-all duration-300 mt-auto">
+                  Post Jobs
+                </Button>
+              </Link>
             </div>
 
             {/* Browse Jobs */}
@@ -266,9 +300,11 @@ export default function LandingPage() {
                 <h3 className="text-xl font-bold text-theme-dark mb-4">Browse Opportunities</h3>
                 <p className="text-theme-gray-dark mb-4">Browse through hundreds of job listings across various industries and experience levels throughout Gambia.</p>
               </div>
-              <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all duration-300 mt-auto">
-                Browse Jobs
-              </Button>
+              <Link href="/jobs">
+                <Button variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all duration-300 mt-auto">
+                  Browse Jobs
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -289,12 +325,16 @@ export default function LandingPage() {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-primary-blue hover:bg-primary-blue-light text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl">
-                Join as Job Seeker
-              </Button>
-              <Button variant="outline" className="border-secondary-green text-secondary-green hover:bg-secondary-green hover:text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300">
-                Join as Employer
-              </Button>
+              <Link href={user ? "/jobs" : "/sign-up"}>
+                <Button className="bg-primary-blue hover:bg-primary-blue-light text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl">
+                  Join as Job Seeker
+                </Button>
+              </Link>
+              <Link href={user ? "/employer/jobs/new" : "/sign-up"}>
+                <Button variant="outline" className="border-secondary-green text-secondary-green hover:bg-secondary-green hover:text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300">
+                  Join as Employer
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
