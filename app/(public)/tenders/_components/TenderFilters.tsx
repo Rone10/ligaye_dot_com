@@ -135,7 +135,7 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
           </div>
 
           {/* Status Filter */}
-          <div className="space-y-sm">
+          {/* <div className="space-y-sm">
             <label htmlFor="status" className="text-sm font-medium text-theme-dark">
               Status
             </label>
@@ -152,7 +152,7 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
         </div>
 
         {/* Active filters summary */}
