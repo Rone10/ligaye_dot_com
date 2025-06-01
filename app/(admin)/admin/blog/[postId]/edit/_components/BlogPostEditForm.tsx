@@ -43,6 +43,7 @@ export function BlogPostForm({ blogPost }: BlogPostFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [content, setContent] = useState(blogPost.content);
+  const [hasChanges, setHasChanges] = useState(false);
 
   const {
     register,
@@ -63,6 +64,8 @@ export function BlogPostForm({ blogPost }: BlogPostFormProps) {
 
   const watchedTitle = watch('title');
   const watchedSlug = watch('slug');
+  const watchedExcerpt = watch('excerpt');
+  const watchedStatus = watch('status');
 
   // Auto-generate slug from title (but preserve manual changes)
   useEffect(() => {
@@ -74,10 +77,23 @@ export function BlogPostForm({ blogPost }: BlogPostFormProps) {
     }
   }, [watchedTitle, watchedSlug, setValue, blogPost.title, blogPost.slug]);
 
-  // Sync content with form
+  // Sync content with form and track changes
   useEffect(() => {
-    setValue('content', content);
-  }, [content, setValue]);
+    const hasContentChanged = content !== blogPost.content;
+    setValue('content', content, { shouldDirty: hasContentChanged });
+  }, [content, setValue, blogPost.content]);
+
+  // Track changes across all form fields
+  useEffect(() => {
+    const hasFormChanges = 
+      watchedTitle !== blogPost.title ||
+      watchedSlug !== blogPost.slug ||
+      watchedExcerpt !== (blogPost.excerpt || '') ||
+      watchedStatus !== blogPost.status ||
+      content !== blogPost.content;
+    
+    setHasChanges(hasFormChanges);
+  }, [watchedTitle, watchedSlug, watchedExcerpt, watchedStatus, content, blogPost]);
 
   const onSubmit = async (data: BlogPostFormData) => {
     setIsSubmitting(true);
@@ -278,7 +294,7 @@ export function BlogPostForm({ blogPost }: BlogPostFormProps) {
           <div className="space-y-sm">
             <Button
               type="submit"
-              disabled={isSubmitting || !isDirty}
+              disabled={isSubmitting || !hasChanges}
               className="w-full bg-primary-blue text-white hover:bg-primary-blue-light duration-standard font-semibold"
             >
               {isSubmitting ? (
