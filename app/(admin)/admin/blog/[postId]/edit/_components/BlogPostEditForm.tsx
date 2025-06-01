@@ -23,6 +23,8 @@ import { AlertCircle, Save, Eye } from 'lucide-react';
 import type { BlogPost } from '@/lib/db/schema';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 const blogPostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
@@ -39,6 +41,7 @@ interface BlogPostFormProps {
 }
 
 export function BlogPostForm({ blogPost }: BlogPostFormProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -113,10 +116,16 @@ export function BlogPostForm({ blogPost }: BlogPostFormProps) {
 
       if (!result.success) {
         setSubmitError(result.error || 'Failed to update blog post');
-      } else {
-        setSubmitSuccess(true);
-        setTimeout(() => setSubmitSuccess(false), 3000);
+        return;
       }
+      
+      // Show success message briefly then redirect
+      setSubmitSuccess(true);
+      toast.success('Blog post updated successfully');
+      
+      setTimeout(() => {
+        router.push(`/admin/blog/${blogPost.id}`);
+      }, 1500);
     } catch (error) {
       setSubmitError('An unexpected error occurred. Please try again.');
     } finally {

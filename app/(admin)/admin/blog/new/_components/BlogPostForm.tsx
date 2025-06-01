@@ -88,10 +88,12 @@ export function BlogPostForm() {
 
       if (!result.success) {
         setSubmitError(result.error || 'Failed to create blog post');
+        return;
       }
+      
       // show a success message
       toast.success('Blog post created successfully');
-      router.push(`/admin/blog/${result.postId}/edit`);
+      router.push(`/admin/blog/${result.postId}`);
       // If successful, the action will redirect, so no need to handle success here
     } catch (error) {
       setSubmitError('An unexpected error occurred. Please try again.');
