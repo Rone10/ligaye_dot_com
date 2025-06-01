@@ -72,7 +72,6 @@ export async function createTenderWithDocumentsAction(
       budgetRange: rawData.budgetRange ? (rawData.budgetRange as string) : '',
       contactInformation: rawData.contactInformation ? (rawData.contactInformation as string) : '',
       externalLink: rawData.externalLink ? (rawData.externalLink as string) : '',
-      status: (rawData.status as any) || 'DRAFT',
       documentsArePaid: rawData.documentsArePaid === 'true',
       documentPrice: rawData.documentPrice ? parseFloat(rawData.documentPrice as string) : undefined,
       documentCurrency: (rawData.documentCurrency as string) || 'GMD',

@@ -44,7 +44,7 @@ const optionalUuidSchema = z
     message: 'Invalid UUID format'
   });
 
-// Update existing schema to include document fields
+// Update existing schema to include document fields (status removed - defaults to DRAFT)
 export const newTenderSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be 200 characters or less'),
   description: z.string().min(1, 'Description is required'),
@@ -56,7 +56,6 @@ export const newTenderSchema = z.object({
   budgetRange: z.string().optional(),
   contactInformation: z.string().optional(),
   externalLink: flexibleUrlSchema,
-  status: z.enum(tenderStatusEnum.enumValues).default('DRAFT'),
   documentsArePaid: z.boolean().default(false),
   documentPrice: z.number().positive().optional(),
   documentCurrency: z.string().default('GMD'),

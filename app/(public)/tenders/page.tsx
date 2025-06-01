@@ -67,7 +67,7 @@ export default async function TendersPage({ searchParams }: PageProps) {
             <Button asChild className="shadow-level-2 hover:shadow-level-3 duration-standard">
               <Link href="/tenders/new" className="gap-xs">
                 <Plus className="h-4 w-4" />
-                Create New Tender
+                Submit New Tender
               </Link>
             </Button>
           {/* )} */}
