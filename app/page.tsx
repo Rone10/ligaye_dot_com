@@ -86,7 +86,7 @@ export default function LandingPage() {
                 </Button>
               </Link>
               <Link href={user ? "/employer/jobs/new" : "/sign-up"}>
-                <Button variant="outline" className="bg-background/50 text-theme-dark border border-theme-gray hover:bg-background/80 transition-all duration-300 font-semibold py-3 px-8 rounded-xl">
+                <Button variant="outline" className="bg-background/90 text-theme-dark border border-theme-gray hover:bg-background/80 transition-all duration-300 font-semibold py-3 px-8 rounded-xl">
                   Post a Job
                 </Button>
               </Link>
