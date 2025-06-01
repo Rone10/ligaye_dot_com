@@ -57,6 +57,7 @@
     "@syncfusion/ej2-react-richtexteditor": "^29.1.35",
     "@syncfusion/ej2-richtexteditor": "^29.1.35",
     "@syncfusion/ej2-splitbuttons": "^29.1.33",
+    "@tailwindcss/line-clamp": "^0.4.4",
     "@tanstack/react-table": "^8.21.3",
     "@tiptap/core": "^2.11.5",
     "@tiptap/extension-bullet-list": "^2.11.5",
