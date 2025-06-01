@@ -16,7 +16,7 @@ export default function AboutUsPage() {
         {/* Header Section */}
         <section className="text-center mb-16">
           <h1 className="text-4xl sm:text-5xl font-bold text-primary-blue mb-4">
-            About Ligaye.com
+            About Ligaye
           </h1>
           <p className="text-lg text-theme-gray-dark max-w-2xl mx-auto">
             Connecting talent with opportunity across The Gambia. We are dedicated to building a thriving job market for everyone.
