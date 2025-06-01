@@ -7,8 +7,6 @@ import { BlogPostCard } from './_components/BlogPostCard';
 import { BlogPagination } from './_components/BlogPagination';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Search } from 'lucide-react';
-import { getUser } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Blog | Ligaye.com - Latest Insights & Job Market Trends',
@@ -81,10 +79,6 @@ function EmptyState() {
 }
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
-  const user = await getUser();
-  if (!user || user?.user_metadata?.role !== 'admin') {
-    redirect('/not-found');
-  }
   const { page } = searchParamsCache.parse(await searchParams);
   const postsPerPage = 9;
 

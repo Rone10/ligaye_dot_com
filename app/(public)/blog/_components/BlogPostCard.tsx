@@ -2,10 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { format } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, User, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight } from 'lucide-react';
 import type { BlogPostWithAuthor } from '../_queries';
 
 interface BlogPostCardProps {
@@ -13,14 +11,6 @@ interface BlogPostCardProps {
 }
 
 export function BlogPostCard({ post }: BlogPostCardProps) {
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase();
-  };
-
   const formatDate = (date: Date | string | null) => {
     if (!date) return 'No date';
     try {
@@ -67,24 +57,11 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
         </CardHeader>
 
         <CardContent className="p-lg pt-0 mt-auto">
-          {/* Author and Date */}
+          {/* Date and Read More */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-sm">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={post.author.avatarUrl || ''} />
-                <AvatarFallback className="bg-primary-blue/10 text-primary-blue text-xs font-medium">
-                  {getInitials(post.author.fullName)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-theme-dark">
-                  {post.author.fullName}
-                </span>
-                <div className="flex items-center gap-xs text-xs text-theme-gray-dark">
-                  <Calendar className="h-3 w-3" />
-                  <span>{formatDate(post.publishedAt)}</span>
-                </div>
-              </div>
+            <div className="flex items-center gap-xs text-sm text-theme-gray-dark">
+              <Calendar className="h-4 w-4" />
+              <span>{formatDate(post.publishedAt)}</span>
             </div>
 
             {/* Read More Arrow */}

@@ -2,10 +2,9 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { format } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Calendar, User } from 'lucide-react';
+import { ArrowLeft, Calendar } from 'lucide-react';
 import { ShareButton } from './ShareButton';
 import type { BlogPostWithAuthor } from '../_queries';
 
@@ -14,14 +13,6 @@ interface BlogPostContentProps {
 }
 
 export function BlogPostContent({ post }: BlogPostContentProps) {
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase();
-  };
-
   const formatDate = (date: Date | string | null) => {
     if (!date) return 'No date';
     try {
@@ -80,27 +71,14 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
 
               {/* Article Meta */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-lg">
-                {/* Author Info */}
-                <div className="flex items-center gap-md">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={post.author.avatarUrl || ''} />
-                    <AvatarFallback className="bg-primary-blue/10 text-primary-blue font-semibold">
-                      {getInitials(post.author.fullName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-semibold text-theme-dark">
-                      {post.author.fullName}
-                    </div>
-                    <div className="flex items-center gap-md text-sm text-theme-gray-dark">
-                      <div className="flex items-center gap-xs">
-                        <Calendar className="h-4 w-4" />
-                        <span>{formatDate(post.publishedAt)}</span>
-                      </div>
-                      <span>•</span>
-                      <span>{formatReadTime(post.content)}</span>
-                    </div>
+                {/* Date and Reading Time */}
+                <div className="flex items-center gap-md text-sm text-theme-gray-dark">
+                  <div className="flex items-center gap-xs">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(post.publishedAt)}</span>
                   </div>
+                  <span>•</span>
+                  <span>{formatReadTime(post.content)}</span>
                 </div>
 
                 {/* Share Button (Optional) */}
@@ -133,25 +111,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
 
             {/* Article Footer */}
             <footer className="mt-2xl pt-xl border-t border-theme-gray">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-lg">
-                {/* Author Card */}
-                <div className="flex items-center gap-md">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={post.author.avatarUrl || ''} />
-                    <AvatarFallback className="bg-primary-blue/10 text-primary-blue font-bold text-lg">
-                      {getInitials(post.author.fullName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-semibold text-theme-dark text-lg">
-                      {post.author.fullName}
-                    </div>
-                    <div className="text-theme-gray-dark">
-                      Author
-                    </div>
-                  </div>
-                </div>
-
+              <div className="flex justify-center">
                 {/* Back to Blog */}
                 <Link href="/blog">
                   <Button className="gap-xs">

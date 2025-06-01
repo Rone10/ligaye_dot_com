@@ -34,14 +34,8 @@ export default function Loading() {
 
               {/* Article Meta Skeleton */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-lg">
-                {/* Author Info Skeleton */}
-                <div className="flex items-center gap-md">
-                  <div className="h-12 w-12 bg-theme-gray/20 rounded-full" />
-                  <div>
-                    <div className="h-5 bg-theme-gray/20 rounded-md mb-xs w-24" />
-                    <div className="h-4 bg-theme-gray/20 rounded-md w-32" />
-                  </div>
-                </div>
+                {/* Date and Reading Time Skeleton */}
+                <div className="h-4 bg-theme-gray/20 rounded-md w-48" />
 
                 {/* Share Button Skeleton */}
                 <div className="h-8 w-16 bg-theme-gray/20 rounded-md" />
@@ -78,16 +72,7 @@ export default function Loading() {
 
             {/* Article Footer Skeleton */}
             <footer className="mt-2xl pt-xl border-t border-theme-gray">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-lg">
-                {/* Author Card Skeleton */}
-                <div className="flex items-center gap-md">
-                  <div className="h-16 w-16 bg-theme-gray/20 rounded-full" />
-                  <div>
-                    <div className="h-5 bg-theme-gray/20 rounded-md mb-xs w-28" />
-                    <div className="h-4 bg-theme-gray/20 rounded-md w-16" />
-                  </div>
-                </div>
-
+              <div className="flex justify-center">
                 {/* Back to Blog Button Skeleton */}
                 <div className="h-10 w-32 bg-theme-gray/20 rounded-md" />
               </div>
