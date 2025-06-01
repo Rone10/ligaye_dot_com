@@ -5,6 +5,7 @@ import { updateBlogPost, getBlogPostByIdForEdit } from './_queries';
 import { ensureUniqueSlug } from '../../new/_utils/slugify';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { uploadBlogImage, deleteBlogImage, extractFileNameFromUrl } from '@/lib/utils/blog-image-upload';
 
 export async function updateBlogPostAction(
   postId: string, 
@@ -28,6 +29,8 @@ export async function updateBlogPostAction(
     const status = formData.get('status') as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
     let slug = formData.get('slug') as string;
     const originalSlug = formData.get('originalSlug') as string;
+    const featuredImage = formData.get('featuredImage') as File | null;
+    const removeFeaturedImage = formData.get('removeFeaturedImage') === 'true';
     
     // Basic validation
     if (!title || !content) {
@@ -43,6 +46,36 @@ export async function updateBlogPostAction(
     const currentPost = await getBlogPostByIdForEdit(postId);
     if (!currentPost) {
       return { success: false, error: 'Blog post not found.' };
+    }
+
+    // Handle featured image upload/removal
+    let featuredImageUrl = currentPost.featuredImageUrl;
+    
+    if (removeFeaturedImage) {
+      // Remove existing image
+      if (currentPost.featuredImageUrl) {
+        const fileName = extractFileNameFromUrl(currentPost.featuredImageUrl);
+        if (fileName) {
+          await deleteBlogImage(fileName);
+        }
+      }
+      featuredImageUrl = null;
+    } else if (featuredImage) {
+      // Upload new image
+      const uploadResult = await uploadBlogImage({ file: featuredImage });
+      if (!uploadResult.success) {
+        return { success: false, error: uploadResult.error || 'Failed to upload featured image' };
+      }
+      
+      // Delete old image if it exists
+      if (currentPost.featuredImageUrl) {
+        const fileName = extractFileNameFromUrl(currentPost.featuredImageUrl);
+        if (fileName) {
+          await deleteBlogImage(fileName);
+        }
+      }
+      
+      featuredImageUrl = uploadResult.url || null;
     }
 
     // Determine publishedAt value:
@@ -67,6 +100,7 @@ export async function updateBlogPostAction(
       slug,
       content,
       excerpt: excerpt || null,
+      featuredImageUrl,
       status: status || 'DRAFT',
       publishedAt: publishedAtValue,
     };

@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Save, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { ImageUpload } from '../../_components/ImageUpload';
 
 const blogPostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
@@ -38,6 +39,7 @@ export function BlogPostForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [content, setContent] = useState('');
+  const [featuredImage, setFeaturedImage] = useState<File | null>(null);
 
   const {
     register,
@@ -83,6 +85,10 @@ export function BlogPostForm() {
       formData.append('content', content);
       formData.append('excerpt', data.excerpt || '');
       formData.append('status', data.status);
+      
+      if (featuredImage) {
+        formData.append('featuredImage', featuredImage);
+      }
 
       const result = await createBlogPostAction(formData);
 
@@ -226,9 +232,12 @@ export function BlogPostForm() {
               <CardTitle className="text-lg font-semibold text-theme-dark">Featured Image</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border-2 border-dashed border-theme-gray rounded-md p-lg text-center">
-                <p className="text-sm text-theme-gray-dark">Image upload coming soon</p>
-              </div>
+              <ImageUpload
+                value={undefined}
+                onChange={setFeaturedImage}
+                disabled={isSubmitting}
+                placeholder="Upload featured image..."
+              />
             </CardContent>
           </Card>
 

@@ -7,11 +7,6 @@ import type { NewBlogPost } from '@/lib/db/schema';
 
 export async function insertBlogPost(data: Omit<NewBlogPost, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
   try {
-    console.log('Inserting blog post with data:', {
-      ...data,
-      content: data.content?.substring(0, 50) + '...'
-    });
-
     const result = await (await db())
       .insert(blogPosts)
       .values({
@@ -21,7 +16,6 @@ export async function insertBlogPost(data: Omit<NewBlogPost, 'id' | 'createdAt' 
       })
       .returning({ id: blogPosts.id });
 
-    console.log('Blog post inserted with ID:', result[0].id);
     return result[0].id;
   } catch (error) {
     console.error('Error inserting blog post:', error);

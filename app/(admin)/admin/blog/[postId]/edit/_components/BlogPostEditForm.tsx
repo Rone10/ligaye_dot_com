@@ -25,6 +25,7 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { ImageUpload } from '../../../_components/ImageUpload';
 
 const blogPostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
@@ -47,6 +48,8 @@ export function BlogPostForm({ blogPost }: BlogPostFormProps) {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [content, setContent] = useState(blogPost.content);
   const [hasChanges, setHasChanges] = useState(false);
+  const [featuredImage, setFeaturedImage] = useState<File | null>(null);
+  const [removeFeaturedImage, setRemoveFeaturedImage] = useState(false);
 
   const {
     register,
@@ -93,10 +96,12 @@ export function BlogPostForm({ blogPost }: BlogPostFormProps) {
       watchedSlug !== blogPost.slug ||
       watchedExcerpt !== (blogPost.excerpt || '') ||
       watchedStatus !== blogPost.status ||
-      content !== blogPost.content;
+      content !== blogPost.content ||
+      featuredImage !== null ||
+      removeFeaturedImage;
     
     setHasChanges(hasFormChanges);
-  }, [watchedTitle, watchedSlug, watchedExcerpt, watchedStatus, content, blogPost]);
+  }, [watchedTitle, watchedSlug, watchedExcerpt, watchedStatus, content, blogPost, featuredImage, removeFeaturedImage]);
 
   const onSubmit = async (data: BlogPostFormData) => {
     setIsSubmitting(true);
@@ -111,6 +116,14 @@ export function BlogPostForm({ blogPost }: BlogPostFormProps) {
       formData.append('excerpt', data.excerpt || '');
       formData.append('status', data.status);
       formData.append('originalSlug', blogPost.slug);
+      
+      if (featuredImage) {
+        formData.append('featuredImage', featuredImage);
+      }
+      
+      if (removeFeaturedImage) {
+        formData.append('removeFeaturedImage', 'true');
+      }
 
       const result = await updateBlogPostAction(blogPost.id, formData);
 
@@ -293,9 +306,41 @@ export function BlogPostForm({ blogPost }: BlogPostFormProps) {
               <CardTitle className="text-lg font-semibold text-theme-dark">Featured Image</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border-2 border-dashed border-theme-gray rounded-md p-lg text-center">
-                <p className="text-sm text-theme-gray-dark">Image upload coming soon</p>
-              </div>
+              <ImageUpload
+                value={removeFeaturedImage ? undefined : blogPost.featuredImageUrl || undefined}
+                onChange={(file) => {
+                  setFeaturedImage(file);
+                  if (file) {
+                    setRemoveFeaturedImage(false);
+                  }
+                }}
+                disabled={isSubmitting}
+                placeholder="Upload featured image..."
+              />
+              {blogPost.featuredImageUrl && !removeFeaturedImage && !featuredImage && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-sm text-red-600 hover:text-red-700"
+                  onClick={() => setRemoveFeaturedImage(true)}
+                >
+                  Remove current image
+                </Button>
+              )}
+              {removeFeaturedImage && (
+                <div className="mt-sm">
+                  <p className="text-sm text-red-600 mb-xs">Current image will be removed</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setRemoveFeaturedImage(false)}
+                  >
+                    Keep current image
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 

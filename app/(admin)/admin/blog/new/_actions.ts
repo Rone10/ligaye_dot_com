@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import type { NewBlogPost } from '@/lib/db/schema';
 import { getProfileIdFromAuthUserId } from '../_queries';
+import { uploadBlogImage } from '@/lib/utils/blog-image-upload';
 
 export async function createBlogPostAction(formData: FormData): Promise<{success: boolean, error?: string, postId?: string}> {
   try {
@@ -22,15 +23,9 @@ export async function createBlogPostAction(formData: FormData): Promise<{success
     const excerpt = formData.get('excerpt') as string;
     const status = formData.get('status') as 'DRAFT' | 'PUBLISHED';
     let slug = formData.get('slug') as string;
+    const featuredImage = formData.get('featuredImage') as File | null;
     
-    // Debug logging
-    console.log('Creating blog post with data:', {
-      title,
-      content: content?.substring(0, 100) + '...',
-      excerpt,
-      status,
-      slug
-    });
+
     
     // Basic validation
     if (!title || !content) {
@@ -46,14 +41,18 @@ export async function createBlogPostAction(formData: FormData): Promise<{success
       return { success: false, error: 'User profile not found.' };
     }
 
+    // Handle featured image upload
+    let featuredImageUrl: string | null = null;
+    if (featuredImage) {
+      const uploadResult = await uploadBlogImage({ file: featuredImage });
+      if (!uploadResult.success) {
+        return { success: false, error: uploadResult.error || 'Failed to upload featured image' };
+      }
+      featuredImageUrl = uploadResult.url || null;
+    }
+
     // Determine publishedAt value
     const publishedAt = status === 'PUBLISHED' ? new Date() : null;
-    
-    console.log('Setting publishedAt:', {
-      status,
-      publishedAt,
-      isPublished: status === 'PUBLISHED'
-    });
 
     // Prepare blog post data
     const blogPostData: Omit<NewBlogPost, 'id' | 'createdAt' | 'updatedAt'> = {
@@ -61,7 +60,7 @@ export async function createBlogPostAction(formData: FormData): Promise<{success
       slug,
       content,
       excerpt: excerpt || null,
-      featuredImageUrl: null, // Will be implemented later with file upload
+      featuredImageUrl,
       status: status || 'DRAFT',
       authorId: profileIdFromAuth,
       publishedAt,
