@@ -12,16 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { Sector, Location } from '@/lib/db/schema';
+import { LocationSelector } from '@/components/ui/location-selector';
+import type { Sector } from '@/lib/db/schema';
+import type { LocationSelection } from '@/lib/types/locations';
 import { tenderStatusEnum } from '@/lib/db/schema';
 
 interface TenderFiltersProps {
   sectors: Sector[];
-  locations: Location[];
   onFilteringChange?: (isFiltering: boolean) => void;
 }
 
-export function TenderFilters({ sectors, locations, onFilteringChange }: TenderFiltersProps) {
+export function TenderFilters({ sectors, onFilteringChange }: TenderFiltersProps) {
   const [isPending, startTransition] = useTransition();
   
   // Local state for immediate UI feedback
@@ -54,10 +55,46 @@ export function TenderFilters({ sectors, locations, onFilteringChange }: TenderF
     startTransition
   });
 
+  // Local state for LocationSelector
+  const [locationSelection, setLocationSelection] = useState<LocationSelection>({});
+
   // Sync local search input with URL state
   useEffect(() => {
     setSearchInput(search);
   }, [search]);
+
+  // Convert locationId from URL to LocationSelection format
+  // This is a simplified approach - you might want to enhance this
+  // by storing location details in the URL or having a lookup mechanism
+  useEffect(() => {
+    if (locationId && locationId !== getLocationIdFromSelection(locationSelection)) {
+      // For now, we'll clear the selection when URL changes
+      // In a full implementation, you'd want to reconstruct the LocationSelection
+      // from the locationId by looking it up in your location data
+      setLocationSelection({});
+    } else if (!locationId) {
+      setLocationSelection({});
+    }
+  }, [locationId]);
+
+  // Helper function to get the most specific location ID from selection
+  const getLocationIdFromSelection = (selection: LocationSelection): string => {
+    return selection.cityId || selection.districtId || selection.regionId || '';
+  };
+
+  // Helper function to get display text for location selection
+  const getLocationDisplayText = (selection: LocationSelection): string => {
+    if (selection.city && selection.district) {
+      return `${selection.city}, ${selection.district}`;
+    }
+    if (selection.district && selection.region) {
+      return `${selection.district}, ${selection.region}`;
+    }
+    if (selection.region) {
+      return selection.region;
+    }
+    return '';
+  };
 
   // Debounce search input
   useEffect(() => {
@@ -89,24 +126,23 @@ export function TenderFilters({ sectors, locations, onFilteringChange }: TenderF
     setSearchInput(''); // Clear local input immediately
     setSearch('');
     setSectorId('');
-    setLocationId('');
+    setLocationId(''); // This will trigger the useEffect to clear locationSelection
     setStatus('');
     setPage('1'); // Reset to first page when clearing filters
   };
 
-  const formatLocationName = (location: Location) => {
-    return location.city ? `${location.city}, ${location.region}` : location.region;
+  // Handle location selection change
+  const handleLocationChange = (selection: LocationSelection) => {
+    setLocationSelection(selection);
+    const newLocationId = getLocationIdFromSelection(selection);
+    setLocationId(newLocationId);
+    setPage('1'); // Reset to first page when location changes
   };
 
   // Handle select value changes to convert "all" back to empty string
   // Also reset page to 1 when filters change
   const handleSectorChange = (value: string) => {
     setSectorId(value === 'all' ? '' : value);
-    setPage('1'); // Reset to first page when filter changes
-  };
-
-  const handleLocationChange = (value: string) => {
-    setLocationId(value === 'all' ? '' : value);
     setPage('1'); // Reset to first page when filter changes
   };
 
@@ -201,25 +237,20 @@ export function TenderFilters({ sectors, locations, onFilteringChange }: TenderF
             </Select>
           </div>
 
-          {/* Location Filter */}
+          {/* Location Filter - New LocationSelector */}
           <div className="space-y-sm">
             <label htmlFor="location" className="text-sm font-medium text-theme-dark">
               Location
             </label>
-            <Select value={locationId || 'all'} onValueChange={handleLocationChange} disabled={isPending}>
-              <SelectTrigger className="bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard disabled:opacity-50 disabled:cursor-not-allowed">
-                <SelectValue placeholder="All locations" />
-                {isPending && <Loader2 className="h-4 w-4 text-primary-blue animate-spin ml-auto" />}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All locations</SelectItem>
-                {locations.map((location) => (
-                  <SelectItem key={location.id} value={location.id}>
-                    {formatLocationName(location)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <LocationSelector
+              value={locationSelection}
+              onChange={handleLocationChange}
+              placeholder="All locations"
+              disabled={isPending}
+              showSearch={true}
+              allowClear={true}
+              className={isPending ? "opacity-50" : ""}
+            />
           </div>
 
           {/* Status Filter */}
@@ -279,9 +310,12 @@ export function TenderFilters({ sectors, locations, onFilteringChange }: TenderF
                 )}
                 {locationId && (
                   <div className="inline-flex items-center gap-xs px-md py-xs bg-theme-gray/20 text-theme-gray-dark rounded-full text-sm border border-theme-gray/30">
-                    Location: {formatLocationName(locations.find(l => l.id === locationId)!)}
+                    Location: {getLocationDisplayText(locationSelection)}
                     <button
-                      onClick={() => setLocationId('')}
+                      onClick={() => {
+                        setLocationSelection({});
+                        setLocationId('');
+                      }}
                       disabled={isPending}
                       className="ml-xs hover:bg-theme-gray/30 rounded-full p-xs duration-standard disabled:opacity-50 disabled:cursor-not-allowed"
                     >

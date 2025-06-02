@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Plus, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getUser } from '@/lib/supabase/server';
-import { getTenders, getTendersCount, getSectorsForFilter, getLocationsForFilter } from './_queries';
+import { getTenders, getTendersCount, getSectorsForFilter } from './_queries';
 import { TendersPageClient } from './_components/TendersPageClient';
 
 interface PageProps {
@@ -37,11 +37,10 @@ export default async function TendersPage({ searchParams }: PageProps) {
   // const profile = await getUserProfile(user?.id || '');
 
   // Fetch data in parallel
-  const [tenders, totalCount, sectors, locations] = await Promise.all([
+  const [tenders, totalCount, sectors] = await Promise.all([
     getTenders({ page, limit, filters }),
     getTendersCount({ filters }),
     getSectorsForFilter(),
-    getLocationsForFilter(),
   ]);
 
   return (
@@ -101,7 +100,6 @@ export default async function TendersPage({ searchParams }: PageProps) {
             currentPage={page}
             limit={limit}
             sectors={sectors}
-            locations={locations}
           />
         </Suspense>
       </div>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { TenderFilters } from './TenderFilters';
 import { TenderList } from './TenderList';
 import type { TenderWithRelations } from '../_queries';
-import type { Sector, Location } from '@/lib/db/schema';
+import type { Sector } from '@/lib/db/schema';
 
 interface TendersPageClientProps {
   tenders: TenderWithRelations[];
@@ -12,7 +12,6 @@ interface TendersPageClientProps {
   currentPage: number;
   limit: number;
   sectors: Sector[];
-  locations: Location[];
 }
 
 export function TendersPageClient({
@@ -21,7 +20,6 @@ export function TendersPageClient({
   currentPage,
   limit,
   sectors,
-  locations,
 }: TendersPageClientProps) {
   const [isFiltering, setIsFiltering] = useState(false);
 
@@ -31,7 +29,6 @@ export function TendersPageClient({
       <div className="lg:sticky lg:top-xl lg:h-fit">
         <TenderFilters 
           sectors={sectors} 
-          locations={locations}
           onFilteringChange={setIsFiltering}
         />
       </div>
