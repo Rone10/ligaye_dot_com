@@ -16,17 +16,19 @@ import { FilterSection } from './FilterSection';
 import { FilterCheckbox } from './FilterCheckbox';
 import { SalaryRangeFilter } from './SalaryRangeFilter';
 import { MobileFilterToggle } from './MobileFilterToggle';
+import { LocationSelector } from '@/components/ui/location-selector';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import { jobTypeEnum, workLocationEnum, experienceLevelEnum } from '@/lib/db/schema';
+import type { LocationSelection } from '@/lib/types/locations';
 
 interface FilterProps {
-  locations: { id: string; region: string; city: string | null }[];
   industries: { id: string; name: string }[];
 }
 
-export function JobSearchFilters({ locations, industries }: FilterProps) {
+export function JobSearchFilters({ industries }: FilterProps) {
   const { filters, setFilters, resetFilters } = useJobFilters();
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
+  const [locationSelection, setLocationSelection] = useState<LocationSelection>({});
   const [salaryRange, setSalaryRange] = useState<[number, number]>([
     filters.salaryMin || 0,
     filters.salaryMax || 1000000
@@ -54,19 +56,41 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
     }
   }, [debouncedSearchTerm, filters.search, handleFilterChange]);
   
-  // Local state for location and industry search
-  const [locationSearchInput, setLocationSearchInput] = useState('');
+  // Local state for industry search
   const [industrySearchInput, setIndustrySearchInput] = useState('');
   const [includeNegotiable, setIncludeNegotiable] = useState(filters.includeNegotiable ?? true);
   
-  // Filtered locations and industries based on search input
-  const filteredLocations = locationSearchInput 
-    ? locations.filter(location => {
-        const locationText = (location.city ? location.city.toLowerCase() : '') + ' ' + location.region.toLowerCase();
-        return locationText.includes(locationSearchInput.toLowerCase());
-      })
-    : locations;
-    
+  // Helper function to get the most specific location ID from selection
+  const getLocationIdFromSelection = (selection: LocationSelection): string | null => {
+    return selection.cityId || selection.districtId || selection.regionId || null;
+  }
+
+  // Helper function to get location display text from selection
+  const getLocationDisplayFromSelection = (selection: LocationSelection): string => {
+    if (selection.city) {
+      return selection.district ? `${selection.city}, ${selection.district}, ${selection.region}` : `${selection.city}, ${selection.region}`;
+    } else if (selection.district) {
+      return `${selection.district}, ${selection.region}`;
+    } else if (selection.region) {
+      return selection.region;
+    }
+    return '';
+  }
+
+  // Handle location selection change
+  const handleLocationChange = (selection: LocationSelection) => {
+    setLocationSelection(selection);
+    const locationId = getLocationIdFromSelection(selection);
+    handleFilterChange({ locationId: locationId || 'all', page: 1 });
+  }
+
+  // Clear location selection
+  const handleClearLocation = () => {
+    setLocationSelection({});
+    handleFilterChange({ locationId: 'all', page: 1 });
+  }
+  
+  // Filtered industries based on search input
   const filteredIndustries = industrySearchInput
     ? industries.filter(industry => 
         industry.name.toLowerCase().includes(industrySearchInput.toLowerCase())
@@ -96,13 +120,6 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
     setActiveFiltersCount(count);
   }, [filters]);
 
-  // Format location display
-  const getLocationLabel = (locationId: string) => {
-    if (locationId === 'all') return 'Any Location';
-    const location = locations.find(loc => loc.id === locationId);
-    return location ? `${location.city || ''}, ${location.region}` : '';
-  };
-
   // Format industry display
   const getIndustryLabel = (industryId: string) => {
     if (industryId === 'all') return 'Any Industry';
@@ -114,7 +131,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
     startTransition(() => {
       resetFilters();
       setSearchInput('');
-      setLocationSearchInput('');
+      setLocationSelection({});
       setIndustrySearchInput('');
     });
   };
@@ -175,11 +192,6 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
       'INTERNSHIP': 43
     };
     return counts[type] || 0;
-  };
-  
-  const getLocationCount = (id: string) => {
-    // Simulated counts - would come from API in real implementation
-    return Math.floor(Math.random() * 50) + 5; 
   };
   
   const getWorkLocationCount = (type: string) => {
@@ -272,9 +284,9 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
               <Badge 
                 variant="secondary" 
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
-                onClick={() => handleFilterChange({ locationId: 'all', page: 1 })}
+                onClick={handleClearLocation}
               >
-                {getLocationLabel(filters.locationId)}
+                {getLocationDisplayFromSelection(locationSelection)}
                 <X className="h-3 w-3" />
               </Badge>
             )}
@@ -407,34 +419,17 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
         <FilterSection 
           title="Location" 
           defaultExpanded={false}
-          onClear={() => handleFilterChange({ locationId: 'all', page: 1 })}
+          onClear={handleClearLocation}
           showClear={filters.locationId !== 'all' && filters.locationId !== null}
         >
-          <Input
-            className="mb-3  border border-[rgba(255,255,255,0.5)] rounded-[10px]"
-            placeholder="Search locations..."
-            type="text"
-            value={locationSearchInput}
-            onChange={(e) => setLocationSearchInput(e.target.value)}
+          <LocationSelector
+            value={locationSelection}
+            onChange={handleLocationChange}
+            placeholder="Select location..."
+            showSearch={true}
+            allowClear={true}
+            className="w-full"
           />
-          <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-            {filteredLocations.length > 0 ? (
-              filteredLocations.map(location => (
-                <FilterCheckbox
-                  key={location.id}
-                  label={location.city ? `${location.city}, ${location.region}` : location.region}
-                  count={getLocationCount(location.id)}
-                  checked={filters.locationId === location.id}
-                  onChange={() => handleFilterChange({ 
-                    locationId: filters.locationId === location.id ? 'all' : location.id, 
-                    page: 1 
-                  })}
-                />
-              ))
-            ) : (
-              <div className="text-sm text-muted-foreground py-2">No locations match your search</div>
-            )}
-          </div>
         </FilterSection>
 
         {/* Industry Filter */}
@@ -559,7 +554,7 @@ export function JobSearchFilters({ locations, industries }: FilterProps) {
                 className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted"
                 onClick={toggleMobileFilter}
               >
-                                  <X className="h-5 w-5 text-foreground" />
+                <X className="h-5 w-5 text-foreground" />
               </button>
             </div>
             {filterContent}
