@@ -4,10 +4,7 @@ import { Plus, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getUser } from '@/lib/supabase/server';
 import { getTenders, getTendersCount, getSectorsForFilter, getLocationsForFilter } from './_queries';
-import { TenderList } from './_components/TenderList';
-import { TenderFilters } from './_components/TenderFilters';
-import { TenderResultsWrapper } from './_components/TenderResultsWrapper';
-import { getUserProfile } from './[id]/_queries';
+import { TendersPageClient } from './_components/TendersPageClient';
 
 interface PageProps {
   searchParams: Promise<{
@@ -74,44 +71,39 @@ export default async function TendersPage({ searchParams }: PageProps) {
           {/* )} */}
         </div>
 
-        {/* Grid Layout for desktop, single column for mobile */}
-        <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-xl">
-          {/* Filter Sidebar */}
-          <div className="lg:sticky lg:top-xl lg:h-fit">
-            <Suspense fallback={
+        {/* Tenders Page Content */}
+        <Suspense fallback={
+          <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-xl">
+            {/* Filter Sidebar Loading */}
+            <div className="lg:sticky lg:top-xl lg:h-fit">
               <div className="glass-card p-xl rounded-xl shadow-level-2 h-[400px] flex items-center justify-center">
                 <div className="text-center space-y-sm">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-blue mx-auto"></div>
                   <p className="text-theme-gray-dark">Loading filters...</p>
                 </div>
               </div>
-            }>
-              <TenderFilters sectors={sectors} locations={locations} />
-            </Suspense>
-          </div>
-          
-          {/* Tender Listings */}
-          <div className="space-y-xl">
-            <Suspense 
-              fallback={
-                <div className="glass-card p-2xl rounded-xl shadow-level-2 flex items-center justify-center h-[400px]">
-                  <div className="text-center space-y-sm">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue mx-auto"></div>
-                    <p className="text-theme-gray-dark text-lg">Loading tenders...</p>
-                  </div>
+            </div>
+            
+            {/* Tender Listings Loading */}
+            <div className="space-y-xl">
+              <div className="glass-card p-2xl rounded-xl shadow-level-2 flex items-center justify-center h-[400px]">
+                <div className="text-center space-y-sm">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue mx-auto"></div>
+                  <p className="text-theme-gray-dark text-lg">Loading tenders...</p>
                 </div>
-              }
-            >
-              <TenderList
-                tenders={tenders}
-                // currentUserId={profile?.id}
-                totalCount={totalCount}
-                currentPage={page}
-                limit={limit}
-              />
-            </Suspense>
+              </div>
+            </div>
           </div>
-        </div>
+        }>
+          <TendersPageClient
+            tenders={tenders}
+            totalCount={totalCount}
+            currentPage={page}
+            limit={limit}
+            sectors={sectors}
+            locations={locations}
+          />
+        </Suspense>
       </div>
     </div>
   );

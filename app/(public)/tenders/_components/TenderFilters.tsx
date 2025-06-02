@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useTransition, useState, useEffect } from 'react';
 import { useQueryState, useQueryStates } from 'nuqs';
 import { Search, Filter, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -18,15 +18,19 @@ import { tenderStatusEnum } from '@/lib/db/schema';
 interface TenderFiltersProps {
   sectors: Sector[];
   locations: Location[];
+  onFilteringChange?: (isFiltering: boolean) => void;
 }
 
-export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
+export function TenderFilters({ sectors, locations, onFilteringChange }: TenderFiltersProps) {
   const [isPending, startTransition] = useTransition();
+  
+  // Local state for immediate UI feedback
+  const [searchInput, setSearchInput] = useState('');
+  const [isSearchPending, setIsSearchPending] = useState(false);
   
   const [search, setSearch] = useQueryState('search', { 
     defaultValue: '', 
     shallow: false,
-    throttleMs: 500, // Debounce search input
     startTransition
   });
   const [sectorId, setSectorId] = useQueryState('sector', { 
@@ -50,9 +54,39 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
     startTransition
   });
 
+  // Sync local search input with URL state
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  // Debounce search input
+  useEffect(() => {
+    if (searchInput !== search) {
+      setIsSearchPending(true);
+      const timer = setTimeout(() => {
+        setSearch(searchInput);
+        setPage('1'); // Reset to first page when search changes
+        setIsSearchPending(false);
+      }, 500);
+
+      return () => {
+        clearTimeout(timer);
+        setIsSearchPending(false);
+      };
+    } else {
+      setIsSearchPending(false);
+    }
+  }, [searchInput, search, setSearch, setPage]);
+
+  // Notify parent component of filtering state changes
+  useEffect(() => {
+    onFilteringChange?.(isPending);
+  }, [isPending, onFilteringChange]);
+
   const hasActiveFilters = search || sectorId || locationId || status;
 
   const clearAllFilters = () => {
+    setSearchInput(''); // Clear local input immediately
     setSearch('');
     setSectorId('');
     setLocationId('');
@@ -82,8 +116,7 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-    setPage('1'); // Reset to first page when search changes
+    setSearchInput(e.target.value); // Update local state immediately for UI responsiveness
   };
 
   return (
@@ -134,12 +167,12 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
               <Input
                 id="search"
                 placeholder="Search tenders..."
-                value={search}
+                value={searchInput}
                 onChange={handleSearchChange}
                 disabled={isPending}
                 className="pl-10 bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard disabled:opacity-50 disabled:cursor-not-allowed"
               />
-              {isPending && (
+              {(isPending || isSearchPending) && (
                 <div className="absolute right-md top-1/2 transform -translate-y-1/2">
                   <Loader2 className="h-4 w-4 text-primary-blue animate-spin" />
                 </div>
@@ -220,7 +253,11 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
                   <div className="inline-flex items-center gap-xs px-md py-xs bg-primary-blue/10 text-primary-blue rounded-full text-sm border border-primary-blue/20">
                     Search: &quot;{search}&quot;
                     <button
-                      onClick={() => setSearch('')}
+                      onClick={() => {
+                        setSearchInput('');
+                        setSearch('');
+                        setPage('1');
+                      }}
                       disabled={isPending}
                       className="ml-xs hover:bg-primary-blue/20 rounded-full p-xs duration-standard disabled:opacity-50 disabled:cursor-not-allowed"
                     >

@@ -112,13 +112,22 @@ export function TenderList({
         <div className="flex justify-center mt-2xl">
           <div className="flex items-center gap-sm">
             {currentPage > 1 && (
-              <Button variant="outline" asChild>
-                <Link 
-                  href={createPaginationUrl(currentPage - 1)}
-                  className="gap-xs"
-                >
-                  Previous
-                </Link>
+              <Button 
+                variant="outline" 
+                asChild={!isFiltering}
+                disabled={isFiltering}
+                className={isFiltering ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                {isFiltering ? (
+                  <span className="gap-xs">Previous</span>
+                ) : (
+                  <Link 
+                    href={createPaginationUrl(currentPage - 1)}
+                    className="gap-xs"
+                  >
+                    Previous
+                  </Link>
+                )}
               </Button>
             )}
             
@@ -127,13 +136,22 @@ export function TenderList({
             </span>
             
             {currentPage < totalPages && (
-              <Button variant="outline" asChild>
-                <Link 
-                  href={createPaginationUrl(currentPage + 1)}
-                  className="gap-xs"
-                >
-                  Next
-                </Link>
+              <Button 
+                variant="outline" 
+                asChild={!isFiltering}
+                disabled={isFiltering}
+                className={isFiltering ? 'opacity-50 cursor-not-allowed' : ''}
+              >
+                {isFiltering ? (
+                  <span className="gap-xs">Next</span>
+                ) : (
+                  <Link 
+                    href={createPaginationUrl(currentPage + 1)}
+                    className="gap-xs"
+                  >
+                    Next
+                  </Link>
+                )}
               </Button>
             )}
           </div>
