@@ -267,13 +267,13 @@ export function LocationSelector({
             <div className="p-md border-b border-theme-gray/30">
               <div className="relative">
                 <Search className="absolute left-md top-1/2 transform -translate-y-1/2 h-4 w-4 text-theme-gray-dark" />
-                                  <Input
-                    ref={searchInputRef}
-                    placeholder="Search locations..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 h-10 bg-theme-light/50 border-theme-gray/50 focus:border-primary-blue focus:shadow-focus duration-standard placeholder:text-theme-gray-dark"
-                  />
+                <Input
+                  ref={searchInputRef}
+                  placeholder="Search locations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-10 bg-theme-light/50 border-theme-gray/50 focus:border-primary-blue focus:shadow-focus duration-standard placeholder:text-theme-gray-dark"
+                />
               </div>
             </div>
           )}
@@ -314,35 +314,49 @@ export function LocationSelector({
               </div>
             )}
 
-            {/* Hierarchical Selection */}
+            {/* Step Navigation */}
             {!searchQuery.trim() && (
-              <>
-                {showSearch && <div className="border-t border-theme-gray/30"></div>}
-                <div className="p-sm">
-                  {/* Breadcrumb Navigation */}
-                  {activeStep !== 'region' && (
-                    <div className="flex items-center gap-sm px-sm py-xs mb-sm text-sm text-theme-gray-dark bg-theme-gray/10 rounded-md">
-                    <button
-                      type="button"
-                      onClick={handleBackToRegions}
-                      className="hover:text-primary-blue duration-fast font-medium"
-                    >
-                      Regions
-                    </button>
-                    {activeStep === 'city' && (
-                      <>
-                        <span className="text-theme-gray">/</span>
-                        <button
-                          type="button"
-                          onClick={handleBackToDistricts}
-                          className="hover:text-primary-blue duration-fast font-medium"
-                        >
-                          {selection.region}
-                        </button>
-                      </>
+              <div className="p-sm">
+                {/* Breadcrumb */}
+                <div className="flex items-center gap-xs mb-md px-sm py-xs bg-theme-light/30 rounded-md">
+                  <button
+                    type="button"
+                    className={cn(
+                      "text-xs font-medium px-sm py-xs rounded-sm duration-fast",
+                      activeStep === 'region' 
+                        ? "bg-primary-blue text-white" 
+                        : "text-theme-gray-dark hover:text-primary-blue hover:bg-primary-blue/10"
                     )}
-                  </div>
-                )}
+                    onClick={handleBackToRegions}
+                  >
+                    Region
+                  </button>
+                  {selection.region && (
+                    <>
+                      <span className="text-theme-gray-dark">/</span>
+                      <button
+                        type="button"
+                        className={cn(
+                          "text-xs font-medium px-sm py-xs rounded-sm duration-fast",
+                          activeStep === 'district' 
+                            ? "bg-primary-blue text-white" 
+                            : "text-theme-gray-dark hover:text-primary-blue hover:bg-primary-blue/10"
+                        )}
+                        onClick={handleBackToDistricts}
+                      >
+                        District
+                      </button>
+                    </>
+                  )}
+                  {selection.district && (
+                    <>
+                      <span className="text-theme-gray-dark">/</span>
+                      <span className="text-xs font-medium px-sm py-xs bg-primary-blue text-white rounded-sm">
+                        City
+                      </span>
+                    </>
+                  )}
+                </div>
 
                 {/* Region Selection */}
                 {activeStep === 'region' && (
@@ -355,73 +369,120 @@ export function LocationSelector({
                         <div className="animate-pulse">Loading regions...</div>
                       </div>
                     ) : (
-                      regions.map((region) => (
-                        <button
-                          type="button"
-                          key={region.id}
-                          className="w-full px-md py-sm text-left hover:bg-primary-blue/10 hover:text-primary-blue rounded-md duration-fast transition-all font-medium text-theme-dark group"
-                          onClick={() => handleRegionSelect(region.id, region.name, region.slug)}
-                        >
-                          <span className="group-hover:text-primary-blue duration-fast">{region.name}</span>
-                        </button>
-                      ))
+                      <div className="space-y-xs">
+                        {regions.map((region) => (
+                          <button
+                            type="button"
+                            key={region.id}
+                            className={cn(
+                              "w-full px-md py-sm text-left rounded-md duration-fast transition-all group",
+                              selection.regionId === region.id
+                                ? "bg-primary-blue text-white"
+                                : "hover:bg-primary-blue/10 hover:text-primary-blue text-theme-dark"
+                            )}
+                            onClick={() => handleRegionSelect(region.id, region.name, region.slug)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">{region.name}</span>
+                              {selection.regionId === region.id && (
+                                <Check className="h-4 w-4" />
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
                 )}
 
                 {/* District Selection */}
-                {activeStep === 'district' && currentRegionData && (
+                {activeStep === 'district' && selection.region && (
                   <div className="space-y-xs">
                     <div className="px-sm py-xs text-xs font-medium text-theme-gray-dark uppercase tracking-wide">
-                      Select District in <span className="text-primary-blue">{selection.region}</span>
+                      Select District in {selection.region}
                     </div>
                     {regionDataLoading ? (
                       <div className="p-lg text-center text-theme-gray-dark">
                         <div className="animate-pulse">Loading districts...</div>
                       </div>
+                    ) : currentRegionData?.districts ? (
+                      <div className="space-y-xs">
+                        {currentRegionData.districts.map((district) => (
+                          <button
+                            type="button"
+                            key={district.id}
+                            className={cn(
+                              "w-full px-md py-sm text-left rounded-md duration-fast transition-all group",
+                              selection.districtId === district.id
+                                ? "bg-primary-blue text-white"
+                                : "hover:bg-primary-blue/10 hover:text-primary-blue text-theme-dark"
+                            )}
+                            onClick={() => handleDistrictSelect(district.id, district.name)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">{district.name}</span>
+                              {selection.districtId === district.id && (
+                                <Check className="h-4 w-4" />
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
                     ) : (
-                      currentRegionData.districts.map((district) => (
-                        <button
-                          type="button"
-                          key={district.id}
-                          className="w-full px-md py-sm text-left hover:bg-primary-blue/10 hover:text-primary-blue rounded-md duration-fast transition-all font-medium text-theme-dark group"
-                          onClick={() => handleDistrictSelect(district.id, district.name)}
-                        >
-                          <span className="group-hover:text-primary-blue duration-fast">{district.name}</span>
-                        </button>
-                      ))
+                      <div className="p-lg text-center text-theme-gray-dark">
+                        No districts available
+                      </div>
                     )}
                   </div>
                 )}
 
                 {/* City Selection */}
-                {activeStep === 'city' && currentRegionData && selection.districtId && (
+                {activeStep === 'city' && selection.district && (
                   <div className="space-y-xs">
                     <div className="px-sm py-xs text-xs font-medium text-theme-gray-dark uppercase tracking-wide">
-                      Select City in <span className="text-primary-blue">{selection.district}</span>
+                      Select City in {selection.district}
                     </div>
-                    {(() => {
-                      const district = currentRegionData.districts.find(d => d.id === selection.districtId);
-                      if (!district) return null;
-                      
-                      return district.cities.map((city) => (
-                        <button
-                          type="button"
-                          key={city.id}
-                          className="w-full px-md py-sm text-left hover:bg-primary-blue/10 hover:text-primary-blue rounded-md duration-fast transition-all flex items-center justify-between font-medium text-theme-dark group"
-                          onClick={() => handleCitySelect(city.id, city.name)}
-                        >
-                          <span className="group-hover:text-primary-blue duration-fast">{city.name}</span>
-                          {selection.cityId === city.id && (
-                            <Check className="h-4 w-4 text-primary-blue group-hover:scale-110 duration-fast" />
-                          )}
-                        </button>
-                      ));
-                    })()}
+                    {regionDataLoading ? (
+                      <div className="p-lg text-center text-theme-gray-dark">
+                        <div className="animate-pulse">Loading cities...</div>
+                      </div>
+                    ) : currentRegionData?.districts ? (
+                      <div className="space-y-xs">
+                        {currentRegionData.districts
+                          .find(d => d.id === selection.districtId)
+                          ?.cities?.map((city) => (
+                            <button
+                              type="button"
+                              key={city.id}
+                              className={cn(
+                                "w-full px-md py-sm text-left rounded-md duration-fast transition-all group",
+                                selection.cityId === city.id
+                                  ? "bg-primary-blue text-white"
+                                  : "hover:bg-primary-blue/10 hover:text-primary-blue text-theme-dark"
+                              )}
+                              onClick={() => handleCitySelect(city.id, city.name)}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium">{city.name}</span>
+                                {selection.cityId === city.id && (
+                                  <Check className="h-4 w-4" />
+                                )}
+                              </div>
+                            </button>
+                          )) || (
+                          <div className="p-lg text-center text-theme-gray-dark">
+                            No cities available
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="p-lg text-center text-theme-gray-dark">
+                        No cities available
+                      </div>
+                    )}
                   </div>
                 )}
-                </div>
-              </>
+              </div>
             )}
           </ScrollArea>
         </div>
