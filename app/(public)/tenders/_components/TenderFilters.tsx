@@ -1,7 +1,8 @@
 'use client';
 
+import { useTransition } from 'react';
 import { useQueryState, useQueryStates } from 'nuqs';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,15 +21,34 @@ interface TenderFiltersProps {
 }
 
 export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
+  const [isPending, startTransition] = useTransition();
+  
   const [search, setSearch] = useQueryState('search', { 
     defaultValue: '', 
     shallow: false,
-    throttleMs: 500 // Debounce search input
+    throttleMs: 500, // Debounce search input
+    startTransition
   });
-  const [sectorId, setSectorId] = useQueryState('sector', { defaultValue: '', shallow: false });
-  const [locationId, setLocationId] = useQueryState('location', { defaultValue: '', shallow: false });
-  const [status, setStatus] = useQueryState('status', { defaultValue: '', shallow: false });
-  const [page, setPage] = useQueryState('page', { defaultValue: '1', shallow: false });
+  const [sectorId, setSectorId] = useQueryState('sector', { 
+    defaultValue: '', 
+    shallow: false,
+    startTransition
+  });
+  const [locationId, setLocationId] = useQueryState('location', { 
+    defaultValue: '', 
+    shallow: false,
+    startTransition
+  });
+  const [status, setStatus] = useQueryState('status', { 
+    defaultValue: '', 
+    shallow: false,
+    startTransition
+  });
+  const [page, setPage] = useQueryState('page', { 
+    defaultValue: '1', 
+    shallow: false,
+    startTransition
+  });
 
   const hasActiveFilters = search || sectorId || locationId || status;
 
@@ -73,16 +93,28 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-sm">
             <div className="p-sm bg-primary-blue/10 rounded-lg">
-              <Filter className="h-5 w-5 text-primary-blue" />
+              {isPending ? (
+                <Loader2 className="h-5 w-5 text-primary-blue animate-spin" />
+              ) : (
+                <Filter className="h-5 w-5 text-primary-blue" />
+              )}
             </div>
-            <h3 className="text-xl font-semibold text-theme-dark">Filter Tenders</h3>
+            <div className="flex items-center gap-sm">
+              <h3 className="text-xl font-semibold text-theme-dark">Filter Tenders</h3>
+              {isPending && (
+                <span className="text-sm text-theme-gray-dark bg-primary-blue/10 px-sm py-xs rounded-full">
+                  Updating...
+                </span>
+              )}
+            </div>
           </div>
           {hasActiveFilters && (
             <Button
               variant="ghost"
               size="sm"
               onClick={clearAllFilters}
-              className="gap-xs text-theme-gray-dark hover:text-theme-dark"
+              disabled={isPending}
+              className="gap-xs text-theme-gray-dark hover:text-theme-dark disabled:opacity-50"
             >
               <X className="h-4 w-4" />
               Clear all
@@ -104,8 +136,14 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
                 placeholder="Search tenders..."
                 value={search}
                 onChange={handleSearchChange}
-                className="pl-10 bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard"
+                disabled={isPending}
+                className="pl-10 bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard disabled:opacity-50 disabled:cursor-not-allowed"
               />
+              {isPending && (
+                <div className="absolute right-md top-1/2 transform -translate-y-1/2">
+                  <Loader2 className="h-4 w-4 text-primary-blue animate-spin" />
+                </div>
+              )}
             </div>
           </div>
 
@@ -114,9 +152,10 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
             <label htmlFor="sector" className="text-sm font-medium text-theme-dark">
               Sector
             </label>
-            <Select value={sectorId || 'all'} onValueChange={handleSectorChange}>
-              <SelectTrigger className="bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard">
+            <Select value={sectorId || 'all'} onValueChange={handleSectorChange} disabled={isPending}>
+              <SelectTrigger className="bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard disabled:opacity-50 disabled:cursor-not-allowed">
                 <SelectValue placeholder="All sectors" />
+                {isPending && <Loader2 className="h-4 w-4 text-primary-blue animate-spin ml-auto" />}
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All sectors</SelectItem>
@@ -134,9 +173,10 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
             <label htmlFor="location" className="text-sm font-medium text-theme-dark">
               Location
             </label>
-            <Select value={locationId || 'all'} onValueChange={handleLocationChange}>
-              <SelectTrigger className="bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard">
+            <Select value={locationId || 'all'} onValueChange={handleLocationChange} disabled={isPending}>
+              <SelectTrigger className="bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard disabled:opacity-50 disabled:cursor-not-allowed">
                 <SelectValue placeholder="All locations" />
+                {isPending && <Loader2 className="h-4 w-4 text-primary-blue animate-spin ml-auto" />}
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All locations</SelectItem>
@@ -181,7 +221,8 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
                     Search: &quot;{search}&quot;
                     <button
                       onClick={() => setSearch('')}
-                      className="ml-xs hover:bg-primary-blue/20 rounded-full p-xs duration-standard"
+                      disabled={isPending}
+                      className="ml-xs hover:bg-primary-blue/20 rounded-full p-xs duration-standard disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -192,7 +233,8 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
                     Sector: {sectors.find(s => s.id === sectorId)?.name}
                     <button
                       onClick={() => setSectorId('')}
-                      className="ml-xs hover:bg-secondary-green/20 rounded-full p-xs duration-standard"
+                      disabled={isPending}
+                      className="ml-xs hover:bg-secondary-green/20 rounded-full p-xs duration-standard disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -203,7 +245,8 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
                     Location: {formatLocationName(locations.find(l => l.id === locationId)!)}
                     <button
                       onClick={() => setLocationId('')}
-                      className="ml-xs hover:bg-theme-gray/30 rounded-full p-xs duration-standard"
+                      disabled={isPending}
+                      className="ml-xs hover:bg-theme-gray/30 rounded-full p-xs duration-standard disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <X className="h-3 w-3" />
                     </button>

@@ -6,6 +6,7 @@ import { getUser } from '@/lib/supabase/server';
 import { getTenders, getTendersCount, getSectorsForFilter, getLocationsForFilter } from './_queries';
 import { TenderList } from './_components/TenderList';
 import { TenderFilters } from './_components/TenderFilters';
+import { TenderResultsWrapper } from './_components/TenderResultsWrapper';
 import { getUserProfile } from './[id]/_queries';
 
 interface PageProps {

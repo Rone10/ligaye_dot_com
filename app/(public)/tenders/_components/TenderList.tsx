@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { TenderCard } from './TenderCard';
@@ -16,6 +16,7 @@ interface TenderListProps {
   totalCount: number;
   currentPage: number;
   limit: number;
+  isFiltering?: boolean;
 }
 
 export function TenderList({
@@ -24,6 +25,7 @@ export function TenderList({
   totalCount,
   currentPage,
   limit,
+  isFiltering = false,
 }: TenderListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -80,10 +82,21 @@ export function TenderList({
 
   return (
     <div className="space-y-xl">
-   
+      {/* Loading Banner */}
+      {isFiltering && (
+        <div className="glass-card p-md rounded-lg shadow-level-2 border border-primary-blue/20">
+          <div className="flex items-center justify-center gap-md">
+            <Loader2 className="h-5 w-5 text-primary-blue animate-spin" />
+            <div className="text-center">
+              <p className="text-sm font-medium text-primary-blue">Updating tender results...</p>
+              <p className="text-xs text-theme-gray-dark">Please wait while we apply your filters</p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Tender Cards */}
-      <div className="max-w-5xl mx-auto space-y-lg">
+      <div className={`max-w-5xl mx-auto space-y-lg ${isFiltering ? 'opacity-60 pointer-events-none' : ''}`}>
         {tenders.map(tender => (
           <TenderCard 
             key={tender.id} 
