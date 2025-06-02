@@ -53,8 +53,21 @@ export function LocationSelector({
 
   // Sync internal selection with props
   useEffect(() => {
+    console.log('Value prop changed:', value);
     if (value) {
+      console.log('Setting selection from value prop:', value);
       setSelection(value);
+    } else if (value === undefined) {
+      console.log('Value is undefined, clearing selection');
+      // Handle when value becomes undefined (cleared from parent)
+      setSelection({
+        regionId: undefined,
+        region: undefined,
+        districtId: undefined,
+        district: undefined,
+        cityId: undefined,
+        city: undefined,
+      });
     }
   }, [value, setSelection]);
 
@@ -150,7 +163,16 @@ export function LocationSelector({
   };
 
   const handleClear = () => {
-    const emptySelection = {};
+    console.log('handleClear called');
+    const emptySelection: LocationSelection = {
+      regionId: undefined,
+      region: undefined,
+      districtId: undefined,
+      district: undefined,
+      cityId: undefined,
+      city: undefined,
+    };
+    console.log('Clearing selection:', emptySelection);
     setSelection(emptySelection);
     onChange?.(emptySelection);
     setActiveStep('region');
@@ -192,32 +214,38 @@ export function LocationSelector({
         role="combobox"
         aria-expanded={isOpen}
         className={cn(
-          "w-full justify-between h-12 px-4 text-left font-normal",
-          !hasValue && "text-gray-500",
+          "w-full justify-between h-12 px-md text-left font-normal bg-theme-light border-theme-gray hover:bg-theme-gray/10 focus:border-primary-blue focus:shadow-focus duration-standard",
+          !hasValue && "text-theme-gray-dark",
+          hasValue && "text-theme-dark",
           error && "border-red-300 focus:border-red-500",
           disabled && "opacity-50 cursor-not-allowed"
         )}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
       >
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
+        <div className="flex items-center gap-sm min-w-0 flex-1">
+          <MapPin className="h-4 w-4 text-theme-gray-dark flex-shrink-0" />
           <span className="truncate">
             {hasValue ? displayValue : placeholder}
           </span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-xs">
           {hasValue && allowClear && !disabled && (
-            <X
-              className="h-4 w-4 text-gray-400 hover:text-gray-600"
+            <button
+              type="button"
+              className="flex items-center justify-center h-6 w-6 hover:bg-theme-gray/20 rounded-sm duration-fast"
               onClick={(e) => {
+                console.log('X button clicked');
+                e.preventDefault();
                 e.stopPropagation();
                 handleClear();
               }}
-            />
+            >
+              <X className="h-4 w-4 text-theme-gray-dark hover:text-theme-dark duration-fast" />
+            </button>
           )}
           <ChevronDown className={cn(
-            "h-4 w-4 text-gray-400 transition-transform",
+            "h-4 w-4 text-theme-gray-dark duration-standard",
             isOpen && "rotate-180"
           )} />
         </div>
@@ -225,57 +253,58 @@ export function LocationSelector({
 
       {/* Error Message */}
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className="mt-xs text-sm text-red-600">{error}</p>
       )}
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+        <div className="absolute top-full left-0 right-0 z-50 mt-xs glass-card rounded-lg shadow-level-4 backdrop-blur-lg animate-appear-zoom">
           {/* Search Input */}
           {showSearch && (
-            <div className="p-3 border-b border-gray-100">
+            <div className="p-md border-b border-theme-gray/30">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  ref={searchInputRef}
-                  placeholder="Search locations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-10"
-                />
+                <Search className="absolute left-md top-1/2 transform -translate-y-1/2 h-4 w-4 text-theme-gray-dark" />
+                                  <Input
+                    ref={searchInputRef}
+                    placeholder="Search locations..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 h-10 bg-theme-light/50 border-theme-gray/50 focus:border-primary-blue focus:shadow-focus duration-standard placeholder:text-theme-gray-dark"
+                  />
               </div>
             </div>
           )}
 
-          <ScrollArea className="max-h-80">
+          <ScrollArea className="max-h-96 overflow-y-auto overscroll-contain">
             {/* Search Results */}
             {searchQuery.trim() && (
-              <div className="p-2">
+              <div className="p-sm">
                 {searchLoading ? (
-                  <div className="p-4 text-center text-gray-500">
-                    Searching...
+                  <div className="p-lg text-center text-theme-gray-dark">
+                    <div className="animate-pulse">Searching...</div>
                   </div>
                 ) : searchResults.length > 0 ? (
-                  <div className="space-y-1">
-                    <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  <div className="space-y-xs">
+                    <div className="px-sm py-xs text-xs font-medium text-theme-gray-dark uppercase tracking-wide">
                       Search Results
                     </div>
                     {searchResults.map((result) => (
                       <button
                         key={result.id}
-                        className="w-full px-3 py-2 text-left hover:bg-gray-50 rounded-md transition-colors"
+                        className="w-full px-md py-sm text-left hover:bg-primary-blue/10 hover:text-primary-blue rounded-md duration-fast transition-all group"
                         onClick={() => handleSearchResultSelect(result)}
                       >
-                        <div className="font-medium text-gray-900">{result.city}</div>
-                        <div className="text-sm text-gray-500">
+                        <div className="font-medium text-theme-dark group-hover:text-primary-blue duration-fast">{result.city}</div>
+                        <div className="text-sm text-theme-gray-dark group-hover:text-primary-blue/70 duration-fast">
                           {result.district}, {result.region}
                         </div>
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <div className="p-4 text-center text-gray-500">
-                    No locations found
+                  <div className="p-lg text-center">
+                    <div className="text-theme-gray-dark">No locations found</div>
+                    <div className="text-xs text-theme-gray-dark mt-xs">Try a different search term</div>
                   </div>
                 )}
               </div>
@@ -283,22 +312,24 @@ export function LocationSelector({
 
             {/* Hierarchical Selection */}
             {!searchQuery.trim() && (
-              <div className="p-2">
-                {/* Breadcrumb Navigation */}
-                {activeStep !== 'region' && (
-                  <div className="flex items-center gap-2 px-2 py-1 mb-2 text-sm text-gray-600">
+              <>
+                {showSearch && <div className="border-t border-theme-gray/30"></div>}
+                <div className="p-sm">
+                  {/* Breadcrumb Navigation */}
+                  {activeStep !== 'region' && (
+                    <div className="flex items-center gap-sm px-sm py-xs mb-sm text-sm text-theme-gray-dark bg-theme-gray/10 rounded-md">
                     <button
                       onClick={handleBackToRegions}
-                      className="hover:text-blue-600 transition-colors"
+                      className="hover:text-primary-blue duration-fast font-medium"
                     >
                       Regions
                     </button>
                     {activeStep === 'city' && (
                       <>
-                        <span>/</span>
+                        <span className="text-theme-gray">/</span>
                         <button
                           onClick={handleBackToDistricts}
-                          className="hover:text-blue-600 transition-colors"
+                          className="hover:text-primary-blue duration-fast font-medium"
                         >
                           {selection.region}
                         </button>
@@ -309,22 +340,22 @@ export function LocationSelector({
 
                 {/* Region Selection */}
                 {activeStep === 'region' && (
-                  <div className="space-y-1">
-                    <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  <div className="space-y-xs">
+                    <div className="px-sm py-xs text-xs font-medium text-theme-gray-dark uppercase tracking-wide">
                       Select Region
                     </div>
                     {regionsLoading ? (
-                      <div className="p-4 text-center text-gray-500">
-                        Loading regions...
+                      <div className="p-lg text-center text-theme-gray-dark">
+                        <div className="animate-pulse">Loading regions...</div>
                       </div>
                     ) : (
                       regions.map((region) => (
                         <button
                           key={region.id}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-50 rounded-md transition-colors"
+                          className="w-full px-md py-sm text-left hover:bg-primary-blue/10 hover:text-primary-blue rounded-md duration-fast transition-all font-medium text-theme-dark group"
                           onClick={() => handleRegionSelect(region.id, region.name, region.slug)}
                         >
-                          {region.name}
+                          <span className="group-hover:text-primary-blue duration-fast">{region.name}</span>
                         </button>
                       ))
                     )}
@@ -333,22 +364,22 @@ export function LocationSelector({
 
                 {/* District Selection */}
                 {activeStep === 'district' && currentRegionData && (
-                  <div className="space-y-1">
-                    <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      Select District in {selection.region}
+                  <div className="space-y-xs">
+                    <div className="px-sm py-xs text-xs font-medium text-theme-gray-dark uppercase tracking-wide">
+                      Select District in <span className="text-primary-blue">{selection.region}</span>
                     </div>
                     {regionDataLoading ? (
-                      <div className="p-4 text-center text-gray-500">
-                        Loading districts...
+                      <div className="p-lg text-center text-theme-gray-dark">
+                        <div className="animate-pulse">Loading districts...</div>
                       </div>
                     ) : (
                       currentRegionData.districts.map((district) => (
                         <button
                           key={district.id}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-50 rounded-md transition-colors"
+                          className="w-full px-md py-sm text-left hover:bg-primary-blue/10 hover:text-primary-blue rounded-md duration-fast transition-all font-medium text-theme-dark group"
                           onClick={() => handleDistrictSelect(district.id, district.name)}
                         >
-                          {district.name}
+                          <span className="group-hover:text-primary-blue duration-fast">{district.name}</span>
                         </button>
                       ))
                     )}
@@ -357,9 +388,9 @@ export function LocationSelector({
 
                 {/* City Selection */}
                 {activeStep === 'city' && currentRegionData && selection.districtId && (
-                  <div className="space-y-1">
-                    <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                      Select City in {selection.district}
+                  <div className="space-y-xs">
+                    <div className="px-sm py-xs text-xs font-medium text-theme-gray-dark uppercase tracking-wide">
+                      Select City in <span className="text-primary-blue">{selection.district}</span>
                     </div>
                     {(() => {
                       const district = currentRegionData.districts.find(d => d.id === selection.districtId);
@@ -368,19 +399,20 @@ export function LocationSelector({
                       return district.cities.map((city) => (
                         <button
                           key={city.id}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-50 rounded-md transition-colors flex items-center justify-between"
+                          className="w-full px-md py-sm text-left hover:bg-primary-blue/10 hover:text-primary-blue rounded-md duration-fast transition-all flex items-center justify-between font-medium text-theme-dark group"
                           onClick={() => handleCitySelect(city.id, city.name)}
                         >
-                          <span>{city.name}</span>
+                          <span className="group-hover:text-primary-blue duration-fast">{city.name}</span>
                           {selection.cityId === city.id && (
-                            <Check className="h-4 w-4 text-blue-600" />
+                            <Check className="h-4 w-4 text-primary-blue group-hover:scale-110 duration-fast" />
                           )}
                         </button>
                       ));
                     })()}
                   </div>
                 )}
-              </div>
+                </div>
+              </>
             )}
           </ScrollArea>
         </div>
