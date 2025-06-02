@@ -15,24 +15,15 @@ import CompensationStep from './form-steps/CompensationStep'
 import PostingSettingsStep from './form-steps/PostingSettingsStep'
 import type { Job } from '@/lib/db/schema'
 
-// Define Location interface
-interface Location {
-  id: string
-  region: string
-  district: string | null
-  city: string | null
-}
-
 interface EditJobFormProps {
   job: Job
-  jobSkills: { id: string; name: string }[]
-  jobIndustries: { id: string; name: string }[]
-  locations: Location[]
+  jobSkills: { skillId: string; name?: string }[]
+  jobIndustries: { industryId: string; name?: string }[]
 }
 
-export default function EditJobForm({ job, jobSkills, jobIndustries, locations }: EditJobFormProps) {
+export default function EditJobForm({ job, jobSkills, jobIndustries }: EditJobFormProps) {
   const router = useRouter()
-  const { form, step, totalSteps, nextStep, prevStep, isSubmitting, setIsSubmitting } = useJobForm(job, jobSkills, jobIndustries)
+  const { form, step, totalSteps, nextStep, prevStep, isSubmitting, setIsSubmitting } = useJobForm(job)
   const [error, setError] = useState<string | null>(null)
   
   const onSubmit = async (data: any) => {
@@ -69,7 +60,7 @@ export default function EditJobForm({ job, jobSkills, jobIndustries, locations }
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {step === 1 && <BasicDetailsStep form={form} onNext={nextStep} locations={locations} />}
+          {step === 1 && <BasicDetailsStep form={form} onNext={nextStep} existingLocationId={job.locationId || undefined} />}
           {step === 2 && <RequirementsStep form={form} onNext={nextStep} onPrevious={prevStep} />}
           {step === 3 && <CompensationStep form={form} onNext={nextStep} onPrevious={prevStep} />}
           {step === 4 && <PostingSettingsStep form={form} onPrevious={prevStep} isSubmitting={isSubmitting} isEditing={true} />}

@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import EditJobForm from './_components/EditJobForm'
 import { 
   getEmployerProfile, 
-  getAllLocations, 
   getJobById,
   checkJobOwnership,
   getJobSkills,
@@ -42,9 +41,6 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
     redirect('/employer/jobs?error=unauthorized')
   }
   
-  // Fetch locations for the job posting form
-  const locations = await getAllLocations()
-  
   // Fetch job skills and industries
   const jobSkills = await getJobSkills(jobId)
   const jobIndustries = await getJobIndustries(jobId)
@@ -57,7 +53,6 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
         job={job} 
         jobSkills={jobSkills} 
         jobIndustries={jobIndustries} 
-        locations={locations} 
       />
     </div>
   )

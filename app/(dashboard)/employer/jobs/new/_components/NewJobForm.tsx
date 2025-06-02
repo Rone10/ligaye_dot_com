@@ -14,19 +14,9 @@ import RequirementsStep from './form-steps/RequirementsStep'
 import CompensationStep from './form-steps/CompensationStep'
 import PostingSettingsStep from './form-steps/PostingSettingsStep'
 
-// Define Location interface
-interface Location {
-  id: string
-  region: string
-  district: string | null
-  city: string | null
-}
+interface NewJobFormProps {}
 
-interface NewJobFormProps {
-  locations: Location[]
-}
-
-export default function NewJobForm({ locations }: NewJobFormProps) {
+export default function NewJobForm() {
   const router = useRouter()
   const { form, step, totalSteps, nextStep, prevStep, isSubmitting, setIsSubmitting } = useJobForm()
   const [error, setError] = useState<string | null>(null)
@@ -213,6 +203,11 @@ export default function NewJobForm({ locations }: NewJobFormProps) {
   
   return (
     <>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Post a New Job</h1>
+        <p className="text-gray-600">Fill out the details below to create a new job posting</p>
+      </div>
+
       {/* Payment modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -285,7 +280,7 @@ export default function NewJobForm({ locations }: NewJobFormProps) {
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {step === 1 && <BasicDetailsStep form={form} onNext={nextStep} locations={locations} />}
+            {step === 1 && <BasicDetailsStep form={form} onNext={nextStep} />}
             {step === 2 && <RequirementsStep form={form} onNext={nextStep} onPrevious={prevStep} />}
             {step === 3 && <CompensationStep form={form} onNext={nextStep} onPrevious={prevStep} />}
             {step === 4 && <PostingSettingsStep form={form} onPrevious={prevStep} isSubmitting={isSubmitting} />}

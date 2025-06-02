@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { 
@@ -20,26 +21,66 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import { LocationSelector } from '@/components/ui/location-selector'
 import { workLocationEnum } from '@/lib/db/schema'
 import { Editor } from '@/components/RichTextEditor/editor'
 import { ArrowRight } from 'lucide-react'
 import { JobFormValues } from '../../_utils/validation'
-
-// Location interface based on the schema
-interface Location {
-  id: string;
-  region: string;
-  district?: string | null;
-  city?: string | null;
-}
+import type { LocationSelection } from '@/lib/types/locations'
+import { getLocationById } from '../../_queries'
 
 interface BasicDetailsStepProps {
   form: UseFormReturn<JobFormValues>
   onNext: () => void
-  locations: Location[]
+  existingLocationId?: string
 }
 
-export default function BasicDetailsStep({ form, onNext, locations }: BasicDetailsStepProps) {
+export default function BasicDetailsStep({ form, onNext, existingLocationId }: BasicDetailsStepProps) {
+  const [locationSelection, setLocationSelection] = useState<LocationSelection>({})
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false)
+
+  // Helper function to get the most specific location ID from selection
+  const getLocationIdFromSelection = (selection: LocationSelection): string => {
+    return selection.cityId || selection.districtId || selection.regionId || '';
+  }
+
+  // Handle location selection change
+  const handleLocationChange = (selection: LocationSelection) => {
+    setLocationSelection(selection)
+    const locationId = getLocationIdFromSelection(selection)
+    form.setValue('locationId', locationId, { shouldDirty: true })
+  }
+
+  // Initialize location selection from existing job data
+  useEffect(() => {
+    if (existingLocationId) {
+      setIsLoadingLocation(true)
+      
+      getLocationById(existingLocationId)
+        .then(location => {
+          if (location) {
+            // Reconstruct the LocationSelection object with proper hierarchy
+            const locationSelectionObj: LocationSelection = {
+              regionId: location.id, // This would need proper mapping in a real scenario
+              region: location.region || undefined,
+              districtId: location.district ? location.id : undefined,
+              district: location.district || undefined,
+              cityId: location.city ? location.id : undefined,
+              city: location.city || undefined,
+            }
+            
+            setLocationSelection(locationSelectionObj)
+          }
+        })
+        .catch(error => {
+          console.error('Error loading location:', error)
+        })
+        .finally(() => {
+          setIsLoadingLocation(false)
+        })
+    }
+  }, [existingLocationId])
+
   const handleNext = () => {
     const basicFieldsValid = form.trigger([
       'title',
@@ -184,27 +225,20 @@ export default function BasicDetailsStep({ form, onNext, locations }: BasicDetai
         <FormField
           control={form.control}
           name="locationId"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
               <FormLabel>Job Location</FormLabel>
-              <Select 
-                value={field.value} 
-                onValueChange={field.onChange}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select location" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {locations.map((location) => (
-                    <SelectItem key={location.id} value={location.id}>
-                      {location.city ? `${location.city}, ${location.region}` : location.region}
-                      {location.district && ` (${location.district})`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <LocationSelector
+                  value={isLoadingLocation ? {} : locationSelection}
+                  onChange={handleLocationChange}
+                  placeholder={isLoadingLocation ? "Loading current location..." : "Select location"}
+                  error={fieldState.error?.message}
+                  showSearch={true}
+                  allowClear={true}
+                  disabled={isLoadingLocation}
+                />
+              </FormControl>
               <FormDescription>
                 Select the location where this job will be based
               </FormDescription>

@@ -80,7 +80,7 @@ export async function getJobSkills(jobId: string) {
   try {
     const result = await db()
       .select({
-        id: skills.id,
+        skillId: skills.id,
         name: skills.name
       })
       .from(jobSkills)
@@ -102,7 +102,7 @@ export async function getJobIndustries(jobId: string) {
   try {
     const result = await db()
       .select({
-        id: industries.id,
+        industryId: industries.id,
         name: industries.name
       })
       .from(jobIndustries)
@@ -298,5 +298,30 @@ export async function updateJob(
   } catch (error) {
     console.error('Error updating job:', error)
     throw error
+  }
+}
+
+// Get location by ID for displaying in forms
+export async function getLocationById(locationId: string) {
+  'use server'
+  try {
+    const result = await db()
+      .select({
+        id: locations.id,
+        region: locations.region,
+        district: locations.district,
+        city: locations.city
+      })
+      .from(locations)
+      .where(and(
+        eq(locations.id, locationId),
+        eq(locations.deleted, false)
+      ))
+      .limit(1)
+    
+    return result.length > 0 ? result[0] : null
+  } catch (error) {
+    console.error('Error getting location by ID:', error)
+    return null
   }
 } 

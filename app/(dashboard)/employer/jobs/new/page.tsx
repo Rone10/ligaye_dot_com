@@ -1,7 +1,7 @@
 import { getUser } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import NewJobForm from './_components/NewJobForm'
-import { getEmployerProfile, getAllLocations } from './_queries'
+import { getEmployerProfile } from './_queries'
 
 export default async function NewJobPage() {
   const user = await getUser()
@@ -17,14 +17,11 @@ export default async function NewJobPage() {
     redirect('/employer/profile')
   }
   
-  // fetch locations for the job posting form
-  const locations = await getAllLocations()
-  
   return (
     <div className="container max-w-4xl py-10 mx-auto">
       <h1 className="text-2xl md:text-3xl font-semibold mb-2 text-[#1a1e2d]">Post a New Job</h1>
       <p className="text-[#9aa3bc] mb-8">Create a new job posting for your company</p>
-      <NewJobForm locations={locations} />
+      <NewJobForm />
     </div>
   )
 } 
