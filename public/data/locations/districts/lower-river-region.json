@@ -1,0 +1,649 @@
+{
+  "region": {
+    "id": "6",
+    "name": "Lower River Region",
+    "slug": "lower-river-region"
+  },
+  "districts": [
+    {
+      "id": "6-1",
+      "name": "Kiang West",
+      "cities": [
+        {
+          "id": "3e6bb2a2-cf73-4e82-9c70-e952257c6639",
+          "name": "Bajana"
+        },
+        {
+          "id": "7e647e80-d42c-42e7-aefc-719b4b9979a7",
+          "name": "Bankuling"
+        },
+        {
+          "id": "4843fa59-7ac2-4025-8269-192438e507ba",
+          "name": "Bantasu"
+        },
+        {
+          "id": "261b39a8-7430-43f2-b7eb-b1eef6b7eb1d",
+          "name": "Bateling"
+        },
+        {
+          "id": "4278e34e-e92e-446a-84dc-4aaebcd8b026",
+          "name": "Brikama N'Ding"
+        },
+        {
+          "id": "592e6fd0-5a0d-4e32-9174-1f0d14a18269",
+          "name": "Burong"
+        },
+        {
+          "id": "ec4c535e-7a87-4113-9c96-676d92441d10",
+          "name": "Dumbuto"
+        },
+        {
+          "id": "41b289e5-f3b4-4f39-a819-1b50103a723f",
+          "name": "Gissay"
+        },
+        {
+          "id": "25a648a9-3a5c-4621-bb83-31d8901bbd9d",
+          "name": "Jali"
+        },
+        {
+          "id": "fc70a343-2a87-48d4-bce6-20e8438017bf",
+          "name": "Jamaru"
+        },
+        {
+          "id": "33630bed-ac15-43e8-bc80-af0aa0c4dcaa",
+          "name": "Janneh Kunda"
+        },
+        {
+          "id": "a08f2b2b-8192-47cc-9ff5-833e4dc0bf96",
+          "name": "Jataba"
+        },
+        {
+          "id": "4a60bb1f-2496-45ec-b84f-a82fca8fac11",
+          "name": "Jifarong"
+        },
+        {
+          "id": "dfb32b02-2591-453f-8ab0-407e85beac26",
+          "name": "Joli"
+        },
+        {
+          "id": "f06a8550-bed4-4c95-8114-c63023b533fa",
+          "name": "Jula Kunda"
+        },
+        {
+          "id": "42f3e9e3-8b17-4c66-b955-1f370cfa099a",
+          "name": "Kantong Kunda"
+        },
+        {
+          "id": "8bc4ce31-5ece-4504-9f15-ba2bb33a5d68",
+          "name": "Karantaba"
+        },
+        {
+          "id": "23b74f12-8d19-4584-b1bd-a09860492659",
+          "name": "Kemoto"
+        },
+        {
+          "id": "2c31cd93-6d00-45a5-bbd4-a93d40ca34bd",
+          "name": "Keneba"
+        },
+        {
+          "id": "3a27090f-c1f8-46fd-8cf9-572a4fb09f3b",
+          "name": "Keno Koto"
+        },
+        {
+          "id": "1294e3bc-66b7-4a9b-8f3e-7f5f4dbdb42b",
+          "name": "Kuli Kunda"
+        },
+        {
+          "id": "4d921f91-7a01-4963-a10e-09b1356fed46",
+          "name": "Kuyang Bajonki"
+        },
+        {
+          "id": "cd80e95b-3cc2-4b64-841d-5fd149b586f0",
+          "name": "Manarr"
+        },
+        {
+          "id": "a2bb60f3-1dcc-4f47-bd68-991652b63f26",
+          "name": "Mandina"
+        },
+        {
+          "id": "23c9af1b-1a14-4aef-958e-cba375436a1f",
+          "name": "Manduar"
+        },
+        {
+          "id": "162f7bb9-104f-4771-ac43-12e695d1cdcf",
+          "name": "Missira Tenda"
+        },
+        {
+          "id": "edc5d0e2-1e3f-4673-805c-f152529e12b6",
+          "name": "Nineteen"
+        },
+        {
+          "id": "441360eb-c6e1-4544-bde1-08adc637e633",
+          "name": "Nioro Jataba"
+        },
+        {
+          "id": "5d87a3a8-a292-4b39-b50c-86aa7cd9ee02",
+          "name": "Sandeng"
+        },
+        {
+          "id": "e95a00cd-80ef-47f7-8e43-fa8dd889b704",
+          "name": "Sankandi"
+        },
+        {
+          "id": "28630b7d-f763-40de-bad9-8dda0b141151",
+          "name": "Santamba"
+        },
+        {
+          "id": "5d7f6ba9-cdcf-4ec3-a0b7-da5c33318cfe",
+          "name": "Taborang Koto"
+        },
+        {
+          "id": "0e48f5a1-65a1-412d-a02c-62f2a48c779a",
+          "name": "Tankularr"
+        },
+        {
+          "id": "27c5785c-7c66-453d-b950-c6192392d975",
+          "name": "Wudeba"
+        }
+      ]
+    },
+    {
+      "id": "6-2",
+      "name": "Kiang Central",
+      "cities": [
+        {
+          "id": "a463b755-e221-4743-91d9-4465178868f8",
+          "name": "Bambako"
+        },
+        {
+          "id": "a655a558-9f17-4581-9aaa-02fa7d1d6a90",
+          "name": "Bumarr"
+        },
+        {
+          "id": "1962002a-ed90-4238-b752-f7b361fa8632",
+          "name": "Jatta Kunda"
+        },
+        {
+          "id": "fab183f6-9341-466a-8718-1d9e45b43fcf",
+          "name": "Jirroff"
+        },
+        {
+          "id": "25805ad8-e324-4513-bc13-31f566dce04d",
+          "name": "Kundang Numu Kunda"
+        },
+        {
+          "id": "fbad9c06-b1b4-4967-8439-a28d88e6419a",
+          "name": "Kundong Fula Kunda"
+        },
+        {
+          "id": "2e600fac-1cd5-48b2-82ef-8feeecb447ed",
+          "name": "Kundong Mariya"
+        },
+        {
+          "id": "15fdc379-846b-44c7-8f70-f8f74dbe0418",
+          "name": "Kwinella Nia Kunda"
+        },
+        {
+          "id": "87e76bd7-e0e4-433c-9a92-f357e9f2feeb",
+          "name": "Kwinella Sansankono"
+        },
+        {
+          "id": "b2be5b8d-5b7d-426b-8830-c16b0ac491f8",
+          "name": "Madina Angalleh"
+        },
+        {
+          "id": "0c6d2cda-7825-400c-8bd5-3bb6eb054ad1",
+          "name": "Mandina"
+        },
+        {
+          "id": "22c2f7a7-7b89-4289-b083-06c06b8e8777",
+          "name": "Nema"
+        },
+        {
+          "id": "2d5338e0-23c9-45e8-ac50-26f6c5ed14f7",
+          "name": "Nema kuta"
+        },
+        {
+          "id": "2f692b06-2959-4e3c-ac6d-dfc7f855ef32",
+          "name": "Nioro Angalleh"
+        },
+        {
+          "id": "6a49277d-a65b-40fc-a63c-9dba1b467d34",
+          "name": "Sare Mamudou"
+        },
+        {
+          "id": "4c505201-5f4b-4595-ab55-ae563cfa67c9",
+          "name": "Sare Ndala"
+        },
+        {
+          "id": "3882817e-5eb3-49ee-816d-66e8a10167c0",
+          "name": "Sare Sarjo"
+        },
+        {
+          "id": "07644cc0-46b8-4e16-b64d-257dd5f792a9",
+          "name": "Sarr Kunda"
+        },
+        {
+          "id": "31c7dc83-23cd-4b26-a8f2-28e00682b44e",
+          "name": "Sibeto"
+        },
+        {
+          "id": "1afd89c3-87e0-4e21-877a-760f10e5f52c",
+          "name": "Tabanani"
+        },
+        {
+          "id": "b5c95aa0-311c-4707-8e3d-52a3af7a5322",
+          "name": "Tendaba"
+        },
+        {
+          "id": "b084ef9f-39dd-4d26-b87a-6fee5eda5c69",
+          "name": "Wellingara"
+        },
+        {
+          "id": "74a6a164-4b7a-4235-942d-3d6a5503cbb1",
+          "name": "Wurokang"
+        }
+      ]
+    },
+    {
+      "id": "6-3",
+      "name": "Kiang East",
+      "cities": [
+        {
+          "id": "d43d1326-db01-4940-8acc-84ab88a82cee",
+          "name": "Genier"
+        },
+        {
+          "id": "26b64607-176d-4c44-8b44-c8a90ef8006f",
+          "name": "Jallow Kunda"
+        },
+        {
+          "id": "7e1bed46-ab37-469d-ab9f-c9238283ac09",
+          "name": "Jasobo Sanneh"
+        },
+        {
+          "id": "663685c7-fdb9-46b5-b3d6-d4564dd6617f",
+          "name": "Jomarr"
+        },
+        {
+          "id": "5fed1fae-baa3-4a39-946a-13125c9371ca",
+          "name": "Kaiaf"
+        },
+        {
+          "id": "7821a356-8564-44d5-881b-85e75ba74fcd",
+          "name": "Kolior Nyamala"
+        },
+        {
+          "id": "9677c0b5-5d97-4b34-8452-452c35d16627",
+          "name": "Kolior Sula"
+        },
+        {
+          "id": "58dacc4d-a9c5-47ea-a31c-631764324c94",
+          "name": "Madina Ceesay Kunda"
+        },
+        {
+          "id": "c5b8bc14-cb3e-48c4-965f-a31a8021beac",
+          "name": "Madina Kaiaf"
+        },
+        {
+          "id": "719a116f-291a-424b-8bb7-3aa18dff9914",
+          "name": "Massembeh"
+        },
+        {
+          "id": "a236d2e3-1cfc-4c21-8de6-e4c7639f1215",
+          "name": "Munku Talla"
+        },
+        {
+          "id": "a769741b-5149-4f1d-a778-b27534d664b0",
+          "name": "Njolfen"
+        },
+        {
+          "id": "36aa5046-9858-4d98-885f-b2f1bb34888e",
+          "name": "Sara Babou Manokang"
+        },
+        {
+          "id": "6ca447ae-3238-4ebf-877a-e8841250af4f",
+          "name": "Sare Musa"
+        },
+        {
+          "id": "4dc2c1ab-6ca0-4b52-a43e-c47bdd0280a4",
+          "name": "Sare Pateh"
+        },
+        {
+          "id": "0b3c29e6-091c-4c9c-a46a-ad5f23f46f1e",
+          "name": "Sare Samba"
+        },
+        {
+          "id": "67290523-0fd9-4b78-86b7-e8843e77b612",
+          "name": "Toranka Bantang"
+        },
+        {
+          "id": "f37f9068-1bb4-4307-b269-2ff6ac3aac9b",
+          "name": "Yorro Jula"
+        }
+      ]
+    },
+    {
+      "id": "6-4",
+      "name": "Jarra West",
+      "cities": [
+        {
+          "id": "3cfd6fcb-c287-409b-a27a-b4d529c06818",
+          "name": "Darusalam"
+        },
+        {
+          "id": "e1189475-5461-4326-a491-76fcc7b71986",
+          "name": "Fonkoi Kunda"
+        },
+        {
+          "id": "105193aa-c869-4b64-b8ba-b9c19b3b94a3",
+          "name": "Giffine"
+        },
+        {
+          "id": "d44396b0-b549-4b0f-859b-bb220dfff224",
+          "name": "Jabisa"
+        },
+        {
+          "id": "5c5c9bdd-c3c0-4b12-b066-9965bb8c873d",
+          "name": "Jenoi"
+        },
+        {
+          "id": "cd9a58e8-210b-47eb-859f-e073c4e8e804",
+          "name": "Kani Kunda"
+        },
+        {
+          "id": "3c1cb3fc-3b03-4344-9087-0ade07376774",
+          "name": "Karantaba"
+        },
+        {
+          "id": "269ddd85-86b8-45fb-93de-3c07480f1657",
+          "name": "Kohel"
+        },
+        {
+          "id": "a99f7f68-0e07-45e0-94bd-317319a6bb2e",
+          "name": "Madina Fonkoi"
+        },
+        {
+          "id": "776fcb7f-5297-4bfe-9b3e-8ee587548c0f",
+          "name": "Mansakonko"
+        },
+        {
+          "id": "5d4388f8-08b2-45ac-b2e6-433a9e4ec83d",
+          "name": "Misira"
+        },
+        {
+          "id": "1d6296ff-bff2-4e6c-a26d-8fd72bd4401a",
+          "name": "Pakalinding"
+        },
+        {
+          "id": "c17b1b19-d728-46e4-9140-b71561216d27",
+          "name": "Sankuwia"
+        },
+        {
+          "id": "6bcf0c27-96d7-489f-b669-dc5d5be7cba7",
+          "name": "Sare Biran"
+        },
+        {
+          "id": "1eaf44cd-1ec0-4854-bb68-5ded12c6d289",
+          "name": "Sare Musa (Diganteh)"
+        },
+        {
+          "id": "d60d9bd6-92ee-4167-8e2d-cc26c2d0df99",
+          "name": "Sare Saidy"
+        },
+        {
+          "id": "a83bde6b-92d1-4485-b859-26861c69ad43",
+          "name": "Seno Bajonki"
+        },
+        {
+          "id": "4afe7ef6-14d3-4b8d-b808-68a2e3a635ee",
+          "name": "Si Kunda"
+        },
+        {
+          "id": "3c15c5e0-d6b7-4a11-9024-b05b6ade8d88",
+          "name": "Soma"
+        },
+        {
+          "id": "9cf8e410-5e44-4fab-a200-c574635d4a02",
+          "name": "Sumbundu"
+        },
+        {
+          "id": "aa88741d-b80a-4901-99ae-388bdd69a03c",
+          "name": "Toniataba"
+        }
+      ]
+    },
+    {
+      "id": "6-5",
+      "name": "Jarra central",
+      "cities": [
+        {
+          "id": "048d53cc-64b2-4cd1-bec0-c9346abb1d0a",
+          "name": "Badumeh Koto"
+        },
+        {
+          "id": "9e40c7a1-f665-4d7b-9a6f-21093887aa85",
+          "name": "Badumeh Kuta"
+        },
+        {
+          "id": "b65392e4-883c-4833-8e89-413ad525e8a5",
+          "name": "Buiba Jallow Kunda"
+        },
+        {
+          "id": "e6308162-1fef-4669-91dd-0de506373e00",
+          "name": "Buiba Mandinka"
+        },
+        {
+          "id": "ea140b1d-2a22-444d-9119-3ebb48aaa10e",
+          "name": "Buiba Musa Njadoh"
+        },
+        {
+          "id": "be6bb686-e92e-43ed-830e-a454c007ef48",
+          "name": "Diganteh Demba Gullo"
+        },
+        {
+          "id": "b48971d3-5824-402f-8867-f556e0f44e90",
+          "name": "Forlolo"
+        },
+        {
+          "id": "06ea3b4f-8812-4963-a3f9-e29bfc949fb5",
+          "name": "Foroya Fula"
+        },
+        {
+          "id": "723e39d9-9127-4499-8028-0c25c4bb5736",
+          "name": "Hamdalai"
+        },
+        {
+          "id": "2c64aa11-497e-49cb-9c44-a388251a83bd",
+          "name": "Jalangbereh Crossma"
+        },
+        {
+          "id": "6465a61a-83ae-4c21-ad19-57de348b6e3c",
+          "name": "Jamaya"
+        },
+        {
+          "id": "6df30f9f-adc3-4c82-b63e-dafde86c825b",
+          "name": "Japineh Marikoto"
+        },
+        {
+          "id": "2d69716d-0fc2-4918-a450-347062ce5a0a",
+          "name": "Japineh Tembeto"
+        },
+        {
+          "id": "b86a80bf-eb2a-4edc-bb85-357206a88649",
+          "name": "Jobe Kunda"
+        },
+        {
+          "id": "23570e1f-2329-4915-b614-c2f4960310a3",
+          "name": "Kanuma"
+        },
+        {
+          "id": "8c74e63e-3b0c-4e2f-8a33-aac823090b99",
+          "name": "Madina Foroyaa"
+        },
+        {
+          "id": "2daab7a3-471a-4931-bca8-3c17e22b203a",
+          "name": "Madina Fula Kunda"
+        },
+        {
+          "id": "32c3b23a-fc6d-4c54-95e1-c192bd984e6e",
+          "name": "Minna"
+        },
+        {
+          "id": "7c2c0105-31b2-42dc-8d60-66e520f25574",
+          "name": "Nema"
+        },
+        {
+          "id": "ddc1482f-cc7e-484b-8f0d-325dbe808ec0",
+          "name": "Sanu Kolly"
+        },
+        {
+          "id": "f82f4442-2f76-481b-be05-a702c1c5ad1d",
+          "name": "Sare Bully"
+        },
+        {
+          "id": "e1f33d06-7a58-4abf-8832-ce4852a29b9e",
+          "name": "Sare Saidy"
+        },
+        {
+          "id": "60c9e8d4-ef51-4987-a4d7-c9148a63b6f3",
+          "name": "Sasita Toranka"
+        },
+        {
+          "id": "f44319b0-4f4d-4892-b240-044df971eff1",
+          "name": "Sitahuma"
+        },
+        {
+          "id": "6269d26d-5d1f-4ca9-ae95-8d748c535d2b",
+          "name": "Suluko"
+        }
+      ]
+    },
+    {
+      "id": "6-6",
+      "name": "Jarra East",
+      "cities": [
+        {
+          "id": "a97f6216-9673-473d-9cf0-6714d044a6c8",
+          "name": "Bantan Nyima"
+        },
+        {
+          "id": "6a028782-b21a-43f4-8e7e-8fcc6c6c0433",
+          "name": "Barrow Kunda"
+        },
+        {
+          "id": "d049af35-513d-4cd6-88ff-74d071b4925c",
+          "name": "Budyell"
+        },
+        {
+          "id": "3fdb1cc3-b62b-47ab-b4f4-b6eb459b401c",
+          "name": "Bureng"
+        },
+        {
+          "id": "bd2c6789-0d13-4cb5-af27-cb8c9fb1e79f",
+          "name": "Dabaly"
+        },
+        {
+          "id": "ab3976c2-8b72-45e8-940d-9c43291ad349",
+          "name": "Dabatu (Sampang Ndama)"
+        },
+        {
+          "id": "0a0b0d04-06ec-4b37-a7d9-332804e3cda5",
+          "name": "Darsilami"
+        },
+        {
+          "id": "15432a90-5927-4a69-bcd2-f79fa9592a50",
+          "name": "Darsilami Crossma"
+        },
+        {
+          "id": "fedcd02e-c583-4dec-a142-3d930f09fd7f",
+          "name": "Demati Kiunda"
+        },
+        {
+          "id": "d2ab457a-9689-4916-b126-265a8f73724b",
+          "name": "Dingirai"
+        },
+        {
+          "id": "c0ef3acc-6034-4663-b03e-722889cee99d",
+          "name": "Dongoro Nding"
+        },
+        {
+          "id": "a85aa90c-cb12-431b-b853-e0789ce64bb8",
+          "name": "Dongoroba"
+        },
+        {
+          "id": "ef5443d0-cbd8-43ae-a574-c2551bc9262e",
+          "name": "Felleng Koto"
+        },
+        {
+          "id": "92f5233f-3a91-455b-9ca3-c504819a832d",
+          "name": "Hamdalai"
+        },
+        {
+          "id": "891ff3fd-9abd-405d-b3f1-054c84e3b39b",
+          "name": "Jababa"
+        },
+        {
+          "id": "cfda6a86-29cd-440b-9bfe-636b87d5b111",
+          "name": "Jassong"
+        },
+        {
+          "id": "3748edfd-2759-46a2-95fe-fd4b525f421a",
+          "name": "Madina"
+        },
+        {
+          "id": "56190c28-8350-4641-98df-d208b701b568",
+          "name": "Missira Cham (Minna)"
+        },
+        {
+          "id": "dc9b1f8c-86eb-4d6f-b635-c12c01df0f06",
+          "name": "N'Joba Kunda"
+        },
+        {
+          "id": "f1efd973-ced3-419a-adeb-6b24260f699b",
+          "name": "Nema kuta"
+        },
+        {
+          "id": "d5439f8a-78ce-4747-a5c6-db749b342345",
+          "name": "Niawurulung"
+        },
+        {
+          "id": "417a0af7-a24f-496c-9e91-d1feb1ec41c6",
+          "name": "Pakaliba"
+        },
+        {
+          "id": "99e7716e-833e-491f-813b-ecff68b8d86a",
+          "name": "Sibinding"
+        },
+        {
+          "id": "eb3ef2d7-af45-49fd-91d3-37687f766df7",
+          "name": "Sibinding Crossma"
+        },
+        {
+          "id": "3bd7e071-392e-4ca6-9030-f7d63c60e520",
+          "name": "Sinchu Njenkuntu"
+        },
+        {
+          "id": "7f1b5137-34fa-467f-8895-fa5841b68939",
+          "name": "Sukuta"
+        },
+        {
+          "id": "4b766ed3-089a-4b8d-abb7-389cc72eb691",
+          "name": "Sutukung"
+        },
+        {
+          "id": "3f5b6ce5-4a6f-455f-9019-578e43ea88e2",
+          "name": "Sutukung Jallow Kunda"
+        },
+        {
+          "id": "80bd718c-b3a1-426d-8355-c9494fe7f340",
+          "name": "Wellingara (Juta Kunda)"
+        },
+        {
+          "id": "426014ed-c19e-40a5-ad75-068e97a0c456",
+          "name": "Wellingara-Ba (Bureng Crossma)"
+        }
+      ]
+    }
+  ]
+}

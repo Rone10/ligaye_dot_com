@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "name": "WCR",
+    "slug": "wcr"
+  },
+  {
+    "id": "2",
+    "name": "Banjul",
+    "slug": "banjul"
+  },
+  {
+    "id": "3",
+    "name": "Kanifing Municipality",
+    "slug": "kanifing-municipality"
+  },
+  {
+    "id": "4",
+    "name": "West Coast Region",
+    "slug": "west-coast-region"
+  },
+  {
+    "id": "5",
+    "name": "North Bank Region",
+    "slug": "north-bank-region"
+  },
+  {
+    "id": "6",
+    "name": "Lower River Region",
+    "slug": "lower-river-region"
+  },
+  {
+    "id": "7",
+    "name": "Central River Region",
+    "slug": "central-river-region"
+  },
+  {
+    "id": "8",
+    "name": "Upper River Region",
+    "slug": "upper-river-region"
+  }
+]

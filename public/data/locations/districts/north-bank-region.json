@@ -1,0 +1,1379 @@
+{
+  "region": {
+    "id": "5",
+    "name": "North Bank Region",
+    "slug": "north-bank-region"
+  },
+  "districts": [
+    {
+      "id": "5-1",
+      "name": "Lower Niumi",
+      "cities": [
+        {
+          "id": "5415125e-24d1-4903-9732-afc42b062040",
+          "name": "Amdalai"
+        },
+        {
+          "id": "8d02ada3-cef9-4a91-8618-dd96c0934835",
+          "name": "Bakindick Koto"
+        },
+        {
+          "id": "7cf538d2-dd61-455e-b62e-b3707e97e398",
+          "name": "Bakindick Mandinka"
+        },
+        {
+          "id": "936593c6-6906-4525-8d89-e50819a45fd3",
+          "name": "Bakindick Tabokoto"
+        },
+        {
+          "id": "c8694d94-8e22-4d43-9f7c-2258fc2de8c0",
+          "name": "Bakindick Wollof"
+        },
+        {
+          "id": "1f5a5a58-a8a8-4d79-9b52-7e90b2d89d04",
+          "name": "Bangally"
+        },
+        {
+          "id": "c5e534f2-1347-4710-b61b-933a9a32ae54",
+          "name": "Barra"
+        },
+        {
+          "id": "8813513e-d769-462c-8501-2d591b8bf6a4",
+          "name": "Berending"
+        },
+        {
+          "id": "3781db68-d284-4158-abe0-c2a58b57cd30",
+          "name": "Buniadu"
+        },
+        {
+          "id": "d473a9fe-3418-4c6d-95af-d698efea79ac",
+          "name": "Busura (Kunkujang)"
+        },
+        {
+          "id": "ba30b673-7c97-44d4-8943-1d07db2bb65f",
+          "name": "Chamen"
+        },
+        {
+          "id": "62d25001-54af-4b71-9b53-60b4b1f272d4",
+          "name": "Chessay"
+        },
+        {
+          "id": "b760874f-25dc-4438-97e2-19062d573da7",
+          "name": "Essau"
+        },
+        {
+          "id": "c571e099-ba94-483f-bd2a-08cf6600f5bd",
+          "name": "Fafanding"
+        },
+        {
+          "id": "d3d2c969-a5a6-49d0-8b34-25f70745cab1",
+          "name": "Fass Njaga Choi"
+        },
+        {
+          "id": "67032746-9561-4fc0-aba8-be58dc9445d5",
+          "name": "Jamagen"
+        },
+        {
+          "id": "e599e8e4-0dc1-45d9-a5b2-c8f5630d3bed",
+          "name": "Jamagen (Kerr Biran Khan)"
+        },
+        {
+          "id": "659829ba-dfa1-4dcb-b8dc-8d83f71b825e",
+          "name": "Jamwelly (Kerr Alieu)"
+        },
+        {
+          "id": "52d16818-a74d-46c8-b5c4-ebf61dcc053f",
+          "name": "Jinack Kajata"
+        },
+        {
+          "id": "9b90b052-f4c7-4a6c-8ffc-d4046cc9f5e7",
+          "name": "Jinack Niji"
+        },
+        {
+          "id": "71a1559e-a5e4-494b-9481-1e05d42c3ffa",
+          "name": "Kaunma"
+        },
+        {
+          "id": "cdd404be-1e45-44e8-a646-f6d43aff2900",
+          "name": "Kerr Bahoum"
+        },
+        {
+          "id": "ada95581-cb23-4df9-8fd6-c94ab262ceae",
+          "name": "Kerr Chandeh"
+        },
+        {
+          "id": "3b66717b-a587-46f4-b736-0add4d277eb8",
+          "name": "Kerr Gallow"
+        },
+        {
+          "id": "4992458e-75f5-444a-b647-6ca90eba72cd",
+          "name": "Kerr Jatta"
+        },
+        {
+          "id": "f84617fd-9559-4378-9e98-9f236834a407",
+          "name": "Kerr Mbuguma"
+        },
+        {
+          "id": "0e8c9af3-3e3c-44ac-96bb-34e94566c970",
+          "name": "Kerr Omar Jawara"
+        },
+        {
+          "id": "450bea61-1220-477f-b391-c2bc320fe77f",
+          "name": "Kerr Pateh"
+        },
+        {
+          "id": "9cb4745c-500e-46b1-9de3-64134bd17d96",
+          "name": "Kerr Sanyang"
+        },
+        {
+          "id": "26badbce-0932-4c9e-9022-5b2a9d9ea62d",
+          "name": "Kerr Tubaye"
+        },
+        {
+          "id": "bd5c3e07-1abe-459e-9f76-e750321173f9",
+          "name": "Kerr Wally (Harr Yala)"
+        },
+        {
+          "id": "82324bc7-9d4e-4f17-a8ab-1654ebc0a46c",
+          "name": "Kerr Wally (Jackley)"
+        },
+        {
+          "id": "cd238dac-8363-4ed4-9ef0-314afbd4cfe7",
+          "name": "Kerr Yero (Sinchu Yero)"
+        },
+        {
+          "id": "94965048-1a29-4ec5-b8ec-ab7c7c0b11d8",
+          "name": "Kolley Kunda"
+        },
+        {
+          "id": "17d8b107-c589-46cb-955c-f57f7bf28f6c",
+          "name": "Lang Sarr"
+        },
+        {
+          "id": "439bf796-3d25-4c17-9151-0eca0e95d415",
+          "name": "Lewna"
+        },
+        {
+          "id": "5622c8dc-a3d2-4dee-b612-8cd8085a72a5",
+          "name": "Lowen"
+        },
+        {
+          "id": "9bc2ea71-a615-4895-86ea-fd94a9ac880b",
+          "name": "Macca Bala Manneh"
+        },
+        {
+          "id": "12c055b2-1108-421d-a432-9ed43aa62d30",
+          "name": "Malick Sarr"
+        },
+        {
+          "id": "f8c85194-a069-494c-94a9-5efc73c30575",
+          "name": "Mayamba"
+        },
+        {
+          "id": "1803ab2f-6716-4404-bbe2-35f27990243c",
+          "name": "Mbahen (Kerr Ngata)"
+        },
+        {
+          "id": "a9e37736-b970-459a-bb39-616a89997916",
+          "name": "Mbankam"
+        },
+        {
+          "id": "22d870cf-75a4-4172-a755-5eea1c4fea4d",
+          "name": "Mbollet Ba"
+        },
+        {
+          "id": "afdc15a7-5610-4460-a6b3-0eeabb560eef",
+          "name": "Mbullum"
+        },
+        {
+          "id": "7bf98d42-5998-4e36-99d7-d89ddd7d9ebe",
+          "name": "Medina Daru"
+        },
+        {
+          "id": "d4a5c950-c375-4dd1-bc0e-8699c103137f",
+          "name": "Medina Kanuma"
+        },
+        {
+          "id": "97ede4db-db2b-4259-8a6b-667f5fe400c9",
+          "name": "Medina Mannen"
+        },
+        {
+          "id": "d48e64fd-2223-44c2-91e8-2cc458c412ca",
+          "name": "Medina Sergne Mass"
+        },
+        {
+          "id": "cdbb3994-0ca1-4e62-9482-e09e2038dc1f",
+          "name": "Medina Sotokoi (Sinchu Mutel)"
+        },
+        {
+          "id": "7f300d6a-e418-4fc2-9702-90ad58f28b77",
+          "name": "Mendy Kunda"
+        },
+        {
+          "id": "3e8f2dfd-e2c7-4b93-8041-a0db465c0c1b",
+          "name": "Missiranding"
+        },
+        {
+          "id": "189cd74f-8a8b-42f4-bd2f-c2ddf66e208a",
+          "name": "Ndofan"
+        },
+        {
+          "id": "83b95e4e-a0af-424e-ad9f-23fcabf0d8d6",
+          "name": "Ndugu Charen"
+        },
+        {
+          "id": "408aedb5-5a3b-4c3c-888c-dc0419be57db",
+          "name": "Ndungu Kebbeh"
+        },
+        {
+          "id": "f27d2bd2-01a9-4525-b4c5-5323fa3303d0",
+          "name": "Njongon"
+        },
+        {
+          "id": "451f83ac-4a40-4906-8296-a7be64c2e9db",
+          "name": "Njoufain"
+        },
+        {
+          "id": "db766a7d-717a-45a4-aa90-bf64ce7091cb",
+          "name": "Saderr Jobe (Sam Njoben)"
+        },
+        {
+          "id": "a450a447-4531-4d65-9a43-605f4a682d77",
+          "name": "Sam M'Bollet"
+        },
+        {
+          "id": "56c78b9a-0f94-4c6e-b739-3ad03570719b",
+          "name": "Samba Kala"
+        },
+        {
+          "id": "e7900737-8a92-4531-b760-45d842d08aad",
+          "name": "Samba Njabeh"
+        },
+        {
+          "id": "788aebb0-2716-4c5e-977e-d06d93291d7b",
+          "name": "Samba Yassin"
+        },
+        {
+          "id": "5acf63a7-521c-4b5f-a6b9-1b1c4fbf0c62",
+          "name": "Sami"
+        },
+        {
+          "id": "025988d7-304a-4669-a819-69f0f2987b30",
+          "name": "Sare Bigi"
+        },
+        {
+          "id": "a9dd0f74-5e19-4d4b-b74d-a3279af3529b",
+          "name": "Sare Yerro"
+        },
+        {
+          "id": "ee010cb6-d8b0-405e-bda3-e0cdc8085ed0",
+          "name": "Touba Angalle"
+        },
+        {
+          "id": "a9653100-f3a4-41fd-97dc-106b628b3689",
+          "name": "Wellingara Lewna Yallal (Kerr Mari)"
+        }
+      ]
+    },
+    {
+      "id": "5-2",
+      "name": "Upper Niumi",
+      "cities": [
+        {
+          "id": "f9d91468-60a0-49ba-99e9-f26f9c490e22",
+          "name": "Albreda"
+        },
+        {
+          "id": "fd6ce656-6517-42a1-98e0-1b457e860f78",
+          "name": "Aljamdou"
+        },
+        {
+          "id": "9e0adf2b-cf5c-47f6-86a6-fae50de7e46d",
+          "name": "Bafuloto"
+        },
+        {
+          "id": "19c2109b-6bb5-40f8-b2b3-82383da04aca",
+          "name": "Bakalarr"
+        },
+        {
+          "id": "59e1347c-9e37-422a-ae79-dd3adda64bf8",
+          "name": "Chamen Sosseh"
+        },
+        {
+          "id": "68bbcaa4-c4a1-48b6-ae89-6a34b56faefa",
+          "name": "Chilla"
+        },
+        {
+          "id": "32808dcf-1569-4414-82cc-17a6ec1a3681",
+          "name": "Daru Abdoulie"
+        },
+        {
+          "id": "0e3fbfc3-54e0-436b-94eb-79b8d00f7482",
+          "name": "Fass Omar Chaho"
+        },
+        {
+          "id": "dab9af98-4a58-4716-b980-944a5404bc25",
+          "name": "Jallow (Kahel)"
+        },
+        {
+          "id": "1b0b7c2c-68c9-4990-86c7-b2ca2813ad74",
+          "name": "Jufureh"
+        },
+        {
+          "id": "6416e730-19bc-4865-a543-dc5521b58174",
+          "name": "Jurunku"
+        },
+        {
+          "id": "0a2121c0-020e-4fbc-a761-7a5c59cf77a9",
+          "name": "Kassewa"
+        },
+        {
+          "id": "1e6f6c07-47cb-4670-a3a6-1a039490fd60",
+          "name": "Kerr Alagie Yero"
+        },
+        {
+          "id": "476e62a4-a882-448c-850c-9ea3e535c4f0",
+          "name": "Kerr Biran Kan"
+        },
+        {
+          "id": "08ee9d5c-b943-4e23-a9a1-930802cf666a",
+          "name": "Kerr Chebo Ceesay"
+        },
+        {
+          "id": "6bcd0113-804b-45ac-a6ef-8165a470dbfa",
+          "name": "Kerr Chebou"
+        },
+        {
+          "id": "87cccfa0-e3ab-4c70-85cf-da7f7fbdf3a7",
+          "name": "Kerr Cherno Baba"
+        },
+        {
+          "id": "5c102e70-0c81-4bc5-9a6c-ee04c3f6b4b2",
+          "name": "Kerr Chikam"
+        },
+        {
+          "id": "fb0eee8c-d21f-45c1-8c1a-e4d3aba1540f",
+          "name": "Kerr Dekodeh"
+        },
+        {
+          "id": "7cc0c7e3-26bc-43af-a546-b84dad32b48e",
+          "name": "Kerr Gumbo"
+        },
+        {
+          "id": "ae3fe0b3-4051-4d05-87ce-cfade3946bc8",
+          "name": "Kerr Juma Hawa"
+        },
+        {
+          "id": "d6bc22b5-73d6-4389-870b-0a92be0646ac",
+          "name": "Kerr Mama"
+        },
+        {
+          "id": "b9bbe67c-af38-4b3b-b1e4-ce39aa48a890",
+          "name": "Kerr Marry Dobo"
+        },
+        {
+          "id": "ec436045-7590-4592-a8d2-835d03ad746d",
+          "name": "Kerr Ousman Busso (Kaba Koto)"
+        },
+        {
+          "id": "2190bfcf-b755-4a84-b002-8af2b06fdb9d",
+          "name": "Kerr Sait Cham"
+        },
+        {
+          "id": "e431302e-a93e-45bd-aa73-7b85371f24f8",
+          "name": "Kerr Sidik (Daru Salam)"
+        },
+        {
+          "id": "44bbb8e6-108a-4336-b89e-e99805e6b0e4",
+          "name": "Kerr Sukum (Jamburr)"
+        },
+        {
+          "id": "270fae40-0050-47ba-961f-adf5e9c9e322",
+          "name": "Lamin"
+        },
+        {
+          "id": "6474d165-b08d-4f1b-b4de-45957f97a172",
+          "name": "Ma Demba Kunda"
+        },
+        {
+          "id": "8beb2ea8-36ba-4e0c-b835-d0f5f4234ce1",
+          "name": "Mahmuda"
+        },
+        {
+          "id": "3b77922d-65b5-4684-9eaa-624ca6e41457",
+          "name": "Malick Nana"
+        },
+        {
+          "id": "c95a247f-a452-4a66-8342-6b1c17944dd5",
+          "name": "Mbantang Killing"
+        },
+        {
+          "id": "e92d3e8c-2b36-4d20-ac57-109322e4c412",
+          "name": "Medina Sanghako"
+        },
+        {
+          "id": "a3fc56a2-2460-4de1-8387-33545ead18c9",
+          "name": "Medina Sedia"
+        },
+        {
+          "id": "51e675ed-f3d2-4f45-a871-51aa6d7228ab",
+          "name": "Nema Kunku"
+        },
+        {
+          "id": "2d38813f-1ef9-45d2-a99e-1aca98205356",
+          "name": "Nyofelleh"
+        },
+        {
+          "id": "d439a60a-f35b-4e2a-9c6c-3fb308ad3199",
+          "name": "Pakala Demba Kholleh"
+        },
+        {
+          "id": "683e75dc-510a-46aa-a5d0-561c6128edfa",
+          "name": "Pakau Njogu"
+        },
+        {
+          "id": "d3a9478f-0c37-44bb-9f59-b18e09389161",
+          "name": "Pakau Saloum"
+        },
+        {
+          "id": "980211f7-d7fd-4317-a508-5217d5ca9dfd",
+          "name": "Passy Chally"
+        },
+        {
+          "id": "4eebe3bb-029b-4066-8224-5fc79f017703",
+          "name": "Passy Mamut Jaw"
+        },
+        {
+          "id": "2beec4db-3980-4259-90da-6ce02d2a9c4a",
+          "name": "Prince"
+        },
+        {
+          "id": "f149755c-625a-4b77-83d0-4d237a96c81d",
+          "name": "Sami Koto"
+        },
+        {
+          "id": "ed60a4f9-8117-4129-8fc7-0a04c7636104",
+          "name": "Sami Kuta"
+        },
+        {
+          "id": "ac99004e-2c4a-4903-9ed6-a3a6114d7e2f",
+          "name": "Sami Tenda"
+        },
+        {
+          "id": "6184f7f5-5923-424c-bd29-6888b13f7509",
+          "name": "Sare Alpha"
+        },
+        {
+          "id": "d41e21ad-5206-40cd-8fee-cee98a33dde4",
+          "name": "Sare Biram (Kembuling)"
+        },
+        {
+          "id": "e3f7560b-257c-4bd9-967f-be24b5783edd",
+          "name": "Sika"
+        },
+        {
+          "id": "bffc8790-e850-4f4c-8b02-9da1e05ed6de",
+          "name": "Sitanunku"
+        },
+        {
+          "id": "8b292db4-2c09-432b-978b-bd5626967fa4",
+          "name": "Sotokoi (Kerr Weriko)"
+        },
+        {
+          "id": "ca5604ab-e990-40fb-82ae-e4e5e739df31",
+          "name": "Tuba Kolong"
+        }
+      ]
+    },
+    {
+      "id": "5-3",
+      "name": "Jokadu",
+      "cities": [
+        {
+          "id": "5253db59-6a92-4e57-b593-5619d4af0615",
+          "name": "Amdalai"
+        },
+        {
+          "id": "271d1ef0-238e-4019-b722-3f74679aa65b",
+          "name": "Bakang"
+        },
+        {
+          "id": "ed791f21-cd32-475f-a5cb-31009e7a4ad2",
+          "name": "Bali Hali Hawa (Kerr Ali Hawa)"
+        },
+        {
+          "id": "103bef16-49f0-43ab-af63-a2a87588cbf8",
+          "name": "Bali Mandinka"
+        },
+        {
+          "id": "d921a2e0-7bac-4610-bb8a-5c0f654df3d8",
+          "name": "Bantanding Toranka"
+        },
+        {
+          "id": "d43d1a4e-b6d9-42ae-bb29-014d2a489077",
+          "name": "Bantanding Wollof"
+        },
+        {
+          "id": "bdcf7959-5ae4-41cd-9c0a-d87fc9bca0ab",
+          "name": "Barianding"
+        },
+        {
+          "id": "9d32b532-e755-44d6-a582-230d5da34aef",
+          "name": "Chesey Majaw"
+        },
+        {
+          "id": "5e4bd59a-0fce-4904-aa61-1d11dc6a6614",
+          "name": "Conteh (Medina Mbayen)"
+        },
+        {
+          "id": "5d7ce35b-b224-42e6-92ac-d5df1906ae47",
+          "name": "Darou Fodeba"
+        },
+        {
+          "id": "6b11bb19-584d-4462-b2ce-fc31dd54ce68",
+          "name": "Darsilameh"
+        },
+        {
+          "id": "4eeb2e02-47e3-46f8-ae0c-6bad4aeb3154",
+          "name": "Daru Lowen"
+        },
+        {
+          "id": "4ab0a600-c00f-4359-9acc-2ece23fb8a53",
+          "name": "Daru Matarr Sarr"
+        },
+        {
+          "id": "bd5c5350-d59f-437d-8803-2e27662925d1",
+          "name": "Gissay (Kerr Amadou Fayol)"
+        },
+        {
+          "id": "e758b0ac-3829-4c27-94dc-7fd14d830b96",
+          "name": "Jamagen"
+        },
+        {
+          "id": "3d7e3254-1cff-42b0-9b69-b61fb853e961",
+          "name": "Juma Sira(Kerr Yag)"
+        },
+        {
+          "id": "86d223ed-3ca1-40f0-9f21-f04b25fecf72",
+          "name": "Karantaba"
+        },
+        {
+          "id": "f3fa6374-c856-49a4-8a70-14bda331a4fe",
+          "name": "Kerr Alagie Malick"
+        },
+        {
+          "id": "25b95b38-1c79-4493-8730-5bcf84af532c",
+          "name": "Kerr Gido (Samba Chargeh)"
+        },
+        {
+          "id": "3cc6af9b-d611-431a-a45e-033dabbe9983",
+          "name": "Kerr Gumbo"
+        },
+        {
+          "id": "bbec7863-2642-44ee-ba5f-5b2c8d2a2d23",
+          "name": "Kerr Jane"
+        },
+        {
+          "id": "93f221fd-4adc-4a8f-938e-0d6dbdec5d90",
+          "name": "Kerr Jarga Jobe"
+        },
+        {
+          "id": "1765d5fa-de68-4181-81b4-b0d348d97459",
+          "name": "Kerr Ngorr"
+        },
+        {
+          "id": "77da1b5a-81ef-4b80-8a6b-78ed3f410095",
+          "name": "Kerr Ngoyan"
+        },
+        {
+          "id": "83150572-4a59-4863-9ebd-70f2258a76fd",
+          "name": "Kerr Omar Saine"
+        },
+        {
+          "id": "170a42e0-2ba4-4169-a911-6d6de870cf05",
+          "name": "Kerr Selleh"
+        },
+        {
+          "id": "56d877e2-b0bd-44b2-9676-47bf9f788fc9",
+          "name": "Kerr Wally"
+        },
+        {
+          "id": "7c012806-6f84-470b-84e6-8eb164839505",
+          "name": "Kuntaya"
+        },
+        {
+          "id": "cfac3341-a2cc-490a-bfc1-c0672b199312",
+          "name": "Mecca Omar Manneh"
+        },
+        {
+          "id": "74a43c56-7b5b-4baa-8844-38cb7bd95c5a",
+          "name": "Medina Njama"
+        },
+        {
+          "id": "cbe7ea66-b8f5-44b3-b5fb-9c138340ff3a",
+          "name": "Medina Talen"
+        },
+        {
+          "id": "2ed7fadd-1b7d-4770-ae8c-3cf8378cf34f",
+          "name": "Memmeh"
+        },
+        {
+          "id": "61416f38-6980-4d67-86ee-fa6a0851d267",
+          "name": "Missira Alagie Karu"
+        },
+        {
+          "id": "51cffd5f-473c-4780-a1eb-fae30d264728",
+          "name": "Munyagen"
+        },
+        {
+          "id": "437936b5-df40-4c14-ae83-9ab57cc8870c",
+          "name": "N'Darameh Joka"
+        },
+        {
+          "id": "38fce7dd-077f-4ece-aa76-1e14b6a16c89",
+          "name": "Njugareh"
+        },
+        {
+          "id": "0f973cf4-60a8-45e5-be52-ddac9851c8c1",
+          "name": "Sam Njoben (Kerr Abdou Fady)"
+        },
+        {
+          "id": "3447d385-9eee-41e4-9616-fbe3de17f3cf",
+          "name": "Sare Pateh Jawo"
+        },
+        {
+          "id": "2519ff4f-b1ae-4216-a4a7-2951a1bea142",
+          "name": "Tambana"
+        },
+        {
+          "id": "0b9e0d31-b87f-4252-8f7f-59eb655ba90e",
+          "name": "Toro Alasan Wellingara"
+        }
+      ]
+    },
+    {
+      "id": "5-4",
+      "name": "Lower Badibu",
+      "cities": [
+        {
+          "id": "92850923-f8c0-4257-a484-d8f5ecb1feb7",
+          "name": "Amdalai (Pallen)"
+        },
+        {
+          "id": "88901ff3-70dc-437e-92b5-af677668e437",
+          "name": "Banni"
+        },
+        {
+          "id": "f128ada7-4d29-4ec6-9823-fa9fb2d4379f",
+          "name": "Choken Fula"
+        },
+        {
+          "id": "372360dd-f725-4510-991d-2fe015c6de3c",
+          "name": "Choken Missira"
+        },
+        {
+          "id": "b643bc1c-91bd-4c20-b3dc-752fda2eccc5",
+          "name": "Daru Salam"
+        },
+        {
+          "id": "11e8e475-4f19-497c-b6f9-bb89a76b4da0",
+          "name": "Foday Biran"
+        },
+        {
+          "id": "87fe484a-6604-46c8-a136-d9a7152e53b2",
+          "name": "Gunjur"
+        },
+        {
+          "id": "fe4154fc-8646-450e-838b-975f5d21b706",
+          "name": "Kerewan"
+        },
+        {
+          "id": "f31b5f7e-16a0-4ea4-861d-7593302c008b",
+          "name": "Kerr Ardo"
+        },
+        {
+          "id": "7e08c682-81f5-4ac5-b512-9afec82a2de4",
+          "name": "Kerr Banno"
+        },
+        {
+          "id": "19a9deef-35f5-46c7-8294-ef78dacabac8",
+          "name": "Kinteh Kunda Janneh-ya"
+        },
+        {
+          "id": "d00884a3-7bf6-470c-81e9-5ab1d7e5692b",
+          "name": "Mbamurr Kunda"
+        },
+        {
+          "id": "fca13df5-33c0-45c5-b875-dc4d8485105e",
+          "name": "Njawara"
+        },
+        {
+          "id": "e75833dc-cd1c-4e43-8000-ad28e2d546bc",
+          "name": "Njie Kunda"
+        },
+        {
+          "id": "345eab74-3da7-465f-a201-ffbd2e311e38",
+          "name": "Panneh Bah"
+        },
+        {
+          "id": "dccf207f-2087-47bf-95b8-5b044454be30",
+          "name": "Saaba"
+        },
+        {
+          "id": "fbff0fcb-2eda-469d-a747-9bebbc3967cf",
+          "name": "Samba Musa"
+        },
+        {
+          "id": "40a50844-89a9-4d2e-85ca-b07702ac100e",
+          "name": "Suwareh Kunda"
+        },
+        {
+          "id": "b26c1a6f-606a-42e7-a8d9-ae553f3fade2",
+          "name": "Taiba (Jebel Satou)"
+        },
+        {
+          "id": "da38480a-1e25-42c3-8586-fd9f1bf7e32f",
+          "name": "Tallen Fula"
+        },
+        {
+          "id": "bf49a2aa-5411-4d92-ae1a-f35f5685779a",
+          "name": "Tallen Wollof"
+        },
+        {
+          "id": "d815b398-9d81-4c0a-ba14-6f712372e0c8",
+          "name": "Tawakaltu"
+        },
+        {
+          "id": "a9c3562f-0dda-4c67-8a62-17ed39e158e6",
+          "name": "Toro Bah"
+        },
+        {
+          "id": "30773e79-d92d-46bd-8d8b-8d3af78a214d",
+          "name": "Toro Tayan"
+        },
+        {
+          "id": "da856c11-fa83-4f1c-9098-f0476ada9219",
+          "name": "Yallal Bah"
+        }
+      ]
+    },
+    {
+      "id": "5-5",
+      "name": "Central Badibu",
+      "cities": [
+        {
+          "id": "4aa62493-933d-45f7-bbe1-e2f50801240d",
+          "name": "Biram Penda (Maida)"
+        },
+        {
+          "id": "df68e149-4cac-43d2-ad12-9b0b699e8f96",
+          "name": "Brikama"
+        },
+        {
+          "id": "6c9a153a-e739-43ab-a586-e1302b116195",
+          "name": "Busura"
+        },
+        {
+          "id": "c2b5be92-f7a4-4db3-ad27-4c8ea91bdb71",
+          "name": "Chamen"
+        },
+        {
+          "id": "bab27574-9b72-454f-a877-199f4ac1f3bf",
+          "name": "Daru Riliwan"
+        },
+        {
+          "id": "be9f9d4f-9889-401b-afb5-c7dd057f6828",
+          "name": "Dobo (Bangaya)"
+        },
+        {
+          "id": "5c43bd8e-2d8f-463e-89ac-473ca902c6e7",
+          "name": "Jammeh Kunda"
+        },
+        {
+          "id": "ab0db96d-41d7-473c-8286-f33a526415d1",
+          "name": "Karantaba"
+        },
+        {
+          "id": "029c8218-d6db-4dc2-b743-cc8658700df1",
+          "name": "Kerr Katim Fula"
+        },
+        {
+          "id": "1a654d7a-d1b6-438b-91f8-bcdb6158c58c",
+          "name": "Kerr Katim Wollof"
+        },
+        {
+          "id": "5e293fce-7fae-485e-b4ef-c7e634ba922a",
+          "name": "Kerr Pateh Koreh"
+        },
+        {
+          "id": "48c1db7c-1bee-45ab-b170-267a643cb6c0",
+          "name": "Kinteh Kunda"
+        },
+        {
+          "id": "18e72f8f-becd-4bc6-a99c-732a32844e44",
+          "name": "Kuli Kunda Fula"
+        },
+        {
+          "id": "bbf2b279-b22e-4d04-90de-df6ed127dab8",
+          "name": "Kuli Kunda Wollof"
+        },
+        {
+          "id": "d20a44d7-5e9c-4e28-aa1e-6563a982b05d",
+          "name": "Maida Moddy"
+        },
+        {
+          "id": "933af28e-3e31-4592-a374-b5e585dfdcd5",
+          "name": "Mandory"
+        },
+        {
+          "id": "25b0197b-3584-468b-a224-2e0417fe4535",
+          "name": "Marong Kunda"
+        },
+        {
+          "id": "d00b1b8e-a814-4c08-8cd0-491c26efc382",
+          "name": "Minteh Kunda"
+        },
+        {
+          "id": "403c382e-0591-4215-8619-cc0e63edd0d1",
+          "name": "Nawleru"
+        },
+        {
+          "id": "f01f653d-db81-48b0-83ba-19e19c52a6f1",
+          "name": "Nduren"
+        },
+        {
+          "id": "285d1e1d-6206-43f1-86f1-bf4a00bed6de",
+          "name": "Ngatanorr Fula"
+        },
+        {
+          "id": "83468e0a-f79b-4e9e-960c-93aed9612e0b",
+          "name": "Ngatanorr Wollof"
+        },
+        {
+          "id": "bd9e63f8-007c-48b7-bb6b-ef172b66f60e",
+          "name": "Njaba Kunda"
+        },
+        {
+          "id": "1e6ab0e3-bd99-4d9f-8dd4-aa819430196e",
+          "name": "Njonen"
+        },
+        {
+          "id": "c9978ca3-f0eb-402f-8a5b-6b0d2b4976f9",
+          "name": "Sallikenni"
+        },
+        {
+          "id": "371d8e36-45f4-41ac-988e-577bf9b293bd",
+          "name": "Sare Biram Kardo"
+        },
+        {
+          "id": "cf1cf995-eaf8-4b43-8181-afa8f74630fb",
+          "name": "Sare Birom Kunda"
+        },
+        {
+          "id": "4c157076-d881-46b0-b3f1-f24a626064f1",
+          "name": "Sare Ello Buya"
+        },
+        {
+          "id": "11cb52b4-773d-4c77-98a6-cbfffd157397",
+          "name": "Sare Mari (Maria)"
+        },
+        {
+          "id": "c85b1ff9-4a15-434a-9194-4fe2f98e6a47",
+          "name": "Sare Samba Sowe (Samba Nyado)"
+        },
+        {
+          "id": "fc5bfbee-b9f3-4380-be35-1003967e53d5",
+          "name": "Sheikh Taal"
+        },
+        {
+          "id": "e26d4f0a-e3d9-486c-875e-e8e41e6a5037",
+          "name": "Sinchu Demba"
+        },
+        {
+          "id": "f5a58ed9-efd0-4212-a138-d2a43cb27349",
+          "name": "Wayaworr"
+        },
+        {
+          "id": "792fbc96-d8cb-47d5-b30a-b7583ee595cd",
+          "name": "Wellingara"
+        }
+      ]
+    },
+    {
+      "id": "5-6",
+      "name": "Illiasa",
+      "cities": [
+        {
+          "id": "9777dd1b-b17b-48f8-a681-4fdf81aa7fe8",
+          "name": "Alkali Kunda"
+        },
+        {
+          "id": "61b634ae-4a32-4be1-8378-ef0c24078faf",
+          "name": "Ballingho"
+        },
+        {
+          "id": "b1c4f30c-a930-431b-b1f5-e032bc1597a5",
+          "name": "Bamba Tenda"
+        },
+        {
+          "id": "82fab31e-2ee7-4f77-92b2-a6596a49849c",
+          "name": "Bereto"
+        },
+        {
+          "id": "6aec5357-485c-444c-a879-ee44df87a78f",
+          "name": "Birom Gido"
+        },
+        {
+          "id": "f08ce1bf-1ee7-408e-91c9-3d904bce5cf6",
+          "name": "Birong Kunda"
+        },
+        {
+          "id": "a1724862-403f-4392-a96f-6336e90c50bf",
+          "name": "Burang Ya"
+        },
+        {
+          "id": "e8b911b9-8062-4d1c-9393-794edafe2022",
+          "name": "Chamaya"
+        },
+        {
+          "id": "514d1b60-3dbb-4aff-b748-36ac1ee4e547",
+          "name": "Chamen"
+        },
+        {
+          "id": "47f73bd8-ce96-4163-8f13-fd99c0326961",
+          "name": "Cheedy Kunda Lawbeh"
+        },
+        {
+          "id": "569cbae5-bdea-4955-9193-fa2d7951d317",
+          "name": "Cheedy Kunda Wollof"
+        },
+        {
+          "id": "c9b9f83a-9490-4c75-a974-65a3ea6c03ff",
+          "name": "Dai Fula (Mbapu Kunda)"
+        },
+        {
+          "id": "268bcfee-fd7e-4bf6-a728-5984c22db1e0",
+          "name": "Dai Mandinka"
+        },
+        {
+          "id": "6d556711-55bf-4a72-bb8a-025b08a5d5ac",
+          "name": "Daru Barakatu"
+        },
+        {
+          "id": "f1986745-cdd3-481a-9d6b-0f5c13c18d76",
+          "name": "Duta Bulu"
+        },
+        {
+          "id": "41c07e19-39bd-42e4-a140-7dadf453412f",
+          "name": "Farafenni"
+        },
+        {
+          "id": "f235de21-e810-4425-8a55-5043e30cf523",
+          "name": "Gikimarr"
+        },
+        {
+          "id": "9486c137-4e0c-418d-a174-3f88b40f4ae9",
+          "name": "Gumalo-Ya"
+        },
+        {
+          "id": "c4f7c23c-9a0d-41e7-b5fd-97ebb4e409fd",
+          "name": "Illiassa"
+        },
+        {
+          "id": "bce543d4-9f92-481e-b0ab-490b4fabe40a",
+          "name": "India"
+        },
+        {
+          "id": "e20866b8-b069-47d9-84c1-c3622e3109b4",
+          "name": "Jajary"
+        },
+        {
+          "id": "5c7ec3ea-1615-42f2-9a99-e1f99d80b858",
+          "name": "Jalaba"
+        },
+        {
+          "id": "581a4e31-ab7b-4d2c-96d6-b8030cfd5f21",
+          "name": "Jali Kunda"
+        },
+        {
+          "id": "e73c30eb-5a93-4610-880d-dac55790fa31",
+          "name": "Jali Kunda Kekuta"
+        },
+        {
+          "id": "21ae4e09-94cf-4426-8167-a47c50b2f2cd",
+          "name": "Jeruko Fula"
+        },
+        {
+          "id": "b86fea75-faae-4909-8f58-cb8cf2038210",
+          "name": "Jeruko Wollof"
+        },
+        {
+          "id": "520a2588-4b0d-47ab-b651-8cfbcdf3e73f",
+          "name": "Jirong"
+        },
+        {
+          "id": "a79bdf3b-665e-4ed8-b143-b3e295d31831",
+          "name": "Jumangsarr Ba"
+        },
+        {
+          "id": "82d8a5a7-9bb7-4009-b15f-eadb4288864a",
+          "name": "Jumansarr Koto"
+        },
+        {
+          "id": "e9d7819b-674a-408d-8485-ee2f3f134164",
+          "name": "Kahen"
+        },
+        {
+          "id": "2b3d293c-90db-4b89-ab67-e19427187752",
+          "name": "Katchang"
+        },
+        {
+          "id": "1194e42a-c778-4bc0-b9ed-f7203f9637ef",
+          "name": "Kekuta Kunda"
+        },
+        {
+          "id": "e40d11c6-128e-45bf-8dd6-f2d9a00d9b88",
+          "name": "Kerr Ali"
+        },
+        {
+          "id": "a2d26049-4e42-4b88-bfb6-3c03e06f9479",
+          "name": "Kerr Gallow (Mbandi Kunda)"
+        },
+        {
+          "id": "96f3c4d6-1e1c-47fa-98e5-d6ed0184b9cc",
+          "name": "Kerr Madi"
+        },
+        {
+          "id": "db249d00-c13c-46de-a2f3-45dc58371913",
+          "name": "Kerr Ndongo"
+        },
+        {
+          "id": "9fa756ba-bcec-4128-a294-b3675b8669dd",
+          "name": "Kerr Sulay (Fass)"
+        },
+        {
+          "id": "75844d87-b5d4-46c3-8bb9-a4d4c7ff7e3a",
+          "name": "Konteh Kunda Nigi"
+        },
+        {
+          "id": "315ee239-5baf-405d-b6e5-35fc2788bc6c",
+          "name": "Konteh Kunda Sukoto"
+        },
+        {
+          "id": "76686661-ec62-4c02-a178-55ed5d379872",
+          "name": "Kosy Sani"
+        },
+        {
+          "id": "5a4df865-e953-4377-81ea-f24de98be98e",
+          "name": "Kubandarr"
+        },
+        {
+          "id": "16a05f7d-c5d4-4e61-978f-6527b6952b81",
+          "name": "Laliya (Timbing Koto)"
+        },
+        {
+          "id": "42affa58-2c6f-4880-a6d0-85ee8599b95e",
+          "name": "Lang Sarr"
+        },
+        {
+          "id": "df342bf2-0aa6-48ae-b2da-bb4b3b905304",
+          "name": "Macca Farafenni"
+        },
+        {
+          "id": "bcd22fa3-5a20-41d4-bd1d-2b3633ff3034",
+          "name": "Mbantang"
+        },
+        {
+          "id": "1932a7c2-b3cc-4edf-8060-348bdcaaf966",
+          "name": "Mbayen Demba Jange"
+        },
+        {
+          "id": "1c1ba97e-f7de-49cf-81f1-c62b4a2cc994",
+          "name": "Missira"
+        },
+        {
+          "id": "decc0202-51d4-4418-b6e4-41168f22362d",
+          "name": "Ndangka Ndangka"
+        },
+        {
+          "id": "a64e82f7-522f-43f7-80c3-689415a529d9",
+          "name": "Neteberi"
+        },
+        {
+          "id": "3686f2bd-9c3a-4ed2-adcd-c3392dafc61a",
+          "name": "Ngeirr"
+        },
+        {
+          "id": "afa2265d-b183-404e-aa5a-22d55635ea65",
+          "name": "Njie Kundaring"
+        },
+        {
+          "id": "22d258b5-c9d3-46c7-b6d9-fa6989c6aa2a",
+          "name": "No-Kunda"
+        },
+        {
+          "id": "111b0833-f84c-4269-b091-8dadc28c5003",
+          "name": "Nyiribaya"
+        },
+        {
+          "id": "6e900215-319e-4518-8f93-6ddbd873b797",
+          "name": "Samataba"
+        },
+        {
+          "id": "6ce3bbdc-26d5-469d-99b7-fcba7a545398",
+          "name": "Talliya"
+        },
+        {
+          "id": "32bb9fee-22e9-4909-8a86-d290466ff9a9",
+          "name": "Tambaringoto (Biram Kardo)"
+        },
+        {
+          "id": "8220f6e1-81f9-43b6-b13a-fd063b9bcef8",
+          "name": "Wallalan"
+        },
+        {
+          "id": "1e4005ec-2a3d-418c-92e3-97df9efae362",
+          "name": "Yalal Tankong Jala"
+        },
+        {
+          "id": "18d92af5-9131-44ae-9d23-8d48188d4393",
+          "name": "Yuuna"
+        }
+      ]
+    },
+    {
+      "id": "5-7",
+      "name": "Sabach Sanjal",
+      "cities": [
+        {
+          "id": "f4c6ce98-20f5-4b1b-be86-5057afe907fe",
+          "name": "Bambally"
+        },
+        {
+          "id": "a82fb1f9-c35a-49c9-8f70-8a919503ec67",
+          "name": "Banta-Su"
+        },
+        {
+          "id": "a4913990-4bde-4cd8-bf0d-a3be9a543794",
+          "name": "Bassik"
+        },
+        {
+          "id": "150fbfa3-385d-4ec3-bf1b-a12c2c030090",
+          "name": "Cheeken"
+        },
+        {
+          "id": "9736d2c2-053a-4885-ba70-cb13ca86d8de",
+          "name": "Daffa"
+        },
+        {
+          "id": "35dfcc25-c2cd-4f77-8b8a-a75f0b07ac6a",
+          "name": "Daru Rahman"
+        },
+        {
+          "id": "f7cad60c-b6e7-447d-a626-381cf9884b04",
+          "name": "Dasilameh (Challa)"
+        },
+        {
+          "id": "3de0ece6-426b-4b3d-a0ee-a2d102a7689c",
+          "name": "Dibba Kunda Fula"
+        },
+        {
+          "id": "a9ea8bc3-1ea6-4c14-91d9-61f4359f606d",
+          "name": "Dibba Kunda Wollof"
+        },
+        {
+          "id": "8e6f375c-6cfc-4aef-84eb-f9384500ef09",
+          "name": "Farato"
+        },
+        {
+          "id": "5f2da4bb-b9fe-4e23-a712-88e108ed1e83",
+          "name": "Jamagen"
+        },
+        {
+          "id": "f30e6f53-6e15-4d60-959c-4118db326fe9",
+          "name": "Jamali Mballow"
+        },
+        {
+          "id": "a0acb65e-8efd-4ad4-bf6c-cbd77e7f893a",
+          "name": "Jambaya"
+        },
+        {
+          "id": "a7682cfb-999d-478c-bb97-efc58140037a",
+          "name": "Kani Kunda Suba"
+        },
+        {
+          "id": "551019ed-9919-4a13-b26c-152b7393d237",
+          "name": "Kani Kunda Tenda"
+        },
+        {
+          "id": "7566a12f-1453-413a-bc97-8933af6c2462",
+          "name": "Kataba Mandinka"
+        },
+        {
+          "id": "2ac79cde-479c-4cb6-8dd0-94d752dc4821",
+          "name": "Kataba Mbapu"
+        },
+        {
+          "id": "1f60fee1-47bd-45c6-824d-bc24213e7eb3",
+          "name": "Kataba Tata"
+        },
+        {
+          "id": "111a1b38-7885-4b4a-9e35-acea57f41fc1",
+          "name": "Kerr Bamba Lowe"
+        },
+        {
+          "id": "4f0eccff-32ce-497c-b909-60169e9bfa46",
+          "name": "Kerr Juka"
+        },
+        {
+          "id": "8ea5db68-ed6c-4d4d-9a60-8aaea9ba8695",
+          "name": "Kumbija"
+        },
+        {
+          "id": "4cd6fd0e-d9ef-4dd3-ac34-cc74673703d9",
+          "name": "Kunjata"
+        },
+        {
+          "id": "2f4ebcb5-1c71-4212-b57f-683fccd15df6",
+          "name": "Kunjo"
+        },
+        {
+          "id": "8aa698c1-fc0a-47ad-986d-8c189a3a1bcd",
+          "name": "Loumen"
+        },
+        {
+          "id": "794d33d1-558a-4e8b-9da4-0ebd44aee893",
+          "name": "Mballow Ebra"
+        },
+        {
+          "id": "aa3bdf44-5248-4d41-b041-bd30ca45bae9",
+          "name": "Mballow Omar (Sinchu Sanjal)"
+        },
+        {
+          "id": "cf6c912d-d846-4227-a1ef-a7ae3eef2ea8",
+          "name": "Mballow Tega"
+        },
+        {
+          "id": "e29a17e6-6e72-42d2-bc5d-f3df7c785cc4",
+          "name": "Mbapa Bah"
+        },
+        {
+          "id": "6efb50e0-8464-4507-8b76-77885bcff262",
+          "name": "Mbapa Mariga"
+        },
+        {
+          "id": "ff3c980e-9383-46a2-a38b-148e92130bb4",
+          "name": "Mbayen"
+        },
+        {
+          "id": "4f159349-db77-40e1-bb99-406b9bccb8aa",
+          "name": "Mbye Dara"
+        },
+        {
+          "id": "68aab3be-3c16-471b-a8a7-66358d31a447",
+          "name": "Missira"
+        },
+        {
+          "id": "8a862e4b-019e-4184-acda-7f6650cf15c4",
+          "name": "Ndowen"
+        },
+        {
+          "id": "078b8eb6-0a89-42e4-964f-b81d08f69b7d",
+          "name": "Ngayen Sabach"
+        },
+        {
+          "id": "04919ee5-3917-43e7-8985-9120f99e1fa8",
+          "name": "Ngayen Sanjal"
+        },
+        {
+          "id": "ae2c0739-570c-409b-a8b4-1066ef22e748",
+          "name": "Njaine"
+        },
+        {
+          "id": "afda024d-82d7-452a-86ca-efcce36e5d63",
+          "name": "Njangen"
+        },
+        {
+          "id": "a078d978-6dc9-43b5-83ba-ff89339206f0",
+          "name": "Numu Kunda"
+        },
+        {
+          "id": "fc20a6a9-f564-41c3-862a-98bc8fbbb608",
+          "name": "Nyang Kunda"
+        },
+        {
+          "id": "171cd62b-e689-4edb-b02c-7221e09b8baf",
+          "name": "Pallen Fula"
+        },
+        {
+          "id": "6b070191-8b8e-40a9-b028-a98275e4d09f",
+          "name": "Pallen Wollof"
+        },
+        {
+          "id": "08900ece-ad2e-46f1-aa00-3cc0844e4e29",
+          "name": "Palodi"
+        },
+        {
+          "id": "6168f85c-1e2f-4652-81e3-ae522d4b5700",
+          "name": "Passimut"
+        },
+        {
+          "id": "10506fae-ed70-47ef-bfe3-a6507fb1f323",
+          "name": "Sabach Njaine"
+        },
+        {
+          "id": "2838070a-7ec7-42a0-aa44-468e73ee422b",
+          "name": "Sabach Sukoto"
+        },
+        {
+          "id": "79ae190a-78d4-48ac-ab35-f18833d7b9b6",
+          "name": "Samba Soto"
+        },
+        {
+          "id": "302cb29f-033b-4e56-9ac5-2cee9b6ec885",
+          "name": "Sancha Medina"
+        },
+        {
+          "id": "f7487741-054a-4756-9888-fcaaee5f7b27",
+          "name": "Sanchi Pallen"
+        },
+        {
+          "id": "c45543ef-dff0-4b4c-bafd-9ebf201ae0f1",
+          "name": "Sankalang"
+        },
+        {
+          "id": "49a2ec82-e723-4d10-b3fb-aacc8fb2709b",
+          "name": "Sara Kunda"
+        },
+        {
+          "id": "8c698e35-68b6-49b1-94a8-c2bcd35a09cd",
+          "name": "Sare Jamjido"
+        },
+        {
+          "id": "825edc54-b242-4d0c-b089-4d343c4e4963",
+          "name": "Sinchu Njabo"
+        },
+        {
+          "id": "06ad4821-212f-4bfa-b33f-86a45140d175",
+          "name": "Sukoto Fula"
+        },
+        {
+          "id": "983695f0-ee41-4c77-8201-a8a6c0ab609e",
+          "name": "Taiba"
+        },
+        {
+          "id": "5b62ce0e-634e-459c-abce-25da783fef5b",
+          "name": "Tamba Koto"
+        },
+        {
+          "id": "ff457f85-ff35-43d6-a2d9-36fb513b03bc",
+          "name": "Tandaito"
+        },
+        {
+          "id": "3c0386ae-778f-4838-8f86-c64ee9214e26",
+          "name": "Yallal Bah"
+        }
+      ]
+    }
+  ]
+}

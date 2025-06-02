@@ -1,0 +1,27 @@
+{
+  "region": {
+    "id": "2",
+    "name": "Banjul",
+    "slug": "banjul"
+  },
+  "districts": [
+    {
+      "id": "2-1",
+      "name": "Banjul",
+      "cities": [
+        {
+          "id": "cfe886c8-5fd6-4a48-989f-d176336ab024",
+          "name": "Banjul Central"
+        },
+        {
+          "id": "0366d577-1dff-450a-8c5b-9ccd9bb2b750",
+          "name": "Banjul North"
+        },
+        {
+          "id": "460a8d73-f27b-44e1-a28c-f3c9f1dcafdf",
+          "name": "Banjul South"
+        }
+      ]
+    }
+  ]
+}

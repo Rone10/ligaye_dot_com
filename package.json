@@ -10,7 +10,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "email:dev": "email dev"
+    "email:dev": "email dev",
+    "generate-locations": "tsx scripts/generate-locations.ts",
+    "prebuild": "npm run generate-locations"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

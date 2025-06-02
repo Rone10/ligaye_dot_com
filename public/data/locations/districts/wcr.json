@@ -1,0 +1,19 @@
+{
+  "region": {
+    "id": "1",
+    "name": "WCR",
+    "slug": "wcr"
+  },
+  "districts": [
+    {
+      "id": "1-1",
+      "name": "Unknown District",
+      "cities": [
+        {
+          "id": "6e85c5d9-c314-434c-83f3-d90a5149dc3d",
+          "name": "Banjulss"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "region": {
+    "id": "3",
+    "name": "Kanifing Municipality",
+    "slug": "kanifing-municipality"
+  },
+  "districts": [
+    {
+      "id": "3-1",
+      "name": "Kanifing Municipality",
+      "cities": [
+        {
+          "id": "294c77f4-a027-45c6-a249-ae7fed29e8c4",
+          "name": "Abuko"
+        },
+        {
+          "id": "973132a7-d3ee-447b-bc03-805b07b0b235",
+          "name": "Bakau New Town"
+        },
+        {
+          "id": "16ba7a78-4ff4-4099-8184-080147574788",
+          "name": "Bakau Wasulun"
+        },
+        {
+          "id": "b59ae34a-6148-46c6-ac58-d506848e3eea",
+          "name": "Bakoteh"
+        },
+        {
+          "id": "f6bd5a69-5b2a-4306-b7dd-ba0c2f90a596",
+          "name": "Bundunka Kunda"
+        },
+        {
+          "id": "1a2d3cc3-c81d-4e8c-b49d-bd033fbcd5bd",
+          "name": "Dippa Kunda"
+        },
+        {
+          "id": "0aa098ed-eb4d-4d03-95ca-20bd786274d0",
+          "name": "Ebo Town"
+        },
+        {
+          "id": "588233f8-62ff-4717-a443-527b004390f4",
+          "name": "Faji Kunda"
+        },
+        {
+          "id": "9412efa2-69d7-46ee-aaf2-b13ea5c5bd34",
+          "name": "Kanifing"
+        },
+        {
+          "id": "47f15d15-24c1-4981-b948-193a03122f3f",
+          "name": "Kololi"
+        },
+        {
+          "id": "7035373a-9f91-4b11-94d3-dc3e04b9285b",
+          "name": "Kotu"
+        },
+        {
+          "id": "b36cc79b-e272-4c67-94c6-ff323ba2d99e",
+          "name": "Latri Kunda German"
+        },
+        {
+          "id": "1f98d152-8996-4f96-94b5-82e85fefcbe9",
+          "name": "Latri Kunda Sabiji"
+        },
+        {
+          "id": "3aa3d90a-c360-44b9-a718-065b1eb885b7",
+          "name": "Manjai Kunda"
+        },
+        {
+          "id": "b1f48ebf-57f8-432b-b74e-fc549eeeb653",
+          "name": "New Jeshwang"
+        },
+        {
+          "id": "924542bd-44cb-44a0-8846-15266f199ba1",
+          "name": "Old Jeshwang"
+        },
+        {
+          "id": "57a0e551-cbe1-478f-918a-4131eb9af620",
+          "name": "Pipeline"
+        },
+        {
+          "id": "d08a56ae-f4a7-42c2-a706-ead996b1b48f",
+          "name": "Sere Kunda"
+        },
+        {
+          "id": "d9f142db-59ae-466a-aa3c-2bb9c3204850",
+          "name": "Talinding"
+        }
+      ]
+    }
+  ]
+}
