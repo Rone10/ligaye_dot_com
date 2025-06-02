@@ -421,15 +421,19 @@ export function JobSearchFilters({ industries }: FilterProps) {
           defaultExpanded={false}
           onClear={handleClearLocation}
           showClear={filters.locationId !== 'all' && filters.locationId !== null}
+          maxHeight="max-h-[700px]"
         >
-          <LocationSelector
-            value={locationSelection}
-            onChange={handleLocationChange}
-            placeholder="Select location..."
-            showSearch={true}
-            allowClear={true}
-            className="w-full"
-          />
+          <div className="min-h-[200px]">
+            <LocationSelector
+              value={locationSelection}
+              onChange={handleLocationChange}
+              placeholder="Select location..."
+              showSearch={true}
+              allowClear={true}
+              className="w-full"
+              maxHeight="max-h-[500px]"
+            />
+          </div>
         </FilterSection>
 
         {/* Industry Filter */}

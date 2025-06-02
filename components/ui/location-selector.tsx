@@ -18,6 +18,7 @@ interface LocationSelectorProps {
   error?: string;
   showSearch?: boolean;
   allowClear?: boolean;
+  maxHeight?: string;
 }
 
 export function LocationSelector({
@@ -29,6 +30,7 @@ export function LocationSelector({
   error,
   showSearch = true,
   allowClear = true,
+  maxHeight = "max-h-[500px]",
 }: LocationSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -276,7 +278,7 @@ export function LocationSelector({
             </div>
           )}
 
-          <ScrollArea className="max-h-96 overflow-y-auto overscroll-contain">
+          <ScrollArea className={cn("max-h-[400px] overflow-y-auto overscroll-contain", maxHeight)}>
             {/* Search Results */}
             {searchQuery.trim() && (
               <div className="p-sm">
