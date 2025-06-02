@@ -210,6 +210,7 @@ export function LocationSelector({
     <div ref={containerRef} className={cn("relative", className)}>
       {/* Trigger Button */}
       <Button
+        type="button"
         variant="outline"
         role="combobox"
         aria-expanded={isOpen}
@@ -290,6 +291,7 @@ export function LocationSelector({
                     </div>
                     {searchResults.map((result) => (
                       <button
+                        type="button"
                         key={result.id}
                         className="w-full px-md py-sm text-left hover:bg-primary-blue/10 hover:text-primary-blue rounded-md duration-fast transition-all group"
                         onClick={() => handleSearchResultSelect(result)}
@@ -319,6 +321,7 @@ export function LocationSelector({
                   {activeStep !== 'region' && (
                     <div className="flex items-center gap-sm px-sm py-xs mb-sm text-sm text-theme-gray-dark bg-theme-gray/10 rounded-md">
                     <button
+                      type="button"
                       onClick={handleBackToRegions}
                       className="hover:text-primary-blue duration-fast font-medium"
                     >
@@ -328,6 +331,7 @@ export function LocationSelector({
                       <>
                         <span className="text-theme-gray">/</span>
                         <button
+                          type="button"
                           onClick={handleBackToDistricts}
                           className="hover:text-primary-blue duration-fast font-medium"
                         >
@@ -351,6 +355,7 @@ export function LocationSelector({
                     ) : (
                       regions.map((region) => (
                         <button
+                          type="button"
                           key={region.id}
                           className="w-full px-md py-sm text-left hover:bg-primary-blue/10 hover:text-primary-blue rounded-md duration-fast transition-all font-medium text-theme-dark group"
                           onClick={() => handleRegionSelect(region.id, region.name, region.slug)}
@@ -375,6 +380,7 @@ export function LocationSelector({
                     ) : (
                       currentRegionData.districts.map((district) => (
                         <button
+                          type="button"
                           key={district.id}
                           className="w-full px-md py-sm text-left hover:bg-primary-blue/10 hover:text-primary-blue rounded-md duration-fast transition-all font-medium text-theme-dark group"
                           onClick={() => handleDistrictSelect(district.id, district.name)}
@@ -398,6 +404,7 @@ export function LocationSelector({
                       
                       return district.cities.map((city) => (
                         <button
+                          type="button"
                           key={city.id}
                           className="w-full px-md py-sm text-left hover:bg-primary-blue/10 hover:text-primary-blue rounded-md duration-fast transition-all flex items-center justify-between font-medium text-theme-dark group"
                           onClick={() => handleCitySelect(city.id, city.name)}

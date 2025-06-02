@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/supabase/server';
-import { getSectors, getLocations } from './_queries';
+import { getSectors } from './_queries';
 import { NewTenderForm } from './_components/NewTenderForm';
 
 export default async function NewTenderPage() {
@@ -11,10 +11,7 @@ export default async function NewTenderPage() {
   }
 
   // Fetch required data for dropdowns
-  const [sectors, locations] = await Promise.all([
-    getSectors(),
-    getLocations(),
-  ]);
+  const sectors = await getSectors();
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -26,7 +23,7 @@ export default async function NewTenderPage() {
           </p>
         </div>
         
-        <NewTenderForm sectors={sectors} locations={locations} />
+        <NewTenderForm sectors={sectors} />
       </div>
     </div>
   );

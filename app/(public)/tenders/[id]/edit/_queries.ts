@@ -1,3 +1,4 @@
+'use server';
 import { db } from '@/lib/db';
 import { tenders, sectors, locations, profiles } from '@/lib/db/schema';
 import type { Tender, Sector, Location } from '@/lib/db/schema';
@@ -48,6 +49,26 @@ export async function getTenderByIdForEdit(id: string, supabaseUserId?: string):
   } catch (error) {
     console.error('Error fetching tender for edit:', error);
     throw new Error('Failed to fetch tender for editing');
+  }
+}
+
+export async function getLocationById(locationId: string): Promise<Location | null> {
+  try {
+    const database = await db();
+    
+    const [location] = await database
+      .select()
+      .from(locations)
+      .where(and(
+        eq(locations.id, locationId),
+        eq(locations.deleted, false)
+      ))
+      .limit(1);
+
+    return location || null;
+  } catch (error) {
+    console.error('Error fetching location by id:', error);
+    return null;
   }
 }
 

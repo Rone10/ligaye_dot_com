@@ -14,22 +14,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Editor } from '@/components/RichTextEditor/editor';
+import { LocationSelector } from '@/components/ui/location-selector';
 import { newTenderSchema, type NewTenderSchemaType } from '../_utils/validation';
 import { createTenderWithDocumentsAction } from '../_actions';
 import { FileUpload } from './FileUpload';
-import type { Sector, Location } from '@/lib/db/schema';
+import type { Sector } from '@/lib/db/schema';
+import type { LocationSelection } from '@/lib/types/locations';
 import { tenderTypeEnum } from '@/lib/db/schema';
 
 interface NewTenderFormProps {
   sectors: Sector[];
-  locations: Location[];
 }
 
-export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
+export function NewTenderForm({ sectors }: NewTenderFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [documentsArePaid, setDocumentsArePaid] = useState(false);
+  const [locationSelection, setLocationSelection] = useState<LocationSelection>({});
   const router = useRouter();
 
   const form = useForm<NewTenderSchemaType>({
@@ -49,6 +51,18 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
       documentCurrency: 'GMD',
     },
   });
+
+  // Helper function to get the most specific location ID from selection
+  const getLocationIdFromSelection = (selection: LocationSelection): string => {
+    return selection.cityId || selection.districtId || selection.regionId || '';
+  };
+
+  // Handle location selection change
+  const handleLocationChange = (selection: LocationSelection) => {
+    setLocationSelection(selection);
+    const locationId = getLocationIdFromSelection(selection);
+    form.setValue('locationId', locationId);
+  };
 
   const onSubmit = async (data: NewTenderSchemaType) => {
     setIsSubmitting(true);
@@ -202,37 +216,26 @@ export function NewTenderForm({ sectors, locations }: NewTenderFormProps) {
               }}
             />
 
-            {/* Location */}
+            {/* Location - New LocationSelector */}
             <FormField
               control={form.control}
               name="locationId"
-              render={({ field }) => {
-                const handleLocationChange = (value: string) => {
-                  field.onChange(value === 'none' ? '' : value);
-                };
-
-                return (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <Select onValueChange={handleLocationChange} value={field.value || 'none'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select location (optional)" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">No specific location</SelectItem>
-                        {locations.map((location) => (
-                          <SelectItem key={location.id} value={location.id}>
-                            {location.region} - {location.city}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <LocationSelector
+                      value={locationSelection}
+                      onChange={handleLocationChange}
+                      placeholder="Select location (optional)"
+                      error={fieldState.error?.message}
+                      showSearch={true}
+                      allowClear={true}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
             {/* Description */}

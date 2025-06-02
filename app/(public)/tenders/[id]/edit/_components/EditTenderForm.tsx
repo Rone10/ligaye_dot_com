@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,20 +13,24 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Editor } from '@/components/RichTextEditor/editor';
+import { LocationSelector } from '@/components/ui/location-selector';
 import { updateTenderSchema, type UpdateTenderSchemaType } from '../_utils/validation';
 import { updateTenderAction } from '../_actions';
-import type { Tender, Sector, Location } from '@/lib/db/schema';
+import { getLocationById } from '../_queries';
+import type { Tender, Sector } from '@/lib/db/schema';
+import type { LocationSelection } from '@/lib/types/locations';
 import { tenderTypeEnum, tenderStatusEnum } from '@/lib/db/schema';
 
 interface EditTenderFormProps {
   tender: Tender;
   sectors: Sector[];
-  locations: Location[];
 }
 
-export function EditTenderForm({ tender, sectors, locations }: EditTenderFormProps) {
+export function EditTenderForm({ tender, sectors }: EditTenderFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [locationSelection, setLocationSelection] = useState<LocationSelection>({});
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const router = useRouter();
 
   const form = useForm<UpdateTenderSchemaType>({
@@ -47,7 +51,56 @@ export function EditTenderForm({ tender, sectors, locations }: EditTenderFormPro
     },
   });
 
+  // Helper function to get the most specific location ID from selection
+  const getLocationIdFromSelection = (selection: LocationSelection): string => {
+    return selection.cityId || selection.districtId || selection.regionId || '';
+  };
+
+  // Handle location selection change
+  const handleLocationChange = (selection: LocationSelection) => {
+    console.log('Location selection changed:', selection);
+    setLocationSelection(selection);
+    const locationId = getLocationIdFromSelection(selection);
+    form.setValue('locationId', locationId, { shouldDirty: true });
+  };
+
+  // Initialize location selection from existing tender data
+  useEffect(() => {
+    const initializeLocation = async () => {
+      if (tender.locationId) {
+        setIsLoadingLocation(true);
+        try {
+          const location = await getLocationById(tender.locationId);
+          if (location) {
+            // Reconstruct the full LocationSelection object with display names
+            const fullLocationSelection: LocationSelection = {
+              cityId: location.id,
+              city: location.city || undefined,
+              district: location.district || undefined,
+              region: location.region || undefined,
+              // Note: We don't have districtId and regionId from the current schema
+              // This is a limitation of the current approach, but the component should still work
+            };
+            console.log('Initialized location selection:', fullLocationSelection);
+            setLocationSelection(fullLocationSelection);
+          }
+        } catch (error) {
+          console.error('Error fetching location details:', error);
+          // Fall back to just the ID if we can't fetch details
+          setLocationSelection({
+            cityId: tender.locationId,
+          });
+        } finally {
+          setIsLoadingLocation(false);
+        }
+      }
+    };
+
+    initializeLocation();
+  }, [tender.locationId]);
+
   const onSubmit = async (data: UpdateTenderSchemaType) => {
+    console.log('Form submitted with data:', data);
     setIsSubmitting(true);
     setError(null);
 
@@ -181,37 +234,29 @@ export function EditTenderForm({ tender, sectors, locations }: EditTenderFormPro
               }}
             />
 
-            {/* Location */}
+            {/* Location - New LocationSelector */}
             <FormField
               control={form.control}
               name="locationId"
-              render={({ field }) => {
-                const handleLocationChange = (value: string) => {
-                  field.onChange(value === 'none' ? '' : value);
-                };
-
-                return (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <Select onValueChange={handleLocationChange} value={field.value || 'none'}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select location (optional)" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">No specific location</SelectItem>
-                        {locations.map((location) => (
-                          <SelectItem key={location.id} value={location.id}>
-                            {location.region} - {location.city}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <LocationSelector
+                        value={locationSelection}
+                        onChange={handleLocationChange}
+                        placeholder={isLoadingLocation ? "Loading current location..." : "Select location (optional)"}
+                        error={fieldState.error?.message}
+                        showSearch={true}
+                        allowClear={true}
+                        disabled={isLoadingLocation}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
             {/* Deadline */}
