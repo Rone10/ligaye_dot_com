@@ -26,10 +26,10 @@ export default async function TendersPage({ searchParams }: PageProps) {
   const page = parseInt(params.page || '1', 10);
   const limit = parseInt(params.limit || '10', 10);
   const filters = {
-    sectorId: params.sector || undefined,
-    locationId: params.location || undefined,
-    status: params.status || undefined,
-    search: params.search || undefined,
+    sectorId: params.sector && params.sector.trim() !== '' ? params.sector : undefined,
+    locationId: params.location && params.location.trim() !== '' ? params.location : undefined,
+    status: params.status && params.status.trim() !== '' ? params.status : undefined,
+    search: params.search && params.search.trim() !== '' ? params.search : undefined,
   };
 
   // Get current user (for showing create button and edit/delete actions)

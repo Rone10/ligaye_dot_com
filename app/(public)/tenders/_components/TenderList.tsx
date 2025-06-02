@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,6 +26,7 @@ export function TenderList({
   limit,
 }: TenderListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
 
   const handleDelete = async (tenderId: string) => {
     setDeletingId(tenderId);
@@ -43,6 +45,13 @@ export function TenderList({
   };
 
   const totalPages = Math.ceil(totalCount / limit);
+
+  // Helper function to create pagination URLs that preserve current filters
+  const createPaginationUrl = (page: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', page.toString());
+    return `/tenders?${params.toString()}`;
+  };
 
   if (tenders.length === 0) {
     return (
@@ -92,13 +101,7 @@ export function TenderList({
             {currentPage > 1 && (
               <Button variant="outline" asChild>
                 <Link 
-                  href={{
-                    pathname: '/tenders',
-                    query: { 
-                      page: (currentPage - 1).toString(),
-                      limit: limit.toString()
-                    }
-                  }}
+                  href={createPaginationUrl(currentPage - 1)}
                   className="gap-xs"
                 >
                   Previous
@@ -113,13 +116,7 @@ export function TenderList({
             {currentPage < totalPages && (
               <Button variant="outline" asChild>
                 <Link 
-                  href={{
-                    pathname: '/tenders',
-                    query: { 
-                      page: (currentPage + 1).toString(),
-                      limit: limit.toString()
-                    }
-                  }}
+                  href={createPaginationUrl(currentPage + 1)}
                   className="gap-xs"
                 >
                   Next

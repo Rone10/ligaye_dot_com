@@ -1,6 +1,6 @@
 'use client';
 
-import { useQueryState } from 'nuqs';
+import { useQueryState, useQueryStates } from 'nuqs';
 import { Search, Filter, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -20,10 +20,15 @@ interface TenderFiltersProps {
 }
 
 export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
-  const [search, setSearch] = useQueryState('search', { defaultValue: '' });
-  const [sectorId, setSectorId] = useQueryState('sector', { defaultValue: '' });
-  const [locationId, setLocationId] = useQueryState('location', { defaultValue: '' });
-  const [status, setStatus] = useQueryState('status', { defaultValue: '' });
+  const [search, setSearch] = useQueryState('search', { 
+    defaultValue: '', 
+    shallow: false,
+    throttleMs: 500 // Debounce search input
+  });
+  const [sectorId, setSectorId] = useQueryState('sector', { defaultValue: '', shallow: false });
+  const [locationId, setLocationId] = useQueryState('location', { defaultValue: '', shallow: false });
+  const [status, setStatus] = useQueryState('status', { defaultValue: '', shallow: false });
+  const [page, setPage] = useQueryState('page', { defaultValue: '1', shallow: false });
 
   const hasActiveFilters = search || sectorId || locationId || status;
 
@@ -32,6 +37,7 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
     setSectorId('');
     setLocationId('');
     setStatus('');
+    setPage('1'); // Reset to first page when clearing filters
   };
 
   const formatLocationName = (location: Location) => {
@@ -39,16 +45,25 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
   };
 
   // Handle select value changes to convert "all" back to empty string
+  // Also reset page to 1 when filters change
   const handleSectorChange = (value: string) => {
     setSectorId(value === 'all' ? '' : value);
+    setPage('1'); // Reset to first page when filter changes
   };
 
   const handleLocationChange = (value: string) => {
     setLocationId(value === 'all' ? '' : value);
+    setPage('1'); // Reset to first page when filter changes
   };
 
   const handleStatusChange = (value: string) => {
     setStatus(value === 'all' ? '' : value);
+    setPage('1'); // Reset to first page when filter changes
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setPage('1'); // Reset to first page when search changes
   };
 
   return (
@@ -88,7 +103,7 @@ export function TenderFilters({ sectors, locations }: TenderFiltersProps) {
                 id="search"
                 placeholder="Search tenders..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={handleSearchChange}
                 className="pl-10 bg-theme-light/50 border-theme-gray/30 focus:border-primary-blue focus:shadow-focus duration-standard"
               />
             </div>
