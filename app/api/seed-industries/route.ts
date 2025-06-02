@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { industries } from '@/lib/db/schema';
+import { sectors } from '@/lib/db/schema';
 import { eq, ilike } from 'drizzle-orm'; // Use ilike for case-insensitive comparison
 import { getUser } from '@/lib/supabase/server';
 
@@ -41,7 +41,7 @@ const industryData = [
   "Utilities & Sanitation",
   "Youth, Sports & Culture",
   "Other"
-].map(name => ({ name })); // Format for insertion
+].map(name => ({ name }));
 
 export async function POST() {
     const user = await getUser();
@@ -50,38 +50,38 @@ export async function POST() {
     }
 
     try {
-        console.log('Attempting to seed industries with duplicate check...');
+        console.log('Attempting to seed sectors with duplicate check...');
 
-        // Fetch existing non-deleted industry names
-        const existingIndustries = await db()
-            .select({ name: industries.name })
-            .from(industries)
-            .where(eq(industries.deleted, false));
+        // Fetch existing non-deleted sector names
+        const existingSectors = await db()
+            .select({ name: sectors.name })
+            .from(sectors)
+            .where(eq(sectors.deleted, false));
 
         const existingNamesLower = new Set(
-            existingIndustries.map(ind => ind.name.toLowerCase())
+            existingSectors.map(sector => sector.name.toLowerCase())
         );
-        console.log(`Found ${existingNamesLower.size} existing industry names.`);
+        console.log(`Found ${existingNamesLower.size} existing sector names.`);
 
         // Filter new data
-        const industriesToInsert = industryData.filter(newInd =>
-            !existingNamesLower.has(newInd.name.toLowerCase())
+        const sectorsToInsert = industryData.filter(newSector =>
+            !existingNamesLower.has(newSector.name.toLowerCase())
         );
 
-        console.log(`Found ${industriesToInsert.length} new industries to insert.`);
+        console.log(`Found ${sectorsToInsert.length} new sectors to insert.`);
 
-        if (industriesToInsert.length === 0) {
-            console.log('No new industries to insert.');
-            return NextResponse.json({ message: 'No new industries to insert. All provided industries already exist.' }, { status: 200 });
+        if (sectorsToInsert.length === 0) {
+            console.log('No new sectors to insert.');
+            return NextResponse.json({ message: 'No new sectors to insert. All provided sectors already exist.' }, { status: 200 });
         }
 
-        const result = await db().insert(industries).values(industriesToInsert).returning();
+        const result = await db().insert(sectors).values(sectorsToInsert).returning();
 
-        console.log(`Successfully inserted ${result.length} new industries.`);
-        return NextResponse.json({ message: `Successfully inserted ${result.length} new industries.`, count: result.length }, { status: 201 });
+        console.log(`Successfully inserted ${result.length} new sectors.`);
+        return NextResponse.json({ message: `Successfully inserted ${result.length} new sectors.`, count: result.length }, { status: 201 });
 
     } catch (error) {
-        console.error('Error seeding industries:', error);
-        return NextResponse.json({ error: 'Failed to seed industries' }, { status: 500 });
+        console.error('Error seeding sectors:', error);
+        return NextResponse.json({ error: 'Failed to seed sectors' }, { status: 500 });
     }
 } 
