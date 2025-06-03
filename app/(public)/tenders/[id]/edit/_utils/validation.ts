@@ -43,6 +43,28 @@ export const updateTenderSchema = z.object({
   contactInformation: z.string().optional(),
   externalLink: flexibleUrlSchema,
   status: z.enum(tenderStatusEnum.enumValues),
+  documentsArePaid: z.boolean().default(false),
+  documentPrice: z.number().positive().optional(),
+  documentCurrency: z.string().default('GMD'),
+  agreeToCommissionTerms: z.boolean().optional(),
+}).refine((data) => {
+  // If documents are paid, price must be provided
+  if (data.documentsArePaid && !data.documentPrice) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Document price is required when documents are paid",
+  path: ["documentPrice"]
+}).refine((data) => {
+  // If documents are paid, terms agreement must be accepted
+  if (data.documentsArePaid && !data.agreeToCommissionTerms) {
+    return false;
+  }
+  return true;
+}, {
+  message: "You must agree to the commission terms to charge for documents",
+  path: ["agreeToCommissionTerms"]
 });
 
 export type UpdateTenderSchemaType = z.infer<typeof updateTenderSchema>; 

@@ -1,6 +1,6 @@
 'use server';
 import { db } from '@/lib/db';
-import { tenders, sectors, locations, profiles } from '@/lib/db/schema';
+import { tenders, sectors, locations, profiles, tenderDocuments } from '@/lib/db/schema';
 import type { Tender, Sector, Location } from '@/lib/db/schema';
 import type { UpdateTenderSchemaType } from './_utils/validation';
 import { eq, and } from 'drizzle-orm';
@@ -116,6 +116,9 @@ export async function updateTender(id: string, data: UpdateTenderSchemaType, sup
         contactInformation: data.contactInformation || null,
         externalLink: data.externalLink || null,
         status: data.status,
+        documentsArePaid: data.documentsArePaid,
+        documentPrice: data.documentPrice || null,
+        documentCurrency: data.documentCurrency,
         updatedAt: new Date(),
       })
       .where(eq(tenders.id, id))
@@ -144,4 +147,30 @@ export async function getLocations(): Promise<Location[]> {
     .from(locations)
     .where(eq(locations.deleted, false))
     .orderBy(locations.region, locations.city);
+}
+
+export async function saveTenderDocumentMetadata(
+  documents: Array<{
+    tenderId: string;
+    storagePath: string;
+    originalFilename: string;
+    fileSize: number;
+    mimeType: string;
+  }>
+): Promise<boolean> {
+  try {
+    const database = await db();
+    await database.insert(tenderDocuments).values(
+      documents.map(doc => ({
+        ...doc,
+        deleted: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }))
+    );
+    return true;
+  } catch (error) {
+    console.error('Error saving document metadata:', error);
+    return false;
+  }
 } 

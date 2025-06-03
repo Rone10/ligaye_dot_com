@@ -12,11 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DatePicker } from '@/components/ui/date-picker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Editor } from '@/components/RichTextEditor/editor';
 import { LocationSelector } from '@/components/ui/location-selector';
 import { updateTenderSchema, type UpdateTenderSchemaType } from '../_utils/validation';
-import { updateTenderAction } from '../_actions';
+import { updateTenderAction, updateTenderWithDocumentsAction } from '../_actions';
 import { getLocationById } from '../_queries';
+import { FileUpload } from './FileUpload';
 import type { Tender, Sector } from '@/lib/db/schema';
 import type { LocationSelection } from '@/lib/types/locations';
 import { tenderTypeEnum, tenderStatusEnum } from '@/lib/db/schema';
@@ -31,6 +33,8 @@ export function EditTenderForm({ tender, sectors }: EditTenderFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [locationSelection, setLocationSelection] = useState<LocationSelection>({});
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [documentsArePaid, setDocumentsArePaid] = useState(tender.documentsArePaid || false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const router = useRouter();
 
   const form = useForm<UpdateTenderSchemaType>({
@@ -48,6 +52,10 @@ export function EditTenderForm({ tender, sectors }: EditTenderFormProps) {
       contactInformation: tender.contactInformation || '',
       externalLink: tender.externalLink || '',
       status: tender.status,
+      documentsArePaid: tender.documentsArePaid || false,
+      documentPrice: tender.documentPrice || undefined,
+      documentCurrency: tender.documentCurrency || 'GMD',
+      agreeToCommissionTerms: false, // Reset this for editing
     },
   });
 
@@ -105,7 +113,34 @@ export function EditTenderForm({ tender, sectors }: EditTenderFormProps) {
     setError(null);
 
     try {
-      const result = await updateTenderAction(tender.id, data);
+      let result;
+
+      // If there are files to upload, use the FormData approach
+      if (selectedFiles.length > 0) {
+        // Create FormData to include files
+        const formData = new FormData();
+        
+        // Add form data
+        Object.entries(data).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            if (key === 'deadline' && value instanceof Date) {
+              formData.append(key, value.toISOString());
+            } else {
+              formData.append(key, value.toString());
+            }
+          }
+        });
+
+        // Add files
+        selectedFiles.forEach((file) => {
+          formData.append('files', file);
+        });
+
+        result = await updateTenderWithDocumentsAction(tender.id, formData);
+      } else {
+        // No files, use regular update
+        result = await updateTenderAction(tender.id, data);
+      }
       
       if (result.success) {
         // Show success toast
@@ -348,6 +383,171 @@ export function EditTenderForm({ tender, sectors }: EditTenderFormProps) {
                 </FormItem>
               )}
             />
+
+            {/* Document Payment Settings */}
+            <div className="space-y-lg border-t border-theme-gray pt-lg">
+              <h3 className="text-xl font-semibold text-theme-dark">Document Access Settings</h3>
+              
+              <div className="space-y-md">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="documentsArePaid"
+                    checked={documentsArePaid}
+                    onCheckedChange={(checked) => {
+                      setDocumentsArePaid(checked as boolean);
+                      form.setValue('documentsArePaid', checked as boolean);
+                      // Reset terms agreement when unchecked
+                      if (!checked) {
+                        form.setValue('agreeToCommissionTerms', false);
+                      }
+                    }}
+                  />
+                  <label htmlFor="documentsArePaid" className="text-sm font-medium">
+                    Charge for document access
+                  </label>
+                </div>
+                
+                {documentsArePaid && (
+                  <div className="space-y-lg">
+                    <div className="grid grid-cols-2 gap-md">
+                      <FormField
+                        control={form.control}
+                        name="documentPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Document Price *</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                {...field}
+                                onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="documentCurrency"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Currency</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="GMD">GMD (Gambian Dalasi)</SelectItem>
+                                <SelectItem value="USD">USD (US Dollar)</SelectItem>
+                                <SelectItem value="EUR">EUR (Euro)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    {/* Commission Terms Agreement */}
+                    <FormField
+                      control={form.control}
+                      name="agreeToCommissionTerms"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="glass-card p-lg rounded-lg border border-primary-blue/20 bg-primary-blue/5">
+                            <div className="flex items-start space-x-md">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  className="mt-xxs flex-shrink-0"
+                                />
+                              </FormControl>
+                              <div className="space-y-sm flex-1">
+                                <FormLabel className="text-sm font-semibold text-theme-dark leading-normal cursor-pointer">
+                                  Commission Terms Agreement *
+                                </FormLabel>
+                                <div className="text-sm text-theme-gray-dark leading-relaxed">
+                                  <p className="mb-sm">
+                                    By checking this box, I acknowledge and agree to the following terms:
+                                  </p>
+                                  <ul className="space-y-xs pl-md">
+                                    <li className="flex items-start">
+                                      <span className="text-primary-blue mr-xs mt-xxs flex-shrink-0">•</span>
+                                      <span>
+                                        <strong className="text-theme-dark">10% Platform Commission:</strong> Ligaye.com will retain 10% of every document sale as a platform commission fee.
+                                      </span>
+                                    </li>
+                                    <li className="flex items-start">
+                                      <span className="text-primary-blue mr-xs mt-xxs flex-shrink-0">•</span>
+                                      <span>
+                                        <strong className="text-theme-dark">Automatic Deduction:</strong> The commission will be automatically deducted from each transaction before funds are transferred to my account.
+                                      </span>
+                                    </li>
+                                    <li className="flex items-start">
+                                      <span className="text-primary-blue mr-xs mt-xxs flex-shrink-0">•</span>
+                                      <span>
+                                        <strong className="text-theme-dark">Payment Processing:</strong> I understand that payment processing may take 3-5 business days after a successful purchase.
+                                      </span>
+                                    </li>
+                                    <li className="flex items-start">
+                                      <span className="text-primary-blue mr-xs mt-xxs flex-shrink-0">•</span>
+                                      <span>
+                                        <strong className="text-theme-dark">Terms Acceptance:</strong> I agree to comply with all platform terms and conditions for paid document distribution.
+                                      </span>
+                                    </li>
+                                  </ul>
+                                  <p className="mt-sm text-xs text-theme-gray-dark italic">
+                                    Example: If a document is sold for GMD 100, you will receive GMD 90 and Ligaye.com will retain GMD 10 as commission.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+              
+              {/* Document Upload Section */}
+              <div className="space-y-lg">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-lg font-semibold text-theme-dark">Document Upload</h4>
+                  {documentsArePaid && (
+                    <div className="px-sm py-xxs bg-secondary-green/10 border border-secondary-green/20 rounded-md">
+                      <span className="text-xs font-medium text-secondary-green">
+                        ⚠️ Documents can be uploaded to update paid content
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                <FileUpload
+                  files={selectedFiles}
+                  onFilesChange={setSelectedFiles}
+                  maxFiles={5}
+                  maxSize={25 * 1024 * 1024} // 25MB
+                />
+                
+                {documentsArePaid && selectedFiles.length === 0 && (
+                  <div className="p-sm bg-blue-50 border border-blue-200 rounded-md">
+                    <p className="text-sm text-blue-700">
+                      <strong>Note:</strong> No new documents selected. Existing documents will remain unchanged.
+                      Upload new documents to replace or add to the current document set.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Status */}
             <FormField

@@ -70,6 +70,14 @@ export function NewTenderForm({ sectors }: NewTenderFormProps) {
     setError(null);
 
     try {
+      // Validate document upload requirement
+      if (data.documentsArePaid && selectedFiles.length === 0) {
+        setError('At least one document must be uploaded when charging for document access.');
+        toast.error('At least one document must be uploaded when charging for document access.');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Create FormData to include files
       const formData = new FormData();
       
@@ -331,7 +339,16 @@ export function NewTenderForm({ sectors }: NewTenderFormProps) {
 
             {/* Document Upload Section */}
             <div className="space-y-lg border-t border-theme-gray pt-lg">
-              <h3 className="text-xl font-semibold text-theme-dark">Document Upload</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-theme-dark">Document Upload</h3>
+                {documentsArePaid && (
+                  <div className="px-sm py-xxs bg-secondary-green/10 border border-secondary-green/20 rounded-md">
+                    <span className="text-xs font-medium text-secondary-green">
+                      ⚠️ At least one document required for paid access
+                    </span>
+                  </div>
+                )}
+              </div>
               
               <FileUpload
                 files={selectedFiles}
