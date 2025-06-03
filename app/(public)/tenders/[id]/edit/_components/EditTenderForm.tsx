@@ -120,6 +120,15 @@ export function EditTenderForm({ tender, sectors, initialDocuments }: EditTender
     setIsSubmitting(true);
     setError(null);
 
+    // Validate document requirements for paid access
+    if (data.documentsArePaid && existingDocuments.length === 0 && selectedFiles.length === 0) {
+      const errorMessage = 'You must upload at least one document to charge for document access';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       let result;
 
@@ -397,22 +406,31 @@ export function EditTenderForm({ tender, sectors, initialDocuments }: EditTender
               <h3 className="text-xl font-semibold text-theme-dark">Document Access Settings</h3>
               
               <div className="space-y-md">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="documentsArePaid"
-                    checked={documentsArePaid}
-                    onCheckedChange={(checked) => {
-                      setDocumentsArePaid(checked as boolean);
-                      form.setValue('documentsArePaid', checked as boolean);
-                      // Reset terms agreement when unchecked
-                      if (!checked) {
-                        form.setValue('agreeToCommissionTerms', false);
-                      }
-                    }}
-                  />
-                  <label htmlFor="documentsArePaid" className="text-sm font-medium">
-                    Charge for document access
-                  </label>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="documentsArePaid"
+                      checked={documentsArePaid}
+                      onCheckedChange={(checked) => {
+                        setDocumentsArePaid(checked as boolean);
+                        form.setValue('documentsArePaid', checked as boolean);
+                        // Reset terms agreement when unchecked
+                        if (!checked) {
+                          form.setValue('agreeToCommissionTerms', false);
+                        }
+                      }}
+                    />
+                    <label htmlFor="documentsArePaid" className="text-sm font-medium">
+                      Charge for document access
+                    </label>
+                  </div>
+                  {documentsArePaid && existingDocuments.length === 0 && selectedFiles.length === 0 && (
+                    <div className="px-sm py-xxs bg-red-100 border border-red-200 rounded-md">
+                      <span className="text-xs font-medium text-red-600">
+                        ⚠️ Documents required
+                      </span>
+                    </div>
+                  )}
                 </div>
                 
                 {documentsArePaid && (
@@ -559,10 +577,10 @@ export function EditTenderForm({ tender, sectors, initialDocuments }: EditTender
                   />
                   
                   {documentsArePaid && selectedFiles.length === 0 && existingDocuments.length === 0 && (
-                    <div className="p-sm bg-blue-50 border border-blue-200 rounded-md">
-                      <p className="text-sm text-blue-700">
-                        <strong>Note:</strong> No documents available. Since this tender charges for document access, 
-                        consider uploading at least one document.
+                    <div className="p-sm bg-red-50 border border-red-200 rounded-md">
+                      <p className="text-sm text-red-700">
+                        <strong>⚠️ Required:</strong> You must upload at least one document to charge for document access. 
+                        Please upload documents or uncheck "Charge for document access".
                       </p>
                     </div>
                   )}
@@ -609,7 +627,10 @@ export function EditTenderForm({ tender, sectors, initialDocuments }: EditTender
             <div className="flex gap-4 pt-6">
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={
+                  isSubmitting || 
+                  (documentsArePaid && existingDocuments.length === 0 && selectedFiles.length === 0)
+                }
                 className="flex-1"
               >
                 {isSubmitting ? 'Updating...' : 'Update Tender'}
