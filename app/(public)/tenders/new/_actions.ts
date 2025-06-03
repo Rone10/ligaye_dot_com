@@ -75,6 +75,7 @@ export async function createTenderWithDocumentsAction(
       documentsArePaid: rawData.documentsArePaid === 'true',
       documentPrice: rawData.documentPrice ? parseFloat(rawData.documentPrice as string) : undefined,
       documentCurrency: (rawData.documentCurrency as string) || 'GMD',
+      agreeToCommissionTerms: rawData.agreeToCommissionTerms === 'true',
     };
 
     // Parse deadline if provided

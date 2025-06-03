@@ -49,6 +49,7 @@ export function NewTenderForm({ sectors }: NewTenderFormProps) {
       documentsArePaid: false,
       documentPrice: undefined,
       documentCurrency: 'GMD',
+      agreeToCommissionTerms: false,
     },
   });
 
@@ -348,6 +349,10 @@ export function NewTenderForm({ sectors }: NewTenderFormProps) {
                     onCheckedChange={(checked) => {
                       setDocumentsArePaid(checked as boolean);
                       form.setValue('documentsArePaid', checked as boolean);
+                      // Reset terms agreement when unchecked
+                      if (!checked) {
+                        form.setValue('agreeToCommissionTerms', false);
+                      }
                     }}
                   />
                   <label htmlFor="documentsArePaid" className="text-sm font-medium">
@@ -356,45 +361,108 @@ export function NewTenderForm({ sectors }: NewTenderFormProps) {
                 </div>
                 
                 {documentsArePaid && (
-                  <div className="grid grid-cols-2 gap-md">
-                    <FormField
-                      control={form.control}
-                      name="documentPrice"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Document Price *</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="0.00"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="documentCurrency"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Currency</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <div className="space-y-lg">
+                    <div className="grid grid-cols-2 gap-md">
+                      <FormField
+                        control={form.control}
+                        name="documentPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Document Price *</FormLabel>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                {...field}
+                                onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                              />
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="GMD">GMD (Gambian Dalasi)</SelectItem>
-                              <SelectItem value="USD">USD (US Dollar)</SelectItem>
-                              <SelectItem value="EUR">EUR (Euro)</SelectItem>
-                            </SelectContent>
-                          </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="documentCurrency"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Currency</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="GMD">GMD (Gambian Dalasi)</SelectItem>
+                                <SelectItem value="USD">USD (US Dollar)</SelectItem>
+                                <SelectItem value="EUR">EUR (Euro)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    {/* Commission Terms Agreement */}
+                    <FormField
+                      control={form.control}
+                      name="agreeToCommissionTerms"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="glass-card p-lg rounded-lg border border-primary-blue/20 bg-primary-blue/5">
+                            <div className="flex items-start space-x-md">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  className="mt-xxs flex-shrink-0"
+                                />
+                              </FormControl>
+                              <div className="space-y-sm flex-1">
+                                <FormLabel className="text-sm font-semibold text-theme-dark leading-normal cursor-pointer">
+                                  Commission Terms Agreement *
+                                </FormLabel>
+                                <div className="text-sm text-theme-gray-dark leading-relaxed">
+                                  <p className="mb-sm">
+                                    By checking this box, I acknowledge and agree to the following terms:
+                                  </p>
+                                  <ul className="space-y-xs pl-md">
+                                    <li className="flex items-start">
+                                      <span className="text-primary-blue mr-xs mt-xxs flex-shrink-0">•</span>
+                                      <span>
+                                        <strong className="text-theme-dark">10% Platform Commission:</strong> Ligaye.com will retain 10% of every document sale as a platform commission fee.
+                                      </span>
+                                    </li>
+                                    <li className="flex items-start">
+                                      <span className="text-primary-blue mr-xs mt-xxs flex-shrink-0">•</span>
+                                      <span>
+                                        <strong className="text-theme-dark">Automatic Deduction:</strong> The commission will be automatically deducted from each transaction before funds are transferred to my account.
+                                      </span>
+                                    </li>
+                                    <li className="flex items-start">
+                                      <span className="text-primary-blue mr-xs mt-xxs flex-shrink-0">•</span>
+                                      <span>
+                                        <strong className="text-theme-dark">Payment Processing:</strong> I understand that payment processing may take 3-5 business days after a successful purchase.
+                                      </span>
+                                    </li>
+                                    <li className="flex items-start">
+                                      <span className="text-primary-blue mr-xs mt-xxs flex-shrink-0">•</span>
+                                      <span>
+                                        <strong className="text-theme-dark">Terms Acceptance:</strong> I agree to comply with all platform terms and conditions for paid document distribution.
+                                      </span>
+                                    </li>
+                                  </ul>
+                                  <p className="mt-sm text-xs text-theme-gray-dark italic">
+                                    Example: If a document is sold for GMD 100, you will receive GMD 90 and Ligaye.com will retain GMD 10 as commission.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                           <FormMessage />
                         </FormItem>
                       )}
