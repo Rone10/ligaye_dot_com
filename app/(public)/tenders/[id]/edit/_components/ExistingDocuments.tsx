@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { FileText, Trash2, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { deleteTenderDocumentAction } from '../_actions';
+import { ConfirmationModal } from './ConfirmationModal';
 import type { TenderDocument } from '@/lib/db/schema';
 
 interface ExistingDocumentsProps {
@@ -16,6 +17,8 @@ interface ExistingDocumentsProps {
 
 export function ExistingDocuments({ documents, tenderId, onDocumentDeleted }: ExistingDocumentsProps) {
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
@@ -25,11 +28,15 @@ export function ExistingDocuments({ documents, tenderId, onDocumentDeleted }: Ex
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleDeleteDocument = async (documentId: string, filename: string) => {
-    if (!confirm(`Are you sure you want to delete "${filename}"? This action cannot be undone.`)) {
-      return;
-    }
+  const handleDeleteClick = (documentId: string, filename: string) => {
+    setDocumentToDelete({ id: documentId, name: filename });
+    setDeleteModalOpen(true);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!documentToDelete) return;
+
+    const { id: documentId, name: filename } = documentToDelete;
     setDeletingIds(prev => new Set([...prev, documentId]));
     
     try {
@@ -38,6 +45,8 @@ export function ExistingDocuments({ documents, tenderId, onDocumentDeleted }: Ex
       if (result.success) {
         toast.success('Document deleted successfully');
         onDocumentDeleted(documentId);
+        setDeleteModalOpen(false);
+        setDocumentToDelete(null);
       } else {
         toast.error(result.error || 'Failed to delete document');
       }
@@ -53,6 +62,13 @@ export function ExistingDocuments({ documents, tenderId, onDocumentDeleted }: Ex
     }
   };
 
+  const handleCloseModal = () => {
+    if (!deletingIds.has(documentToDelete?.id || '')) {
+      setDeleteModalOpen(false);
+      setDocumentToDelete(null);
+    }
+  };
+
   if (documents.length === 0) {
     return (
       <Card className="border-theme-gray/50">
@@ -65,47 +81,65 @@ export function ExistingDocuments({ documents, tenderId, onDocumentDeleted }: Ex
   }
 
   return (
-    <Card>
-      <CardContent className="p-lg">
-        <h4 className="font-medium text-theme-dark mb-md">
-          Current Documents ({documents.length})
-        </h4>
-        <div className="space-y-sm">
-          {documents.map((document) => (
-            <div
-              key={document.id}
-              className="flex items-center justify-between p-sm bg-theme-light rounded-md"
-            >
-              <div className="flex items-center gap-sm flex-1">
-                <FileText className="h-4 w-4 text-theme-gray-dark flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-theme-dark truncate">
-                    {document.originalFilename}
-                  </p>
-                  <div className="flex items-center gap-md text-xs text-theme-gray-dark">
-                    <span>{formatFileSize(document.fileSize || 0)}</span>
-                    <span>•</span>
-                    <span>Uploaded {new Date(document.createdAt).toLocaleDateString()}</span>
+    <>
+      <Card>
+        <CardContent className="p-lg">
+          <h4 className="font-medium text-theme-dark mb-md">
+            Current Documents ({documents.length})
+          </h4>
+          <div className="space-y-sm">
+            {documents.map((document) => (
+              <div
+                key={document.id}
+                className="flex items-center justify-between p-sm bg-theme-light rounded-md"
+              >
+                <div className="flex items-center gap-sm flex-1">
+                  <FileText className="h-4 w-4 text-theme-gray-dark flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-theme-dark truncate">
+                      {document.originalFilename}
+                    </p>
+                    <div className="flex items-center gap-md text-xs text-theme-gray-dark">
+                      <span>{formatFileSize(document.fileSize || 0)}</span>
+                      <span>•</span>
+                      <span>Uploaded {new Date(document.createdAt).toLocaleDateString()}</span>
+                    </div>
                   </div>
                 </div>
+                
+                <div className="flex items-center gap-xs">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={deletingIds.has(document.id)}
+                    onClick={() => handleDeleteClick(document.id, document.originalFilename)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 px-sm"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              
-              <div className="flex items-center gap-xs">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  disabled={deletingIds.has(document.id)}
-                  onClick={() => handleDeleteDocument(document.id, document.originalFilename)}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50 px-sm"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <ConfirmationModal
+        open={deleteModalOpen}
+        onOpenChange={handleCloseModal}
+        title="Delete Document"
+        description={
+          documentToDelete 
+            ? `Are you sure you want to delete "${documentToDelete.name}"? This action cannot be undone and the document will be permanently removed from this tender.`
+            : ''
+        }
+        confirmText="Delete Document"
+        cancelText="Cancel"
+        variant="destructive"
+        onConfirm={handleConfirmDelete}
+        isLoading={documentToDelete ? deletingIds.has(documentToDelete.id) : false}
+      />
+    </>
   );
 } 
