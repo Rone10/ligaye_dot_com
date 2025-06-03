@@ -144,7 +144,7 @@ export default function Navbar({ user }: NavbarProps) {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="text-theme-dark hover:text-primary-blue"
+                className="text-theme-dark hover:text-primary-blue dark:hover:text-white"
                 onClick={handleLogout}
               >
                 {/* <LogOut className="h-4 w-4 mr-2" /> */}
