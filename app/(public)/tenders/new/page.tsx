@@ -9,6 +9,9 @@ export default async function NewTenderPage() {
   if (!user) {
     redirect('/sign-in?redirect=/tenders/new');
   }
+  if (user.user_metadata.role !== 'employer') {
+    redirect('/');
+  }
 
   // Fetch required data for dropdowns
   const sectors = await getSectors();
