@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { getUser } from '@/lib/supabase/server';
-import { getTenderByIdForEdit, getSectors } from './_queries';
+import { getTenderByIdForEdit, getSectors, getTenderDocuments } from './_queries';
 import { EditTenderForm } from './_components/EditTenderForm';
 
 interface PageProps {
@@ -18,9 +18,10 @@ export default async function EditTenderPage({ params }: PageProps) {
 
   try {
     // Fetch tender data with ownership verification and other required data
-    const [tender, sectors] = await Promise.all([
+    const [tender, sectors, tenderDocuments] = await Promise.all([
       getTenderByIdForEdit(id, user.id), // Pass user.id for ownership verification
       getSectors(),
+      getTenderDocuments(id),
     ]);
 
     if (!tender) {
@@ -33,6 +34,7 @@ export default async function EditTenderPage({ params }: PageProps) {
         <EditTenderForm 
           tender={tender}
           sectors={sectors}
+          initialDocuments={tenderDocuments}
         />
       </div>
     );

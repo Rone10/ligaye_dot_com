@@ -2,7 +2,7 @@
 
 import { getUser } from '@/lib/supabase/server';
 import { updateTenderSchema, type UpdateTenderSchemaType } from './_utils/validation';
-import { updateTender, saveTenderDocumentMetadata } from './_queries';
+import { updateTender, saveTenderDocumentMetadata, deleteTenderDocument, getTenderByIdForEdit } from './_queries';
 import { uploadTenderDocument } from '@/lib/utils/file-upload';
 import { revalidatePath } from 'next/cache';
 
@@ -153,5 +153,41 @@ export async function updateTenderWithDocumentsAction(
     }
     
     return { success: false, error: 'An unexpected error occurred while updating the tender' };
+  }
+}
+
+export async function deleteTenderDocumentAction(
+  tenderId: string,
+  documentId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Get current user
+    const user = await getUser();
+    if (!user || user.user_metadata.role !== 'employer') {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    // Verify tender ownership first
+    const tender = await getTenderByIdForEdit(tenderId, user.id);
+    if (!tender) {
+      return { success: false, error: 'Tender not found or unauthorized' };
+    }
+
+    // Delete the document
+    const success = await deleteTenderDocument(documentId);
+    
+    if (!success) {
+      return { success: false, error: 'Failed to delete document' };
+    }
+
+    // Revalidate relevant paths
+    revalidatePath('/tenders');
+    revalidatePath(`/tenders/${tenderId}`);
+    revalidatePath(`/tenders/${tenderId}/edit`);
+
+    return { success: true };
+  } catch (error) {
+    console.error('Delete document action error:', error);
+    return { success: false, error: 'An unexpected error occurred while deleting the document' };
   }
 } 

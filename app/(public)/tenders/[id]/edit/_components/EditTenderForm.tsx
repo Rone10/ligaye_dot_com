@@ -19,22 +19,25 @@ import { updateTenderSchema, type UpdateTenderSchemaType } from '../_utils/valid
 import { updateTenderAction, updateTenderWithDocumentsAction } from '../_actions';
 import { getLocationById } from '../_queries';
 import { FileUpload } from './FileUpload';
-import type { Tender, Sector } from '@/lib/db/schema';
+import { ExistingDocuments } from './ExistingDocuments';
+import type { Tender, Sector, TenderDocument } from '@/lib/db/schema';
 import type { LocationSelection } from '@/lib/types/locations';
 import { tenderTypeEnum, tenderStatusEnum } from '@/lib/db/schema';
 
 interface EditTenderFormProps {
   tender: Tender;
   sectors: Sector[];
+  initialDocuments: TenderDocument[];
 }
 
-export function EditTenderForm({ tender, sectors }: EditTenderFormProps) {
+export function EditTenderForm({ tender, sectors, initialDocuments }: EditTenderFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [locationSelection, setLocationSelection] = useState<LocationSelection>({});
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [documentsArePaid, setDocumentsArePaid] = useState(tender.documentsArePaid || false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [existingDocuments, setExistingDocuments] = useState<TenderDocument[]>(initialDocuments);
   const router = useRouter();
 
   const form = useForm<UpdateTenderSchemaType>({
@@ -70,6 +73,11 @@ export function EditTenderForm({ tender, sectors }: EditTenderFormProps) {
     setLocationSelection(selection);
     const locationId = getLocationIdFromSelection(selection);
     form.setValue('locationId', locationId, { shouldDirty: true });
+  };
+
+  // Handle document deletion
+  const handleDocumentDeleted = (documentId: string) => {
+    setExistingDocuments(prev => prev.filter(doc => doc.id !== documentId));
   };
 
   // Initialize location selection from existing tender data
@@ -520,32 +528,54 @@ export function EditTenderForm({ tender, sectors }: EditTenderFormProps) {
               
               {/* Document Upload Section */}
               <div className="space-y-lg">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-semibold text-theme-dark">Document Upload</h4>
-                  {documentsArePaid && (
-                    <div className="px-sm py-xxs bg-secondary-green/10 border border-secondary-green/20 rounded-md">
-                      <span className="text-xs font-medium text-secondary-green">
-                        ⚠️ Documents can be uploaded to update paid content
-                      </span>
+                {/* Existing Documents */}
+                <div className="space-y-md">
+                  <h4 className="text-lg font-semibold text-theme-dark">Current Documents</h4>
+                  <ExistingDocuments 
+                    documents={existingDocuments}
+                    tenderId={tender.id}
+                    onDocumentDeleted={handleDocumentDeleted}
+                  />
+                </div>
+
+                {/* New Document Upload */}
+                <div className="space-y-md">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-theme-dark">Upload New Documents</h4>
+                    {documentsArePaid && (
+                      <div className="px-sm py-xxs bg-secondary-green/10 border border-secondary-green/20 rounded-md">
+                        <span className="text-xs font-medium text-secondary-green">
+                          ⚠️ Documents can be uploaded to update paid content
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <FileUpload
+                    files={selectedFiles}
+                    onFilesChange={setSelectedFiles}
+                    maxFiles={5}
+                    maxSize={25 * 1024 * 1024} // 25MB
+                  />
+                  
+                  {documentsArePaid && selectedFiles.length === 0 && existingDocuments.length === 0 && (
+                    <div className="p-sm bg-blue-50 border border-blue-200 rounded-md">
+                      <p className="text-sm text-blue-700">
+                        <strong>Note:</strong> No documents available. Since this tender charges for document access, 
+                        consider uploading at least one document.
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedFiles.length === 0 && existingDocuments.length > 0 && (
+                    <div className="p-sm bg-gray-50 border border-gray-200 rounded-md">
+                      <p className="text-sm text-gray-700">
+                        <strong>Note:</strong> No new documents selected. Current documents will remain unchanged.
+                        Upload new documents to add to the current set.
+                      </p>
                     </div>
                   )}
                 </div>
-                
-                <FileUpload
-                  files={selectedFiles}
-                  onFilesChange={setSelectedFiles}
-                  maxFiles={5}
-                  maxSize={25 * 1024 * 1024} // 25MB
-                />
-                
-                {documentsArePaid && selectedFiles.length === 0 && (
-                  <div className="p-sm bg-blue-50 border border-blue-200 rounded-md">
-                    <p className="text-sm text-blue-700">
-                      <strong>Note:</strong> No new documents selected. Existing documents will remain unchanged.
-                      Upload new documents to replace or add to the current document set.
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
 

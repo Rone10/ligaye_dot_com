@@ -1,7 +1,7 @@
 'use server';
 import { db } from '@/lib/db';
 import { tenders, sectors, locations, profiles, tenderDocuments } from '@/lib/db/schema';
-import type { Tender, Sector, Location } from '@/lib/db/schema';
+import type { Tender, Sector, Location, TenderDocument } from '@/lib/db/schema';
 import type { UpdateTenderSchemaType } from './_utils/validation';
 import { eq, and } from 'drizzle-orm';
 
@@ -147,6 +147,42 @@ export async function getLocations(): Promise<Location[]> {
     .from(locations)
     .where(eq(locations.deleted, false))
     .orderBy(locations.region, locations.city);
+}
+
+export async function getTenderDocuments(tenderId: string): Promise<TenderDocument[]> {
+  try {
+    const database = await db();
+    return await database
+      .select()
+      .from(tenderDocuments)
+      .where(and(
+        eq(tenderDocuments.tenderId, tenderId),
+        eq(tenderDocuments.deleted, false)
+      ))
+      .orderBy(tenderDocuments.createdAt);
+  } catch (error) {
+    console.error('Error fetching tender documents:', error);
+    return [];
+  }
+}
+
+export async function deleteTenderDocument(documentId: string): Promise<boolean> {
+  try {
+    const database = await db();
+    const [result] = await database
+      .update(tenderDocuments)
+      .set({ 
+        deleted: true, 
+        updatedAt: new Date() 
+      })
+      .where(eq(tenderDocuments.id, documentId))
+      .returning();
+    
+    return !!result;
+  } catch (error) {
+    console.error('Error deleting tender document:', error);
+    return false;
+  }
 }
 
 export async function saveTenderDocumentMetadata(
