@@ -12,7 +12,7 @@ export async function updateTenderAction(tenderId: string, formData: UpdateTende
   try {
     // Get current user
     const user = await getUser();
-    if (!user) {
+    if (!user || user.user_metadata.role !== 'employer') {
       return { success: false, error: 'Authentication required' };
     }
 

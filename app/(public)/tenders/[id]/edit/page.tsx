@@ -12,8 +12,8 @@ export default async function EditTenderPage({ params }: PageProps) {
 
   // Get current user
   const user = await getUser();
-  if (!user) {
-    redirect('/login');
+  if (!user || user.user_metadata.role !== 'employer') {
+    redirect('/');
   }
 
   try {

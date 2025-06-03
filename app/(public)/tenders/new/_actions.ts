@@ -20,7 +20,7 @@ export async function createTenderAction(formData: NewTenderSchemaType): Promise
   try {
     // Get current user from Supabase Auth
     const user = await getUser();
-    if (!user) {
+    if (!user || user.user_metadata.role !== 'employer') {
       return { success: false, error: 'Authentication required' };
     }
 
@@ -50,7 +50,7 @@ export async function createTenderWithDocumentsAction(
   try {
     // Get authenticated user
     const user = await getUser();
-    if (!user) {
+    if (!user || user.user_metadata.role !== 'employer') {
       return { success: false, error: 'Authentication required' };
     }
 
