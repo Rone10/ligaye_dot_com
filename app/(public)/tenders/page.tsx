@@ -31,7 +31,7 @@ export default async function TendersPage({ searchParams }: PageProps) {
   };
 
   // Get current user (for showing create button and edit/delete actions)
-  // const user = await getUser();
+  const user = await getUser();
 
   // // get user profile
   // const profile = await getUserProfile(user?.id || '');
@@ -60,14 +60,14 @@ export default async function TendersPage({ searchParams }: PageProps) {
             </p>
           </div>
           
-          {/* {user && ( */}
+          {user && user.user_metadata.role === 'employer' && (
             <Button asChild className="shadow-level-2 hover:shadow-level-3 duration-standard">
               <Link href="/tenders/new" className="gap-xs">
                 <Plus className="h-4 w-4" />
-                Submit New Tender
+                Submit New Tenders
               </Link>
             </Button>
-          {/* )} */}
+          )}
         </div>
 
         {/* Tenders Page Content */}
@@ -100,6 +100,7 @@ export default async function TendersPage({ searchParams }: PageProps) {
             currentPage={page}
             limit={limit}
             sectors={sectors}
+            user={user}
           />
         </Suspense>
       </div>

@@ -5,6 +5,7 @@ import { TenderFilters } from './TenderFilters';
 import { TenderList } from './TenderList';
 import type { TenderWithRelations } from '../_queries';
 import type { Sector } from '@/lib/db/schema';
+import type { User } from '@supabase/supabase-js';
 
 interface TendersPageClientProps {
   tenders: TenderWithRelations[];
@@ -12,6 +13,7 @@ interface TendersPageClientProps {
   currentPage: number;
   limit: number;
   sectors: Sector[];
+  user: User | null;
 }
 
 export function TendersPageClient({
@@ -20,6 +22,7 @@ export function TendersPageClient({
   currentPage,
   limit,
   sectors,
+  user,
 }: TendersPageClientProps) {
   const [isFiltering, setIsFiltering] = useState(false);
 
@@ -41,6 +44,7 @@ export function TendersPageClient({
           currentPage={currentPage}
           limit={limit}
           isFiltering={isFiltering}
+          user={user}
         />
       </div>
     </div>

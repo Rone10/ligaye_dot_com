@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { TenderCard } from './TenderCard';
 import { deleteTenderAction } from '../_actions';
 import type { TenderWithRelations } from '../_queries';
+import { User } from '@supabase/supabase-js';
 
 interface TenderListProps {
   tenders: TenderWithRelations[];
@@ -17,6 +18,7 @@ interface TenderListProps {
   currentPage: number;
   limit: number;
   isFiltering?: boolean;
+  user: User | null;
 }
 
 export function TenderList({
@@ -26,6 +28,7 @@ export function TenderList({
   currentPage,
   limit,
   isFiltering = false,
+  user,
 }: TenderListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -66,14 +69,14 @@ export function TenderList({
                 There are no tenders matching your current filters.
               </p>
             </div>
-            {/* {currentUserId && ( */}
+            {user && user.user_metadata.role === 'employer' && (
               <Button asChild className="shadow-level-2 hover:shadow-level-3 duration-standard">
                 <Link href="/tenders/new" className="gap-xs">
                   <Plus className="h-4 w-4" />
                   Create New Tender
                 </Link>
               </Button>
-            {/* )} */}
+            )}
           </div>
         </CardContent>
       </Card>
