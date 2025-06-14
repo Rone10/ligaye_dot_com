@@ -58,8 +58,8 @@ export default function Navbar({ user }: NavbarProps) {
           {/* <div className="h-8 w-8 rounded-lg bg-primary-blue flex items-center justify-center">
             <span className="text-white font-bold text-lg">L</span>
           </div> */}
-          <Image src="/ligaye-logo.svg" alt="Ligaye Logo" width={40} height={40} />
-          <span className="text-2xl md:text-3xl font-bold text-primary-blue">Ligaye</span>
+          <Image src="/logo.PNG" alt="Ligaye Logo" width={170} height={100} />
+          {/* <span className="text-2xl md:text-3xl font-bold text-primary-blue">Ligaye</span> */}
         </Link>
         
         {/* Desktop Navigation */}
