@@ -1,12 +1,12 @@
 {
   "region": {
-    "id": "3",
+    "id": "2",
     "name": "Kanifing Municipality",
     "slug": "kanifing-municipality"
   },
   "districts": [
     {
-      "id": "3-1",
+      "id": "2-1",
       "name": "Kanifing Municipality",
       "cities": [
         {

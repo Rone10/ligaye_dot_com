@@ -67,15 +67,17 @@ export function TenderFilters({ sectors, onFilteringChange }: TenderFiltersProps
   // This is a simplified approach - you might want to enhance this
   // by storing location details in the URL or having a lookup mechanism
   useEffect(() => {
-    if (locationId && locationId !== getLocationIdFromSelection(locationSelection)) {
-      // For now, we'll clear the selection when URL changes
-      // In a full implementation, you'd want to reconstruct the LocationSelection
-      // from the locationId by looking it up in your location data
-      setLocationSelection({});
-    } else if (!locationId) {
+    // If locationId is cleared from the URL, and we still have a local selection,
+    // clear the local selection to keep things in sync.
+    if (!locationId && getLocationIdFromSelection(locationSelection)) {
       setLocationSelection({});
     }
-  }, [locationId]);
+    // NOTE: We are intentionally not handling the case where `locationId` is present
+    // on page load but `locationSelection` is not. The current component design
+    // cannot restore the full `locationSelection` state from only an ID.
+    // The previous implementation attempted to "fix" this by clearing the state,
+    // which caused an infinite render loop. This change avoids the crash.
+  }, [locationId, locationSelection]);
 
   // Helper function to get the most specific location ID from selection
   const getLocationIdFromSelection = (selection: LocationSelection): string => {

@@ -1,12 +1,12 @@
 {
   "region": {
-    "id": "8",
+    "id": "7",
     "name": "Upper River Region",
     "slug": "upper-river-region"
   },
   "districts": [
     {
-      "id": "8-1",
+      "id": "7-1",
       "name": "Jimara",
       "cities": [
         {
@@ -368,7 +368,7 @@
       ]
     },
     {
-      "id": "8-2",
+      "id": "7-2",
       "name": "Basse",
       "cities": [
         {
@@ -522,7 +522,7 @@
       ]
     },
     {
-      "id": "8-3",
+      "id": "7-3",
       "name": "Tumana",
       "cities": [
         {
@@ -728,7 +728,7 @@
       ]
     },
     {
-      "id": "8-4",
+      "id": "7-4",
       "name": "Kantora",
       "cities": [
         {
@@ -938,7 +938,7 @@
       ]
     },
     {
-      "id": "8-5",
+      "id": "7-5",
       "name": "Wuli West",
       "cities": [
         {
@@ -1128,7 +1128,7 @@
       ]
     },
     {
-      "id": "8-6",
+      "id": "7-6",
       "name": "Wuli East",
       "cities": [
         {
@@ -1298,7 +1298,7 @@
       ]
     },
     {
-      "id": "8-7",
+      "id": "7-7",
       "name": "Sandu",
       "cities": [
         {

@@ -1,12 +1,12 @@
 {
   "region": {
-    "id": "5",
+    "id": "4",
     "name": "North Bank Region",
     "slug": "north-bank-region"
   },
   "districts": [
     {
-      "id": "5-1",
+      "id": "4-1",
       "name": "Lower Niumi",
       "cities": [
         {
@@ -276,7 +276,7 @@
       ]
     },
     {
-      "id": "5-2",
+      "id": "4-2",
       "name": "Upper Niumi",
       "cities": [
         {
@@ -486,7 +486,7 @@
       ]
     },
     {
-      "id": "5-3",
+      "id": "4-3",
       "name": "Jokadu",
       "cities": [
         {
@@ -652,7 +652,7 @@
       ]
     },
     {
-      "id": "5-4",
+      "id": "4-4",
       "name": "Lower Badibu",
       "cities": [
         {
@@ -758,7 +758,7 @@
       ]
     },
     {
-      "id": "5-5",
+      "id": "4-5",
       "name": "Central Badibu",
       "cities": [
         {
@@ -900,7 +900,7 @@
       ]
     },
     {
-      "id": "5-6",
+      "id": "4-6",
       "name": "Illiasa",
       "cities": [
         {
@@ -1142,7 +1142,7 @@
       ]
     },
     {
-      "id": "5-7",
+      "id": "4-7",
       "name": "Sabach Sanjal",
       "cities": [
         {

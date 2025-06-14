@@ -1,12 +1,12 @@
 {
   "region": {
-    "id": "4",
+    "id": "3",
     "name": "West Coast Region",
     "slug": "west-coast-region"
   },
   "districts": [
     {
-      "id": "4-1",
+      "id": "3-1",
       "name": "Kombo North",
       "cities": [
         {
@@ -168,7 +168,7 @@
       ]
     },
     {
-      "id": "4-2",
+      "id": "3-2",
       "name": "Kombo South",
       "cities": [
         {
@@ -378,7 +378,7 @@
       ]
     },
     {
-      "id": "4-3",
+      "id": "3-3",
       "name": "Kombo Central",
       "cities": [
         {
@@ -600,7 +600,7 @@
       ]
     },
     {
-      "id": "4-4",
+      "id": "3-4",
       "name": "Kombo East",
       "cities": [
         {
@@ -758,7 +758,7 @@
       ]
     },
     {
-      "id": "4-5",
+      "id": "3-5",
       "name": "Foni Brefet",
       "cities": [
         {
@@ -820,7 +820,7 @@
       ]
     },
     {
-      "id": "4-6",
+      "id": "3-6",
       "name": "Foni Bintang Karanai",
       "cities": [
         {
@@ -1034,7 +1034,7 @@
       ]
     },
     {
-      "id": "4-7",
+      "id": "3-7",
       "name": "Foni Kansala",
       "cities": [
         {
@@ -1232,7 +1232,7 @@
       ]
     },
     {
-      "id": "4-8",
+      "id": "3-8",
       "name": "Foni Bondali",
       "cities": [
         {

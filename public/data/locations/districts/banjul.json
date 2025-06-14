@@ -1,12 +1,12 @@
 {
   "region": {
-    "id": "2",
+    "id": "1",
     "name": "Banjul",
     "slug": "banjul"
   },
   "districts": [
     {
-      "id": "2-1",
+      "id": "1-1",
       "name": "Banjul",
       "cities": [
         {

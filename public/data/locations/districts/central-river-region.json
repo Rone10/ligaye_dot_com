@@ -1,12 +1,12 @@
 {
   "region": {
-    "id": "7",
+    "id": "6",
     "name": "Central River Region",
     "slug": "central-river-region"
   },
   "districts": [
     {
-      "id": "7-1",
+      "id": "6-1",
       "name": "Lower Saloum",
       "cities": [
         {
@@ -260,7 +260,7 @@
       ]
     },
     {
-      "id": "7-2",
+      "id": "6-2",
       "name": "Upper Saloum",
       "cities": [
         {
@@ -590,7 +590,7 @@
       ]
     },
     {
-      "id": "7-3",
+      "id": "6-3",
       "name": "Nianija",
       "cities": [
         {
@@ -728,7 +728,7 @@
       ]
     },
     {
-      "id": "7-4",
+      "id": "6-4",
       "name": "Niani",
       "cities": [
         {
@@ -1102,7 +1102,7 @@
       ]
     },
     {
-      "id": "7-5",
+      "id": "6-5",
       "name": "Sami",
       "cities": [
         {
@@ -1412,7 +1412,7 @@
       ]
     },
     {
-      "id": "7-6",
+      "id": "6-6",
       "name": "Niamina Dankunku",
       "cities": [
         {
@@ -1522,7 +1522,7 @@
       ]
     },
     {
-      "id": "7-7",
+      "id": "6-7",
       "name": "Niamina West",
       "cities": [
         {
@@ -1664,7 +1664,7 @@
       ]
     },
     {
-      "id": "7-8",
+      "id": "6-8",
       "name": "Niamina East",
       "cities": [
         {
@@ -1882,7 +1882,7 @@
       ]
     },
     {
-      "id": "7-9",
+      "id": "6-9",
       "name": "Lower Fuladu West",
       "cities": [
         {
@@ -2204,7 +2204,7 @@
       ]
     },
     {
-      "id": "7-10",
+      "id": "6-10",
       "name": "Janjanbureh",
       "cities": [
         {
@@ -2214,7 +2214,7 @@
       ]
     },
     {
-      "id": "7-11",
+      "id": "6-11",
       "name": "Upper Fuladu West",
       "cities": [
         {
