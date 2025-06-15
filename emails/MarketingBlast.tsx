@@ -18,6 +18,8 @@ interface MarketingBlastProps {
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
+// const logoUrl = 'https://ligaye.com/branding/full_logo.png';
+const logoUrl = 'https://ligaye.com/logo.PNG';
 
 export const MarketingBlast: React.FC<Readonly<MarketingBlastProps>> = ({
   name,
@@ -29,9 +31,9 @@ export const MarketingBlast: React.FC<Readonly<MarketingBlastProps>> = ({
       <Container style={container}>
         <Section style={{ marginTop: '32px' }}>
           <Img
-            src={`${baseUrl}/logo.png`}
-            width="100"
-            height="100"
+            src={logoUrl}
+            width="500"
+            // height="200"
             alt="Ligaye.com"
             style={logo}
           />
