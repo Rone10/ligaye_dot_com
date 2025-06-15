@@ -18,8 +18,7 @@ const emailTemplates: Record<
   string,
   React.ComponentType<{ name: string }>
 > = {
-  WelcomeEmail: require('@/emails/WelcomeEmail').WelcomeEmail,
-  MarketingBlast: require('@/emails/MarketingBlast').MarketingBlast,
+  EmployerLaunchPromo: require('@/emails/EmployerLaunchPromo').EmployerLaunchPromo,
 };
 
 export async function sendBulkEmails(
