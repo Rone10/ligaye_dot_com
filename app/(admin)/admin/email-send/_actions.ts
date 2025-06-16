@@ -3,6 +3,7 @@
 import { Resend } from 'resend';
 import { sendEmailFormSchema, type TSendEmailForm } from './_utils/validation';
 import * as React from 'react';
+import { EmployerLaunchPromo } from '@/emails/EmployerLaunchPromo';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = 'Campaigns <no-reply@ligaye.com>';
@@ -13,12 +14,12 @@ type ActionResult = {
 };
 
 // A map to safely access email components
-// This prevents arbitrary file path imports
+// Using static imports instead of require() for production compatibility
 const emailTemplates: Record<
   string,
   React.ComponentType<{ name: string }>
 > = {
-  EmployerLaunchPromo: require('@/emails/EmployerLaunchPromo').EmployerLaunchPromo,
+  EmployerLaunchPromo: EmployerLaunchPromo,
 };
 
 export async function sendBulkEmails(
@@ -34,10 +35,15 @@ export async function sendBulkEmails(
 
     const { templateName, contacts, subject } = validationResult.data;
 
+    console.log('Received template name:', templateName);
+    console.log('Available templates:', Object.keys(emailTemplates));
+
     // 2. Get the template component
     const TemplateComponent = emailTemplates[templateName];
     if (!TemplateComponent) {
-      return { success: false, message: 'Invalid email template selected.' };
+      console.error('Template not found:', templateName);
+      console.error('Available templates:', Object.keys(emailTemplates));
+      return { success: false, message: `Invalid email template selected: ${templateName}. Available: ${Object.keys(emailTemplates).join(', ')}` };
     }
 
     // 3. Prepare the bulk email payload for Resend
