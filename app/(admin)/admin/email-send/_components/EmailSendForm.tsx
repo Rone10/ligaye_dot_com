@@ -48,12 +48,9 @@ const templatePreviews: Record<string, { title: string; description: string; con
     content: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8faff; padding: 20px 0;">
         <div style="background-color: #ffffff; border: 1px solid #e1e5f2; border-radius: 12px; margin: 0 auto; padding: 40px 30px; max-width: 600px;">
-          <div style="text-align: center; margin: 32px 0;">
-            <div style="width: 520px; height: 300px;  border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
-         
-              <img src="https://ligaye.com/logo.PNG" alt="Ligaye.com" style="width: 400px; height: 150px; object-fit: contain;" />
+                      <div style="text-align: center; margin: 32px 0;">
+              <img src="/full_logo_branding.png" alt="Ligaye.com" style="width: 400px; height: 200px; object-fit: contain; margin: 0 auto; display: block;" />
             </div>
-          </div>
           
           <h1 style="color: #1a1e2d; font-size: 28px; font-weight: 700; text-align: center; margin: 30px 0 20px 0; line-height: 1.3;">
             🚀 Welcome to the Future of Recruitment in The Gambia!
@@ -64,7 +61,7 @@ const templatePreviews: Record<string, { title: string; description: string; con
           </p>
           
           <p style="color: #4a5568; font-size: 16px; line-height: 1.6; margin: 16px 0;">
-            We're excited to introduce you to <strong>Ligaye.com</strong> - The Gambia's newest and most innovative job board platform, designed specifically for connecting local talent with forward-thinking employers like yourself.
+            We're excited to introduce you to <strong>Ligaye</strong> - The Gambia's newest and most innovative talent marketplace, designed specifically for connecting with talent and forward-thinking employers like yourself.
           </p>
 
           <div style="background-color: #e9efff; border: 2px solid #4a6cfa; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0;">
@@ -76,12 +73,12 @@ const templatePreviews: Record<string, { title: string; description: string; con
               Valid from June 1, 2025 to July 30, 2025
             </p>
             <p style="color: #4a6cfa; font-size: 14px; font-weight: 500; margin: 0; font-style: italic;">
-              Be among the first employers to discover top Gambian talent!
+              Be among the first employers to discover top talent!
             </p>
           </div>
 
           <p style="color: #4a5568; font-size: 16px; line-height: 1.6; margin: 16px 0;">
-            As we launch this groundbreaking platform, we're looking for visionary employers who want to be part of revolutionizing how recruitment works in The Gambia. Here's what makes Ligaye.com different:
+            As we launch this groundbreaking platform, we're looking for visionary employers who want to be part of revolutionizing how recruitment works in The Gambia. Here's what makes Ligaye different:
           </p>
 
           <div style="margin: 20px 0;">
@@ -89,7 +86,9 @@ const templatePreviews: Record<string, { title: string; description: string; con
             <p style="color: #4a5568; font-size: 15px; line-height: 1.6; margin: 8px 0;">✅ <strong>Flexible Payment Options:</strong> Pay online with Stripe or cash payments</p>
             <p style="color: #4a5568; font-size: 15px; line-height: 1.6; margin: 8px 0;">✅ <strong>Smart Matching:</strong> Advanced filters to find the right candidates</p>
             <p style="color: #4a5568; font-size: 15px; line-height: 1.6; margin: 8px 0;">✅ <strong>Easy Management:</strong> Simple dashboard to track applications</p>
+            <p style="color: #4a5568; font-size: 15px; line-height: 1.6; margin: 8px 0;">✅ <strong>Tenders & Procurement:</strong> Post and manage tender opportunities</p>
             <p style="color: #4a5568; font-size: 15px; line-height: 1.6; margin: 8px 0;">✅ <strong>Mobile Optimized:</strong> Reach candidates wherever they are</p>
+            <p style="color: #4a5568; font-size: 15px; line-height: 1.6; margin: 8px 0;">✅ <strong>Mobile App:</strong> Coming soon for even better accessibility</p>
           </div>
 
           <div style="text-align: center; margin: 32px 0;">
@@ -100,8 +99,8 @@ const templatePreviews: Record<string, { title: string; description: string; con
 
           <p style="color: #4a5568; font-size: 16px; line-height: 1.6; margin: 32px 0 24px 0;">
             Best regards,<br />
-            <strong>The Ligaye.com Launch Team</strong><br />
-            <em>Connecting Gambian Talent with Opportunity</em>
+            <strong>The Ligaye Launch Team</strong><br />
+            <em>Where Talent Meets Opportunity</em>
           </p>
 
           <div style="border-top: 1px solid #e1e5f2; padding-top: 20px; margin-top: 32px;">
@@ -109,7 +108,7 @@ const templatePreviews: Record<string, { title: string; description: string; con
               Questions? Reply to this email or visit our website for more information.
             </p>
             <p style="color: #9aa3bc; font-size: 13px; line-height: 1.5; text-align: center; margin: 8px 0;">
-              Ligaye.com - Proudly Gambian, Globally Competitive
+              Ligaye - Proudly Gambian, Globally Competitive
             </p>
           </div>
         </div>
@@ -251,12 +250,12 @@ export function EmailSendForm({ templates }: EmailSendFormProps) {
                 <FormLabel>Email Subject</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="e.g. 🚀 Introducing Ligaye.com - 2 Months FREE Job Posting!" 
+                    placeholder="e.g. 🚀 Introducing Ligaye - 2 Months FREE Job Posting!" 
                     {...field} 
                   />
                 </FormControl>
                 <FormDescription>
-                  Suggested: "🚀 Introducing Ligaye.com - 2 Months FREE Job Posting for Launch Partners!"
+                  Suggested: "🚀 Introducing Ligaye - 2 Months FREE Job Posting for Launch Partners!"
                 </FormDescription>
                 <FormMessage />
               </FormItem>

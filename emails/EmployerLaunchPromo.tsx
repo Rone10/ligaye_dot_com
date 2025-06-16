@@ -17,15 +17,15 @@ interface EmployerLaunchPromoProps {
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
-// const logoUrl = 'https://ligaye.com/branding/full_logo.png';
-const logoUrl = 'https://ligaye.com/logo.PNG';
+// Use baseUrl for development, fallback to production domain if needed
+const logoUrl = baseUrl ? `${baseUrl}/full_logo_branding.png` : 'https://ligaye.com/full_logo_branding.png';
 
 export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> = ({
   name,
 }) => (
   <Html>
     <Head />
-    <Preview>🚀 Introducing Ligaye.com - 2 Months FREE Job Posting for Launch Partners!</Preview>
+    <Preview>🚀 Introducing Ligaye - 2 Months FREE Job Posting for Launch Partners!</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={{ marginTop: '32px' }}>
@@ -43,7 +43,7 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
         <Text style={greeting}>Dear {name},</Text>
         
         <Text style={text}>
-          We're excited to introduce you to <strong>Ligaye.com</strong> - The Gambia's newest and most innovative job board platform, designed specifically for connecting local talent with forward-thinking employers like yourself.
+          We're excited to introduce you to <strong>Ligaye</strong> - The Gambia's newest and most innovative talent marketplace, designed specifically for connecting with talent and forward-thinking employers like yourself.
         </Text>
 
         <Section style={highlightBox}>
@@ -53,12 +53,12 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
             Valid from June 1, 2025 to July 30, 2025
           </Text>
           <Text style={highlightSubtext}>
-            Be among the first employers to discover top Gambian talent!
+            Be among the first employers to discover top talent!
           </Text>
         </Section>
 
         <Text style={text}>
-          As we launch this groundbreaking platform, we're looking for visionary employers who want to be part of revolutionizing how recruitment works in The Gambia. Here's what makes Ligaye.com different:
+          As we launch this groundbreaking platform, we're looking for visionary employers who want to be part of revolutionizing how recruitment works in The Gambia. Here's what makes Ligaye different:
         </Text>
 
         <Section style={featuresList}>
@@ -66,7 +66,9 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
           <Text style={featureItem}>✅ <strong>Flexible Payment Options:</strong> Pay online with Stripe or cash payments</Text>
           <Text style={featureItem}>✅ <strong>Smart Matching:</strong> Advanced filters to find the right candidates</Text>
           <Text style={featureItem}>✅ <strong>Easy Management:</strong> Simple dashboard to track applications</Text>
+          <Text style={featureItem}>✅ <strong>Tenders & Procurement:</strong> Post and manage tender opportunities</Text>
           <Text style={featureItem}>✅ <strong>Mobile Optimized:</strong> Reach candidates wherever they are</Text>
+          <Text style={featureItem}>✅ <strong>Mobile App:</strong> Coming soon for even better accessibility</Text>
         </Section>
 
         <Text style={text}>
@@ -84,13 +86,13 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
         </Text>
 
         <Text style={text}>
-          Ready to discover your next great hire? Let's build the future of Gambian employment together.
+          Ready to discover your next great hire? Let's build the future of employment together.
         </Text>
 
         <Text style={signature}>
           Best regards,<br />
-          <strong>The Ligaye.com Launch Team</strong><br />
-          <em>Connecting Gambian Talent with Opportunity</em>
+          <strong>The Ligaye Launch Team</strong><br />
+          <em>Where Talent Meets Opportunity</em>
         </Text>
 
         <Section style={footer}>
@@ -98,7 +100,7 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
             Questions? Reply to this email or visit our website for more information.
           </Text>
           <Text style={footerText}>
-            Ligaye.com - Proudly Gambian, Globally Competitive
+            Ligaye - Proudly Gambian, Globally Competitive
           </Text>
         </Section>
       </Container>
