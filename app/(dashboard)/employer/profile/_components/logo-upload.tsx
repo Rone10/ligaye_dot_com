@@ -4,8 +4,18 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { handleLogoUpload } from '../_actions';
-import { AlertCircle, Upload, X } from 'lucide-react';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { handleLogoUpload, handleLogoDelete } from '../_actions';
+import { AlertCircle, Upload, X, Trash2, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LogoUploadProps {
@@ -19,7 +29,10 @@ export default function LogoUpload({ currentLogoUrl, hasProfile }: LogoUploadPro
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Handle file selection
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -81,6 +94,7 @@ export default function LogoUpload({ currentLogoUrl, hasProfile }: LogoUploadPro
     
     setIsUploading(true);
     setUploadError(null);
+    setDeleteError(null);
     
     try {
       const formData = new FormData();
@@ -111,6 +125,28 @@ export default function LogoUpload({ currentLogoUrl, hasProfile }: LogoUploadPro
     setUploadError(null);
   }
 
+  // Handle logo deletion
+  async function deleteLogo() {
+    setIsDeleting(true);
+    setDeleteError(null);
+    setUploadError(null);
+    
+    try {
+      const result = await handleLogoDelete();
+      
+      if (result.success) {
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+        setShowDeleteDialog(false);
+      }
+    } catch (error) {
+      console.error('Error deleting logo:', error);
+      setDeleteError(error instanceof Error ? error.message : 'Failed to delete logo');
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   if (!hasProfile) {
     return (
       <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg border border-gray-200">
@@ -132,8 +168,20 @@ export default function LogoUpload({ currentLogoUrl, hasProfile }: LogoUploadPro
       {/* Current logo display */}
       {currentLogoUrl && !previewUrl && (
         <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">Current Logo</h3>
-          <div className="relative w-40 h-40 mx-auto border border-gray-200 rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium text-gray-900">Current Logo</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDeleteDialog(true)}
+              disabled={isDeleting}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              {isDeleting ? 'Removing...' : 'Remove'}
+            </Button>
+          </div>
+          <div className="relative w-40 h-40 mx-auto border border-gray-200 rounded-lg overflow-hidden bg-white">
             <Image
               src={currentLogoUrl}
               alt="Company Logo"
@@ -148,7 +196,12 @@ export default function LogoUpload({ currentLogoUrl, hasProfile }: LogoUploadPro
       
       {/* Upload area */}
       <div className="space-y-4">
-        <Label htmlFor="logo-upload">Upload New Logo</Label>
+        <div className="flex items-center gap-2">
+          <Camera className="h-4 w-4 text-gray-500" />
+          <Label htmlFor="logo-upload" className="text-sm font-medium">
+            {currentLogoUrl ? 'Replace Logo' : 'Upload Company Logo'}
+          </Label>
+        </div>
         
         <div
           className={cn(
@@ -204,17 +257,23 @@ export default function LogoUpload({ currentLogoUrl, hasProfile }: LogoUploadPro
           onChange={handleFileChange}
         />
         
-        {/* Error message */}
+        {/* Error messages */}
         {uploadError && (
           <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
-            {uploadError}
+            <strong>Upload Error:</strong> {uploadError}
+          </div>
+        )}
+        
+        {deleteError && (
+          <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
+            <strong>Delete Error:</strong> {deleteError}
           </div>
         )}
         
         {/* Success message */}
         {showSuccess && (
           <div className="p-3 bg-green-50 border border-green-200 text-green-600 rounded-md text-sm">
-            Logo uploaded successfully!
+            <strong>Success!</strong> Logo {currentLogoUrl && !selectedFile ? 'removed' : currentLogoUrl ? 'updated' : 'uploaded'} successfully!
           </div>
         )}
         
@@ -223,14 +282,37 @@ export default function LogoUpload({ currentLogoUrl, hasProfile }: LogoUploadPro
           <div className="flex justify-end">
             <Button 
               onClick={uploadLogo} 
-              disabled={isUploading}
+              disabled={isUploading || isDeleting}
               className="mt-2"
             >
-              {isUploading ? 'Uploading...' : 'Upload Logo'}
+              {isUploading ? 'Uploading...' : currentLogoUrl ? 'Replace Logo' : 'Upload Logo'}
             </Button>
           </div>
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Company Logo</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove your company logo? This action cannot be undone.
+              You can always upload a new logo later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteLogo}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {isDeleting ? 'Removing...' : 'Remove Logo'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 } 

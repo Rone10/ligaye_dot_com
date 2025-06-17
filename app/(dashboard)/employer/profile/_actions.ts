@@ -203,4 +203,87 @@ export async function handleLogoUpload(formData: FormData) {
     console.error('Logo upload error:', error);
     throw error;
   }
+}
+
+// Delete logo action
+export async function handleLogoDelete() {
+  try {
+    const user = await getUser();
+    if (!user) {
+      throw new Error('Unauthorized');
+    }
+    
+    // Check if user has a profile
+    const profile = await db()
+      .select()
+      .from(profiles)
+      .where(eq(profiles.userId, user.id))
+      .limit(1)
+      .then(res => res[0]);
+      
+    if (!profile) {
+      throw new Error('Profile not found');
+    }
+
+    // Check if employer profile exists
+    const employerProfile = await db()
+      .select()
+      .from(employerProfiles)
+      .where(eq(employerProfiles.profileId, profile.id))
+      .limit(1)
+      .then(res => res[0]);
+      
+    if (!employerProfile) {
+      throw new Error('Employer profile not found');
+    }
+    
+    // Create Supabase client with proper auth context
+    const supabase = await createClient();
+    
+    // Verify user is authenticated in the Supabase client
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+    if (authError || !authUser) {
+      console.error('Auth verification failed:', authError);
+      throw new Error('Authentication failed');
+    }
+    
+    // Find and delete all existing logo files for this user
+    const { data: existingFiles } = await supabase.storage
+      .from('company-logos')
+      .list(user.id, {
+        limit: 100,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
+    
+    if (existingFiles && existingFiles.length > 0) {
+      console.log(`Deleting ${existingFiles.length} logo files for user ${user.id}`);
+      const filesToDelete = existingFiles.map(file => `${user.id}/${file.name}`);
+      const { error: deleteError } = await supabase.storage
+        .from('company-logos')
+        .remove(filesToDelete);
+      
+      if (deleteError) {
+        console.error('Failed to delete logo files:', deleteError);
+        throw new Error(`Failed to delete logo files: ${deleteError.message}`);
+      }
+      
+      console.log(`Successfully deleted ${existingFiles.length} logo files`);
+    } else {
+      console.log('No logo files found to delete');
+    }
+    
+    // Update employer profile to remove logo URL
+    await upsertEmployerProfile(profile.id, {
+      companyLogoUrl: null
+    });
+    
+    // Revalidate the page and cache
+    revalidatePath('/employer/profile');
+    revalidateTag('employer-profile');
+    
+    return { success: true, message: 'Logo deleted successfully' };
+  } catch (error) {
+    console.error('Logo delete error:', error);
+    throw error;
+  }
 } 
