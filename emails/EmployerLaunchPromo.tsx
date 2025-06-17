@@ -19,7 +19,7 @@ interface EmployerLaunchPromoProps {
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
 // Use baseUrl for development, fallback to production domain if needed
 // const logoUrl = baseUrl ? `${baseUrl}/full_logo_branding.png` : 'https://ligaye.com/full_logo_branding.png';
-const logoUrl = baseUrl ? `${baseUrl}/logo.PNG  ` : 'https://ligaye.com/logo.PNG';
+const logoUrl = baseUrl ? `${baseUrl}/logo.PNG` : 'https://ligaye.com/logo.PNG';
 
 export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> = ({
   name,

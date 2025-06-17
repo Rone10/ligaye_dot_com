@@ -51,12 +51,6 @@ export function useLocations(): UseLocationsReturn {
   
   const [selection, setSelection] = useState<LocationSelection>({});
 
-  // Load regions on mount
-  useEffect(() => {
-    loadRegions();
-    loadPopularRegions(); // Preload popular regions
-  }, []);
-
   const loadRegions = useCallback(async () => {
     if (cache.regions) {
       setRegions(cache.regions);
@@ -188,6 +182,12 @@ export function useLocations(): UseLocationsReturn {
     if (!selection.regionId || !regions.length) return null;
     return regions.find(r => r.id === selection.regionId) || null;
   }, [selection.regionId, regions]);
+
+  // Load regions on mount
+  useEffect(() => {
+    loadRegions();
+    loadPopularRegions(); // Preload popular regions
+  }, [loadRegions, loadPopularRegions]);
 
   // Auto-load region data when region is selected
   useEffect(() => {
