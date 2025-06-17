@@ -6,7 +6,7 @@ import * as React from 'react';
 import { EmployerLaunchPromo } from '@/emails/EmployerLaunchPromo';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const fromEmail = 'Campaigns <no-reply@ligaye.com>';
+const fromEmail = 'Ligaye <contact@ligaye.com>';
 
 type ActionResult = {
   success: boolean;

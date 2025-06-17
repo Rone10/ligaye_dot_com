@@ -18,7 +18,8 @@ interface EmployerLaunchPromoProps {
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
 // Use baseUrl for development, fallback to production domain if needed
-const logoUrl = baseUrl ? `${baseUrl}/full_logo_branding.png` : 'https://ligaye.com/full_logo_branding.png';
+// const logoUrl = baseUrl ? `${baseUrl}/full_logo_branding.png` : 'https://ligaye.com/full_logo_branding.png';
+const logoUrl = baseUrl ? `${baseUrl}/logo.PNG  ` : 'https://ligaye.com/logo.PNG';
 
 export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> = ({
   name,
@@ -32,7 +33,7 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
           <Img
             src={logoUrl}
             width="400"
-            height="200"
+            height="300"
             alt="Ligaye.com"
             style={logo}
           />
@@ -76,7 +77,7 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
         </Text>
 
         <Section style={{ textAlign: 'center', marginTop: '32px', marginBottom: '32px' }}>
-          <Button style={button} href={`${baseUrl}/employer/register`}>
+          <Button style={button} href={`${baseUrl}/signup`}>
             Claim Your FREE 2 Months Now
           </Button>
         </Section>
@@ -91,7 +92,7 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
 
         <Text style={signature}>
           Best regards,<br />
-          <strong>The Ligaye Launch Team</strong><br />
+          <strong>The Ligaye Team</strong><br />
           <em>Where Talent Meets Opportunity</em>
         </Text>
 
