@@ -91,72 +91,116 @@ export async function updateEmployerProfileDetails(
 
 // Logo upload action
 export async function handleLogoUpload(formData: FormData) {
-  const user = await getUser();
-  if (!user) {
-    throw new Error('Unauthorized');
-  }
-  
-  // Check if user has a profile
-  const profile = await db()
-    .select()
-    .from(profiles)
-    .where(eq(profiles.userId, user.id))
-    .limit(1)
-    .then(res => res[0]);
+  try {
+    const user = await getUser();
+    if (!user) {
+      throw new Error('Unauthorized');
+    }
     
-  if (!profile) {
-    throw new Error('Profile not found');
-  }
+    // Check if user has a profile
+    const profile = await db()
+      .select()
+      .from(profiles)
+      .where(eq(profiles.userId, user.id))
+      .limit(1)
+      .then(res => res[0]);
+      
+    if (!profile) {
+      throw new Error('Profile not found');
+    }
 
-  // Check if employer profile exists
-  const employerProfile = await db()
-    .select()
-    .from(employerProfiles)
-    .where(eq(employerProfiles.profileId, profile.id))
-    .limit(1)
-    .then(res => res[0]);
+    // Check if employer profile exists
+    const employerProfile = await db()
+      .select()
+      .from(employerProfiles)
+      .where(eq(employerProfiles.profileId, profile.id))
+      .limit(1)
+      .then(res => res[0]);
+      
+    if (!employerProfile) {
+      throw new Error('Employer profile not found. Please create a profile first.');
+    }
     
-  if (!employerProfile) {
-    throw new Error('Employer profile not found. Please create a profile first.');
-  }
-  
-  const logoFile = formData.get('logo') as File;
-  if (!logoFile) {
-    throw new Error('No file provided');
-  }
-  
-  // Validate the file
-  validateLogoUpload(logoFile);
-  
-  // Upload to Supabase Storage
-  const supabase = await createClient();
-  // Organize files by user ID for RLS policies to work correctly
-  const filePath = `${user.id}/${Date.now()}-${logoFile.name.replace(/\s+/g, '_')}`;
-  const { data, error } = await supabase.storage
-    .from('company-logos')
-    .upload(filePath, logoFile, {
-      cacheControl: '3600',
-      upsert: true
+    const logoFile = formData.get('logo') as File;
+    if (!logoFile) {
+      throw new Error('No file provided');
+    }
+    
+    // Validate the file
+    validateLogoUpload(logoFile);
+    
+    // Create Supabase client with proper auth context
+    const supabase = await createClient();
+    
+    // Verify user is authenticated in the Supabase client
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+    if (authError || !authUser) {
+      console.error('Auth verification failed:', authError);
+      throw new Error('Authentication failed');
+    }
+    
+    // First, delete any existing logo files for this user
+    const { data: existingFiles } = await supabase.storage
+      .from('company-logos')
+      .list(user.id, {
+        limit: 100,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
+    
+    if (existingFiles && existingFiles.length > 0) {
+      console.log(`Found ${existingFiles.length} existing logo files, deleting them...`);
+      const filesToDelete = existingFiles.map(file => `${user.id}/${file.name}`);
+      const { error: deleteError } = await supabase.storage
+        .from('company-logos')
+        .remove(filesToDelete);
+      
+      if (deleteError) {
+        console.warn('Warning: Could not delete existing files:', deleteError);
+        // Continue anyway - this is not critical
+      }
+    }
+    
+    // Organize files by user ID for RLS policies to work correctly
+    const filePath = `${user.id}/${Date.now()}-${logoFile.name.replace(/\s+/g, '_')}`;
+    
+    console.log('Uploading file:', {
+      userId: user.id,
+      authUserId: authUser.id,
+      filePath,
+      fileName: logoFile.name,
+      fileSize: logoFile.size,
+      deletedFiles: existingFiles?.length || 0
     });
     
-  if (error) {
-    console.error('File upload failed:', error);
-    throw new Error('File upload failed');
+    const { data, error } = await supabase.storage
+      .from('company-logos')
+      .upload(filePath, logoFile, {
+        cacheControl: '3600',
+        upsert: false // Changed to false since we're deleting old files first
+      });
+      
+    if (error) {
+      console.error('File upload failed:', error);
+      throw new Error(`File upload failed: ${error.message}`);
+    }
+    
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('company-logos')
+      .getPublicUrl(filePath);
+    
+    // Update profile with logo URL
+    await upsertEmployerProfile(profile.id, {
+      companyLogoUrl: publicUrl
+    });
+    
+    // Revalidate the page and cache
+    revalidatePath('/employer/profile');
+    revalidateTag('employer-profile');
+    
+    return { success: true, url: publicUrl };
+  } catch (error) {
+    console.error('Logo upload error:', error);
+    throw error;
   }
-  
-  // Get public URL
-  const { data: { publicUrl } } = supabase.storage
-    .from('company-logos')
-    .getPublicUrl(filePath);
-  
-  // Update profile with logo URL
-  await upsertEmployerProfile(profile.id, {
-    companyLogoUrl: publicUrl
-  });
-  
-  // Revalidate the page and cache
-  revalidatePath('/employer/profile');
-  revalidateTag('employer-profile');
-  
-  return { success: true, url: publicUrl };
 } 
