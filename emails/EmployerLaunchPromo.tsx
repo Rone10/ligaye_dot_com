@@ -77,7 +77,7 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
         </Text>
 
         <Section style={{ textAlign: 'center', marginTop: '32px', marginBottom: '32px' }}>
-          <Button style={button} href={`${baseUrl}/signup`}>
+          <Button style={button} href={`${baseUrl}/sign-up`}>
             Claim Your FREE 2 Months Now
           </Button>
         </Section>
