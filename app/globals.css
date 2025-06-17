@@ -104,6 +104,12 @@
     --chart-5: 340 75% 55%;
   }
 
+  /* Fix for mobile gap issue when zoomed out */
+  html {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
   * {
     @apply border-border;
   }
@@ -111,6 +117,15 @@
   body {
     @apply bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))] text-foreground min-h-screen;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    width: 100%;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Ensure all major layout containers properly handle width */
+  #__next {
+    width: 100%;
+    overflow-x: hidden;
   }
 }
 

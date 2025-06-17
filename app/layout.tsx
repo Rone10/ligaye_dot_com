@@ -1,5 +1,5 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   title: 'Ligaye.com - Gambia\'s Premier Job Board',
   description: 'Find your dream job or hire the perfect candidate in The Gambia',
 };
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+}
 
 export default function RootLayout({
   children,
