@@ -76,6 +76,11 @@ export async function toggleSaveJob(jobId: string) {
     // Revalidate job detail page
     revalidatePath(`/jobs/${jobId}`);
     revalidateTag('saved-jobs')
+    revalidatePath('/jobs')
+    revalidatePath('/employers')
+    revalidatePath('/tenders')
+    revalidatePath('/admin/jobs')
+    revalidatePath('/admin/payments')
     return { success: true, isSaved: existingSave.length ? !existingSave[0].deleted : true };
   } catch (error) {
     console.error('Error toggling job save:', error);
