@@ -25,8 +25,12 @@ const loadJobFilters = createLoader(jobFiltersParsers, { urlKeys: jobFiltersUrlK
 export default async function JobsPage({ searchParams }: PageProps) {
   const awaitedSearchParams = await searchParams;
   const filters = await loadJobFilters(awaitedSearchParams);
-  
-  const industries = await getIndustriesForFilters();
+
+  // OPTIMIZED: Wave 1 - Independent data that can be fetched in parallel
+  const [industries, user] = await Promise.all([
+    getIndustriesForFilters(), // Filter options are independent
+    getUser() // User authentication is independent
+  ]);
   
   const queryFilters: JobFiltersType = {
     search: filters.search || null,
@@ -42,18 +46,18 @@ export default async function JobsPage({ searchParams }: PageProps) {
   
   const page = filters.page;
   const pageSize = filters.pageSize;
-  
-  const { jobs, totalCount, pageCount } = await getFilteredJobs(
-    queryFilters,
-    { page, pageSize }
-  );
+
+  // OPTIMIZED: Wave 2 - Data that can be fetched in parallel, with user-conditional logic
+  const [jobsResult, savedJobIds] = await Promise.all([
+    getFilteredJobs(queryFilters, { page, pageSize }), // Jobs are independent of user
+    user ? getSavedJobIdsForUser(user.id) : Promise.resolve([]) // Only fetch if user exists
+  ]);
+
+  const { jobs, totalCount, pageCount } = jobsResult;
   
   if (page > pageCount && pageCount > 0) {
     notFound();
   }
-  
-  const user = await getUser();
-  const savedJobIds = user ? await getSavedJobIdsForUser(user.id) : [];
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))]">

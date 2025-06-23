@@ -5,6 +5,7 @@ import { getUser } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { savedJobs, profiles } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { invalidateUserSavedJobsCache } from './_queries';
 
 /**
  * Toggle saving/unsaving a job for the current user
@@ -17,32 +18,23 @@ export async function toggleSaveJob(jobId: string) {
     throw new Error('You must be logged in to save jobs');
   }
   
-  // Get profile ID from user ID
-  const profileResult = await db()
-    .select({ id: profiles.id })
-    .from(profiles)
-    .where(eq(profiles.userId, user.id))
-    .limit(1);
-    
-  if (!profileResult.length) {
-    throw new Error('User profile not found');
-  }
-  
-  const profileId = profileResult[0].id;
-  
-  // Check if job is already saved
-  const existingSave = await db()
-    .select({ deleted: savedJobs.deleted })
-    .from(savedJobs)
-    .where(
-      and(
-        eq(savedJobs.userId, profileId),
-        eq(savedJobs.jobId, jobId)
-      )
-    )
-    .limit(1);
-    
   try {
+    // OPTIMIZED: Single query to check existing save status with JOIN
+    const existingSave = await db()
+      .select({ 
+        userId: savedJobs.userId,
+        deleted: savedJobs.deleted 
+      })
+      .from(savedJobs)
+      .innerJoin(profiles, eq(savedJobs.userId, profiles.id))
+      .where(
+        and(
+          eq(profiles.userId, user.id),
+          eq(savedJobs.jobId, jobId)
+        )
+      )
+      .limit(1);
+    
     if (existingSave.length) {
       // Toggle the deleted state to effectively save/unsave
       const newDeletedState = !existingSave[0].deleted;
@@ -56,26 +48,41 @@ export async function toggleSaveJob(jobId: string) {
         })
         .where(
           and(
-            eq(savedJobs.userId, profileId),
+            eq(savedJobs.userId, existingSave[0].userId),
             eq(savedJobs.jobId, jobId)
           )
         );
     } else {
+      // Get profile ID for new save record
+      const profileResult = await db()
+        .select({ id: profiles.id })
+        .from(profiles)
+        .where(eq(profiles.userId, user.id))
+        .limit(1);
+        
+      if (!profileResult.length) {
+        throw new Error('User profile not found');
+      }
+      
       // Create new save record
       await db()
         .insert(savedJobs)
         .values({
-          userId: profileId,
+          userId: profileResult[0].id,
           jobId: jobId,
           deleted: false,
           createdAt: new Date()
         });
     }
     
-    // Revalidate jobs page to show updated save state
-    revalidatePath('/jobs');
-    revalidatePath('/candidate/saved-jobs')
-    revalidateTag('saved-jobs')
+    // OPTIMIZED: Smart cache invalidation using hierarchical tags
+    await Promise.all([
+      invalidateUserSavedJobsCache(user.id), // Invalidate user-specific cache
+      revalidatePath('/jobs'), // Update jobs page
+      revalidatePath('/candidate/saved-jobs'), // Update saved jobs page
+      revalidateTag('saved-jobs-collection') // Invalidate saved jobs collection
+    ]);
+    
     return { success: true };
   } catch (error) {
     console.error('Error toggling job save:', error);

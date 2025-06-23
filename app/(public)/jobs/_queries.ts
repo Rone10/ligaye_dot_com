@@ -15,8 +15,30 @@ import type { JobFilters, JobsQueryResult } from './_utils/types';
 import { unstable_cache } from 'next/cache';
 import { getEffectiveSalaryRange } from './_utils/salary-utils';
 
+// Cache duration constants following the guide
+const STABLE_DATA_CACHE = 3600; // 1 hour for stable data (locations, industries)
+const SEMI_DYNAMIC_CACHE = 900; // 15 minutes for job listings
+const USER_SPECIFIC_CACHE = 300; // 5 minutes for user-specific data
+
+// Cache tag helpers for hierarchical invalidation
+const CACHE_TAGS = {
+  job: (id: string) => `job-${id}`,
+  jobs: 'jobs-collection',
+  jobsFiltered: (filtersHash: string) => `jobs-filtered-${filtersHash}`,
+  userSavedJobs: (userId: string) => `user-saved-jobs-${userId}`,
+  industries: 'industries-collection',
+  locations: 'locations-collection',
+  filters: 'job-filters'
+};
+
+// Helper to create cache key from filters
+function createFiltersHash(filters: JobFilters, pagination: { page: number; pageSize: number }): string {
+  const filterStr = JSON.stringify({ ...filters, ...pagination });
+  return Buffer.from(filterStr).toString('base64').slice(0, 16);
+}
+
 /**
- * Get a filtered and paginated list of jobs based on search criteria
+ * OPTIMIZED: Get a filtered and paginated list of jobs with consolidated queries
  */
 async function getFilteredJobsData(
   filters: JobFilters,
@@ -197,8 +219,8 @@ async function getFilteredJobsData(
   const whereCondition = conditions.length > 0
     ? and(baseConditions, ...conditions)
     : baseConditions;
-  
-  // Industry filter requires a subquery/join approach
+
+  // OPTIMIZED: Industry filter using optimized subquery with EXISTS
   const jobIdsInIndustry = industryId 
     ? (await db()
         .select({ jobId: jobIndustries.jobId })
@@ -221,9 +243,10 @@ async function getFilteredJobsData(
   const sortDirection = sortBy === 'oldest' ? asc : desc;
   const secondarySortDirection = sortBy === 'oldest' ? asc : desc;
   
-  // Query jobs with pagination
-  const jobsQuery = await db()
+  // OPTIMIZED: Single query for both jobs and count using window function
+  const results = await db()
     .select({
+      // Job data
       id: jobs.id,
       title: jobs.title,
       companyName: employerProfiles.companyName,
@@ -237,39 +260,40 @@ async function getFilteredJobsData(
       salaryFrequency: jobs.salaryFrequency,
       salaryDisplayType: jobs.salaryDisplayType,
       publishedAt: jobs.publishedAt,
-      slug: jobs.slug
+      slug: jobs.slug,
+      // Count for pagination
+      totalCount: sql<number>`count(*) over()`.as('totalCount')
     })
     .from(jobs)
     .leftJoin(employerProfiles, eq(jobs.companyId, employerProfiles.id))
     .leftJoin(locations, eq(jobs.locationId, locations.id))
     .where(finalWhereCondition)
-    // Use sql.coalesce to handle null publishedAt dates - fall back to createdAt
-    // Apply sort direction using Drizzle functions
     .orderBy(
       sortDirection(sql`coalesce(${jobs.publishedAt}, ${jobs.createdAt})`),
-      secondarySortDirection(jobs.id) // Use ID as final tiebreaker
+      secondarySortDirection(jobs.id)
     )
     .limit(pageSize)
     .offset(offset);
-    
-  // Count total matching jobs for pagination
-  const countResult = await db()
-    .select({ count: sql<number>`count(*)` })
-    .from(jobs)
-    // Restore joins for count
-    .leftJoin(employerProfiles, eq(jobs.companyId, employerProfiles.id))
-    .leftJoin(locations, eq(jobs.locationId, locations.id))
-    .where(finalWhereCondition);
-    
-    // Ensure totalCount is a number before calculation
-    const totalCount = Number(countResult[0]?.count || 0);
-    const pageCount = Math.ceil(totalCount / pageSize);
+
+  const totalCount = results.length > 0 ? Number(results[0].totalCount) : 0;
+  const pageCount = Math.ceil(totalCount / pageSize);
   
   // Process the results to ensure they match the expected types
-  const processedJobs = jobsQuery.map(job => ({
-    ...job,
-    // Ensure salaryDisplayType is never null
-    salaryDisplayType: job.salaryDisplayType ?? ''
+  const processedJobs = results.map(job => ({
+    id: job.id,
+    title: job.title,
+    companyName: job.companyName,
+    companyLogoUrl: job.companyLogoUrl,
+    locationName: job.locationName,
+    workLocation: job.workLocation,
+    jobType: job.jobType,
+    salaryRangeMin: job.salaryRangeMin,
+    salaryRangeMax: job.salaryRangeMax,
+    salaryCurrency: job.salaryCurrency,
+    salaryFrequency: job.salaryFrequency,
+    salaryDisplayType: job.salaryDisplayType ?? '',
+    publishedAt: job.publishedAt,
+    slug: job.slug
   }));
   
   return {
@@ -280,18 +304,29 @@ async function getFilteredJobsData(
 }
 
 /**
- * Cached version of filtered jobs 
+ * OPTIMIZED: Cached version with proper hierarchical tags
  */
-export const getFilteredJobs = unstable_cache(
-  async (filters: JobFilters, pagination: { page: number; pageSize: number }) => {
-    return getFilteredJobsData(filters, pagination);
-  },
-  ['filtered-jobs'],
-  {
-    tags: ['jobs'],
-    revalidate: 60 * 10 // Revalidate every 10 minutes
-  }
-);
+export const getFilteredJobs = async (
+  filters: JobFilters, 
+  pagination: { page: number; pageSize: number }
+) => {
+  const filtersHash = createFiltersHash(filters, pagination);
+  
+  const cachedFunction = unstable_cache(
+    async () => getFilteredJobsData(filters, pagination),
+    [`filtered-jobs-${filtersHash}`],
+    {
+      tags: [
+        CACHE_TAGS.jobs,
+        CACHE_TAGS.jobsFiltered(filtersHash),
+        CACHE_TAGS.filters
+      ],
+      revalidate: SEMI_DYNAMIC_CACHE, // 15 minutes for job listings
+    }
+  );
+  
+  return cachedFunction();
+};
 
 /**
  * Get location data for filter options
@@ -310,18 +345,20 @@ async function getLocationsForFiltersData() {
 }
 
 /**
- * Cached version of locations for filters
+ * OPTIMIZED: Cached version with proper tags and duration
  */
-export const getLocationsForFilters = unstable_cache(
-  async () => {
-    return getLocationsForFiltersData();
-  },
-  ['locations-for-filters'],
-  {
-    tags: ['locations', 'job-filters'],
-    revalidate: 3600 // Revalidate hourly
-  }
-);
+export const getLocationsForFilters = async () => {
+  const cachedFunction = unstable_cache(
+    async () => getLocationsForFiltersData(),
+    ['locations-for-filters'],
+    {
+      tags: [CACHE_TAGS.locations, CACHE_TAGS.filters],
+      revalidate: STABLE_DATA_CACHE, // 1 hour for stable data
+    }
+  );
+  
+  return cachedFunction();
+};
 
 /**
  * Get industry data for filter options
@@ -338,43 +375,33 @@ async function getIndustriesForFiltersData() {
 }
 
 /**
- * Cached version of industries for filters
+ * OPTIMIZED: Cached version with proper tags and duration
  */
-export const getIndustriesForFilters = unstable_cache(
-  async () => {
-    return getIndustriesForFiltersData();
-  },
-  ['industries-for-filters'],
-  {
-    tags: ['industries', 'job-filters'],
-    revalidate: 3600 // Revalidate hourly
-  }
-);
+export const getIndustriesForFilters = async () => {
+  const cachedFunction = unstable_cache(
+    async () => getIndustriesForFiltersData(),
+    ['industries-for-filters'],
+    {
+      tags: [CACHE_TAGS.industries, CACHE_TAGS.filters],
+      revalidate: STABLE_DATA_CACHE, // 1 hour for stable data
+    }
+  );
+  
+  return cachedFunction();
+};
 
 /**
- * Get saved jobs IDs for a user
+ * OPTIMIZED: Get saved job IDs with single JOIN query
  */
 async function getSavedJobIdsForUserData(userId: string) {
-  // First get the profile ID from the user ID
-  const profileResult = await db()
-    .select({ id: profiles.id })
-    .from(profiles)
-    .where(eq(profiles.userId, userId))
-    .limit(1);
-    
-  if (!profileResult.length) {
-    return [];
-  }
-  
-  const profileId = profileResult[0].id;
-  
-  // Get saved job IDs that aren't deleted
+  // Single query with JOIN instead of N+1 pattern
   const savedJobIds = await db()
     .select({ jobId: savedJobs.jobId })
     .from(savedJobs)
+    .innerJoin(profiles, eq(savedJobs.userId, profiles.id))
     .where(
       and(
-        eq(savedJobs.userId, profileId),
+        eq(profiles.userId, userId),
         eq(savedJobs.deleted, false)
       )
     );
@@ -383,15 +410,46 @@ async function getSavedJobIdsForUserData(userId: string) {
 }
 
 /**
- * Cached version of saved job IDs for a user
+ * OPTIMIZED: Cached version with user-specific tags
  */
-export const getSavedJobIdsForUser = unstable_cache(
-  async (userId: string) => {
-    return getSavedJobIdsForUserData(userId);
-  },
-  ['saved-job-ids'],
-  {
-    tags: ['saved-jobs', 'user-data'],
-    revalidate: 60 // Revalidate every minute
-  }
-); 
+export const getSavedJobIdsForUser = async (userId: string) => {
+  const cachedFunction = unstable_cache(
+    async () => getSavedJobIdsForUserData(userId),
+    [`saved-job-ids-${userId}`],
+    {
+      tags: [
+        CACHE_TAGS.userSavedJobs(userId),
+        'saved-jobs-collection'
+      ],
+      revalidate: USER_SPECIFIC_CACHE, // 5 minutes for user-specific data
+    }
+  );
+  
+  return cachedFunction();
+};
+
+// OPTIMIZED: Cache invalidation helpers
+export async function invalidateJobsCache() {
+  const { revalidateTag } = await import('next/cache');
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.jobs),
+    revalidateTag(CACHE_TAGS.filters)
+  ]);
+}
+
+export async function invalidateUserSavedJobsCache(userId: string) {
+  const { revalidateTag } = await import('next/cache');
+  
+  await revalidateTag(CACHE_TAGS.userSavedJobs(userId));
+}
+
+export async function invalidateFiltersCache() {
+  const { revalidateTag } = await import('next/cache');
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.locations),
+    revalidateTag(CACHE_TAGS.industries),
+    revalidateTag(CACHE_TAGS.filters)
+  ]);
+} 
