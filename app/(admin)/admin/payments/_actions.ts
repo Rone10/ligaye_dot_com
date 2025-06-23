@@ -30,6 +30,11 @@ export async function handleApproveCashPayment(formData: FormData) {
     
     // Revalidate the payments page
     revalidatePath('/admin/payments')
+    revalidatePath('/admin/jobs')
+    revalidatePath('/admin/employers')
+    revalidatePath('/jobs')
+    revalidatePath('/employers')
+    revalidatePath('/tenders')
     
     return { success: true, message: 'Payment approved successfully' }
   } catch (error) {
