@@ -4,6 +4,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { getCandidateApplications } from './_queries'
 import ApplicationsList from './_components/ApplicationsList'
 
+// Force dynamic rendering since this page uses authentication
+export const dynamic = 'force-dynamic'
+
 // Loading skeleton component
 function ApplicationsLoading() {
   return (

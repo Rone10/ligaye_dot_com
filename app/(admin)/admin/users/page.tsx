@@ -3,6 +3,9 @@ import { getAllUsers } from "./_queries";
 import UsersTable from "./_components/users-table";
 import { Card, CardContent } from "@/components/ui/card";
 
+// Force dynamic rendering since this page uses database queries and admin features
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "Manage Users - Ligaye Admin",
   description: "Manage all users on the Ligaye.com platform",

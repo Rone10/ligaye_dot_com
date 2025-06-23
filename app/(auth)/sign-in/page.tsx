@@ -3,6 +3,9 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getUser } from '@/lib/supabase/server'
 
+// Force dynamic rendering since this page checks authentication
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Sign In - Ligaye.com',
   description: 'Sign in to your Ligaye.com account',

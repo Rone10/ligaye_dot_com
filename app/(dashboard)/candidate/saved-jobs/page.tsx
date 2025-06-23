@@ -6,6 +6,9 @@ import { EmptySavedJobs } from './_components/empty-saved-jobs'
 import { PageHeading } from '@/components/page-heading'
 import { SavedJobsLoading } from './_components/saved-jobs-loading'
 
+// Force dynamic rendering since this page uses authentication
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Saved Jobs | Ligaye',
   description: 'View and manage your saved jobs on Ligaye',
