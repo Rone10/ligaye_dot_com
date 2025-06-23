@@ -7,6 +7,21 @@ import { getUser } from '@/lib/supabase/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 
 /**
+ * Cache invalidation helper functions
+ */
+export async function revalidateJobCache(jobId: string) {
+  revalidateTag(`job-${jobId}`);
+  revalidateTag(`related-jobs-${jobId}`);
+  revalidateTag(`job-applications-${jobId}`);
+  revalidateTag(`job-saved-${jobId}`);
+}
+
+export async function revalidateUserCache(userId: string) {
+  revalidateTag(`user-application-${userId}`);
+  revalidateTag(`user-saved-jobs-${userId}`);
+}
+
+/**
  * Toggle the saved state of a job for the current user
  */
 export async function toggleSaveJob(jobId: string) {
@@ -72,6 +87,12 @@ export async function toggleSaveJob(jobId: string) {
           createdAt: new Date()
         });
     }
+    
+    // Invalidate relevant caches
+    await Promise.all([
+      revalidateUserCache(user.id),
+      revalidateJobCache(jobId)
+    ]);
     
     // Revalidate job detail page
     revalidatePath(`/jobs/${jobId}`);

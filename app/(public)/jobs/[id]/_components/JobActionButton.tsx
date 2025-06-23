@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { applicationMethodEnum } from "@/lib/db/schema"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { useEffect } from "react"
 
 interface JobActionButtonProps {
   id: string
@@ -22,17 +21,6 @@ export function JobActionButton({
   hasApplied = false
 }: JobActionButtonProps) {
   const router = useRouter()
-  
-  // Log the props for debugging purposes
-  useEffect(() => {
-    console.log('JobActionButton props:', {
-      id,
-      applicationMethod,
-      isLoggedIn,
-      userRole,
-      hasApplied
-    })
-  }, [id, applicationMethod, isLoggedIn, userRole, hasApplied])
   
   const handleApply = () => {
     if (!isLoggedIn) {

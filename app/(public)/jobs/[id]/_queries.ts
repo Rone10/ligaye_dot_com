@@ -15,7 +15,7 @@ import {
 } from '@/lib/db/schema';
 import { notFound } from 'next/navigation';
 import type { JobDetail, SimpleSkill, SimpleIndustry } from '../_utils/types';
-import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 
 // Cache options type for Next.js
 type CacheOptions = {
@@ -26,15 +26,13 @@ type CacheOptions = {
 };
 
 /**
- * Get detailed job information by ID with optional filtering
- * React cache wrapping to prevent duplicate queries within the same render
+ * Optimized job data fetching with combined queries
+ * Uses Next.js unstable_cache for proper server-side caching
  */
-export const getJobById = cache(async function getJobByIdInternal(
+async function getJobByIdData(
   jobId: string, 
-  options?: CacheOptions & { skipStatusFilter?: boolean }
+  skipStatusFilter: boolean = false
 ): Promise<JobDetail> {
-  const skipStatusFilter = options?.skipStatusFilter || false;
-  
   // Build the where conditions based on whether we should filter by status
   const whereConditions = skipStatusFilter 
     ? eq(jobs.id, jobId)
@@ -44,231 +42,259 @@ export const getJobById = cache(async function getJobByIdInternal(
         gte(jobs.expiresAt, new Date())
       );
 
-  // Get the job with basic company and location information
-  const jobQuery = await db()
-    .select()
-    .from(jobs)
-    .where(whereConditions)
-    .leftJoin(employerProfiles, eq(jobs.companyId, employerProfiles.id))
-    .leftJoin(locations, eq(jobs.locationId, locations.id));
+  // OPTIMIZATION: Single query to get all job data including skills and industries
+  // Using Drizzle's query API for more efficient joins
+  const jobData = await db().query.jobs.findFirst({
+    where: whereConditions,
+    with: {
+      company: true,
+      location: true,
+      jobSkills: {
+        with: {
+          skill: true
+        }
+      },
+      jobIndustries: {
+        with: {
+          industry: true
+        }
+      }
+    }
+  });
     
-  if (jobQuery.length === 0) {
+  if (!jobData) {
     notFound();
   }
   
-  const jobResult = jobQuery[0];
-  
-  if (!jobResult.employer_profiles) {
+  if (!jobData.company) {
     notFound();
   }
   
-  const job = jobResult.jobs;
-  
-  // Run both skill and industry queries in parallel
-  const [skillsQuery, industriesQuery] = await Promise.all([
-    // Get job skills
-    db()
-      .select({
-        id: skills.id,
-        name: skills.name
-      })
-      .from(jobSkills)
-      .leftJoin(skills, eq(jobSkills.skillId, skills.id))
-      .where(eq(jobSkills.jobId, jobId)),
-    
-    // Get job industries
-    db()
-      .select({
-        id: industries.id,
-        name: industries.name
-      })
-      .from(jobIndustries)
-      .leftJoin(industries, eq(jobIndustries.industryId, industries.id))
-      .where(eq(jobIndustries.jobId, jobId))
-  ]);
-    
-  const jobSkillsList: SimpleSkill[] = skillsQuery
-    .filter(skill => skill.id !== null)
-    .map(skill => ({
-      id: skill.id as string,
-      name: skill.name || ''
+  // Transform the data to match the expected format
+  const jobSkillsList: SimpleSkill[] = jobData.jobSkills
+    .filter(js => js.skill)
+    .map(js => ({
+      id: js.skill!.id,
+      name: js.skill!.name
     }));
     
-  const jobIndustriesList: SimpleIndustry[] = industriesQuery
-    .filter(industry => industry.id !== null)
-    .map(industry => ({
-      id: industry.id as string,
-      name: industry.name || ''
+  const jobIndustriesList: SimpleIndustry[] = jobData.jobIndustries
+    .filter(ji => ji.industry)
+    .map(ji => ({
+      id: ji.industry!.id,
+      name: ji.industry!.name
     }));
   
   // Restructure data into the expected format
   const jobDetail: JobDetail = {
     // Core job data
-    id: job.id,
-    title: job.title,
-    description: job.description,
-    jobType: job.jobType,
-    companyId: job.companyId,
-    locationId: job.locationId,
-    workLocation: job.workLocation,
-    experienceLevel: job.experienceLevel,
-    salaryRangeMin: job.salaryRangeMin,
-    salaryRangeMax: job.salaryRangeMax,
-    salaryCurrency: job.salaryCurrency,
-    salaryFrequency: job.salaryFrequency,
-    salaryDisplayType: job.salaryDisplayType ?? '',
-    applicationMethod: job.applicationMethod as JobDetail['applicationMethod'],
-    applicationEmail: job.applicationEmail,
-    applicationUrl: job.applicationUrl,
-    publishedAt: job.publishedAt,
-    expiresAt: job.expiresAt ?? new Date(),
-    status: job.status,
-    slug: job.slug,
-    createdAt: job.createdAt,
-    updatedAt: job.updatedAt,
+    id: jobData.id,
+    title: jobData.title,
+    description: jobData.description,
+    jobType: jobData.jobType,
+    companyId: jobData.companyId,
+    locationId: jobData.locationId,
+    workLocation: jobData.workLocation,
+    experienceLevel: jobData.experienceLevel,
+    salaryRangeMin: jobData.salaryRangeMin,
+    salaryRangeMax: jobData.salaryRangeMax,
+    salaryCurrency: jobData.salaryCurrency,
+    salaryFrequency: jobData.salaryFrequency,
+    salaryDisplayType: jobData.salaryDisplayType ?? '',
+    applicationMethod: jobData.applicationMethod as JobDetail['applicationMethod'],
+    applicationEmail: jobData.applicationEmail,
+    applicationUrl: jobData.applicationUrl,
+    publishedAt: jobData.publishedAt,
+    expiresAt: jobData.expiresAt ?? new Date(),
+    status: jobData.status,
+    slug: jobData.slug,
+    createdAt: jobData.createdAt,
+    updatedAt: jobData.updatedAt,
     
     // Additional fields
-    jobLanguage: job.jobLanguage,
-    numberOfOpenings: job.numberOfOpenings,
-    displayAddress: job.displayAddress === null ? undefined : job.displayAddress,
-    educationRequirements: job.educationRequirements,
-    experienceRequirements: job.experienceRequirements,
-    languageRequirements: job.languageRequirements,
-    languageTrainingProvided: job.languageTrainingProvided === null ? undefined : job.languageTrainingProvided,
-    schedule: job.schedule,
-    expectedHours: job.expectedHours,
-    hoursType: job.hoursType,
-    contractLength: job.contractLength,
-    plannedStartDate: job.plannedStartDate,
-    supplementalPay: job.supplementalPay,
-    benefits: job.benefits,
-    applicationInstructions: job.applicationInstructions,
-    resumeRequired: job.resumeRequired === null ? undefined : job.resumeRequired,
-    allowCandidateContact: job.allowCandidateContact === null ? undefined : job.allowCandidateContact,
-    applicationDeadline: job.applicationDeadline,
+    jobLanguage: jobData.jobLanguage,
+    numberOfOpenings: jobData.numberOfOpenings,
+    displayAddress: jobData.displayAddress === null ? undefined : jobData.displayAddress,
+    educationRequirements: jobData.educationRequirements,
+    experienceRequirements: jobData.experienceRequirements,
+    languageRequirements: jobData.languageRequirements,
+    languageTrainingProvided: jobData.languageTrainingProvided === null ? undefined : jobData.languageTrainingProvided,
+    schedule: jobData.schedule,
+    expectedHours: jobData.expectedHours,
+    hoursType: jobData.hoursType,
+    contractLength: jobData.contractLength,
+    plannedStartDate: jobData.plannedStartDate,
+    supplementalPay: jobData.supplementalPay,
+    benefits: jobData.benefits,
+    applicationInstructions: jobData.applicationInstructions,
+    resumeRequired: jobData.resumeRequired === null ? undefined : jobData.resumeRequired,
+    allowCandidateContact: jobData.allowCandidateContact === null ? undefined : jobData.allowCandidateContact,
+    applicationDeadline: jobData.applicationDeadline,
     
     // Related entities
-    company: jobResult.employer_profiles,
-    location: jobResult.locations,
+    company: jobData.company,
+    location: jobData.location,
     skills: jobSkillsList,
     industries: jobIndustriesList
   };
 
   return jobDetail;
-});
+}
 
 /**
- * Get similar/related jobs (same company or industry)
- * Wrapped with React cache to prevent duplicate queries
+ * Cached version of getJobById with proper Next.js caching
  */
-export const getRelatedJobs = cache(async function getRelatedJobsInternal(jobId: string, limit: number = 3, options?: CacheOptions) {
-  const currentJob = await db()
-    .select({
-      companyId: jobs.companyId
-    })
-    .from(jobs)
-    .where(eq(jobs.id, jobId));
-    
-  if (currentJob.length === 0) {
+export const getJobById = async (
+  jobId: string, 
+  options?: CacheOptions & { skipStatusFilter?: boolean }
+): Promise<JobDetail> => {
+  const skipStatusFilter = options?.skipStatusFilter || false;
+  
+  // Use unstable_cache for proper server-side caching
+  const cachedFunction = unstable_cache(
+    async () => getJobByIdData(jobId, skipStatusFilter),
+    [`job-${jobId}-${skipStatusFilter}`],
+    {
+      tags: [`job-${jobId}`],
+      revalidate: 3600, // 1 hour cache
+    }
+  );
+  
+  return cachedFunction();
+};
+
+/**
+ * Optimized related jobs query - uses Drizzle query API for efficiency
+ */
+async function getRelatedJobsData(jobId: string, limit: number = 3): Promise<any[]> {
+  // First get the current job's company ID efficiently
+  const currentJob = await db().query.jobs.findFirst({
+    where: eq(jobs.id, jobId),
+    columns: { companyId: true }
+  });
+  
+  if (!currentJob) {
     return [];
   }
   
-  const companyId = currentJob[0].companyId;
-  
-  // Get other jobs from the same company
-  return db()
-    .select({
-      id: jobs.id,
-      title: jobs.title,
-      jobType: jobs.jobType,
-      locationName: locations.city,
-      slug: jobs.slug
-    })
-    .from(jobs)
-    .leftJoin(locations, eq(jobs.locationId, locations.id))
-    .where(
-      and(
-        eq(jobs.companyId, companyId),
-        eq(jobs.status, 'ACTIVE'),
-        gte(jobs.expiresAt, new Date()),
-        ne(jobs.id, jobId)
-      )
-    )
-    .limit(limit);
-});
+  // Then get related jobs from the same company using query API
+  return db().query.jobs.findMany({
+    where: and(
+      eq(jobs.companyId, currentJob.companyId),
+      eq(jobs.status, 'ACTIVE'),
+      gte(jobs.expiresAt, new Date()),
+      ne(jobs.id, jobId)
+    ),
+    columns: {
+      id: true,
+      title: true,
+      jobType: true,
+      slug: true
+    },
+    with: {
+      location: {
+        columns: {
+          city: true
+        }
+      }
+    },
+    limit
+  });
+}
 
 /**
- * Check if user has applied to a job
- * Wrapped with React cache to prevent duplicate queries
+ * Cached version of getRelatedJobs
  */
-export const checkUserApplication = cache(async function checkUserApplicationInternal(jobId: string, userId: string | undefined, options?: CacheOptions) {
-  if (!userId) {
-    return false;
-  }
+export const getRelatedJobs = async (jobId: string, limit: number = 3, options?: CacheOptions) => {
+  const cachedFunction = unstable_cache(
+    async () => getRelatedJobsData(jobId, limit),
+    [`related-jobs-${jobId}-${limit}`],
+    {
+      tags: [`related-jobs-${jobId}`],
+      revalidate: 3600,
+    }
+  );
   
-  // Get the candidate profile ID for this user
-  const candidateResult = await db()
-    .select({
-      id: candidateProfiles.id,
-    })
-    .from(candidateProfiles)
-    .leftJoin(profiles, eq(candidateProfiles.profileId, profiles.id))
-    .where(eq(profiles.userId, userId))
-    .limit(1);
-  
-  if (!candidateResult.length) {
-    return false;
-  }
-  
-  const candidateProfileId = candidateResult[0].id;
-  
-  // Check if this candidate has applied to this job
+  return cachedFunction();
+};
+
+/**
+ * Optimized user application check with single query
+ */
+async function checkUserApplicationData(jobId: string, userId: string): Promise<boolean> {
+  // OPTIMIZATION: Single query with joins instead of multiple queries
   const applicationResult = await db()
     .select({ id: applications.id })
     .from(applications)
+    .innerJoin(candidateProfiles, eq(applications.candidateProfileId, candidateProfiles.id))
+    .innerJoin(profiles, eq(candidateProfiles.profileId, profiles.id))
     .where(
       and(
         eq(applications.jobId, jobId),
-        eq(applications.candidateProfileId, candidateProfileId)
+        eq(profiles.userId, userId),
+        eq(applications.deleted, false)
       )
     )
     .limit(1);
   
   return applicationResult.length > 0;
-});
+}
 
 /**
- * Check if a job is saved by a user
- * Wrapped with React cache to prevent duplicate queries
+ * Cached version of checkUserApplication
  */
-export const checkUserSavedJob = cache(async function checkUserSavedJobInternal(jobId: string, userId: string | undefined, options?: CacheOptions) {
-  if (!userId) return false;
+export const checkUserApplication = async (jobId: string, userId: string | undefined, options?: CacheOptions) => {
+  if (!userId) {
+    return false;
+  }
   
-  // Get the profile ID for this user
-  const profileResult = await db()
-    .select({
-      id: profiles.id,
-    })
-    .from(profiles)
-    .where(eq(profiles.userId, userId))
-    .limit(1);
+  const cachedFunction = unstable_cache(
+    async () => checkUserApplicationData(jobId, userId),
+    [`user-application-${jobId}-${userId}`],
+    {
+      tags: [`user-application-${userId}`, `job-applications-${jobId}`],
+      revalidate: 300, // 5 minutes cache (shorter for user-specific data)
+    }
+  );
   
-  if (!profileResult.length) return false;
-  
-  const profileId = profileResult[0].id;
-  
-  // Check if this user has saved this job
+  return cachedFunction();
+};
+
+/**
+ * Optimized saved job check with single query
+ */
+async function checkUserSavedJobData(jobId: string, userId: string): Promise<boolean> {
+  // OPTIMIZATION: Single query with joins instead of multiple queries
   const savedJobResult = await db()
     .select({ deleted: savedJobs.deleted })
     .from(savedJobs)
+    .innerJoin(profiles, eq(savedJobs.userId, profiles.id))
     .where(
       and(
         eq(savedJobs.jobId, jobId),
-        eq(savedJobs.userId, profileId)
+        eq(profiles.userId, userId)
       )
     )
     .limit(1);
   
   // Return true if the job is saved (record exists and deleted is false)
   return savedJobResult.length > 0 && !savedJobResult[0].deleted;
-}); 
+}
+
+/**
+ * Cached version of checkUserSavedJob
+ */
+export const checkUserSavedJob = async (jobId: string, userId: string | undefined, options?: CacheOptions) => {
+  if (!userId) return false;
+  
+  const cachedFunction = unstable_cache(
+    async () => checkUserSavedJobData(jobId, userId),
+    [`user-saved-job-${jobId}-${userId}`],
+    {
+      tags: [`user-saved-jobs-${userId}`, `job-saved-${jobId}`],
+      revalidate: 300, // 5 minutes cache (shorter for user-specific data)
+    }
+  );
+  
+  return cachedFunction();
+}; 

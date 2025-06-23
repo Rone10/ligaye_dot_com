@@ -26,44 +26,25 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   // Check if we're coming from an application view
   const fromApplication = resolvedSearchParams.from === 'application';
   
-  // Get the current user
-  const user = await getUser();
+  // OPTIMIZATION: Run all initial data fetching in parallel
+  // This eliminates waterfall loading and improves performance significantly
+  const [user, job] = await Promise.all([
+    getUser(),
+    getJobById(id, { 
+      skipStatusFilter: fromApplication
+    })
+  ]);
   
-  // Fetch job details - skip status filter if coming from application
-  const job = await getJobById(id, { 
-    next: { 
-      tags: [`job-${id}`]
-    },
-    skipStatusFilter: fromApplication
-  });
-  
-  // Fetch related jobs in parallel with other user-specific data - remove revalidate, keep tags
-  const relatedJobsPromise = getRelatedJobs(id, 3, { 
-    next: { 
-      tags: [`company-${job.companyId}`]
-      // revalidate: 3600 // Remove this
-    }
-  });
-  
-  // These user-specific checks should only be fetched when a user is logged in
-  // and they should run in parallel to prevent waterfall loading
-  let hasApplied = false;
-  let isSaved = false;
-  
-  if (user) {
-    // Run these checks in parallel
-    [hasApplied, isSaved] = await Promise.all([
-      checkUserApplication(id, user.id),
-      checkUserSavedJob(id, user.id)
-    ]);
-  }
-  
-  // Await related jobs only after other data has loaded
-  const relatedJobs = await relatedJobsPromise;
-  
-  // Log debug info (will show in server console)
-  console.log('User info:', user ? { id: user.id, role: user.user_metadata.role } : 'Not logged in');
-  console.log('Job application status - hasApplied:', hasApplied);
+  // OPTIMIZATION: Now that we have job data, run all remaining queries in parallel
+  // This includes user-specific checks and related jobs
+  const [relatedJobs, hasApplied, isSaved] = await Promise.all([
+    // Related jobs query - no longer depends on job.companyId since it's handled internally
+    getRelatedJobs(id, 3),
+    
+    // User-specific queries - only run if user exists
+    user ? checkUserApplication(id, user.id) : Promise.resolve(false),
+    user ? checkUserSavedJob(id, user.id) : Promise.resolve(false)
+  ]);
   
   return (
     <div className="container max-w-7xl py-8 px-4 mx-auto space-y-8">
@@ -106,9 +87,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
         <TabsList className="mb-6">
           <TabsTrigger value="details">Job Details</TabsTrigger>
           <TabsTrigger value="company">Company Info</TabsTrigger>
-          {/* {relatedJobs.length > 0 && ( */}
-            <TabsTrigger value="related">Similar Jobs</TabsTrigger>
-          {/* )} */}
+          <TabsTrigger value="related">Similar Jobs</TabsTrigger>
         </TabsList>
         
         <TabsContent value="details">
@@ -155,11 +134,9 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
           </div>
         </TabsContent>
         
-        {/* {relatedJobs.length > 0 && ( */}
-          <TabsContent value="related">
-            <RelatedJobs relatedJobs={relatedJobs} />
-          </TabsContent>
-        {/* )} */}
+        <TabsContent value="related">
+          <RelatedJobs relatedJobs={relatedJobs} />
+        </TabsContent>
       </Tabs>
     </div>
   );
