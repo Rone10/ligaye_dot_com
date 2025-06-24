@@ -71,39 +71,36 @@ export default async function ConfirmResetPage({ searchParams }: PageProps) {
     }
   }
 
-  // For legacy format (code) or if no tokens, check if we have any valid access
-  if (!token_hash && !type && !code) {
-    // No tokens at all - check if user already has a session
-    const user = await getUser()
-    
-    if (!user) {
-      // No session and no tokens - they accessed the page directly
-      return (
-        <div className="flex items-center justify-center">
-          <div className="w-full max-w-md">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h2 className="text-yellow-800 font-semibold">Invalid Access</h2>
-              <p className="text-yellow-600 text-sm mt-1">
-                You need to use the password reset link from your email to access this page.
-              </p>
-              <a 
-                href="/reset-password" 
-                className="text-yellow-700 underline text-sm mt-2 inline-block"
-              >
-                Request a new reset link
-              </a>
-            </div>
-          </div>
-        </div>
-      )
-    }
-  }
+  // Check if user has a valid session (should be established by the reset link)
+  const user = await getUser()
   
-  // Pass the reset code to the form component if we have it
+  // If we have a code parameter OR if user has an active session, show the form
+  if (code || user) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="w-full max-w-md">
+          <ConfirmResetForm />
+        </div>
+      </div>
+    )
+  }
+
+  // No session and no tokens - they accessed the page directly
   return (
     <div className="flex items-center justify-center">
       <div className="w-full max-w-md">
-        <ConfirmResetForm resetCode={code} />
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <h2 className="text-yellow-800 font-semibold">Invalid Access</h2>
+          <p className="text-yellow-600 text-sm mt-1">
+            You need to use the password reset link from your email to access this page.
+          </p>
+          <a 
+            href="/reset-password" 
+            className="text-yellow-700 underline text-sm mt-2 inline-block"
+          >
+            Request a new reset link
+          </a>
+        </div>
       </div>
     </div>
   )
