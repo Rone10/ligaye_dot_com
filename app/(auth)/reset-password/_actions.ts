@@ -25,9 +25,12 @@ export async function requestPasswordReset(formData: FormData): Promise<RequestR
     // Create Supabase client
     const supabase = await createClient()
     
+    // Get the base URL for redirects
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    
     // Request a password reset
     const { error } = await supabase.auth.resetPasswordForEmail(validatedData.email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password/confirm`,
+      redirectTo: `${baseUrl}/reset-password/confirm`,
     })
     
     // Handle Supabase Auth errors

@@ -14,6 +14,7 @@ export type ConfirmResetActionResult = {
 /**
  * Server action for confirming a password reset
  * This action validates the new password and updates it using Supabase Auth
+ * Note: This requires that a session has been established via token verification
  */
 export async function confirmPasswordReset(formData: FormData): Promise<ConfirmResetActionResult> {
   // Extract form data
@@ -29,6 +30,17 @@ export async function confirmPasswordReset(formData: FormData): Promise<ConfirmR
     // Create Supabase client
     const supabase = await createClient()
     
+    // Verify that we have a valid session first
+    const { data: { user }, error: sessionError } = await supabase.auth.getUser()
+    
+    if (sessionError || !user) {
+      console.error('Session verification error:', sessionError)
+      return { 
+        success: false, 
+        error: 'Your password reset session has expired. Please request a new password reset link.' 
+      }
+    }
+    
     // Update the user's password
     const { error } = await supabase.auth.updateUser({
       password: validatedData.password,
@@ -37,9 +49,18 @@ export async function confirmPasswordReset(formData: FormData): Promise<ConfirmR
     // Handle Supabase Auth errors
     if (error) {
       console.error('Password reset confirmation error:', error)
+      
+      // Handle specific error types
+      if (error.message.includes('session')) {
+        return { 
+          success: false, 
+          error: 'Your password reset session has expired. Please request a new password reset link.' 
+        }
+      }
+      
       return { 
         success: false, 
-        error: error.message || 'Failed to reset password. The link may have expired.' 
+        error: error.message || 'Failed to reset password. Please try again.' 
       }
     }
     

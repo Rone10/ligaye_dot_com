@@ -61,6 +61,13 @@ export function ConfirmResetForm() {
         // Handle general error
         if (result.error) {
           setFormError(result.error)
+          
+          // If it's a session-related error, we should provide a way to get a new link
+          if (result.error.includes('session') || result.error.includes('expired')) {
+            setTimeout(() => {
+              router.push('/reset-password')
+            }, 3000)
+          }
         }
         
         return
@@ -116,7 +123,16 @@ export function ConfirmResetForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {formError && (
             <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{formError}</AlertDescription>
+              <AlertDescription>
+                {formError}
+                {(formError.includes('session') || formError.includes('expired')) && (
+                  <div className="mt-2">
+                    <Link href="/reset-password" className="text-red-700 underline text-sm">
+                      Request a new password reset link
+                    </Link>
+                  </div>
+                )}
+              </AlertDescription>
             </Alert>
           )}
           
