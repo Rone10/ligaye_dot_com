@@ -24,6 +24,7 @@ interface PageProps {
 
 export default async function ConfirmResetPage({ searchParams }: PageProps) {
   const params = await searchParams
+  console.log('params', params)
   const { token_hash, type, code, error, error_description } = params
 
   // If there's an error in the URL, show it
