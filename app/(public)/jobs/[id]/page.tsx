@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { JobActionButton } from './_components/JobActionButton';
-import { getUser } from '@/lib/supabase/server';
+import { getUser, getCachedUser } from '@/lib/supabase/server';
 
 // Remove the time-based revalidation - rely on tags + on-demand revalidation
 // export const revalidate = 3600; 
@@ -29,7 +29,7 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   // OPTIMIZATION: Run all initial data fetching in parallel
   // This eliminates waterfall loading and improves performance significantly
   const [user, job] = await Promise.all([
-    getUser(),
+    getCachedUser(),
     getJobById(id, { 
       skipStatusFilter: fromApplication
     })

@@ -8,7 +8,7 @@ import {
 import { createLoader } from 'nuqs/server';
 import { jobFiltersParsers, jobFiltersUrlKeys } from './_utils/job-filter-parsers';
 import { jobTypeEnum, workLocationEnum, experienceLevelEnum } from '@/lib/db/schema';
-import { getUser } from '@/lib/supabase/server';
+import { getUser, getCachedUser } from '@/lib/supabase/server';
 import { 
   JobSearchFilters, 
   JobListWithSaving,
@@ -29,7 +29,7 @@ export default async function JobsPage({ searchParams }: PageProps) {
   // OPTIMIZED: Wave 1 - Independent data that can be fetched in parallel
   const [industries, user] = await Promise.all([
     getIndustriesForFilters(), // Filter options are independent
-    getUser() // User authentication is independent
+    getCachedUser() // User authentication is independent
   ]);
   
   const queryFilters: JobFiltersType = {

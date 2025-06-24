@@ -3,7 +3,7 @@
 import { eq, and } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { savedJobs, profiles } from '@/lib/db/schema';
-import { getUser } from '@/lib/supabase/server';
+import { getUser, getCachedUser } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { 
   invalidateUserSavedJobCache, 
@@ -14,7 +14,7 @@ import {
  * OPTIMIZED: Toggle the saved state of a job with single query and comprehensive cache invalidation
  */
 export async function toggleSaveJob(jobId: string) {
-  const user = await getUser();
+  const user = await getCachedUser();
   
   if (!user) {
     throw new Error('You must be logged in to save a job');

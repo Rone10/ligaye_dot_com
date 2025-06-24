@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { getUser } from '@/lib/supabase/server';
+import { getUser, getCachedUser } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { savedJobs, profiles } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
@@ -12,7 +12,7 @@ import { invalidateUserSavedJobsCache, invalidateJobsCache } from './_queries';
  */
 export async function toggleSaveJob(jobId: string) {
   // Get current authenticated user
-  const user = await getUser();
+  const user = await getCachedUser();
   
   if (!user) {
     throw new Error('You must be logged in to save jobs');
