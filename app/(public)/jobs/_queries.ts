@@ -15,11 +15,6 @@ import type { JobFilters, JobsQueryResult } from './_utils/types';
 import { unstable_cache } from 'next/cache';
 import { getEffectiveSalaryRange } from './_utils/salary-utils';
 
-// Cache duration constants following the guide
-const STABLE_DATA_CACHE = 3600; // 1 hour for stable data (locations, industries)
-const SEMI_DYNAMIC_CACHE = 900; // 15 minutes for job listings
-const USER_SPECIFIC_CACHE = 300; // 5 minutes for user-specific data
-
 // Cache tag helpers for hierarchical invalidation
 const CACHE_TAGS = {
   job: (id: string) => `job-${id}`,
@@ -304,7 +299,7 @@ async function getFilteredJobsData(
 }
 
 /**
- * OPTIMIZED: Cached version with proper hierarchical tags
+ * OPTIMIZED: Indefinite cache with on-demand revalidation via tags
  */
 export const getFilteredJobs = async (
   filters: JobFilters, 
@@ -320,8 +315,8 @@ export const getFilteredJobs = async (
         CACHE_TAGS.jobs,
         CACHE_TAGS.jobsFiltered(filtersHash),
         CACHE_TAGS.filters
-      ],
-      revalidate: SEMI_DYNAMIC_CACHE, // 15 minutes for job listings
+      ]
+      // NO revalidate property = indefinite cache until tag invalidation
     }
   );
   
@@ -345,15 +340,15 @@ async function getLocationsForFiltersData() {
 }
 
 /**
- * OPTIMIZED: Cached version with proper tags and duration
+ * OPTIMIZED: Indefinite cache with on-demand revalidation
  */
 export const getLocationsForFilters = async () => {
   const cachedFunction = unstable_cache(
     async () => getLocationsForFiltersData(),
     ['locations-for-filters'],
     {
-      tags: [CACHE_TAGS.locations, CACHE_TAGS.filters],
-      revalidate: STABLE_DATA_CACHE, // 1 hour for stable data
+      tags: [CACHE_TAGS.locations, CACHE_TAGS.filters]
+      // NO revalidate property = indefinite cache until tag invalidation
     }
   );
   
@@ -375,15 +370,15 @@ async function getIndustriesForFiltersData() {
 }
 
 /**
- * OPTIMIZED: Cached version with proper tags and duration
+ * OPTIMIZED: Indefinite cache with on-demand revalidation
  */
 export const getIndustriesForFilters = async () => {
   const cachedFunction = unstable_cache(
     async () => getIndustriesForFiltersData(),
     ['industries-for-filters'],
     {
-      tags: [CACHE_TAGS.industries, CACHE_TAGS.filters],
-      revalidate: STABLE_DATA_CACHE, // 1 hour for stable data
+      tags: [CACHE_TAGS.industries, CACHE_TAGS.filters]
+      // NO revalidate property = indefinite cache until tag invalidation
     }
   );
   
@@ -410,7 +405,7 @@ async function getSavedJobIdsForUserData(userId: string) {
 }
 
 /**
- * OPTIMIZED: Cached version with user-specific tags
+ * OPTIMIZED: Indefinite cache with on-demand revalidation for user data
  */
 export const getSavedJobIdsForUser = async (userId: string) => {
   const cachedFunction = unstable_cache(
@@ -420,15 +415,15 @@ export const getSavedJobIdsForUser = async (userId: string) => {
       tags: [
         CACHE_TAGS.userSavedJobs(userId),
         'saved-jobs-collection'
-      ],
-      revalidate: USER_SPECIFIC_CACHE, // 5 minutes for user-specific data
+      ]
+      // NO revalidate property = indefinite cache until tag invalidation
     }
   );
   
   return cachedFunction();
 };
 
-// OPTIMIZED: Cache invalidation helpers
+// OPTIMIZED: Cache invalidation helpers for mutation-triggered revalidation
 export async function invalidateJobsCache() {
   const { revalidateTag } = await import('next/cache');
   
@@ -451,5 +446,26 @@ export async function invalidateFiltersCache() {
     revalidateTag(CACHE_TAGS.locations),
     revalidateTag(CACHE_TAGS.industries),
     revalidateTag(CACHE_TAGS.filters)
+  ]);
+}
+
+// Additional cache invalidation helpers for comprehensive mutation coverage
+export async function invalidateJobCache(jobId: string) {
+  const { revalidateTag } = await import('next/cache');
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.job(jobId)),
+    revalidateTag(CACHE_TAGS.jobs), // Invalidate job listings
+    revalidateTag(CACHE_TAGS.filters) // Job changes might affect filter counts
+  ]);
+}
+
+export async function invalidateAllJobCaches() {
+  const { revalidateTag } = await import('next/cache');
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.jobs),
+    revalidateTag(CACHE_TAGS.filters),
+    revalidateTag('saved-jobs-collection')
   ]);
 } 

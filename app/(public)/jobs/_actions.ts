@@ -5,7 +5,7 @@ import { getUser } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { savedJobs, profiles } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { invalidateUserSavedJobsCache } from './_queries';
+import { invalidateUserSavedJobsCache, invalidateJobsCache } from './_queries';
 
 /**
  * Toggle saving/unsaving a job for the current user
@@ -75,9 +75,10 @@ export async function toggleSaveJob(jobId: string) {
         });
     }
     
-    // OPTIMIZED: Smart cache invalidation using hierarchical tags
+    // OPTIMIZED: Comprehensive on-demand cache invalidation
     await Promise.all([
-      invalidateUserSavedJobsCache(user.id), // Invalidate user-specific cache
+      invalidateUserSavedJobsCache(user.id), // User-specific saved jobs cache
+      invalidateJobsCache(), // Job listings cache (for save counts/states)
       revalidatePath('/jobs'), // Update jobs page
       revalidatePath('/candidate/saved-jobs'), // Update saved jobs page
       revalidateTag('saved-jobs-collection') // Invalidate saved jobs collection
