@@ -14,7 +14,7 @@ export type ConfirmResetActionResult = {
 /**
  * Server action for confirming a password reset
  * This action validates the new password and updates it using Supabase Auth
- * Note: This requires that a session has been established via token verification
+ * Note: Session should be established client-side before calling this action
  */
 export async function confirmPasswordReset(formData: FormData): Promise<ConfirmResetActionResult> {
   // Extract form data
@@ -30,7 +30,7 @@ export async function confirmPasswordReset(formData: FormData): Promise<ConfirmR
     // Create Supabase client
     const supabase = await createClient()
     
-    // Verify that we have a valid session first
+    // Verify that we have a valid session
     const { data: { user }, error: sessionError } = await supabase.auth.getUser()
     
     if (sessionError || !user) {

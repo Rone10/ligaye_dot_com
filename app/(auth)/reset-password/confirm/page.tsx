@@ -11,8 +11,12 @@ export const metadata: Metadata = {
 
 interface PageProps {
   searchParams: Promise<{ 
+    // New format (recommended)
     token_hash?: string
     type?: string
+    // Old format (legacy)
+    code?: string
+    // Error handling
     error?: string
     error_description?: string
   }>
@@ -20,7 +24,7 @@ interface PageProps {
 
 export default async function ConfirmResetPage({ searchParams }: PageProps) {
   const params = await searchParams
-  const { token_hash, type, error, error_description } = params
+  const { token_hash, type, code, error, error_description } = params
 
   // If there's an error in the URL, show it
   if (error) {
@@ -44,7 +48,7 @@ export default async function ConfirmResetPage({ searchParams }: PageProps) {
     )
   }
 
-  // If we have tokens in the URL, verify them to establish a session
+  // Handle new format (token_hash + type) by establishing session
   if (token_hash && type) {
     const supabase = await createClient()
     
@@ -56,22 +60,23 @@ export default async function ConfirmResetPage({ searchParams }: PageProps) {
 
       if (verifyError) {
         console.error('Token verification error:', verifyError)
-        // Redirect to error state
         redirect(`/reset-password/confirm?error=invalid_token&error_description=${encodeURIComponent('The reset link is invalid or has expired.')}`)
       }
       
-      // Tokens verified successfully, session is now established
-      // Continue to show the form
+      // Token verified successfully, session is now established
     } catch (error) {
       console.error('Token verification error:', error)
       redirect(`/reset-password/confirm?error=invalid_token&error_description=${encodeURIComponent('The reset link is invalid or has expired.')}`)
     }
-  } else {
-    // No tokens in URL - check if user already has a session
+  }
+
+  // For legacy format (code) or if no tokens, check if we have any valid access
+  if (!token_hash && !type && !code) {
+    // No tokens at all - check if user already has a session
     const user = await getUser()
     
     if (!user) {
-      // No session and no tokens - this means they accessed the page directly
+      // No session and no tokens - they accessed the page directly
       return (
         <div className="flex items-center justify-center">
           <div className="w-full max-w-md">
@@ -93,10 +98,11 @@ export default async function ConfirmResetPage({ searchParams }: PageProps) {
     }
   }
   
+  // Pass the reset code to the form component if we have it
   return (
     <div className="flex items-center justify-center">
       <div className="w-full max-w-md">
-        <ConfirmResetForm />
+        <ConfirmResetForm resetCode={code} />
       </div>
     </div>
   )
