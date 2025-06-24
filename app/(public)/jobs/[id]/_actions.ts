@@ -4,25 +4,14 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { savedJobs, profiles } from '@/lib/db/schema';
 import { getUser } from '@/lib/supabase/server';
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath } from 'next/cache';
+import { 
+  invalidateUserSavedJobCache, 
+  invalidateJobDetailCache 
+} from './_queries';
 
 /**
- * Cache invalidation helper functions
- */
-export async function revalidateJobCache(jobId: string) {
-  revalidateTag(`job-${jobId}`);
-  revalidateTag(`related-jobs-${jobId}`);
-  revalidateTag(`job-applications-${jobId}`);
-  revalidateTag(`job-saved-${jobId}`);
-}
-
-export async function revalidateUserCache(userId: string) {
-  revalidateTag(`user-application-${userId}`);
-  revalidateTag(`user-saved-jobs-${userId}`);
-}
-
-/**
- * Toggle the saved state of a job for the current user
+ * OPTIMIZED: Toggle the saved state of a job with single query and comprehensive cache invalidation
  */
 export async function toggleSaveJob(jobId: string) {
   const user = await getUser();
@@ -31,37 +20,29 @@ export async function toggleSaveJob(jobId: string) {
     throw new Error('You must be logged in to save a job');
   }
   
-  // Get the profile ID for this user
-  const profileResult = await db()
-    .select({
-      id: profiles.id,
-    })
-    .from(profiles)
-    .where(eq(profiles.userId, user.id))
-    .limit(1);
-  
-  if (!profileResult.length) {
-    throw new Error('User profile not found');
-  }
-  
-  const profileId = profileResult[0].id;
-  
-  // Check if job is already saved
-  const existingSave = await db()
-    .select({ deleted: savedJobs.deleted })
-    .from(savedJobs)
-    .where(
-      and(
-        eq(savedJobs.userId, profileId),
-        eq(savedJobs.jobId, jobId)
-      )
-    )
-    .limit(1);
-    
   try {
+    // OPTIMIZED: Single query to check existing save status with JOIN
+    const existingSave = await db()
+      .select({ 
+        userId: savedJobs.userId,
+        deleted: savedJobs.deleted 
+      })
+      .from(savedJobs)
+      .innerJoin(profiles, eq(savedJobs.userId, profiles.id))
+      .where(
+        and(
+          eq(profiles.userId, user.id),
+          eq(savedJobs.jobId, jobId)
+        )
+      )
+      .limit(1);
+    
+    let isSaved: boolean;
+    
     if (existingSave.length) {
       // Toggle the deleted state to effectively save/unsave
       const newDeletedState = !existingSave[0].deleted;
+      isSaved = !newDeletedState;
       
       await db()
         .update(savedJobs)
@@ -72,37 +53,49 @@ export async function toggleSaveJob(jobId: string) {
         })
         .where(
           and(
-            eq(savedJobs.userId, profileId),
+            eq(savedJobs.userId, existingSave[0].userId),
             eq(savedJobs.jobId, jobId)
           )
         );
     } else {
+      // Get profile ID for new save record
+      const profileResult = await db()
+        .select({ id: profiles.id })
+        .from(profiles)
+        .where(eq(profiles.userId, user.id))
+        .limit(1);
+        
+      if (!profileResult.length) {
+        throw new Error('User profile not found');
+      }
+      
       // Create new save record
       await db()
         .insert(savedJobs)
         .values({
-          userId: profileId,
+          userId: profileResult[0].id,
           jobId: jobId,
           deleted: false,
           createdAt: new Date()
         });
+      
+      isSaved = true;
     }
     
-    // Invalidate relevant caches
+    // OPTIMIZED: Comprehensive on-demand cache invalidation
     await Promise.all([
-      revalidateUserCache(user.id),
-      revalidateJobCache(jobId)
+      invalidateUserSavedJobCache(user.id, jobId), // User-specific saved job cache
+      invalidateJobDetailCache(jobId), // Job detail and related caches
+      revalidatePath(`/jobs/${jobId}`), // Update job detail page
+      revalidatePath('/jobs'), // Update jobs listing
+      revalidatePath('/candidate/saved-jobs'), // Update saved jobs page
+      revalidatePath('/employers'), // Update employers page
+      revalidatePath('/tenders'), // Update tenders page
+      revalidatePath('/admin/jobs'), // Update admin jobs page
+      revalidatePath('/admin/payments') // Update admin payments page
     ]);
     
-    // Revalidate job detail page
-    revalidatePath(`/jobs/${jobId}`);
-    revalidateTag('saved-jobs')
-    revalidatePath('/jobs')
-    revalidatePath('/employers')
-    revalidatePath('/tenders')
-    revalidatePath('/admin/jobs')
-    revalidatePath('/admin/payments')
-    return { success: true, isSaved: existingSave.length ? !existingSave[0].deleted : true };
+    return { success: true, isSaved };
   } catch (error) {
     console.error('Error toggling job save:', error);
     throw new Error('Failed to save job');

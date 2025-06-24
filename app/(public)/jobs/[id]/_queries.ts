@@ -17,12 +17,19 @@ import { notFound } from 'next/navigation';
 import type { JobDetail, SimpleSkill, SimpleIndustry } from '../_utils/types';
 import { unstable_cache } from 'next/cache';
 
-// Cache options type for Next.js
-type CacheOptions = {
-  next?: {
-    tags?: string[];
-    revalidate?: number;
-  }
+// Cache tag helpers for hierarchical invalidation
+const CACHE_TAGS = {
+  job: (id: string) => `job-${id}`,
+  jobDetail: (id: string) => `job-detail-${id}`,
+  relatedJobs: (id: string) => `related-jobs-${id}`,
+  companyJobs: (companyId: string) => `company-jobs-${companyId}`,
+  userApplication: (userId: string, jobId: string) => `user-application-${userId}-${jobId}`,
+  userApplications: (userId: string) => `user-applications-${userId}`,
+  jobApplications: (jobId: string) => `job-applications-${jobId}`,
+  userSavedJob: (userId: string, jobId: string) => `user-saved-job-${userId}-${jobId}`,
+  userSavedJobs: (userId: string) => `user-saved-jobs-${userId}`,
+  jobSaved: (jobId: string) => `job-saved-${jobId}`,
+  jobsCollection: 'jobs-collection'
 };
 
 /**
@@ -142,21 +149,24 @@ async function getJobByIdData(
 }
 
 /**
- * Cached version of getJobById with proper Next.js caching
+ * OPTIMIZED: Indefinite cache with on-demand revalidation for job details
  */
 export const getJobById = async (
   jobId: string, 
-  options?: CacheOptions & { skipStatusFilter?: boolean }
+  options?: { skipStatusFilter?: boolean }
 ): Promise<JobDetail> => {
   const skipStatusFilter = options?.skipStatusFilter || false;
   
-  // Use unstable_cache for proper server-side caching
   const cachedFunction = unstable_cache(
     async () => getJobByIdData(jobId, skipStatusFilter),
-    [`job-${jobId}-${skipStatusFilter}`],
+    [`job-detail-${jobId}-${skipStatusFilter}`],
     {
-      tags: [`job-${jobId}`],
-      revalidate: 3600, // 1 hour cache
+      tags: [
+        CACHE_TAGS.job(jobId),
+        CACHE_TAGS.jobDetail(jobId),
+        CACHE_TAGS.jobsCollection
+      ]
+      // NO revalidate property = indefinite cache until tag invalidation
     }
   );
   
@@ -203,15 +213,18 @@ async function getRelatedJobsData(jobId: string, limit: number = 3): Promise<any
 }
 
 /**
- * Cached version of getRelatedJobs
+ * OPTIMIZED: Indefinite cache with on-demand revalidation for related jobs
  */
-export const getRelatedJobs = async (jobId: string, limit: number = 3, options?: CacheOptions) => {
+export const getRelatedJobs = async (jobId: string, limit: number = 3) => {
   const cachedFunction = unstable_cache(
     async () => getRelatedJobsData(jobId, limit),
     [`related-jobs-${jobId}-${limit}`],
     {
-      tags: [`related-jobs-${jobId}`],
-      revalidate: 3600,
+      tags: [
+        CACHE_TAGS.relatedJobs(jobId),
+        CACHE_TAGS.jobsCollection
+      ]
+      // NO revalidate property = indefinite cache until tag invalidation
     }
   );
   
@@ -241,9 +254,9 @@ async function checkUserApplicationData(jobId: string, userId: string): Promise<
 }
 
 /**
- * Cached version of checkUserApplication
+ * OPTIMIZED: Indefinite cache with on-demand revalidation for user application status
  */
-export const checkUserApplication = async (jobId: string, userId: string | undefined, options?: CacheOptions) => {
+export const checkUserApplication = async (jobId: string, userId: string | undefined) => {
   if (!userId) {
     return false;
   }
@@ -252,8 +265,12 @@ export const checkUserApplication = async (jobId: string, userId: string | undef
     async () => checkUserApplicationData(jobId, userId),
     [`user-application-${jobId}-${userId}`],
     {
-      tags: [`user-application-${userId}`, `job-applications-${jobId}`],
-      revalidate: 300, // 5 minutes cache (shorter for user-specific data)
+      tags: [
+        CACHE_TAGS.userApplication(userId, jobId),
+        CACHE_TAGS.userApplications(userId),
+        CACHE_TAGS.jobApplications(jobId)
+      ]
+      // NO revalidate property = indefinite cache until tag invalidation
     }
   );
   
@@ -282,19 +299,115 @@ async function checkUserSavedJobData(jobId: string, userId: string): Promise<boo
 }
 
 /**
- * Cached version of checkUserSavedJob
+ * OPTIMIZED: Indefinite cache with on-demand revalidation for user saved job status
  */
-export const checkUserSavedJob = async (jobId: string, userId: string | undefined, options?: CacheOptions) => {
+export const checkUserSavedJob = async (jobId: string, userId: string | undefined) => {
   if (!userId) return false;
   
   const cachedFunction = unstable_cache(
     async () => checkUserSavedJobData(jobId, userId),
     [`user-saved-job-${jobId}-${userId}`],
     {
-      tags: [`user-saved-jobs-${userId}`, `job-saved-${jobId}`],
-      revalidate: 300, // 5 minutes cache (shorter for user-specific data)
+      tags: [
+        CACHE_TAGS.userSavedJob(userId, jobId),
+        CACHE_TAGS.userSavedJobs(userId),
+        CACHE_TAGS.jobSaved(jobId)
+      ]
+      // NO revalidate property = indefinite cache until tag invalidation
     }
   );
   
   return cachedFunction();
-}; 
+};
+
+// OPTIMIZED: Cache invalidation helpers for mutation-triggered revalidation
+
+/**
+ * Invalidate job detail cache when job data changes
+ */
+export async function invalidateJobDetailCache(jobId: string, companyId?: string) {
+  const { revalidateTag } = await import('next/cache');
+  
+  const tags = [
+    CACHE_TAGS.job(jobId),
+    CACHE_TAGS.jobDetail(jobId),
+    CACHE_TAGS.relatedJobs(jobId),
+    CACHE_TAGS.jobsCollection
+  ];
+  
+  if (companyId) {
+    tags.push(CACHE_TAGS.companyJobs(companyId));
+  }
+  
+  await Promise.all(tags.map(tag => revalidateTag(tag)));
+}
+
+/**
+ * Invalidate user application cache when application status changes
+ */
+export async function invalidateUserApplicationCache(userId: string, jobId: string) {
+  const { revalidateTag } = await import('next/cache');
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.userApplication(userId, jobId)),
+    revalidateTag(CACHE_TAGS.userApplications(userId)),
+    revalidateTag(CACHE_TAGS.jobApplications(jobId))
+  ]);
+}
+
+/**
+ * Invalidate user saved job cache when save status changes
+ */
+export async function invalidateUserSavedJobCache(userId: string, jobId: string) {
+  const { revalidateTag } = await import('next/cache');
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.userSavedJob(userId, jobId)),
+    revalidateTag(CACHE_TAGS.userSavedJobs(userId)),
+    revalidateTag(CACHE_TAGS.jobSaved(jobId))
+  ]);
+}
+
+/**
+ * Invalidate company-related job caches when company data changes
+ */
+export async function invalidateCompanyJobCaches(companyId: string) {
+  const { revalidateTag } = await import('next/cache');
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.companyJobs(companyId)),
+    revalidateTag(CACHE_TAGS.jobsCollection)
+  ]);
+}
+
+/**
+ * Comprehensive cache invalidation for job-related data
+ */
+export async function invalidateAllJobDetailCaches(jobId: string, companyId?: string, affectedUserIds?: string[]) {
+  const { revalidateTag } = await import('next/cache');
+  
+  const tags = [
+    CACHE_TAGS.job(jobId),
+    CACHE_TAGS.jobDetail(jobId),
+    CACHE_TAGS.relatedJobs(jobId),
+    CACHE_TAGS.jobApplications(jobId),
+    CACHE_TAGS.jobSaved(jobId),
+    CACHE_TAGS.jobsCollection
+  ];
+  
+  if (companyId) {
+    tags.push(CACHE_TAGS.companyJobs(companyId));
+  }
+  
+  // Add user-specific invalidations if provided
+  if (affectedUserIds) {
+    affectedUserIds.forEach(userId => {
+      tags.push(
+        CACHE_TAGS.userApplications(userId),
+        CACHE_TAGS.userSavedJobs(userId)
+      );
+    });
+  }
+  
+  await Promise.all(tags.map(tag => revalidateTag(tag)));
+} 
