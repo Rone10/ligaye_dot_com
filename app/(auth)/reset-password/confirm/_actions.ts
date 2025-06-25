@@ -31,16 +31,16 @@ export async function confirmPasswordReset(formData: FormData): Promise<ConfirmR
     const supabase = await createClient()
     
     // Verify that we have a valid session
-    const user = await getUser()
+    // const user = await getUser()
     
-    if (!user) {
-      console.error('Session verification error: no user found')
-      return { 
-        success: false, 
-        error: 'Your password reset session has expired. Please request a new password reset link.' 
-      }
-    }
-    console.log('user in confirmPasswordReset action', user)
+    // if (!user) {
+    //   console.error('Session verification error: no user found')
+    //   return { 
+    //     success: false, 
+    //     error: 'Your password reset session has expired. Please request a new password reset link.' 
+    //   }
+    // }
+    // console.log('user in confirmPasswordReset action', user)
     
     // Update the user's password
     const { error } = await supabase.auth.updateUser({
