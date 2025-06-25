@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getUser } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { confirmResetSchema } from './_utils/validation'
 import { z } from 'zod'
@@ -31,15 +31,16 @@ export async function confirmPasswordReset(formData: FormData): Promise<ConfirmR
     const supabase = await createClient()
     
     // Verify that we have a valid session
-    const { data: { user }, error: sessionError } = await supabase.auth.getUser()
+    const user = await getUser()
     
-    if (sessionError || !user) {
-      console.error('Session verification error:', sessionError)
+    if (!user) {
+      console.error('Session verification error: no user found')
       return { 
         success: false, 
         error: 'Your password reset session has expired. Please request a new password reset link.' 
       }
     }
+    console.log('user in confirmPasswordReset action', user)
     
     // Update the user's password
     const { error } = await supabase.auth.updateUser({

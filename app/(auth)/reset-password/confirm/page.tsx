@@ -73,7 +73,7 @@ export default async function ConfirmResetPage({ searchParams }: PageProps) {
 
   // Check if user has a valid session (should be established by the reset link)
   const user = await getUser()
-  
+  console.log('user in confirm page', user)
   // If we have a code parameter OR if user has an active session, show the form
   if (code || user) {
     return (
