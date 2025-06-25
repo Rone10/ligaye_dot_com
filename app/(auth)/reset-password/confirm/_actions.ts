@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient, getUser } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { confirmResetSchema } from './_utils/validation'
 import { z } from 'zod'
@@ -13,8 +13,7 @@ export type ConfirmResetActionResult = {
 
 /**
  * Server action for confirming a password reset
- * This action validates the new password and updates it using Supabase Auth
- * Note: Session should be established client-side before calling this action
+ * Uses the reset code to update the password directly
  */
 export async function confirmPasswordReset(formData: FormData): Promise<ConfirmResetActionResult> {
   // Extract form data
@@ -22,6 +21,9 @@ export async function confirmPasswordReset(formData: FormData): Promise<ConfirmR
     password: formData.get('password'),
     confirmPassword: formData.get('confirmPassword'),
   }
+  
+  // Extract reset code 
+  const resetCode = formData.get('resetCode') as string | null
 
   // Validate form data
   try {
@@ -30,43 +32,49 @@ export async function confirmPasswordReset(formData: FormData): Promise<ConfirmR
     // Create Supabase client
     const supabase = await createClient()
     
-    // Verify that we have a valid session
-    // const user = await getUser()
-    
-    // if (!user) {
-    //   console.error('Session verification error: no user found')
-    //   return { 
-    //     success: false, 
-    //     error: 'Your password reset session has expired. Please request a new password reset link.' 
-    //   }
-    // }
-    // console.log('user in confirmPasswordReset action', user)
-    
-    // Update the user's password
-    const { error } = await supabase.auth.updateUser({
-      password: validatedData.password,
-    })
-    
-    // Handle Supabase Auth errors
-    if (error) {
-      console.error('Password reset confirmation error:', error)
-      
-      // Handle specific error types
-      if (error.message.includes('session')) {
+    // If we have a reset code, try to use it to establish session and update password
+    if (resetCode) {
+      try {
+        // First, try to exchange the code for a session
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(resetCode)
+        
+        if (exchangeError) {
+          console.error('Code exchange error:', exchangeError)
+          return { 
+            success: false, 
+            error: 'The password reset link is invalid or has expired. Please request a new reset link.' 
+          }
+        }
+        
+        // Now update the password
+        const { error: updateError } = await supabase.auth.updateUser({
+          password: validatedData.password,
+        })
+        
+        if (updateError) {
+          console.error('Password update error:', updateError)
+          return { 
+            success: false, 
+            error: updateError.message || 'Failed to update password. Please try again.' 
+          }
+        }
+        
+        return { success: true }
+        
+      } catch (error) {
+        console.error('Reset code handling error:', error)
         return { 
           success: false, 
-          error: 'Your password reset session has expired. Please request a new password reset link.' 
+          error: 'The password reset link is invalid or has expired. Please request a new reset link.' 
         }
-      }
-      
-      return { 
-        success: false, 
-        error: error.message || 'Failed to reset password. Please try again.' 
       }
     }
     
-    // Success - return result
-    return { success: true }
+    // No reset code provided
+    return { 
+      success: false, 
+      error: 'Invalid password reset request. Please use the link from your email.' 
+    }
     
   } catch (error) {
     // Handle validation errors

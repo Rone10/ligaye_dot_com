@@ -1,8 +1,5 @@
 import { ConfirmResetForm } from './_components/ConfirmResetForm'
 import { Metadata } from 'next'
-import { getUser } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Set New Password - Ligaye.com',
@@ -11,10 +8,7 @@ export const metadata: Metadata = {
 
 interface PageProps {
   searchParams: Promise<{ 
-    // New format (recommended)
-    token_hash?: string
-    type?: string
-    // Old format (legacy)
+    // Password reset code from email
     code?: string
     // Error handling
     error?: string
@@ -25,7 +19,7 @@ interface PageProps {
 export default async function ConfirmResetPage({ searchParams }: PageProps) {
   const params = await searchParams
   console.log('params', params)
-  const { token_hash, type, code, error, error_description } = params
+  const { code, error, error_description } = params
 
   // If there's an error in the URL, show it
   if (error) {
@@ -49,32 +43,7 @@ export default async function ConfirmResetPage({ searchParams }: PageProps) {
     )
   }
 
-  // Handle new format (token_hash + type) by establishing session
-  if (token_hash && type) {
-    const supabase = await createClient()
-    
-    try {
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        token_hash,
-        type: type as 'recovery',
-      })
-
-      if (verifyError) {
-        console.error('Token verification error:', verifyError)
-        redirect(`/reset-password/confirm?error=invalid_token&error_description=${encodeURIComponent('The reset link is invalid or has expired.')}`)
-      }
-      
-      // Token verified successfully, session is now established
-    } catch (error) {
-      console.error('Token verification error:', error)
-      redirect(`/reset-password/confirm?error=invalid_token&error_description=${encodeURIComponent('The reset link is invalid or has expired.')}`)
-    }
-  }
-
-  // Check if user has a valid session (should be established by the reset link)
-  // const user = await getUser()
-  // console.log('user in confirm page', user)
-  // If we have a code parameter OR if user has an active session, show the form
+  // If we have a code parameter, show the password reset form
   if (code) {
     return (
       <div className="flex items-center justify-center">
@@ -85,7 +54,7 @@ export default async function ConfirmResetPage({ searchParams }: PageProps) {
     )
   }
 
-  // No session and no tokens - they accessed the page directly
+  // No code - they accessed the page directly
   return (
     <div className="flex items-center justify-center">
       <div className="w-full max-w-md">

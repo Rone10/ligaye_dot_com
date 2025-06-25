@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { confirmResetSchema, type ConfirmResetFormData } from '../_utils/validation'
@@ -8,7 +8,6 @@ import { confirmPasswordReset, type ConfirmResetActionResult } from '../_actions
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 // Shadcn UI components
 import { Button } from '@/components/ui/button'
@@ -23,7 +22,6 @@ export function ConfirmResetForm({ resetCode }: { resetCode?: string }) {
   const [isLoading, setIsLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [isSuccess, setIsSuccess] = useState(false)
-  const [isSessionReady, setIsSessionReady] = useState(!resetCode) // If no code, assume ready
   
   const {
     register,
@@ -38,38 +36,7 @@ export function ConfirmResetForm({ resetCode }: { resetCode?: string }) {
     },
   })
   
-  // Handle reset code on client side
-  useEffect(() => {
-    const handleResetCode = async () => {
-      if (!resetCode) return
-      
-      try {
-        const supabase = createClient()
-        
-        // Try to exchange the code for a session on the client side
-        const { error } = await supabase.auth.exchangeCodeForSession(resetCode)
-        
-        if (error) {
-          console.error('Client-side code exchange error:', error)
-          setFormError('The password reset link is invalid or has expired. Please request a new reset link.')
-        } else {
-          setIsSessionReady(true)
-        }
-      } catch (error) {
-        console.error('Client-side reset code handling error:', error)
-        setFormError('The password reset link is invalid or has expired. Please request a new reset link.')
-      }
-    }
-    
-    handleResetCode()
-  }, [resetCode])
-  
   const onSubmit = async (data: ConfirmResetFormData) => {
-    if (!isSessionReady) {
-      setFormError('Please wait while we verify your reset link...')
-      return
-    }
-    
     setIsLoading(true)
     setFormError(null)
     
@@ -78,7 +45,10 @@ export function ConfirmResetForm({ resetCode }: { resetCode?: string }) {
       formData.append('password', data.password)
       formData.append('confirmPassword', data.confirmPassword)
       
-      // Don't include reset code anymore since we handled it client-side
+      // Include reset code if available
+      if (resetCode) {
+        formData.append('resetCode', resetCode)
+      }
       
       const result = await confirmPasswordReset(formData)
       
