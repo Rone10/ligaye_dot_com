@@ -14,6 +14,7 @@ import {
 import { eq, and } from 'drizzle-orm'
 import type { NewJob, NewJobSkill, NewJobIndustry } from '@/lib/db/schema'
 import { unstable_cache } from 'next/cache'
+import { CACHE_TAGS } from './_utils/cache-tags'
 
 // Get employer profile for a user
 export async function getEmployerProfile(userId: string) {
@@ -65,7 +66,7 @@ export const getAllLocations = unstable_cache(
   },
   ['locations'],
   {
-    tags: ['locations']
+    tags: [CACHE_TAGS.locations]
   }
 )
 
@@ -93,7 +94,7 @@ export const getAllSkills = unstable_cache(
   },
   ['skills'],
   {
-    tags: ['skills']
+    tags: [CACHE_TAGS.skills]
   }
 )
 
@@ -121,7 +122,7 @@ export const getAllIndustries = unstable_cache(
   },
   ['industries'],
   {
-    tags: ['industries']
+    tags: [CACHE_TAGS.industries]
   }
 )
 
@@ -224,4 +225,6 @@ export async function insertNewJob(
     console.error('Error inserting new job:', error)
     throw error
   }
-} 
+}
+
+ 

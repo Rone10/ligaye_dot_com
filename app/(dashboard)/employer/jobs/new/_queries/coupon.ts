@@ -1,9 +1,7 @@
-'use server'
-
 import { db } from '@/lib/db'
 import { coupons, couponRedemptions, profiles } from '@/lib/db/schema'
 import { eq, and, or, gte, lte, isNull, sql } from 'drizzle-orm'
-import { getUser } from '@/lib/supabase/server'
+import { getUser, getCachedUser } from '@/lib/supabase/server'
 
 export interface CouponValidationResult {
   valid: boolean
@@ -28,7 +26,7 @@ export async function validateCouponForJobPosting(
 ): Promise<CouponValidationResult> {
   try {
     // Get current user
-    const user = await getUser()
+    const user = await getCachedUser()
     if (!user) {
       return { valid: false, error: 'You must be logged in to use a coupon' }
     }

@@ -765,6 +765,20 @@ Files marked with `'use server'` at the top can ONLY export async functions. If 
 Error: A "use server" file can only export async functions, found object.
 ```
 
+#### **Additional Problem: Client Components Importing Server Files**
+
+Another critical issue occurs when client components try to import from files that contain `'use server'` directives:
+
+```
+Error: It is not allowed to define inline "use server" annotated Server Actions in Client Components.
+To use Server Actions in a Client Component, you can either export them from a separate file with "use server" at the top, or pass them down through props from a Server Component.
+```
+
+This happens when:
+1. A `_queries.ts` file has `'use server'` at the top
+2. It exports cache tags or other objects
+3. A client component (like a hook) imports from this file
+
 #### **❌ INCORRECT: File-Level 'use server' with Object Exports**
 
 ```typescript
@@ -784,20 +798,27 @@ export const getUserData = async (id: string) => {
 }
 ```
 
-#### **✅ CORRECT: Function-Level 'use server' Only Where Needed**
+#### **✅ CORRECT: Separate Cache Tags into Utils**
+
+The best solution is to separate cache tags and other shared constants into a dedicated utils file:
 
 ```typescript
-// ✅ NO file-level 'use server' directive
-
-import { unstable_cache } from 'next/cache'
-
-// ✅ Objects can be exported without issues
+// _utils/cache-tags.ts - No 'use server' directive
 export const CACHE_TAGS = {
   user: (id: string) => `user-${id}`,
-  collection: 'users-collection'
-}
+  collection: 'users-collection',
+  locations: 'locations',
+  skills: 'skills',
+  industries: 'industries'
+} as const
 
-// ✅ Query functions don't need 'use server' (called from Server Components)
+// _queries.ts - Can now have 'use server' at the top
+'use server'
+
+import { unstable_cache } from 'next/cache'
+import { CACHE_TAGS } from './_utils/cache-tags'
+
+// ✅ Query functions work with file-level 'use server'
 export const getUserData = async (id: string) => {
   const cachedFunction = unstable_cache(
     async () => fetchUserDataInternal(id),
@@ -808,15 +829,32 @@ export const getUserData = async (id: string) => {
   return cachedFunction()
 }
 
-// ✅ Only cache invalidation functions need 'use server' (called from Server Actions)
-export async function invalidateUserCache(id: string) {
-  'use server' // ✅ Function-level directive only
-  const { revalidateTag } = await import('next/cache')
+// _actions.ts - Server actions with 'use server'
+'use server'
+
+import { CACHE_TAGS } from './_utils/cache-tags'
+import { revalidateTag } from 'next/cache'
+
+export async function updateUser(id: string, data: UpdateData) {
+  // Update logic...
   
-  await Promise.all([
-    revalidateTag(CACHE_TAGS.user(id)),
-    revalidateTag(CACHE_TAGS.collection)
-  ])
+  // Cache invalidation using imported tags
+  await revalidateTag(CACHE_TAGS.user(id))
+}
+
+// Client hook can safely import server action
+// _hooks/useUserUpdate.ts
+'use client'
+
+import { updateUser } from '../_actions' // ✅ Safe - importing server action
+
+export function useUserUpdate() {
+  const handleUpdate = async (id: string, data: UpdateData) => {
+    const result = await updateUser(id, data)
+    // Handle result...
+  }
+  
+  return { handleUpdate }
 }
 ```
 
@@ -824,17 +862,19 @@ export async function invalidateUserCache(id: string) {
 
 | File Type | Use 'use server'? | Reason |
 |-----------|------------------|---------|
-| **Query Files** (`_queries.ts`) | NO (file-level) | Need to export cache tag objects |
+| **Query Files** (`_queries.ts`) | YES (file-level) | Can use file-level when cache tags are in separate utils file |
 | **Server Action Files** (`_actions.ts`) | YES (file-level) | Only export async functions |
-| **Cache Invalidation Functions** | YES (function-level) | Called from server actions |
-| **Regular Query Functions** | NO | Called from Server Components |
+| **Cache Tag Files** (`_utils/cache-tags.ts`) | NO | Must be importable by both client and server |
+| **Client Hooks** (`_hooks/*.ts`) | NO ('use client') | Client-side code |
+| **Utility Files** (`_utils/*.ts`) | NO | Shared between client and server |
 
 #### **Key Rules for 'use server' Usage**
 
-1. **Query Files**: Remove file-level `'use server'`, add function-level only to invalidation functions
-2. **Server Action Files**: Keep file-level `'use server'` (they only export functions)
-3. **Cache Tag Objects**: Can only be exported from files WITHOUT file-level `'use server'`
-4. **Cache Invalidation**: Always needs `'use server'` since called from client-side actions
+1. **Separate Shared Constants**: Move cache tags and other shared objects to `_utils` files without `'use server'`
+2. **Query Files**: Can keep file-level `'use server'` when cache tags are in separate files
+3. **Server Action Files**: Keep file-level `'use server'` (they only export functions)
+4. **Client Components**: Never import from files with `'use server'` directives, only import server actions from `_actions.ts`
+5. **Cache Invalidation**: Server actions handle all cache invalidation using imported cache tags
 
 #### **Migration Pattern for Existing Files**
 
@@ -855,13 +895,59 @@ export async function invalidateCache() {
 
 This issue commonly occurs when refactoring existing query files to add caching and cache invalidation. Always remember: if you need to export objects (especially cache tags), don't use file-level `'use server'`.
 
+#### **Real-World Example: Client Hook Importing from Server File**
+
+```typescript
+// ❌ PROBLEM: This causes runtime errors
+
+// _queries/coupon.ts
+'use server'
+
+export interface CouponValidationResult { // Object export with 'use server'
+  valid: boolean
+  error?: string
+}
+
+export async function validateCouponForJobPosting() { // Function export
+  // validation logic
+}
+
+// _hooks/useCouponValidation.ts
+'use client'
+
+import { validateCouponForJobPosting } from '../_queries/coupon' // ❌ ERROR!
+// Error: Cannot import server functions in client components
+
+// ✅ SOLUTION: Move validation to server action
+
+// _actions.ts
+'use server'
+
+export async function validateCoupon(code: string, amount: number) {
+  // Call internal validation logic
+  return validateCouponInternal(code, amount)
+}
+
+// _hooks/useCouponValidation.ts
+'use client'
+
+import { validateCoupon } from '../_actions' // ✅ Works!
+
+// Define types locally or in separate utils file
+interface CouponValidationResult {
+  valid: boolean
+  error?: string
+}
+```
+
 ## 📚 **Quick Reference Checklists**
 
 ### **New Feature Development Checklist**
 - [ ] **🔥 CRITICAL**: Ensure NO authentication/cookie access inside cached functions
-- [ ] **🔥 CRITICAL**: Remove file-level `'use server'` from query files that export objects
+- [ ] **🔥 CRITICAL**: Separate cache tags and shared constants into `_utils` files without `'use server'`
+- [ ] **🔥 CRITICAL**: Client hooks should only import from `_actions.ts`, never from `_queries.ts`
 - [ ] Verify authentication checks happen BEFORE calling cached functions
-- [ ] Add function-level `'use server'` only to cache invalidation functions
+- [ ] Keep file-level `'use server'` in both `_queries.ts` and `_actions.ts`
 - [ ] Plan data requirements (primary, secondary, user-specific)
 - [ ] Design optimized queries with relations
 - [ ] Implement on-demand cache invalidation strategy
@@ -872,9 +958,10 @@ This issue commonly occurs when refactoring existing query files to add caching 
 
 ### **Existing Feature Optimization Checklist**
 - [ ] **🔥 CRITICAL**: Audit for authentication/cookie access inside cached functions - WILL BREAK
-- [ ] **🔥 CRITICAL**: Check for file-level `'use server'` with object exports - WILL BREAK
+- [ ] **🔥 CRITICAL**: Check for client components importing from `_queries.ts` - WILL BREAK
+- [ ] **🔥 CRITICAL**: Move cache tags and shared objects to `_utils` files
 - [ ] Move any auth checks OUTSIDE cached function calls
-- [ ] Fix `'use server'` placement (function-level for invalidation only)
+- [ ] Move client-called functions (like validation) to `_actions.ts`
 - [ ] Replace time-based caching with on-demand invalidation
 - [ ] Audit current query patterns
 - [ ] Measure baseline performance
@@ -885,12 +972,13 @@ This issue commonly occurs when refactoring existing query files to add caching 
 
 ### **Cache Invalidation Implementation Checklist**
 - [ ] **🔥 CRITICAL**: Verify NO `getUser()` or cookie access inside `unstable_cache()` functions
-- [ ] **🔥 CRITICAL**: Ensure NO file-level `'use server'` in query files with cache tag exports
+- [ ] **🔥 CRITICAL**: Create separate `_utils/cache-tags.ts` file for cache tag constants
+- [ ] **🔥 CRITICAL**: Ensure client components only import server actions, not query functions
 - [ ] Structure auth checks OUTSIDE cached functions
-- [ ] Add function-level `'use server'` only to cache invalidation helpers
+- [ ] Import cache tags in both `_queries.ts` and `_actions.ts`
 - [ ] Remove `revalidate` properties from cache configs
 - [ ] Add hierarchical cache tags
-- [ ] Create cache invalidation helpers
+- [ ] Implement cache invalidation in server actions
 - [ ] Add invalidation calls to all mutations (create, update, delete)
 - [ ] Test that changes appear immediately
 - [ ] Monitor cache hit rates (should be >90%)

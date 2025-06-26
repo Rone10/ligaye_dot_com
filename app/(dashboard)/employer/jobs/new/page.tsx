@@ -1,21 +1,24 @@
-import { getUser } from '@/lib/supabase/server'
+import { getUser, getCachedUser } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import NewJobForm from './_components/NewJobForm'
 import { getEmployerProfile } from './_queries'
 
 export default async function NewJobPage() {
-  const user = await getUser()
+  const user = await getCachedUser()
 
   if (!user) {
     redirect('/sign-in?redirect=/employer/jobs/new')
   }
 
-  // check if user is employer
-  const employerProfile = await getEmployerProfile(user.id)
-  
-  if (!employerProfile) {
-    redirect('/employer/profile')
+  // Check if user is employer
+  // const employerProfile = await getEmployerProfile(user.id)
+  if (user.user_metadata.role !== 'employer') {
+    redirect('/sign-in?redirect=/employer/jobs/new')
   }
+  
+  // if (!employerProfile) {
+  //   redirect('/employer/profile')
+  // }
   
   return (
     <div className="container max-w-4xl py-10 mx-auto">

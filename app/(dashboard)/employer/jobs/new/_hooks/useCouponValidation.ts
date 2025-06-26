@@ -1,8 +1,22 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { validateCouponForJobPosting } from '../_queries/coupon'
-import type { CouponValidationResult } from '../_queries/coupon'
+import { validateCoupon as validateCouponAction } from '../_actions'
+
+// Define the type locally to avoid importing from server file
+interface CouponValidationResult {
+  valid: boolean
+  error?: string
+  coupon?: {
+    id: string
+    code: string
+    discountType: 'PERCENTAGE' | 'FIXED' | 'FREE'
+    discountValue: number
+    description?: string | null
+  }
+  discountAmount?: number
+  finalAmount?: number
+}
 
 export function useCouponValidation() {
   const [isValidating, setIsValidating] = useState(false)
@@ -16,7 +30,7 @@ export function useCouponValidation() {
 
     setIsValidating(true)
     try {
-      const result = await validateCouponForJobPosting(couponCode.trim(), originalAmount)
+      const result = await validateCouponAction(couponCode.trim(), originalAmount)
       setValidationResult(result)
       return result
     } catch (error) {

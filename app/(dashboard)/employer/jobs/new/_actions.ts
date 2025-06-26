@@ -2,13 +2,14 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { getUser } from '@/lib/supabase/server'
+import { getUser, getCachedUser } from '@/lib/supabase/server'
 import { jobFormSchema } from './_utils/validation'
 import { 
   getEmployerProfile, 
   insertNewJob,
   calculateExpiryDate
 } from './_queries'
+import { CACHE_TAGS } from './_utils/cache-tags'
 import { db } from '@/lib/db'
 import { profiles, employerProfiles, jobStatusEnum, payments, jobs } from '@/lib/db/schema'
 import { v4 as uuidv4 } from 'uuid'
@@ -16,8 +17,26 @@ import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
 import { createStripeCheckoutSession } from '@/lib/stripe/stripe-actions'
 import { recordCouponRedemption } from './_queries/coupon'
+import { validateCouponForJobPosting as validateCouponInternal } from './_queries/coupon'
+
+// Server action for coupon validation (to be used by client components)
+export async function validateCoupon(couponCode: string, originalAmount: number) {
+  try {
+    return await validateCouponInternal(couponCode, originalAmount)
+  } catch (error) {
+    console.error('Error in validateCoupon action:', error)
+    return {
+      valid: false,
+      error: 'Failed to validate coupon'
+    }
+  }
+}
 
 export async function createJobPosting(formData: z.infer<typeof jobFormSchema> & { coupon?: { couponId: string; code: string; discountAmount: number; finalAmount: number } | null }) {
+  const user = await getCachedUser()
+  if (!user) {
+    return { error: 'You must be logged in to post a job' }
+  }
   try {
     // Extract coupon data before validation
     const { coupon, ...jobData } = formData
@@ -30,10 +49,8 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
     console.log('[Action Debug] Job Duration:', validatedData.jobDuration);
     
     // Get the current user
-    const user = await getUser()
-    if (!user) {
-      return { error: 'You must be logged in to post a job' }
-    }
+    // const user = await getUser()
+  
     
     // Get employer profile for the user
     const result = await db()
@@ -127,29 +144,35 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
     console.log('[Action Debug] Final paymentAmount (cents):', paymentAmount);
     console.log('[Action Debug] Coupon applied:', coupon ? coupon.code : 'none');
     
-    // Invalidate caches related to jobs
-    revalidateTag('jobs')
-    revalidateTag('employer-jobs')
-    revalidateTag('public-jobs')
-    revalidateTag('filtered-jobs') // Invalidate cached job listings for public jobs page
-    // Invalidate reference data caches if they might be affected
-    revalidateTag('locations')
-    revalidateTag('skills') 
-    revalidateTag('industries')
-    // Invalidate employer dashboard caches
-    revalidateTag('employer-dashboard')
-    revalidateTag('employer-dashboard-stats')
-    revalidateTag('employer-recent-jobs')
-    // Invalidate public job listing caches
-    revalidateTag('job-filters')
-    revalidateTag('locations-for-filters')
-    revalidateTag('industries-for-filters')
-    revalidateTag('saved-jobs') // Invalidate saved jobs cache to ensure accuracy
-    revalidateTag('user-data') // Invalidate user data cache that might reference jobs
+    // Invalidate caches related to jobs with specific tags
+    await Promise.all([
+      // Core job caches
+      revalidateTag(CACHE_TAGS.jobs),
+      revalidateTag(CACHE_TAGS.employerJobs),
+      revalidateTag('public-jobs'),
+      revalidateTag('filtered-jobs'),
+      
+      // Employer-specific caches
+      revalidateTag('employer-dashboard'),
+      revalidateTag('employer-dashboard-stats'),
+      revalidateTag('employer-recent-jobs'),
+      revalidateTag(`employer-jobs-${result.employerProfileId}`),
+      
+      // Public job listing caches
+      revalidateTag('job-filters'),
+      revalidateTag('locations-for-filters'),
+      revalidateTag('industries-for-filters'),
+      revalidateTag('saved-jobs'),
+      revalidateTag('user-data'),
+      
+      // Job-specific cache
+      revalidateTag(`job-${newJob.id}`)
+    ])
+    
     // Revalidate paths that show job listings
     revalidatePath('/employer/jobs')
     revalidatePath('/jobs')
-    revalidatePath('/employer') // Also revalidate the employer dashboard path
+    revalidatePath('/employer')
     
     // Check if coupon covers full amount (payment is free)
     if (paymentAmount === 0 && coupon) {
