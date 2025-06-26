@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/supabase/server';
-import { getCandidateProfile } from './_queries';
+import { getCandidateProfileData } from './_queries';
 import ProfileForm from './_components/profile-form';
 
 interface PageProps {
@@ -10,23 +10,33 @@ interface PageProps {
   }>;
 }
 
-export default async function CandidateProfilePage({ params, searchParams }: PageProps) {
-  // Get logged-in user
-  const user = await getUser();
-  
-  // Handle unauthorized access
+// Helper function for authentication (outside cache scope)
+async function checkProfileAccess(): Promise<{ user: any; hasAccess: boolean }> {
+  const user = await getUser()
   if (!user) {
-    redirect('/sign-in?redirect=/candidate/profile');
+    return { user: null, hasAccess: false }
   }
   
-  // Get tab from search params
-  const { tab } = await searchParams;
+  return { user, hasAccess: true }
+}
+
+export default async function CandidateProfilePage({ params, searchParams }: PageProps) {
+  // Step 1: Authentication check OUTSIDE cache scope
+  const { user, hasAccess } = await checkProfileAccess()
   
-  // Fetch candidate profile data
-  const profileData = await getCandidateProfile(user.id);
+  // Handle unauthorized access
+  if (!hasAccess || !user) {
+    redirect('/sign-in?redirect=/candidate/profile')
+  }
+  
+  // Step 2: Await search params and fetch cached data (no auth logic inside)
+  const [{ tab }, profileData] = await Promise.all([
+    searchParams,
+    getCandidateProfileData(user.id)
+  ])
   
   // Check if profile exists, if not show creation form
-  const hasProfile = !!profileData?.candidateProfile;
+  const hasProfile = !!profileData?.candidateProfile
   
   return (
     <div className="container mx-auto py-10 max-w-5xl">

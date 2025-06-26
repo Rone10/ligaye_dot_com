@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getUser, createClient } from '@/lib/supabase/server';
 import { profiles, candidateProfiles } from '@/lib/db/schema';
@@ -15,7 +15,11 @@ import {
   updateExperienceRecord,
   deleteExperienceRecord,
   updateCandidateSkills,
-  getAvailableSkills
+  getAvailableSkills,
+  invalidateCandidateProfile,
+  invalidateCandidateEducation,
+  invalidateCandidateExperience,
+  invalidateCandidateSkills
 } from './_queries';
 import { 
   validateProfileData, 
@@ -45,22 +49,27 @@ export async function updateBasicProfileInfo(formData: FormData) {
   if (!profile) {
     throw new Error('Candidate profile not found');
   }
-
-
   
   // Extract and validate data
   const data = Object.fromEntries(formData.entries());
   const validatedData = validateProfileData(data);
   
-  // Update profile in database
-  await upsertCandidateProfile({
-    userId: user.id,
-    ...validatedData
-  });
-  
-  revalidatePath('/candidate/profile');
-  revalidateTag('candidate-profile');
-  return { success: true };
+  try {
+    // Update profile in database
+    await upsertCandidateProfile({
+      userId: user.id,
+      ...validatedData
+    });
+    
+    // Use optimized cache invalidation
+    await invalidateCandidateProfile(user.id);
+    revalidatePath('/candidate/profile');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating basic profile info:', error);
+    throw new Error('Failed to update profile');
+  }
 }
 
 // Resume upload action
@@ -95,33 +104,40 @@ export async function handleResumeUpload(formData: FormData) {
     throw new Error('No file provided');
   }
   
-  // Upload to Supabase Storage
-  const supabase = await createClient();
-  const fileName = `${user.id}-${Date.now()}-${resumeFile.name}`;
-  const { data, error } = await supabase.storage
-    .from('resumes')
-    .upload(fileName, resumeFile);
+  try {
+    // Upload to Supabase Storage
+    const supabase = await createClient();
+    const fileName = `${user.id}-${Date.now()}-${resumeFile.name}`;
+    const { data, error } = await supabase.storage
+      .from('resumes')
+      .upload(fileName, resumeFile);
+      
+    if (error){
+      console.log('File upload failed in handleResumeUpload:', error);
+      throw new Error('File upload failed');
+    }
     
-  if (error){
-    console.log('File upload failed in handleResumeUpload:', error);
-    throw new Error('File upload failed');
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('resumes')
+      .getPublicUrl(fileName);
+    
+    // Update profile with resume URL
+    await upsertCandidateProfile({
+      userId: user.id,
+      resumeUrl: urlData.publicUrl,
+      resumeFilename: resumeFile.name
+    });
+    
+    // Use optimized cache invalidation
+    await invalidateCandidateProfile(user.id);
+    revalidatePath('/candidate/profile');
+    
+    return { success: true, url: urlData.publicUrl };
+  } catch (error) {
+    console.error('Error uploading resume:', error);
+    throw new Error('Failed to upload resume');
   }
-  
-  // Get public URL
-  const { data: urlData } = supabase.storage
-    .from('resumes')
-    .getPublicUrl(fileName);
-  
-  // Update profile with resume URL
-  await upsertCandidateProfile({
-    userId: user.id,
-    resumeUrl: urlData.publicUrl,
-    resumeFilename: resumeFile.name
-  });
-  
-  revalidatePath('/candidate/profile');
-  revalidateTag('candidate-profile');
-  return { success: true, url: urlData.publicUrl };
 }
 
 // Education record actions
@@ -161,13 +177,20 @@ export async function addEducation(formData: FormData) {
     throw new Error('Candidate profile not found');
   }
   
-  // Transform data and add record
-  const educationData = transformFormToEducation(validatedData, candidateProfileId);
-  await addEducationRecord(educationData);
-  
-  revalidatePath('/candidate/profile');
-  revalidateTag('candidate-profile');
-  return { success: true };
+  try {
+    // Transform data and add record
+    const educationData = transformFormToEducation(validatedData, candidateProfileId);
+    await addEducationRecord(educationData, user.id);
+    
+    // Use optimized cache invalidation
+    await invalidateCandidateEducation(user.id);
+    revalidatePath('/candidate/profile');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error adding education record:', error);
+    throw new Error('Failed to add education record');
+  }
 }
 
 export async function updateEducation(formData: FormData) {
@@ -210,13 +233,20 @@ export async function updateEducation(formData: FormData) {
     throw new Error('Candidate profile not found');
   }
   
-  // Transform data and update record
-  const educationData = transformFormToEducation(validatedData, candidateProfileId);
-  await updateEducationRecord(educationId, educationData);
-  
-  revalidatePath('/candidate/profile');
-  revalidateTag('candidate-profile');
-  return { success: true };
+  try {
+    // Transform data and update record
+    const educationData = transformFormToEducation(validatedData, candidateProfileId);
+    await updateEducationRecord(educationId, educationData, user.id);
+    
+    // Use optimized cache invalidation
+    await invalidateCandidateEducation(user.id);
+    revalidatePath('/candidate/profile');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating education record:', error);
+    throw new Error('Failed to update education record');
+  }
 }
 
 export async function deleteEducation(formData: FormData) {
@@ -239,11 +269,18 @@ export async function deleteEducation(formData: FormData) {
     throw new Error('Education ID is required');
   }
   
-  await deleteEducationRecord(educationId);
-  
-  revalidatePath('/candidate/profile');
-  revalidateTag('candidate-profile');
-  return { success: true };
+  try {
+    await deleteEducationRecord(educationId, user.id);
+    
+    // Use optimized cache invalidation
+    await invalidateCandidateEducation(user.id);
+    revalidatePath('/candidate/profile');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting education record:', error);
+    throw new Error('Failed to delete education record');
+  }
 }
 
 // Experience record actions
@@ -286,13 +323,20 @@ export async function addExperience(formData: FormData) {
     throw new Error('Candidate profile not found');
   }
   
-  // Transform data and add record
-  const experienceData = transformFormToExperience(validatedData, candidateProfileId);
-  await addExperienceRecord(experienceData);
-  
-  revalidatePath('/candidate/profile');
-  revalidateTag('candidate-profile');
-  return { success: true };
+  try {
+    // Transform data and add record
+    const experienceData = transformFormToExperience(validatedData, candidateProfileId);
+    await addExperienceRecord(experienceData, user.id);
+    
+    // Use optimized cache invalidation
+    await invalidateCandidateExperience(user.id);
+    revalidatePath('/candidate/profile');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error adding experience record:', error);
+    throw new Error('Failed to add experience record');
+  }
 }
 
 export async function updateExperience(formData: FormData) {
@@ -339,13 +383,20 @@ export async function updateExperience(formData: FormData) {
     throw new Error('Candidate profile not found');
   }
   
-  // Transform data and update record
-  const experienceData = transformFormToExperience(validatedData, candidateProfileId);
-  await updateExperienceRecord(experienceId, experienceData);
-  
-  revalidatePath('/candidate/profile');
-  revalidateTag('candidate-profile');
-  return { success: true };
+  try {
+    // Transform data and update record
+    const experienceData = transformFormToExperience(validatedData, candidateProfileId);
+    await updateExperienceRecord(experienceId, experienceData, user.id);
+    
+    // Use optimized cache invalidation
+    await invalidateCandidateExperience(user.id);
+    revalidatePath('/candidate/profile');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating experience record:', error);
+    throw new Error('Failed to update experience record');
+  }
 }
 
 export async function deleteExperience(formData: FormData) {
@@ -368,11 +419,18 @@ export async function deleteExperience(formData: FormData) {
     throw new Error('Experience ID is required');
   }
   
-  await deleteExperienceRecord(experienceId);
-  
-  revalidatePath('/candidate/profile');
-  revalidateTag('candidate-profile');
-  return { success: true };
+  try {
+    await deleteExperienceRecord(experienceId, user.id);
+    
+    // Use optimized cache invalidation
+    await invalidateCandidateExperience(user.id);
+    revalidatePath('/candidate/profile');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting experience record:', error);
+    throw new Error('Failed to delete experience record');
+  }
 }
 
 // Fetch available skills
@@ -431,10 +489,17 @@ export async function updateSkills(formData: FormData) {
   // Validate skills data
   validateSkillsData({ skills });
   
-  // Update skills in database
-  await updateCandidateSkills(candidateProfileId, skills);
-  
-  revalidatePath('/candidate/profile');
-  revalidateTag('candidate-profile');
-  return { success: true };
+  try {
+    // Update skills in database
+    await updateCandidateSkills(candidateProfileId, skills, user.id);
+    
+    // Use optimized cache invalidation
+    await invalidateCandidateSkills(user.id);
+    revalidatePath('/candidate/profile');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating candidate skills:', error);
+    throw new Error('Failed to update skills');
+  }
 } 

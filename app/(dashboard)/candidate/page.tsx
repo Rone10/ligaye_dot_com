@@ -11,70 +11,46 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { getUser } from '@/lib/supabase/server';
-import { db } from '@/lib/db';
-import { candidateProfiles, applications, savedJobs, profiles } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
-import { formatDistanceToNow } from 'date-fns';
+import { getCandidateDashboardData } from './_queries';
+
+// Helper function for authentication (outside cache scope)
+async function checkCandidateAccess(): Promise<{ user: any; hasAccess: boolean }> {
+  const user = await getUser()
+  if (!user) {
+    return { user: null, hasAccess: false }
+  }
+  
+  return { user, hasAccess: true }
+}
 
 export default async function CandidateDashboard() {
-  const user = await getUser();
+  // Step 1: Authentication check OUTSIDE cache scope
+  const { user, hasAccess } = await checkCandidateAccess()
   
-  // Initialize variables
-  let profile = null;
-  let candidateProfile = null;
-  let applicationCount = 0;
-  let savedJobsCount = 0;
-  
-  if (user) {
-    // First, get the profile which maps to both candidateProfile and savedJobs
-    const profileResult = await db()
-      .select()
-      .from(profiles)
-      .where(eq(profiles.userId, user.id))
-      .limit(1);
-    
-    if (profileResult.length > 0) {
-      profile = profileResult[0];
-      
-      // Now get the candidate profile
-      const candidateProfileResult = await db()
-        .select()
-        .from(candidateProfiles)
-        .where(eq(candidateProfiles.profileId, profile.id))
-        .limit(1);
-      
-      if (candidateProfileResult.length > 0) {
-        candidateProfile = candidateProfileResult[0];
-        
-        // Get application count
-        const applicationsResult = await db()
-          .select()
-          .from(applications)
-          .where(eq(applications.candidateProfileId, candidateProfile.id));
-        
-        applicationCount = applicationsResult.length;
-      }
-      
-      // Get saved jobs count - this is associated with the profile, not candidate profile
-      const savedJobsResult = await db()
-        .select()
-        .from(savedJobs)
-        .where(
-          and(
-            eq(savedJobs.userId, profile.id),
-            eq(savedJobs.deleted, false)
-          )
-        );
-      
-      savedJobsCount = savedJobsResult.length;
-    }
+  if (!hasAccess || !user) {
+    return (
+      <div className="glass-card p-8">
+        <h1 className="text-3xl font-bold text-theme-dark mb-2">Access Required</h1>
+        <p className="text-theme-gray-dark">Please sign in to access your candidate dashboard.</p>
+      </div>
+    )
   }
+
+  // Step 2: Cache the data fetching (no auth logic inside)
+  const dashboardData = await getCandidateDashboardData(user.id)
+  
+  const { profile, candidateProfile, applicationCount, savedJobsCount } = dashboardData
   
   return (
     <div className="space-y-8">
       {/* Dashboard Header */}
       <div className="glass-card p-8">
-        <h1 className="text-3xl font-bold text-theme-dark mb-2">Welcome to Your Dashboard</h1>
+        <h1 className="text-3xl font-bold text-theme-dark mb-2">
+          Welcome to Your Dashboard
+          {profile?.fullName && (
+            <span className="text-primary-blue">, {profile.fullName}</span>
+          )}
+        </h1>
         <p className="text-theme-gray-dark max-w-2xl">
           Track your job applications, manage your career profile, and discover new opportunities that match your skills.
         </p>

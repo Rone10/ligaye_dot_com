@@ -1,11 +1,22 @@
 import { Suspense } from 'react'
 import { Briefcase } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { getUser } from '@/lib/supabase/server'
 import { getCandidateApplications } from './_queries'
 import ApplicationsList from './_components/ApplicationsList'
 
 // Force dynamic rendering since this page uses authentication
 export const dynamic = 'force-dynamic'
+
+// Helper function for authentication (outside cache scope)
+async function checkApplicationsAccess(): Promise<{ user: any; hasAccess: boolean }> {
+  const user = await getUser()
+  if (!user) {
+    return { user: null, hasAccess: false }
+  }
+  
+  return { user, hasAccess: true }
+}
 
 // Loading skeleton component
 function ApplicationsLoading() {
@@ -29,8 +40,32 @@ function ApplicationsLoading() {
 }
 
 export default async function ApplicationsPage() {
-  // Fetch applications
-  const { data, error } = await getCandidateApplications()
+  // Step 1: Authentication check OUTSIDE cache scope
+  const { user, hasAccess } = await checkApplicationsAccess()
+  
+  if (!hasAccess || !user) {
+    return (
+      <div className="space-y-6">
+        <div className="glass-card p-6">
+          <h1 className="text-2xl font-bold tracking-tight text-theme-dark">Access Required</h1>
+          <p className="text-theme-gray-dark mt-2">
+            Please sign in to view your job applications.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Step 2: Fetch cached data (no auth logic inside)
+  let applicationsResult
+  try {
+    applicationsResult = await getCandidateApplications(user.id)
+  } catch (error) {
+    console.error('Error fetching applications:', error)
+    applicationsResult = { data: [], error: 'Failed to load applications' }
+  }
+  
+  const { data, error } = applicationsResult
   
   return (
     <div className="space-y-6">

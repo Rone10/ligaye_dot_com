@@ -4,7 +4,12 @@ import { db } from '@/lib/db'
 import { eq, and } from 'drizzle-orm'
 import { savedJobs, profiles } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
+import { 
+  invalidateSavedJobs, 
+  invalidateJobSavedCheck,
+  invalidateSavedJobsCollection 
+} from '../_queries'
 
 /**
  * Save a job for the current logged-in user
@@ -17,7 +22,7 @@ export async function saveJob(jobId: string) {
   }
   
   try {
-    // Restore userProfile lookup
+    // Get user profile
     const userProfile = await db()
       .select({
         id: profiles.id
@@ -37,7 +42,7 @@ export async function saveJob(jobId: string) {
       .from(savedJobs)
       .where(and(
         eq(savedJobs.jobId, jobId),
-        eq(savedJobs.userId, userProfile.id) // Use profile ID
+        eq(savedJobs.userId, userProfile.id)
       ))
       .limit(1)
       .then(res => res[0])
@@ -49,7 +54,7 @@ export async function saveJob(jobId: string) {
         .set({ deleted: false })
         .where(and(
           eq(savedJobs.jobId, jobId),
-          eq(savedJobs.userId, userProfile.id) // Use profile ID
+          eq(savedJobs.userId, userProfile.id)
         ))
     } else {
       // Otherwise, create a new saved job entry using profile ID
@@ -57,14 +62,19 @@ export async function saveJob(jobId: string) {
         .insert(savedJobs)
         .values({
           jobId,
-          userId: userProfile.id, // Use profile ID
+          userId: userProfile.id,
           deleted: false
         })
     }
     
-    // Revalidate cached data
+    // Use optimized cache invalidation
+    await Promise.all([
+      invalidateSavedJobs(user.id),
+      invalidateJobSavedCheck(user.id, jobId),
+      invalidateSavedJobsCollection()
+    ])
+    
     revalidatePath('/candidate/saved-jobs')
-    revalidateTag('saved-jobs')
     
     return { success: true, error: null }
   } catch (error) {
@@ -84,7 +94,7 @@ export async function unsaveJob(jobId: string) {
   }
   
   try {
-    // Restore userProfile lookup
+    // Get user profile
     const userProfile = await db()
       .select({
         id: profiles.id
@@ -104,13 +114,18 @@ export async function unsaveJob(jobId: string) {
       .set({ deleted: true })
       .where(and(
         eq(savedJobs.jobId, jobId),
-        eq(savedJobs.userId, userProfile.id) // Use profile ID
+        eq(savedJobs.userId, userProfile.id)
       ))
     
-    // Revalidate cached data
+    // Use optimized cache invalidation
+    await Promise.all([
+      invalidateSavedJobs(user.id),
+      invalidateJobSavedCheck(user.id, jobId),
+      invalidateSavedJobsCollection()
+    ])
+    
     revalidatePath('/candidate/saved-jobs')
     revalidatePath('/jobs')
-    revalidateTag('saved-jobs')
     
     return { success: true, error: null }
   } catch (error) {

@@ -23,11 +23,205 @@ This guide documents proven performance optimization patterns discovered during 
 - **Minimize Waterfalls**: Reduce sequential dependencies
 - **Early Data Fetching**: Start queries as early as possible
 
+## 🚨 **CRITICAL: Authentication and Cache Compatibility**
+
+### **The Problem: Cookies in Cached Functions**
+
+One of the most critical issues when implementing caching is attempting to access dynamic data sources (like cookies) inside cached functions. This will cause a runtime error:
+
+```
+Error: Route /admin/payments used "cookies" inside a function cached with "unstable_cache(...)". 
+Accessing Dynamic data sources inside a cache scope is not supported.
+```
+
+### **❌ INCORRECT: Authentication Inside Cached Functions**
+
+```typescript
+// ❌ THIS WILL BREAK - DON'T DO THIS
+async function getDataInternal() {
+  // This calls getUser() which accesses cookies - WILL CRASH
+  const user = await getUser() 
+  if (!user || user.user_metadata.role !== 'admin') {
+    return { error: 'Unauthorized' }
+  }
+  
+  return fetchData()
+}
+
+export const getData = async () => {
+  const cachedFunction = unstable_cache(
+    async () => getDataInternal(), // ❌ Contains cookie access
+    ['data'],
+    { tags: ['data-collection'] }
+  )
+  
+  return cachedFunction()
+}
+```
+
+### **✅ CORRECT: Authentication Outside Cached Functions**
+
+```typescript
+// ✅ CORRECT PATTERN - Authentication outside cache scope
+async function checkAdminAccess(): Promise<boolean> {
+  const user = await getUser() // Cookies accessed outside cache
+  if (!user) return false
+  
+  if (user.user_metadata.role === 'admin') {
+    return true
+  }
+  
+  // Fallback database check if needed
+  const adminProfile = await db()
+    .select({ role: profiles.role })
+    .from(profiles)
+    .where(and(
+      eq(profiles.userId, user.id),
+      eq(profiles.deleted, false)
+    ))
+    .limit(1)
+    .then(res => res[0])
+  
+  return adminProfile?.role === 'admin'
+}
+
+// Internal data fetching (no authentication logic)
+async function getDataInternal() {
+  // Pure data fetching - no cookie access
+  return fetchData()
+}
+
+// Public function with proper structure
+export const getData = async () => {
+  // Step 1: Authentication check OUTSIDE cache scope
+  const isAdmin = await checkAdminAccess()
+  if (!isAdmin) {
+    return { error: 'Unauthorized' }
+  }
+
+  // Step 2: Cache the data fetching (no auth logic inside)
+  const cachedFunction = unstable_cache(
+    async () => getDataInternal(),
+    ['data'],
+    { tags: ['data-collection'] }
+  )
+  
+  return cachedFunction()
+}
+```
+
+### **✅ Complete Working Example**
+
+```typescript
+'use server'
+
+import { getUser } from '@/lib/supabase/server'
+import { unstable_cache } from 'next/cache'
+
+// Helper function for authentication (outside cache scope)
+async function checkAdminAccess(): Promise<boolean> {
+  const user = await getUser()
+  if (!user) return false
+  
+  // Check user metadata or database as needed
+  return user.user_metadata.role === 'admin'
+}
+
+// Internal functions without authentication checks
+async function getPaymentDataInternal() {
+  try {
+    const payments = await db()
+      .select()
+      .from(payments)
+      .where(eq(payments.status, 'pending'))
+    
+    return { payments }
+  } catch (error) {
+    return { error: 'Failed to fetch payments' }
+  }
+}
+
+// Public function with proper auth + caching structure
+export const getPaymentData = async () => {
+  // Authentication BEFORE caching
+  const isAdmin = await checkAdminAccess()
+  if (!isAdmin) {
+    return { error: 'Unauthorized' }
+  }
+
+  // Cache the data fetching only
+  const cachedFunction = unstable_cache(
+    async () => getPaymentDataInternal(),
+    ['payment-data'],
+    {
+      tags: ['payments-collection', 'admin-data']
+    }
+  )
+  
+  return cachedFunction()
+}
+
+// Server actions follow the same pattern
+export async function updatePayment(id: string, data: UpdateData) {
+  // Authentication outside any cache scope
+  const isAdmin = await checkAdminAccess()
+  if (!isAdmin) {
+    return { error: 'Unauthorized' }
+  }
+  
+  // Perform update and invalidate cache
+  const result = await db().update(payments).set(data).where(eq(payments.id, id))
+  
+  // Cache invalidation
+  await revalidateTag('payments-collection')
+  
+  return { success: true, data: result }
+}
+```
+
+### **Key Rules for Authentication + Caching**
+
+1. **NEVER call `getUser()` or access cookies inside `unstable_cache()` functions**
+2. **ALWAYS perform authentication checks BEFORE calling cached functions**
+3. **Separate concerns**: Authentication logic separate from data fetching logic
+4. **Cache only pure data operations** that don't depend on dynamic sources
+5. **Use helper functions** to check authentication status outside cache scopes
+
+### **Pattern Summary**
+
+```typescript
+// This is the proven pattern that works:
+export const secureFunction = async () => {
+  // 1. Auth check (outside cache)
+  const hasAccess = await checkAccess()
+  if (!hasAccess) return { error: 'Unauthorized' }
+
+  // 2. Cache pure data fetching
+  const cachedFunction = unstable_cache(
+    async () => pureDataFetch(), // No auth checks inside
+    ['cache-key'],
+    { tags: ['cache-tags'] }
+  )
+  
+  return cachedFunction()
+}
+```
+
 ## 🔍 **Performance Issue Identification Framework**
 
 ### **Red Flags to Look For:**
 
 ```typescript
+// 🔥 CRITICAL: Authentication Inside Cached Functions (WILL BREAK)
+export const getData = unstable_cache(
+  async () => {
+    const user = await getUser() // ❌ Cookie access in cache - RUNTIME ERROR
+    if (!user) return { error: 'Unauthorized' }
+    return fetchData()
+  },
+  ['data']
+)
+
 // ❌ Multiple Sequential Database Calls
 const user = await getUser()
 const data = await getData(user.id)
@@ -52,6 +246,8 @@ const savedItems = await getSavedItems(profileId)
 
 ### **Performance Audit Checklist:**
 
+- [ ] **🔥 CRITICAL**: Check for `getUser()` or cookie access inside `unstable_cache()` functions
+- [ ] Verify authentication checks happen BEFORE cached function calls
 - [ ] Count database queries per page load
 - [ ] Identify sequential vs parallel data fetching
 - [ ] Check cache hit/miss rates
@@ -537,6 +733,9 @@ export async function monitorCacheEffectiveness() {
 ## 🚨 **Common Pitfalls to Avoid**
 
 ### **Caching Pitfalls**
+- **🔥 CRITICAL: Cookies in cached functions**: NEVER call `getUser()` or access cookies inside `unstable_cache()` - will cause runtime errors
+- **🔥 CRITICAL: 'use server' with object exports**: NEVER use file-level `'use server'` in query files that export cache tag objects - will cause build errors
+- **Authentication placement**: Always perform auth checks OUTSIDE cached functions, not inside
 - **Time-based expiration**: Don't use `revalidate` unless absolutely necessary
 - **Under-invalidation**: Ensure all related cache entries are invalidated on mutations
 - **Over-invalidation**: Don't invalidate caches that aren't affected by the mutation
@@ -554,9 +753,115 @@ export async function monitorCacheEffectiveness() {
 - **Error handling**: Ensure parallel operations handle errors correctly
 - **Type safety**: Maintain proper TypeScript types throughout optimizations
 
+### **🔥 CRITICAL: 'use server' Directive Issues**
+
+One of the most common issues when implementing optimized queries is incorrectly using the `'use server'` directive, which can break your application during development.
+
+#### **The Problem: File-Level 'use server' with Object Exports**
+
+Files marked with `'use server'` at the top can ONLY export async functions. If you try to export objects (like cache tags), you'll get this error:
+
+```
+Error: A "use server" file can only export async functions, found object.
+```
+
+#### **❌ INCORRECT: File-Level 'use server' with Object Exports**
+
+```typescript
+'use server' // ❌ THIS BREAKS when exporting objects
+
+import { unstable_cache } from 'next/cache'
+
+// ❌ This object export will cause an error
+export const CACHE_TAGS = {
+  user: (id: string) => `user-${id}`,
+  collection: 'users-collection'
+}
+
+// Query functions
+export const getUserData = async (id: string) => {
+  // ... cached query logic
+}
+```
+
+#### **✅ CORRECT: Function-Level 'use server' Only Where Needed**
+
+```typescript
+// ✅ NO file-level 'use server' directive
+
+import { unstable_cache } from 'next/cache'
+
+// ✅ Objects can be exported without issues
+export const CACHE_TAGS = {
+  user: (id: string) => `user-${id}`,
+  collection: 'users-collection'
+}
+
+// ✅ Query functions don't need 'use server' (called from Server Components)
+export const getUserData = async (id: string) => {
+  const cachedFunction = unstable_cache(
+    async () => fetchUserDataInternal(id),
+    [`user-${id}`],
+    { tags: [CACHE_TAGS.user(id)] }
+  )
+  
+  return cachedFunction()
+}
+
+// ✅ Only cache invalidation functions need 'use server' (called from Server Actions)
+export async function invalidateUserCache(id: string) {
+  'use server' // ✅ Function-level directive only
+  const { revalidateTag } = await import('next/cache')
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.user(id)),
+    revalidateTag(CACHE_TAGS.collection)
+  ])
+}
+```
+
+#### **When to Use 'use server'**
+
+| File Type | Use 'use server'? | Reason |
+|-----------|------------------|---------|
+| **Query Files** (`_queries.ts`) | NO (file-level) | Need to export cache tag objects |
+| **Server Action Files** (`_actions.ts`) | YES (file-level) | Only export async functions |
+| **Cache Invalidation Functions** | YES (function-level) | Called from server actions |
+| **Regular Query Functions** | NO | Called from Server Components |
+
+#### **Key Rules for 'use server' Usage**
+
+1. **Query Files**: Remove file-level `'use server'`, add function-level only to invalidation functions
+2. **Server Action Files**: Keep file-level `'use server'` (they only export functions)
+3. **Cache Tag Objects**: Can only be exported from files WITHOUT file-level `'use server'`
+4. **Cache Invalidation**: Always needs `'use server'` since called from client-side actions
+
+#### **Migration Pattern for Existing Files**
+
+```typescript
+// BEFORE (broken):
+'use server'
+export const CACHE_TAGS = { ... } // ❌ Causes error
+
+// AFTER (working):
+// No file-level directive
+export const CACHE_TAGS = { ... } // ✅ Works
+
+export async function invalidateCache() {
+  'use server' // ✅ Function-level only
+  // ...
+}
+```
+
+This issue commonly occurs when refactoring existing query files to add caching and cache invalidation. Always remember: if you need to export objects (especially cache tags), don't use file-level `'use server'`.
+
 ## 📚 **Quick Reference Checklists**
 
 ### **New Feature Development Checklist**
+- [ ] **🔥 CRITICAL**: Ensure NO authentication/cookie access inside cached functions
+- [ ] **🔥 CRITICAL**: Remove file-level `'use server'` from query files that export objects
+- [ ] Verify authentication checks happen BEFORE calling cached functions
+- [ ] Add function-level `'use server'` only to cache invalidation functions
 - [ ] Plan data requirements (primary, secondary, user-specific)
 - [ ] Design optimized queries with relations
 - [ ] Implement on-demand cache invalidation strategy
@@ -566,6 +871,10 @@ export async function monitorCacheEffectiveness() {
 - [ ] Test with realistic data volumes
 
 ### **Existing Feature Optimization Checklist**
+- [ ] **🔥 CRITICAL**: Audit for authentication/cookie access inside cached functions - WILL BREAK
+- [ ] **🔥 CRITICAL**: Check for file-level `'use server'` with object exports - WILL BREAK
+- [ ] Move any auth checks OUTSIDE cached function calls
+- [ ] Fix `'use server'` placement (function-level for invalidation only)
 - [ ] Replace time-based caching with on-demand invalidation
 - [ ] Audit current query patterns
 - [ ] Measure baseline performance
@@ -575,6 +884,10 @@ export async function monitorCacheEffectiveness() {
 - [ ] Validate performance improvements
 
 ### **Cache Invalidation Implementation Checklist**
+- [ ] **🔥 CRITICAL**: Verify NO `getUser()` or cookie access inside `unstable_cache()` functions
+- [ ] **🔥 CRITICAL**: Ensure NO file-level `'use server'` in query files with cache tag exports
+- [ ] Structure auth checks OUTSIDE cached functions
+- [ ] Add function-level `'use server'` only to cache invalidation helpers
 - [ ] Remove `revalidate` properties from cache configs
 - [ ] Add hierarchical cache tags
 - [ ] Create cache invalidation helpers

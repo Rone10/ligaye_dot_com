@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
-import { getApplicationById } from './_queries'
+import { getUser } from '@/lib/supabase/server'
+import { getApplicationById } from '../_queries'
 import ApplicationDetailHeader from './_components/ApplicationDetailHeader'
 import ApplicationDocuments from './_components/ApplicationDocuments'
 import EmployerFeedback from './_components/EmployerFeedback'
@@ -11,12 +12,36 @@ interface ApplicationDetailPageProps {
   params: Promise<{ id: string }>
 }
 
+// Helper function for authentication (outside cache scope)
+async function checkApplicationDetailAccess(): Promise<{ user: any; hasAccess: boolean }> {
+  const user = await getUser()
+  if (!user) {
+    return { user: null, hasAccess: false }
+  }
+  
+  return { user, hasAccess: true }
+}
+
 export default async function ApplicationDetailPage({ params }: ApplicationDetailPageProps) {
-  // Get application ID from params
+  // Step 1: Authentication check OUTSIDE cache scope
+  const { user, hasAccess } = await checkApplicationDetailAccess()
+  
+  if (!hasAccess || !user) {
+    notFound()
+  }
+
+  // Step 2: Get application ID from params and fetch cached data
   const { id } = await params
   
-  // Fetch application details
-  const { data, error } = await getApplicationById(id)
+  let applicationResult
+  try {
+    applicationResult = await getApplicationById(id, user.id)
+  } catch (error) {
+    console.error('Error fetching application:', error)
+    notFound()
+  }
+  
+  const { data, error } = applicationResult
   
   // Handle not found or errors
   if (error || !data) {
