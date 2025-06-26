@@ -187,3 +187,11 @@ async function handleSubmit(e: FormEvent) {
 - Separate server error handling from UI logic
 - Use refs for DOM operations in async functions
 - Don't couple dialog state with background operations
+
+## Linting & Type Checking
+Before saying you're done implementing any task, ALWAYS run:
+```bash
+pnpm lint
+tsc --noEmit
+```
+This will help catch any lint or TypeScript errors before completion.

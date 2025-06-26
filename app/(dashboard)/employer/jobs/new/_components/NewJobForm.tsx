@@ -190,6 +190,18 @@ export default function NewJobForm() {
         return;
       }
       
+      // Handle fully-covered coupon payment
+      if (
+        result &&
+        typeof result === 'object' &&
+        'fullyCoveredByCoupon' in result &&
+        result.fullyCoveredByCoupon
+      ) {
+        console.log('[Form Debug] Job fully covered by coupon, redirecting to success');
+        router.push('/employer/jobs?status=published&coupon=success');
+        return;
+      }
+      
       // Handle cash payment or other status
       if (result && typeof result === 'object' && 'status' in result) {
         console.log('[Form Debug] Status received, redirecting to jobs list');

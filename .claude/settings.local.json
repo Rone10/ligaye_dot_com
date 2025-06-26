@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(pnpm lint:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(tsc --noEmit)"
     ],
     "deny": []
   }

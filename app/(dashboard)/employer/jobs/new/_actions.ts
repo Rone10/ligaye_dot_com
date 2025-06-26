@@ -151,6 +151,63 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
     revalidatePath('/jobs')
     revalidatePath('/employer') // Also revalidate the employer dashboard path
     
+    // Check if coupon covers full amount (payment is free)
+    if (paymentAmount === 0 && coupon) {
+      console.log('[Action Debug] Coupon covers full amount - publishing job immediately');
+      
+      // Update job status to ACTIVE since payment is covered
+      await db()
+        .update(jobs)
+        .set({ status: 'ACTIVE' })
+        .where(eq(jobs.id, newJob.id));
+      
+      // Create a payment record with completed status
+      const [paymentRecord] = await db().insert(payments).values({
+        jobId: newJob.id,
+        employerProfileId: result.employerProfileId,
+        amount: 0, // Payment amount is 0 after coupon
+        currency: 'USD',
+        method: validatedData.paymentMethod, // Keep the original payment method choice
+        status: 'completed', // Mark as completed since coupon covers full amount
+        transactionId: `COUPON_${coupon.code}_${Date.now()}`,
+        couponId: coupon.couponId,
+        metadata: JSON.stringify({
+          jobTitle: validatedData.title,
+          duration: validatedData.jobDuration,
+          createdBy: user.id,
+          baseAmount: baseAmount,
+          discountAmount: discountAmount,
+          couponCode: coupon.code,
+          fullyCoveredByCoupon: true
+        }),
+        deleted: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning()
+      
+      // Record coupon redemption
+      if (paymentRecord) {
+        await recordCouponRedemption(
+          coupon.couponId,
+          result.profileId,
+          paymentRecord.id,
+          newJob.id,
+          baseAmount,
+          discountAmount,
+          0 // Final amount is 0
+        )
+      }
+      
+      // Return success with published status
+      return { 
+        success: true,
+        jobId: newJob.id, 
+        status: 'ACTIVE',
+        fullyCoveredByCoupon: true,
+        message: 'Job posted successfully! The coupon covered the full cost.'
+      }
+    }
+    
     // Handle payment method
     if (validatedData.paymentMethod === 'stripe') {
       try {
@@ -209,15 +266,26 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
         return { error: 'Failed to create payment session. Your job has been saved as a draft.' };
       }
     } else {
-      // Cash payment - create a payment record with 'pending' status
+      // Cash payment - create a payment record with 'pending' status (unless fully covered by coupon)
+      const paymentStatus = paymentAmount === 0 ? 'completed' : 'pending'
+      const jobFinalStatus = paymentAmount === 0 ? 'ACTIVE' : 'PENDING_PAYMENT'
+      
+      // Update job status if fully covered by coupon
+      if (paymentAmount === 0) {
+        await db()
+          .update(jobs)
+          .set({ status: 'ACTIVE' })
+          .where(eq(jobs.id, newJob.id));
+      }
+      
       const [paymentRecord] = await db().insert(payments).values({
         jobId: newJob.id,
         employerProfileId: result.employerProfileId,
         amount: paymentAmount,
         currency: 'USD',
         method: 'cash',
-        status: 'pending',
-        transactionId: null,
+        status: paymentStatus,
+        transactionId: paymentAmount === 0 ? `COUPON_${coupon?.code}_${Date.now()}` : null,
         couponId: coupon?.couponId || null,
         metadata: JSON.stringify({
           jobTitle: validatedData.title,
@@ -225,7 +293,8 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
           createdBy: user.id,
           baseAmount: baseAmount,
           discountAmount: discountAmount,
-          couponCode: coupon?.code || null
+          couponCode: coupon?.code || null,
+          fullyCoveredByCoupon: paymentAmount === 0
         }),
         deleted: false,
         createdAt: new Date(),
@@ -243,6 +312,17 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
           discountAmount,
           paymentAmount
         )
+      }
+      
+      // Return appropriate response based on whether coupon covered full amount
+      if (paymentAmount === 0) {
+        return { 
+          success: true,
+          jobId: newJob.id, 
+          status: 'ACTIVE',
+          fullyCoveredByCoupon: true,
+          message: 'Job posted successfully! The coupon covered the full cost.'
+        }
       }
       
       // Redirect to job listing with pending status
