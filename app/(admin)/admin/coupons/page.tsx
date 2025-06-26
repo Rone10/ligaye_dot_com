@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { getCouponsWithStats } from './_queries'
 import CouponsTable from './_components/CouponsTable'
-import CreateCouponDialog from './_components/CreateCouponDialog'
+import CouponFormDialog from './_components/CouponFormDialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, Tag, TrendingUp, DollarSign, Users } from 'lucide-react'
@@ -35,7 +35,7 @@ export default async function AdminCouponsPage() {
           <h1 className="text-3xl font-bold text-[#1a1e2d]">Coupons</h1>
           <p className="text-[#9aa3bc] mt-1">Manage discount codes and promotions</p>
         </div>
-        <CreateCouponDialog />
+        <CouponFormDialog mode="create" />
       </div>
       
       {/* Stats Cards */}

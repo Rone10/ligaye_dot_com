@@ -20,12 +20,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { format } from 'date-fns'
-import { MoreHorizontal, Eye, Edit, Trash, Copy, CheckCircle } from 'lucide-react'
+import { MoreHorizontal, Eye, Edit, Trash, Copy, CheckCircle, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { deleteCoupon, updateCoupon } from '../_actions'
+import { updateCoupon } from '../_actions'
 import { toast } from 'sonner'
 import type { Coupon } from '@/lib/db/schema'
+import CouponFormDialog from './CouponFormDialog'
+import DeleteCouponDialog from './DeleteCouponDialog'
 
 interface CouponsTableProps {
   coupons: {
@@ -37,8 +39,11 @@ interface CouponsTableProps {
 
 export default function CouponsTable({ coupons }: CouponsTableProps) {
   const router = useRouter();
-  // const { toast } = useToast()
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null)
   
   const handleCopyCode = async (code: string) => {
     try {
@@ -65,22 +70,14 @@ export default function CouponsTable({ coupons }: CouponsTableProps) {
     }
   }
   
-  const handleDelete = async (couponId: string) => {
-    if (!confirm('Are you sure you want to delete this coupon?')) {
-      return
-    }
-    
-    try {
-      const result = await deleteCoupon(couponId)
-      if (result.success) {
-        toast.success('Coupon deleted successfully')
-        router.refresh()
-      } else {
-        toast.error(result.error || 'Failed to delete coupon')
-      }
-    } catch (error) {
-      toast.error('Failed to delete coupon')
-    }
+  const handleDeleteClick = (coupon: Coupon) => {
+    setSelectedCoupon(coupon)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleEditClick = (coupon: Coupon) => {
+    setEditingCoupon(coupon)
+    setEditDialogOpen(true)
   }
   
   const getDiscountDisplay = (coupon: Coupon) => {
@@ -102,11 +99,11 @@ export default function CouponsTable({ coupons }: CouponsTableProps) {
     const validUntil = coupon.validUntil ? new Date(coupon.validUntil) : null
     
     if (!coupon.isActive) {
-      return <Badge variant="secondary">Inactive</Badge>
+      return <Badge variant="default" className="bg-gray text-gray-800 border-gray-400">Inactive</Badge>
     }
     
     if (validFrom > now) {
-      return <Badge variant="secondary">Scheduled</Badge>
+      return <Badge variant="default">Scheduled</Badge>
     }
     
     if (validUntil && validUntil < now) {
@@ -117,7 +114,7 @@ export default function CouponsTable({ coupons }: CouponsTableProps) {
       return <Badge variant="destructive">Exhausted</Badge>
     }
     
-    return <Badge variant="default" className="bg-[#05ce91]">Active</Badge>
+    return <Badge variant="default" className="bg-secondary">Active</Badge>
   }
   
   return (
@@ -212,21 +209,32 @@ export default function CouponsTable({ coupons }: CouponsTableProps) {
                           View Details
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/admin/coupons/${coupon.id}/edit`}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </Link>
+                      <DropdownMenuItem
+                        onClick={() => handleEditClick(coupon)}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => handleToggleActive(coupon.id, coupon.isActive)}
+                        className={coupon.isActive ? 'text-destructive' : 'text-green-600'}
                       >
-                        {coupon.isActive ? 'Deactivate' : 'Activate'}
+                        {coupon.isActive ? (
+                          <>
+                            <XCircle className="mr-2 h-4 w-4" />
+                            Deactivate
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Activate
+                          </>
+                        )}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => handleDelete(coupon.id)}
+                        onClick={() => handleDeleteClick(coupon)}
                       >
                         <Trash className="mr-2 h-4 w-4" />
                         Delete
@@ -239,6 +247,21 @@ export default function CouponsTable({ coupons }: CouponsTableProps) {
           )}
         </TableBody>
       </Table>
+      {selectedCoupon && (
+        <DeleteCouponDialog
+          coupon={selectedCoupon}
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+        />
+      )}
+      {editingCoupon && (
+        <CouponFormDialog
+          mode="edit"
+          coupon={editingCoupon}
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+        />
+      )}
     </div>
   )
 }

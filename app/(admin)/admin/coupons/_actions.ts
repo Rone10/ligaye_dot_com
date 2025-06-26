@@ -124,3 +124,34 @@ export async function deleteCoupon(couponId: string) {
     return { error: 'Failed to delete coupon' }
   }
 }
+
+export async function editCoupon(couponId: string, formData: FormData) {
+  console.log('[Server Action] editCoupon called')
+  try {
+    const data: any = {
+      description: formData.get('description') as string || null,
+      maxUses: formData.get('maxUses') ? parseInt(formData.get('maxUses') as string) : null,
+      maxUsesPerUser: formData.get('maxUsesPerUser') ? parseInt(formData.get('maxUsesPerUser') as string) : null,
+      validFrom: new Date(formData.get('validFrom') as string),
+      validUntil: formData.get('validUntil') ? new Date(formData.get('validUntil') as string) : null,
+      minPurchaseAmount: formData.get('minPurchaseAmount') ? parseFloat(formData.get('minPurchaseAmount') as string) * 100 : null,
+    }
+    
+    const result = await updateCouponQuery(couponId, data)
+    
+    if (result.success) {
+      try {
+        revalidatePath('/admin/coupons')
+        revalidatePath(`/admin/coupons/${couponId}`)
+      } catch (revalidateError) {
+        console.error('Error revalidating path:', revalidateError)
+      }
+      return { success: true, error: null }
+    }
+    
+    return { success: false, error: result.error || 'Failed to update coupon' }
+  } catch (error) {
+    console.error('[Server Action] Caught error:', error)
+    return { success: false, error: 'Failed to update coupon' }
+  }
+}
