@@ -1,8 +1,8 @@
-import { redirect } from 'next/navigation';
 import stripe from './index';
 import { db } from '@/lib/db';
 import { and, eq } from 'drizzle-orm';
-import { jobs, payments } from '@/lib/db/schema';
+import { jobs, payments, profiles, employerProfiles } from '@/lib/db/schema';
+import { recordCouponRedemption } from '@/app/(dashboard)/employer/jobs/new/_queries/coupon';
 
 export interface CreateCheckoutSessionParams {
   jobId: string;
@@ -12,6 +12,10 @@ export interface CreateCheckoutSessionParams {
   jobTitle: string;
   jobDuration: number;
   userId: string;
+  couponId?: string;
+  couponCode?: string;
+  baseAmount?: number;
+  discountAmount?: number;
 }
 
 /**
@@ -25,6 +29,10 @@ export async function createStripeCheckoutSession({
   jobTitle,
   jobDuration,
   userId,
+  couponId,
+  couponCode,
+  baseAmount,
+  discountAmount,
 }: CreateCheckoutSessionParams) {
   try {
     // Build the base URL
@@ -72,11 +80,15 @@ export async function createStripeCheckoutSession({
       method: 'stripe',
       status: 'pending',
       transactionId: session.id,
+      couponId: couponId || null,
       metadata: JSON.stringify({
         jobTitle,
         duration: jobDuration,
         createdBy: userId,
         sessionId: session.id,
+        baseAmount: baseAmount || paymentAmount,
+        discountAmount: discountAmount || 0,
+        couponCode: couponCode || null,
       }),
       deleted: false,
       createdAt: new Date(),
@@ -111,10 +123,15 @@ export async function handleSuccessfulPayment(sessionId: string) {
     
     // Update the payment record in the database
     await db().transaction(async (tx) => {
-      // Find the payment record
+      // Find the payment record with employer profile info
       const paymentRecord = await tx
-        .select()
+        .select({
+          payment: payments,
+          profileId: profiles.id
+        })
         .from(payments)
+        .innerJoin(employerProfiles, eq(employerProfiles.id, payments.employerProfileId))
+        .innerJoin(profiles, eq(profiles.id, employerProfiles.profileId))
         .where(and(
           eq(payments.transactionId, sessionId),
           eq(payments.method, 'stripe'),
@@ -135,7 +152,7 @@ export async function handleSuccessfulPayment(sessionId: string) {
           status: 'succeeded',
           updatedAt: new Date(),
         })
-        .where(eq(payments.id, paymentRecord.id));
+        .where(eq(payments.id, paymentRecord.payment.id));
       
       // Update the job status to ACTIVE
       await tx
@@ -146,6 +163,28 @@ export async function handleSuccessfulPayment(sessionId: string) {
           updatedAt: new Date(),
         })
         .where(eq(jobs.id, jobId));
+        
+      // Record coupon redemption if a coupon was used
+      if (paymentRecord.payment.couponId && paymentRecord.payment.metadata) {
+        try {
+          const metadata = JSON.parse(paymentRecord.payment.metadata);
+          const baseAmount = metadata.baseAmount || paymentRecord.payment.amount;
+          const discountAmount = metadata.discountAmount || 0;
+          
+          await recordCouponRedemption(
+            paymentRecord.payment.couponId,
+            paymentRecord.profileId,
+            paymentRecord.payment.id,
+            jobId,
+            baseAmount,
+            discountAmount,
+            paymentRecord.payment.amount
+          );
+        } catch (error) {
+          console.error('Error recording coupon redemption:', error);
+          // Don't fail the payment if coupon redemption fails
+        }
+      }
     });
 
     return { success: true };

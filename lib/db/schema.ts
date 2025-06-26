@@ -81,6 +81,10 @@ export const tenderStatusEnum = pgEnum('tender_status', ['DRAFT', 'PUBLISHED', '
 // Country enum (if needed globally, otherwise maybe just Gambia focus)
 // export const countryEnum = pgEnum('country', ['GAMBIA', 'SENEGAL', 'NIGERIA', 'GHANA', 'CANADA', 'USA', 'UK', 'OTHER']);
 
+// Coupon Enums
+export const couponDiscountTypeEnum = pgEnum('coupon_discount_type', ['PERCENTAGE', 'FIXED', 'FREE']);
+export const couponApplicableToEnum = pgEnum('coupon_applicable_to', ['JOB_POSTING', 'TENDER', 'ALL']);
+
 
 // --- Tables ---
 
@@ -586,7 +590,7 @@ export const tenderDocumentPurchasesRelations = relations(tenderDocumentPurchase
 
 
 
-// Payments Table (No changes needed from original good design)
+// Payments Table (Updated with coupon support)
 export const payments = pgTable('payments', {
   id: uuid('id').primaryKey().defaultRandom(),
   jobId: uuid('job_id').references(() => jobs.id, { onDelete: 'set null' }), // Nullable if payment not tied to a job, or job deleted
@@ -596,6 +600,7 @@ export const payments = pgTable('payments', {
   method: text('method').notNull(), // 'stripe', 'cash', 'mobile_money'
   status: text('status').notNull(), // 'pending', 'succeeded', 'failed'
   transactionId: text('transaction_id'), // Stripe charge ID or external ref
+  couponId: uuid('coupon_id').references(() => coupons.id, { onDelete: 'set null' }), // Reference to coupon used
   metadata: text('metadata'), // Store JSON as text or use jsonb type if available/needed
   deleted: boolean('deleted').default(false).notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -606,7 +611,64 @@ export const payments = pgTable('payments', {
     employerProfileIdIdx: index('payments_employer_profile_id_idx').on(table.employerProfileId),
     statusIdx: index('payments_status_idx').on(table.status),
     methodIdx: index('payments_method_idx').on(table.method),
+    couponIdIdx: index('payments_coupon_id_idx').on(table.couponId),
     deletedIdx: index('payments_deleted_idx').on(table.deleted)
+  };
+});
+
+// Coupons Table
+export const coupons = pgTable('coupons', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  code: text('code').notNull().unique(), // Unique coupon code
+  description: text('description'), // Human-readable description
+  discountType: couponDiscountTypeEnum('discount_type').notNull(), // PERCENTAGE, FIXED, FREE
+  discountValue: real('discount_value').notNull(), // Percentage (0-100) or fixed amount
+  maxUses: integer('max_uses'), // Null means unlimited
+  usedCount: integer('used_count').default(0).notNull(),
+  maxUsesPerUser: integer('max_uses_per_user').default(1), // Null means unlimited per user
+  validFrom: timestamp('valid_from').notNull(),
+  validUntil: timestamp('valid_until'), // Null means no expiry
+  applicableTo: couponApplicableToEnum('applicable_to').default('JOB_POSTING').notNull(),
+  minPurchaseAmount: integer('min_purchase_amount'), // Minimum amount required (in cents)
+  isActive: boolean('is_active').default(true).notNull(),
+  deleted: boolean('deleted').default(false).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    codeIdx: uniqueIndex('coupons_code_idx').on(table.code),
+    validFromIdx: index('coupons_valid_from_idx').on(table.validFrom),
+    validUntilIdx: index('coupons_valid_until_idx').on(table.validUntil),
+    isActiveIdx: index('coupons_is_active_idx').on(table.isActive),
+    applicableToIdx: index('coupons_applicable_to_idx').on(table.applicableTo),
+    deletedIdx: index('coupons_deleted_idx').on(table.deleted),
+    // Composite index for common query pattern
+    activeValidIdx: index('coupons_active_valid_idx').on(table.isActive, table.validFrom, table.validUntil)
+  };
+});
+
+// Coupon Redemptions Table
+export const couponRedemptions = pgTable('coupon_redemptions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  couponId: uuid('coupon_id').notNull().references(() => coupons.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  paymentId: uuid('payment_id').references(() => payments.id, { onDelete: 'set null' }),
+  jobId: uuid('job_id').references(() => jobs.id, { onDelete: 'set null' }),
+  originalAmount: integer('original_amount').notNull(), // Amount before discount (in cents)
+  discountAmount: integer('discount_amount').notNull(), // Discount applied (in cents)
+  finalAmount: integer('final_amount').notNull(), // Amount after discount (in cents)
+  redeemedAt: timestamp('redeemed_at').notNull().defaultNow(),
+  deleted: boolean('deleted').default(false).notNull(),
+}, (table) => {
+  return {
+    couponIdIdx: index('coupon_redemptions_coupon_id_idx').on(table.couponId),
+    userIdIdx: index('coupon_redemptions_user_id_idx').on(table.userId),
+    paymentIdIdx: index('coupon_redemptions_payment_id_idx').on(table.paymentId),
+    jobIdIdx: index('coupon_redemptions_job_id_idx').on(table.jobId),
+    redeemedAtIdx: index('coupon_redemptions_redeemed_at_idx').on(table.redeemedAt),
+    deletedIdx: index('coupon_redemptions_deleted_idx').on(table.deleted),
+    // Unique constraint to prevent duplicate redemptions
+    userCouponUniqueIdx: uniqueIndex('coupon_redemptions_user_coupon_unique').on(table.userId, table.couponId, table.paymentId)
   };
 });
 
@@ -629,6 +691,7 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   savedJobs: many(savedJobs), // Jobs saved by this profile (if candidate)
   submittedApplications: many(applications), // Applications submitted by this profile (if candidate) - Requires adjusted relation definition
   authoredBlogPosts: many(blogPosts, { relationName: 'blogPostAuthor' }),
+  couponRedemptions: many(couponRedemptions), // Coupons redeemed by this user
 }));
 
 export const locationsRelations = relations(locations, ({ many }) => ({
@@ -793,6 +856,34 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
     fields: [payments.employerProfileId],
     references: [employerProfiles.id],
   }),
+  coupon: one(coupons, { // Link to the coupon used (if applicable)
+    fields: [payments.couponId],
+    references: [coupons.id],
+  }),
+}));
+
+export const couponsRelations = relations(coupons, ({ many }) => ({
+  payments: many(payments), // Payments that used this coupon
+  redemptions: many(couponRedemptions), // Redemption records for this coupon
+}));
+
+export const couponRedemptionsRelations = relations(couponRedemptions, ({ one }) => ({
+  coupon: one(coupons, {
+    fields: [couponRedemptions.couponId],
+    references: [coupons.id],
+  }),
+  user: one(profiles, {
+    fields: [couponRedemptions.userId],
+    references: [profiles.id],
+  }),
+  payment: one(payments, {
+    fields: [couponRedemptions.paymentId],
+    references: [payments.id],
+  }),
+  job: one(jobs, {
+    fields: [couponRedemptions.jobId],
+    references: [jobs.id],
+  }),
 }));
 
 
@@ -919,4 +1010,12 @@ export type NewTenderDocumentPurchase = InferInsertModel<typeof tenderDocumentPu
 // Blog Post Types
 export type BlogPost = InferSelectModel<typeof blogPosts>;
 export type NewBlogPost = InferInsertModel<typeof blogPosts>;
+
+// Coupon Types
+export type Coupon = InferSelectModel<typeof coupons>;
+export type NewCoupon = InferInsertModel<typeof coupons>;
+
+// Coupon Redemption Types
+export type CouponRedemption = InferSelectModel<typeof couponRedemptions>;
+export type NewCouponRedemption = InferInsertModel<typeof couponRedemptions>;
 

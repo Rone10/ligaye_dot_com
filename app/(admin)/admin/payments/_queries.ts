@@ -7,6 +7,7 @@ import type { Job, EmployerProfile, Profile } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { recordCouponRedemption } from '@/app/(dashboard)/employer/jobs/new/_queries/coupon'
 
 // Define the structure for the unpaid jobs list item
 export interface UnpaidJobListItem {
@@ -91,14 +92,17 @@ export async function approveCashPayment(paymentId: string) {
       return { error: 'Unauthorized. Admin access required.' }
     }
     
-    // Get payment and job information
+    // Get payment and job information with employer profile
     const paymentInfo = await db()
       .select({
-        paymentId: payments.id,
-        jobId: jobs.id
+        payment: payments,
+        jobId: jobs.id,
+        profileId: profiles.id
       })
       .from(payments)
       .innerJoin(jobs, eq(payments.jobId, jobs.id))
+      .innerJoin(employerProfiles, eq(employerProfiles.id, payments.employerProfileId))
+      .innerJoin(profiles, eq(profiles.id, employerProfiles.profileId))
       .where(and(
         eq(payments.id, paymentId),
         eq(payments.method, 'cash'),
@@ -112,6 +116,8 @@ export async function approveCashPayment(paymentId: string) {
     }
     
     // Run transaction to update both payment and job status
+    const paymentRecord = paymentInfo[0]
+    
     await db().transaction(async (tx) => {
       // Update payment status to succeeded
       await tx
@@ -130,8 +136,30 @@ export async function approveCashPayment(paymentId: string) {
           publishedAt: new Date(),
           updatedAt: new Date()
         })
-        .where(eq(jobs.id, paymentInfo[0].jobId))
+        .where(eq(jobs.id, paymentRecord.jobId))
     })
+    
+    // Record coupon redemption if a coupon was used (outside transaction)
+    if (paymentRecord.payment.couponId && paymentRecord.payment.metadata) {
+      try {
+        const metadata = JSON.parse(paymentRecord.payment.metadata)
+        const baseAmount = metadata.baseAmount || paymentRecord.payment.amount
+        const discountAmount = metadata.discountAmount || 0
+        
+        await recordCouponRedemption(
+          paymentRecord.payment.couponId,
+          paymentRecord.profileId,
+          paymentRecord.payment.id,
+          paymentRecord.jobId,
+          baseAmount,
+          discountAmount,
+          paymentRecord.payment.amount
+        )
+      } catch (error) {
+        console.error('Error recording coupon redemption:', error)
+        // Don't fail the payment approval if coupon redemption fails
+      }
+    }
     
     revalidatePath('/admin/payments')
     revalidatePath('/jobs')

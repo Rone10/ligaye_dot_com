@@ -28,18 +28,86 @@ import {
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
 import { format } from 'date-fns'
-import { CalendarIcon, ArrowLeft, Loader2 } from 'lucide-react'
+import { CalendarIcon, ArrowLeft, Loader2, Tag, CheckCircle, AlertCircle } from 'lucide-react'
 import { JobFormValues } from '../../_utils/validation'
 import { applicationMethodEnum } from '@/lib/db/schema'
 import { cn } from '@/lib/utils'
+import { useCouponValidation } from '../../_hooks/useCouponValidation'
+import { useEffect, useState } from 'react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface PostingSettingsStepProps {
   form: UseFormReturn<JobFormValues>
   onPrevious: () => void
   isSubmitting: boolean
+  onCouponValidated?: (couponData: { couponId: string; code: string; discountAmount: number; finalAmount: number } | null) => void
 }
 
-export default function PostingSettingsStep({ form, onPrevious, isSubmitting }: PostingSettingsStepProps) {
+export default function PostingSettingsStep({ form, onPrevious, isSubmitting, onCouponValidated }: PostingSettingsStepProps) {
+  const { isValidating, validationResult, validateCoupon, clearValidation } = useCouponValidation()
+  const [couponCode, setCouponCode] = useState('')
+  const [showCouponField, setShowCouponField] = useState(false)
+  const [hasValidatedCoupon, setHasValidatedCoupon] = useState(false)
+  const jobDuration = form.watch('jobDuration') || 1
+  
+  // Calculate base price (50 USD per month in cents)
+  const basePrice = jobDuration * 5000
+  const finalPrice = validationResult?.valid ? validationResult.finalAmount || 0 : basePrice
+  
+  const handleCouponValidation = async () => {
+    if (couponCode.trim()) {
+      const result = await validateCoupon(couponCode, basePrice)
+      if (result) {
+        setHasValidatedCoupon(true)
+      }
+    }
+  }
+  
+  const handleClearCoupon = () => {
+    setCouponCode('')
+    clearValidation()
+    setHasValidatedCoupon(false)
+    onCouponValidated?.(null)
+  }
+  
+  const handleCancelCoupon = () => {
+    setShowCouponField(false)
+    setCouponCode('')
+    clearValidation()
+    setHasValidatedCoupon(false)
+    onCouponValidated?.(null)
+  }
+  
+  // Only clear validation when coupon code is completely empty
+  useEffect(() => {
+    if (!couponCode.trim()) {
+      clearValidation()
+      setHasValidatedCoupon(false)
+      onCouponValidated?.(null)
+    }
+  }, [couponCode, clearValidation, onCouponValidated])
+  
+  // Update parent component when validation changes
+  useEffect(() => {
+    if (validationResult?.valid && validationResult.coupon) {
+      onCouponValidated?.({
+        couponId: validationResult.coupon.id,
+        code: validationResult.coupon.code,
+        discountAmount: validationResult.discountAmount || 0,
+        finalAmount: validationResult.finalAmount || 0
+      })
+    } else if (validationResult && !validationResult.valid) {
+      onCouponValidated?.(null)
+    }
+  }, [validationResult, onCouponValidated])
+  
+  // Re-validate when duration changes BUT only if we already have a validated coupon
+  useEffect(() => {
+    if (couponCode.trim() && hasValidatedCoupon && validationResult?.valid) {
+      validateCoupon(couponCode, basePrice)
+    }
+  }, [jobDuration, couponCode, hasValidatedCoupon, validationResult?.valid, validateCoupon, basePrice])
+  
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold mb-4 text-[#1a1e2d]">Posting Settings & Payment</h2>
@@ -342,6 +410,128 @@ export default function PostingSettingsStep({ form, onPrevious, isSubmitting }: 
           </FormItem>
         )}
       />
+      
+      {/* Price Display */}
+      <div className="bg-[#f8f9fa] rounded-lg p-4 space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-[#9aa3bc]">Duration:</span>
+          <span className="font-medium text-[#1a1e2d]">{jobDuration} month{jobDuration > 1 ? 's' : ''}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-[#9aa3bc]">Base Price:</span>
+          <span className="font-medium text-[#1a1e2d]">${(basePrice / 100).toFixed(2)}</span>
+        </div>
+        {validationResult?.valid && (
+          <>
+            <div className="flex justify-between items-center text-[#05ce91]">
+              <span>Discount:</span>
+              <span className="font-medium">-${(validationResult.discountAmount! / 100).toFixed(2)}</span>
+            </div>
+            <div className="border-t pt-2 flex justify-between items-center">
+              <span className="font-semibold text-[#1a1e2d]">Total:</span>
+              <span className="font-bold text-lg text-[#1a1e2d]">
+                ${(finalPrice / 100).toFixed(2)}
+              </span>
+            </div>
+          </>
+        )}
+        {!validationResult?.valid && (
+          <div className="border-t pt-2 flex justify-between items-center">
+            <span className="font-semibold text-[#1a1e2d]">Total:</span>
+            <span className="font-bold text-lg text-[#1a1e2d]">${(basePrice / 100).toFixed(2)}</span>
+          </div>
+        )}
+      </div>
+      
+      {/* Coupon Section */}
+      <div className="space-y-3">
+        {!showCouponField ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowCouponField(true)}
+            className="w-full flex items-center justify-center"
+          >
+            <Tag className="mr-2 h-4 w-4" />
+            Have a coupon code?
+          </Button>
+        ) : (
+          <div className="space-y-3">
+            {!hasValidatedCoupon || !validationResult?.valid ? (
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter coupon code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleCouponValidation()
+                    }
+                  }}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  onClick={handleCouponValidation}
+                  disabled={isValidating || !couponCode.trim()}
+                  variant="secondary"
+                >
+                  {isValidating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Apply'
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleCancelCoupon}
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Input
+                  value={`${couponCode} - Applied`}
+                  disabled
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  onClick={handleClearCoupon}
+                  variant="outline"
+                >
+                  Remove
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleCancelCoupon}
+                >
+                  Cancel
+                </Button>
+              </div>
+            )}
+            
+            {validationResult && (
+              <Alert className={validationResult.valid ? 'border-[#05ce91]' : 'border-destructive'}>
+                {validationResult.valid ? (
+                  <CheckCircle className="h-4 w-4 text-[#05ce91]" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 text-destructive" />
+                )}
+                <AlertDescription>
+                  {validationResult.valid 
+                    ? `Coupon "${validationResult.coupon?.code}" applied successfully!` 
+                    : validationResult.error}
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        )}
+      </div>
       
       <div className="flex justify-between mt-8">
         <Button 

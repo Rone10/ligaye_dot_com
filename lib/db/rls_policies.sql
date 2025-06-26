@@ -436,3 +436,175 @@ ON storage.objects FOR DELETE USING (
      TO authenticated
      USING (auth.uid() IN (SELECT user_id FROM public.profiles WHERE role = 'admin'))
      WITH CHECK (auth.uid() IN (SELECT user_id FROM public.profiles WHERE role = 'admin'));
+
+
+
+  -- ########################################################
+  -- Coupons
+    1. Enable RLS on the tables
+
+  -- Enable RLS
+  ALTER TABLE coupons ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE coupon_redemptions ENABLE ROW LEVEL SECURITY;
+
+  2. Policies for coupons table
+
+  -- Policy: Anyone can view active, non-deleted coupons that are currently valid
+  CREATE POLICY "Public can view active coupons" ON coupons
+  FOR SELECT
+  TO authenticated, anon
+  USING (
+    is_active = true
+    AND deleted = false
+    AND valid_from <= NOW()
+    AND (valid_until IS NULL OR valid_until >= NOW())
+  );
+
+  -- Policy: Only admins can view all coupons (including inactive/deleted)
+  CREATE POLICY "Admins can view all coupons" ON coupons
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.role = 'admin'
+      AND profiles.deleted = false
+    )
+  );
+
+  -- Policy: Only admins can insert coupons
+  CREATE POLICY "Only admins can create coupons" ON coupons
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.role = 'admin'
+      AND profiles.deleted = false
+    )
+  );
+
+  -- Policy: Only admins can update coupons
+  CREATE POLICY "Only admins can update coupons" ON coupons
+  FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.role = 'admin'
+      AND profiles.deleted = false
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.role = 'admin'
+      AND profiles.deleted = false
+    )
+  );
+
+  -- Policy: Only admins can delete coupons (soft delete)
+  CREATE POLICY "Only admins can delete coupons" ON coupons
+  FOR DELETE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.role = 'admin'
+      AND profiles.deleted = false
+    )
+  );
+
+  3. Policies for coupon_redemptions table
+
+  -- Policy: Users can view their own redemptions
+  CREATE POLICY "Users can view own redemptions" ON coupon_redemptions
+  FOR SELECT
+  TO authenticated
+  USING (
+    user_id IN (
+      SELECT id FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.deleted = false
+    )
+    AND deleted = false
+  );
+
+  -- Policy: Admins can view all redemptions
+  CREATE POLICY "Admins can view all redemptions" ON coupon_redemptions
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.role = 'admin'
+      AND profiles.deleted = false
+    )
+  );
+
+  -- Policy: System can insert redemptions (through server-side actions)
+  -- Note: This should typically be handled server-side, not through direct client access
+  CREATE POLICY "Authenticated users can create redemptions" ON coupon_redemptions
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    user_id IN (
+      SELECT id FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.deleted = false
+    )
+  );
+
+  -- Policy: Nobody can update redemptions (immutable records)
+  -- Redemptions should be immutable once created
+
+  -- Policy: Only admins can soft delete redemptions
+  CREATE POLICY "Only admins can delete redemptions" ON coupon_redemptions
+  FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.role = 'admin'
+      AND profiles.deleted = false
+    )
+    AND deleted = false
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.user_id = auth.uid()
+      AND profiles.role = 'admin'
+      AND profiles.deleted = false
+    )
+    AND deleted = true -- Only allow setting deleted to true
+  );
+
+  4. Additional considerations
+
+  You may also want to create a function to handle the increment of used_count on the coupons table when a redemption is created:
+
+  -- Function to increment coupon used_count
+  CREATE OR REPLACE FUNCTION increment_coupon_used_count()
+  RETURNS TRIGGER AS $$
+  BEGIN
+    UPDATE coupons
+    SET used_count = used_count + 1,
+        updated_at = NOW()
+    WHERE id = NEW.coupon_id;
+    RETURN NEW;
+  END;
+  $$ LANGUAGE plpgsql;
+
+  -- Trigger to call the function
+  CREATE TRIGGER increment_coupon_used_count_trigger
+  AFTER INSERT ON coupon_redemptions
+  FOR EACH ROW
+  EXECUTE FUNCTION increment_coupon_used_count();

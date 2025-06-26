@@ -15,11 +15,15 @@ import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
 import { createStripeCheckoutSession } from '@/lib/stripe/stripe-actions'
+import { recordCouponRedemption } from './_queries/coupon'
 
-export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) {
+export async function createJobPosting(formData: z.infer<typeof jobFormSchema> & { coupon?: { couponId: string; code: string; discountAmount: number; finalAmount: number } | null }) {
   try {
+    // Extract coupon data before validation
+    const { coupon, ...jobData } = formData
+    
     // Validate form data
-    const validatedData = jobFormSchema.parse(formData)
+    const validatedData = jobFormSchema.parse(jobData)
     
     // Log payment info for debugging
     console.log('[Action Debug] Payment Method:', validatedData.paymentMethod);
@@ -72,7 +76,7 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
     const slug = `${validatedData.title.toLowerCase().replace(/\s+/g, '-')}-${uuidv4().slice(0, 8)}`
     
     // Extract data needed for job creation
-    const jobData = {
+    const jobDataWithMeta = {
       ...validatedData,
       companyId: result.employerProfileId,
       status: initialStatus,
@@ -91,7 +95,7 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
       educationRequirementsRichText,
       experienceRequirementsRichText,
       ...baseJobData 
-    } = jobData
+    } = jobDataWithMeta
     
     // Log the rich text fields for debugging
     console.log('[Action Debug] Education Rich Text Length:', educationRequirementsRichText?.length || 0);
@@ -113,9 +117,15 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
     
     console.log('[Action Debug] New job created with ID:', newJob.id);
     
-    // Calculate payment amount (simple example: $50 per month)
-    const paymentAmount = validatedData.jobDuration * 5000 // $50 in cents per month
-    console.log('[Action Debug] Calculated paymentAmount (cents):', paymentAmount);
+    // Calculate payment amount with coupon
+    const baseAmount = validatedData.jobDuration * 5000 // $50 in cents per month
+    const paymentAmount = coupon ? coupon.finalAmount : baseAmount
+    const discountAmount = coupon ? coupon.discountAmount : 0
+    
+    console.log('[Action Debug] Base amount (cents):', baseAmount);
+    console.log('[Action Debug] Discount amount (cents):', discountAmount);
+    console.log('[Action Debug] Final paymentAmount (cents):', paymentAmount);
+    console.log('[Action Debug] Coupon applied:', coupon ? coupon.code : 'none');
     
     // Invalidate caches related to jobs
     revalidateTag('jobs')
@@ -153,7 +163,11 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
           currency: 'USD',
           jobTitle: validatedData.title,
           jobDuration: validatedData.jobDuration,
-          userId: user.id
+          userId: user.id,
+          couponId: coupon?.couponId,
+          couponCode: coupon?.code,
+          baseAmount: baseAmount,
+          discountAmount: discountAmount
         });
         
         const sessionUrl = stripeResult.sessionUrl;
@@ -196,7 +210,7 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
       }
     } else {
       // Cash payment - create a payment record with 'pending' status
-      await db().insert(payments).values({
+      const [paymentRecord] = await db().insert(payments).values({
         jobId: newJob.id,
         employerProfileId: result.employerProfileId,
         amount: paymentAmount,
@@ -204,15 +218,32 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema>) 
         method: 'cash',
         status: 'pending',
         transactionId: null,
+        couponId: coupon?.couponId || null,
         metadata: JSON.stringify({
           jobTitle: validatedData.title,
           duration: validatedData.jobDuration,
-          createdBy: user.id
+          createdBy: user.id,
+          baseAmount: baseAmount,
+          discountAmount: discountAmount,
+          couponCode: coupon?.code || null
         }),
         deleted: false,
         createdAt: new Date(),
         updatedAt: new Date()
-      })
+      }).returning()
+      
+      // Record coupon redemption if coupon was used
+      if (coupon && paymentRecord) {
+        await recordCouponRedemption(
+          coupon.couponId,
+          result.profileId,
+          paymentRecord.id,
+          newJob.id,
+          baseAmount,
+          discountAmount,
+          paymentAmount
+        )
+      }
       
       // Redirect to job listing with pending status
       return { jobId: newJob.id, status: 'PENDING_PAYMENT' }

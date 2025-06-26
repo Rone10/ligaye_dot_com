@@ -26,6 +26,7 @@ export default function NewJobForm() {
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'failed'>('pending')
   const [paymentDetails, setPaymentDetails] = useState<{sessionId?: string, jobId?: string} | null>(null)
+  const [couponData, setCouponData] = useState<{ couponId: string; code: string; discountAmount: number; finalAmount: number } | null>(null)
   
   // Listen for messages from the Stripe window
   useEffect(() => {
@@ -147,9 +148,16 @@ export default function NewJobForm() {
       setError(null)
       
       console.log('[Form Debug] Submitting form with payment method:', data.paymentMethod);
+      console.log('[Form Debug] Coupon data:', couponData);
+      
+      // Add coupon data to form submission
+      const dataWithCoupon = {
+        ...data,
+        coupon: couponData
+      }
       
       // Execute server action directly
-      const result = await createJobPosting(data)
+      const result = await createJobPosting(dataWithCoupon)
       
       // Add even more verbose logging
       console.log('[Form Debug] Raw result received:', result);
@@ -283,7 +291,7 @@ export default function NewJobForm() {
             {step === 1 && <BasicDetailsStep form={form} onNext={nextStep} />}
             {step === 2 && <RequirementsStep form={form} onNext={nextStep} onPrevious={prevStep} />}
             {step === 3 && <CompensationStep form={form} onNext={nextStep} onPrevious={prevStep} />}
-            {step === 4 && <PostingSettingsStep form={form} onPrevious={prevStep} isSubmitting={isSubmitting} />}
+            {step === 4 && <PostingSettingsStep form={form} onPrevious={prevStep} isSubmitting={isSubmitting} onCouponValidated={setCouponData} />}
             
             <div className="pt-4">
               <div className="flex justify-between text-sm text-muted-foreground">

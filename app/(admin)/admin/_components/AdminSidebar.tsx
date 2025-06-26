@@ -13,7 +13,8 @@ import {
   Settings, 
   FileText, 
   Building2,
-  LogOut
+  LogOut,
+  Tag
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -32,6 +33,11 @@ const navItems = [
     name: 'Payments',
     href: '/admin/payments',
     icon: CreditCard
+  },
+  {
+    name: 'Coupons',
+    href: '/admin/coupons',
+    icon: Tag
   },
   {
     name: 'Jobs',
