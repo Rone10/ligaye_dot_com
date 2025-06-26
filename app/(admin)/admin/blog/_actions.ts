@@ -4,7 +4,7 @@ import { getUser } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { blogPosts } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { revalidatePath } from 'next/cache';
+import { invalidateBlogPostCache } from './_queries';
 
 export async function deleteBlogPostAction(postId: string): Promise<{success: boolean, error?: string}> {
   try {
@@ -27,7 +27,9 @@ export async function deleteBlogPostAction(postId: string): Promise<{success: bo
       })
       .where(eq(blogPosts.id, postId));
 
-    revalidatePath('/blog');
+    // ON-DEMAND cache invalidation - only invalidate what changed
+    await invalidateBlogPostCache(postId);
+    
     return { success: true };
     
   } catch (error) {

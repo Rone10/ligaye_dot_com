@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getCouponDetails } from '../_queries'
+import { getCouponDetailsCached } from '../_queries'
 import CouponDetailsClient from './_components/CouponDetailsClient'
 
 interface PageProps {
@@ -8,7 +8,7 @@ interface PageProps {
 
 export default async function CouponDetailsPage({ params }: PageProps) {
   const { id } = await params
-  const result = await getCouponDetails(id)
+  const result = await getCouponDetailsCached(id)
   
   if (result.error || !result.coupon) {
     notFound()

@@ -1,11 +1,10 @@
 'use server'
 
-import { revalidatePath } from "next/cache";
 import { getUser } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { deleteUserProfile, restoreUserProfile } from "./_queries";
+import { deleteUserProfile, restoreUserProfile, invalidateUserCache } from "./_queries";
 
 // Action to delete a user profile (soft delete)
 export async function softDeleteUserProfile(formData: FormData) {
@@ -34,11 +33,8 @@ export async function softDeleteUserProfile(formData: FormData) {
     throw new Error("Profile ID is required");
   }
   
-  // Delete the profile
+  // Delete the profile (this already includes cache invalidation)
   const result = await deleteUserProfile(profileId);
-  
-  // Revalidate the users page
-  revalidatePath("/admin/users");
   
   return result;
 }
@@ -70,11 +66,8 @@ export async function restoreDeletedUserProfile(formData: FormData) {
     throw new Error("Profile ID is required");
   }
   
-  // Restore the profile
+  // Restore the profile (this already includes cache invalidation)
   const result = await restoreUserProfile(profileId);
-  
-  // Revalidate the users page
-  revalidatePath("/admin/users");
   
   return result;
 } 

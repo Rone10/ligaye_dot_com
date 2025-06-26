@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { FileText, Clock, CheckCircle } from 'lucide-react'
-import { getUnpaidJobs, getJobPaymentStats } from './_queries'
+import { getUnpaidJobsCached, getJobPaymentStatsCached } from './_queries'
 import UnpaidJobsTable from './_components/UnpaidJobsTable'
 import { DashboardHeader } from '@/components/dashboard/dashboard-header'
 import { DashboardShell } from '@/components/dashboard/dashboard-shell'
@@ -16,8 +16,11 @@ export const metadata = {
 }
 
 export default async function UnpaidJobsPage() {
-  const jobsResult = await getUnpaidJobs()
-  const statsResult = await getJobPaymentStats()
+  // Optimized parallel data fetching - fetch both data sets simultaneously
+  const [jobsResult, statsResult] = await Promise.all([
+    getUnpaidJobsCached(),
+    getJobPaymentStatsCached()
+  ]);
   
   // Handle potential error responses
   const unpaidJobs = 'unpaidJobs' in jobsResult && jobsResult.unpaidJobs ? jobsResult.unpaidJobs : []

@@ -3,17 +3,30 @@
 import { db } from '@/lib/db'
 import { coupons, couponRedemptions, profiles, payments, jobs } from '@/lib/db/schema'
 import { eq, and, desc, sql, gte, lte, or, isNull } from 'drizzle-orm'
+import { unstable_cache } from 'next/cache'
+import { cache } from 'react'
 import { getUser } from '@/lib/supabase/server'
 import type { Coupon } from '@/lib/db/schema'
 
-// Get all coupons with usage stats
-export async function getCouponsWithStats() {
-  // Verify user is admin
+// Cache tags for hierarchical invalidation
+const CACHE_TAGS = {
+  coupon: (id: string) => `coupon-${id}`,
+  couponCollection: 'coupons-collection',
+  adminCouponData: 'admin-coupon-data',
+  couponStats: 'coupon-stats',
+  couponRedemptions: 'coupon-redemptions'
+};
+
+// Helper function to check if user is admin (outside cache scope)
+async function checkAdminAccess(): Promise<boolean> {
   const user = await getUser()
-  if (!user) {
-    return { error: 'Unauthorized' }
+  if (!user) return false
+  
+  if (user.user_metadata.role === 'admin') {
+    return true
   }
   
+  // Fallback check in database
   const adminProfile = await db()
     .select({ role: profiles.role })
     .from(profiles)
@@ -24,10 +37,11 @@ export async function getCouponsWithStats() {
     .limit(1)
     .then(res => res[0])
   
-  if (!adminProfile || adminProfile.role !== 'admin') {
-    return { error: 'Unauthorized. Admin access required.' }
-  }
-  
+  return adminProfile?.role === 'admin'
+}
+
+// Internal function for coupons with stats without caching (no auth check inside)
+async function getCouponsWithStatsInternal() {
   try {
     const couponsData = await db()
       .select({
@@ -51,62 +65,43 @@ export async function getCouponsWithStats() {
   }
 }
 
-// Get single coupon with detailed stats
-export async function getCouponDetails(couponId: string) {
-  // Verify user is admin
-  const user = await getUser()
-  if (!user) {
-    return { error: 'Unauthorized' }
-  }
-  
-  const adminProfile = await db()
-    .select({ role: profiles.role })
-    .from(profiles)
-    .where(and(
-      eq(profiles.userId, user.id),
-      eq(profiles.deleted, false)
-    ))
-    .limit(1)
-    .then(res => res[0])
-  
-  if (!adminProfile || adminProfile.role !== 'admin') {
-    return { error: 'Unauthorized. Admin access required.' }
-  }
-  
+// Internal function for coupon details without caching (no auth check inside)
+async function getCouponDetailsInternal(couponId: string) {
   try {
-    // Get coupon details
-    const couponData = await db()
-      .select()
-      .from(coupons)
-      .where(and(
-        eq(coupons.id, couponId),
-        eq(coupons.deleted, false)
-      ))
-      .limit(1)
-      .then(res => res[0])
+    // Wave 1: Parallel data fetching - get coupon and redemptions simultaneously
+    const [couponData, redemptions] = await Promise.all([
+      db()
+        .select()
+        .from(coupons)
+        .where(and(
+          eq(coupons.id, couponId),
+          eq(coupons.deleted, false)
+        ))
+        .limit(1)
+        .then(res => res[0]),
+      
+      db()
+        .select({
+          redemption: couponRedemptions,
+          userFullName: profiles.fullName,
+          jobTitle: jobs.title,
+          paymentAmount: payments.amount,
+          paymentStatus: payments.status
+        })
+        .from(couponRedemptions)
+        .innerJoin(profiles, eq(profiles.id, couponRedemptions.userId))
+        .leftJoin(jobs, eq(jobs.id, couponRedemptions.jobId))
+        .leftJoin(payments, eq(payments.id, couponRedemptions.paymentId))
+        .where(and(
+          eq(couponRedemptions.couponId, couponId),
+          eq(couponRedemptions.deleted, false)
+        ))
+        .orderBy(desc(couponRedemptions.redeemedAt))
+    ])
     
     if (!couponData) {
       return { error: 'Coupon not found' }
     }
-    
-    // Get redemption history
-    const redemptions = await db()
-      .select({
-        redemption: couponRedemptions,
-        userFullName: profiles.fullName,
-        jobTitle: jobs.title,
-        paymentAmount: payments.amount,
-        paymentStatus: payments.status
-      })
-      .from(couponRedemptions)
-      .innerJoin(profiles, eq(profiles.id, couponRedemptions.userId))
-      .leftJoin(jobs, eq(jobs.id, couponRedemptions.jobId))
-      .leftJoin(payments, eq(payments.id, couponRedemptions.paymentId))
-      .where(and(
-        eq(couponRedemptions.couponId, couponId),
-        eq(couponRedemptions.deleted, false)
-      ))
-      .orderBy(desc(couponRedemptions.redeemedAt))
     
     // Calculate stats
     const stats = {
@@ -128,6 +123,51 @@ export async function getCouponDetails(couponId: string) {
   }
 }
 
+// Public functions with auth checks outside cache scope
+export const getCouponsWithStats = async () => {
+  // Auth check outside cache scope
+  const isAdmin = await checkAdminAccess()
+  if (!isAdmin) {
+    return { error: 'Unauthorized. Admin access required.' }
+  }
+
+  // Cache the data fetching (without auth logic)
+  const cachedFunction = unstable_cache(
+    async () => getCouponsWithStatsInternal(),
+    ['admin-coupons-with-stats'],
+    {
+      tags: [CACHE_TAGS.couponCollection, CACHE_TAGS.adminCouponData, CACHE_TAGS.couponStats]
+      // NO revalidate property = indefinite cache until tag invalidation
+    }
+  )
+  
+  return cachedFunction()
+}
+
+export const getCouponDetails = async (couponId: string) => {
+  // Auth check outside cache scope
+  const isAdmin = await checkAdminAccess()
+  if (!isAdmin) {
+    return { error: 'Unauthorized. Admin access required.' }
+  }
+
+  // Cache the data fetching (without auth logic)
+  const cachedFunction = unstable_cache(
+    async () => getCouponDetailsInternal(couponId),
+    [`coupon-details-${couponId}`],
+    {
+      tags: [CACHE_TAGS.coupon(couponId), CACHE_TAGS.couponRedemptions, CACHE_TAGS.adminCouponData]
+      // NO revalidate property = indefinite cache until tag invalidation
+    }
+  )
+  
+  return cachedFunction()
+}
+
+// Request-level cache for repeated calls within same request
+export const getCouponsWithStatsCached = cache(getCouponsWithStats)
+export const getCouponDetailsCached = cache(getCouponDetails)
+
 // Create a new coupon
 export async function createCoupon(data: {
   code: string
@@ -141,23 +181,9 @@ export async function createCoupon(data: {
   applicableTo: 'JOB_POSTING' | 'TENDER' | 'ALL'
   minPurchaseAmount: number | null
 }) {
-  // Verify user is admin
-  const user = await getUser()
-  if (!user) {
-    return { success: false, error: 'Unauthorized' }
-  }
-  
-  const adminProfile = await db()
-    .select({ role: profiles.role })
-    .from(profiles)
-    .where(and(
-      eq(profiles.userId, user.id),
-      eq(profiles.deleted, false)
-    ))
-    .limit(1)
-    .then(res => res[0])
-  
-  if (!adminProfile || adminProfile.role !== 'admin') {
+  // Verify user is admin (outside any cache scope)
+  const isAdmin = await checkAdminAccess()
+  if (!isAdmin) {
     return { success: false, error: 'Unauthorized. Admin access required.' }
   }
   
@@ -196,6 +222,9 @@ export async function createCoupon(data: {
       })
       .returning()
     
+    // ON-DEMAND cache invalidation
+    await invalidateCouponCache()
+    
     return { success: true, coupon: newCoupon }
   } catch (error) {
     console.error('Error creating coupon:', error)
@@ -215,23 +244,9 @@ export async function updateCoupon(
     isActive: boolean
   }>
 ) {
-  // Verify user is admin
-  const user = await getUser()
-  if (!user) {
-    return { error: 'Unauthorized' }
-  }
-  
-  const adminProfile = await db()
-    .select({ role: profiles.role })
-    .from(profiles)
-    .where(and(
-      eq(profiles.userId, user.id),
-      eq(profiles.deleted, false)
-    ))
-    .limit(1)
-    .then(res => res[0])
-  
-  if (!adminProfile || adminProfile.role !== 'admin') {
+  // Verify user is admin (outside any cache scope)
+  const isAdmin = await checkAdminAccess()
+  if (!isAdmin) {
     return { error: 'Unauthorized. Admin access required.' }
   }
   
@@ -244,6 +259,9 @@ export async function updateCoupon(
       })
       .where(eq(coupons.id, couponId))
     
+    // ON-DEMAND cache invalidation
+    await invalidateCouponCache(couponId)
+    
     return { success: true }
   } catch (error) {
     console.error('Error updating coupon:', error)
@@ -253,23 +271,9 @@ export async function updateCoupon(
 
 // Delete (soft) a coupon
 export async function deleteCoupon(couponId: string) {
-  // Verify user is admin
-  const user = await getUser()
-  if (!user) {
-    return { error: 'Unauthorized' }
-  }
-  
-  const adminProfile = await db()
-    .select({ role: profiles.role })
-    .from(profiles)
-    .where(and(
-      eq(profiles.userId, user.id),
-      eq(profiles.deleted, false)
-    ))
-    .limit(1)
-    .then(res => res[0])
-  
-  if (!adminProfile || adminProfile.role !== 'admin') {
+  // Verify user is admin (outside any cache scope)
+  const isAdmin = await checkAdminAccess()
+  if (!isAdmin) {
     return { error: 'Unauthorized. Admin access required.' }
   }
   
@@ -283,9 +287,41 @@ export async function deleteCoupon(couponId: string) {
       })
       .where(eq(coupons.id, couponId))
     
+    // ON-DEMAND cache invalidation
+    await invalidateCouponCache(couponId)
+    
     return { success: true }
   } catch (error) {
     console.error('Error deleting coupon:', error)
     return { error: 'Failed to delete coupon' }
   }
+}
+
+// Cache invalidation helpers - call these when data changes
+export async function invalidateCouponCache(couponId?: string) {
+  const { revalidateTag } = await import('next/cache')
+  
+  const tags = [
+    CACHE_TAGS.couponCollection,
+    CACHE_TAGS.adminCouponData,
+    CACHE_TAGS.couponStats
+  ]
+  
+  if (couponId) {
+    tags.push(CACHE_TAGS.coupon(couponId))
+  }
+  
+  await Promise.all(tags.map(tag => revalidateTag(tag)))
+}
+
+export async function invalidateCouponRedemptionCache(couponId: string) {
+  const { revalidateTag } = await import('next/cache')
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.coupon(couponId)),
+    revalidateTag(CACHE_TAGS.couponRedemptions),
+    revalidateTag(CACHE_TAGS.couponStats),
+    revalidateTag(CACHE_TAGS.couponCollection),
+    revalidateTag(CACHE_TAGS.adminCouponData)
+  ])
 }

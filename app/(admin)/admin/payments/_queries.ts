@@ -3,10 +3,12 @@
 import { eq, and, not, desc, asc, sql, or, inArray } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { payments, jobs, employerProfiles, profiles } from '@/lib/db/schema'
+import { unstable_cache } from 'next/cache'
+import { cache } from 'react'
 import type { Job, EmployerProfile, Profile } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
-import { revalidatePath, revalidateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
+
 import { recordCouponRedemption } from '@/app/(dashboard)/employer/jobs/new/_queries/coupon'
 
 // Define the structure for the unpaid jobs list item
@@ -16,22 +18,44 @@ export interface UnpaidJobListItem {
   employerUser: Pick<Profile, 'fullName'>;
 }
 
-// Get unpaid jobs (DRAFT or PENDING_PAYMENT)
-export async function getUnpaidJobs(
+// Cache tags for hierarchical invalidation
+const CACHE_TAGS = {
+  payment: (id: string) => `payment-${id}`,
+  paymentCollection: 'payments-collection',
+  adminPaymentData: 'admin-payment-data',
+  unpaidJobs: 'unpaid-jobs',
+  paymentStats: 'payment-stats',
+  job: (id: string) => `job-${id}`,
+  jobCollection: 'jobs-collection'
+};
+
+// Helper function to check if user is admin (outside cache scope)
+async function checkAdminAccess(): Promise<boolean> {
+  const user = await getUser()
+  if (!user) return false
+  
+  if (user.user_metadata.role === 'admin') {
+    return true
+  }
+  
+  // Fallback check in database
+  const adminProfile = await db()
+    .select({ role: profiles.role })
+    .from(profiles)
+    .where(and(
+      eq(profiles.userId, user.id),
+      eq(profiles.deleted, false)
+    ))
+    .limit(1)
+    .then(res => res[0])
+  
+  return adminProfile?.role === 'admin'
+}
+
+// Internal function for unpaid jobs without caching (no auth check inside)
+async function getUnpaidJobsInternal(
   sort: 'newest' | 'oldest' = 'newest'
 ): Promise<{ unpaidJobs?: UnpaidJobListItem[], error?: string }> {
-  // Verify user is admin
-  const user = await getUser()
-  if (!user) {
-    return { error: 'Unauthorized' }
-  }
-  if (user.user_metadata.role !== 'admin') {
-    // Use redirect within the function for clarity
-    redirect('/sign-in'); 
-    // Although redirect throws an error, satisfy TypeScript return type
-    return { error: 'Redirecting...' }; 
-  }
-
   try {
     const unpaidJobs = await db()
       .select({
@@ -44,7 +68,6 @@ export async function getUnpaidJobs(
         employer: {
           id: employerProfiles.id,
           companyName: employerProfiles.companyName,
-          // profileId: employerProfiles.profileId // Not needed for display
         },
         employerUser: {
           fullName: profiles.fullName
@@ -70,25 +93,101 @@ export async function getUnpaidJobs(
   }
 }
 
+// Internal function for payment stats without caching (no auth check inside)
+async function getJobPaymentStatsInternal(): Promise<{ stats?: { draft: number, pendingPayment: number, active: number }, error?: string }> {
+  try {
+    // Get job counts by status
+    const jobCounts = await db()
+      .select({
+        status: jobs.status,
+        count: sql<number>`count(*)`
+      })
+      .from(jobs)
+      .where(
+         // Only count relevant statuses, exclude DELETED
+         inArray(jobs.status, ['DRAFT', 'PENDING_PAYMENT', 'ACTIVE']) 
+      )
+      .groupBy(jobs.status);
+
+    // Process results into the desired structure
+    const stats = {
+      draft: 0,
+      pendingPayment: 0,
+      active: 0 // Added active count for context
+    };
+
+    for (const row of jobCounts) {
+      if (row.status === 'DRAFT') {
+        stats.draft = row.count;
+      } else if (row.status === 'PENDING_PAYMENT') {
+        stats.pendingPayment = row.count;
+      } else if (row.status === 'ACTIVE') {
+        stats.active = row.count;
+      }
+    }
+    
+    return { stats };
+
+  } catch (error) {
+    console.error('Error fetching job payment stats:', error)
+    return { error: 'Failed to fetch job payment statistics' }
+  }
+}
+
+// Public functions with auth checks outside cache scope
+export const getUnpaidJobs = async (
+  sort: 'newest' | 'oldest' = 'newest'
+): Promise<{ unpaidJobs?: UnpaidJobListItem[], error?: string }> => {
+  // Auth check outside cache scope
+  const isAdmin = await checkAdminAccess()
+  if (!isAdmin) {
+    redirect('/sign-in')
+    return { error: 'Redirecting...' }
+  }
+
+  // Cache the data fetching (without auth logic)
+  const cachedFunction = unstable_cache(
+    async () => getUnpaidJobsInternal(sort),
+    [`unpaid-jobs-${sort}`],
+    {
+      tags: [CACHE_TAGS.unpaidJobs, CACHE_TAGS.adminPaymentData, CACHE_TAGS.jobCollection]
+      // NO revalidate property = indefinite cache until tag invalidation
+    }
+  )
+  
+  return cachedFunction()
+}
+
+export const getJobPaymentStats = async (): Promise<{ stats?: { draft: number, pendingPayment: number, active: number }, error?: string }> => {
+  // Auth check outside cache scope
+  const isAdmin = await checkAdminAccess()
+  if (!isAdmin) {
+    return { error: 'Unauthorized. Admin access required.' }
+  }
+
+  // Cache the data fetching (without auth logic)
+  const cachedFunction = unstable_cache(
+    async () => getJobPaymentStatsInternal(),
+    ['job-payment-stats'],
+    {
+      tags: [CACHE_TAGS.paymentStats, CACHE_TAGS.adminPaymentData, CACHE_TAGS.jobCollection]
+      // NO revalidate property = indefinite cache until tag invalidation
+    }
+  )
+  
+  return cachedFunction()
+}
+
+// Request-level cache for repeated calls within same request
+export const getUnpaidJobsCached = cache(getUnpaidJobs)
+export const getJobPaymentStatsCached = cache(getJobPaymentStats)
+
 // Approve a cash payment
 export async function approveCashPayment(paymentId: string) {
   try {
-    // Verify user is admin
-    const user = await getUser()
-    if (!user) {
-      return { error: 'Unauthorized' }
-    }
-    
-    const adminProfile = await db()
-      .select()
-      .from(profiles)
-      .where(and(
-        eq(profiles.userId, user.id),
-        eq(profiles.deleted, false)
-      ))
-      .limit(1)
-    
-    if (!adminProfile.length || adminProfile[0].role !== 'admin') {
+    // Verify user is admin (outside any cache scope)
+    const isAdmin = await checkAdminAccess()
+    if (!isAdmin) {
       return { error: 'Unauthorized. Admin access required.' }
     }
     
@@ -161,12 +260,8 @@ export async function approveCashPayment(paymentId: string) {
       }
     }
     
-    revalidatePath('/admin/payments')
-    revalidatePath('/jobs')
-    revalidatePath('/candidate/saved-jobs')
-    revalidateTag('saved-jobs')
-    revalidateTag('jobs')
-    revalidateTag('job-status')
+    // ON-DEMAND cache invalidation
+    await invalidatePaymentCache(paymentId, paymentRecord.jobId)
     
     return { success: true }
   } catch (error) {
@@ -178,22 +273,9 @@ export async function approveCashPayment(paymentId: string) {
 // Reject a cash payment
 export async function rejectCashPayment(paymentId: string) {
   try {
-    // Verify user is admin
-    const user = await getUser()
-    if (!user) {
-      return { error: 'Unauthorized' }
-    }
-    
-    const adminProfile = await db()
-      .select()
-      .from(profiles)
-      .where(and(
-        eq(profiles.userId, user.id),
-        eq(profiles.deleted, false)
-      ))
-      .limit(1)
-    
-    if (!adminProfile.length || adminProfile[0].role !== 'admin') {
+    // Verify user is admin (outside any cache scope)
+    const isAdmin = await checkAdminAccess()
+    if (!isAdmin) {
       return { error: 'Unauthorized. Admin access required.' }
     }
     
@@ -238,7 +320,9 @@ export async function rejectCashPayment(paymentId: string) {
         .where(eq(jobs.id, paymentInfo[0].jobId))
     })
     
-    revalidatePath('/admin/payments')
+    // ON-DEMAND cache invalidation
+    await invalidatePaymentCache(paymentId, paymentInfo[0].jobId)
+    
     return { success: true }
   } catch (error) {
     console.error('Error rejecting cash payment:', error)
@@ -271,6 +355,9 @@ export async function updateJobStatusInDb(
       .set(updateData)
       .where(eq(jobs.id, jobId));
       
+    // ON-DEMAND cache invalidation
+    await invalidateJobCache(jobId)
+      
     return { success: true };
   } catch (error) {
     console.error('Error updating job status in DB:', error);
@@ -278,62 +365,37 @@ export async function updateJobStatusInDb(
   }
 }
 
-// Get job payment statistics for admin dashboard
-export async function getJobPaymentStats(): Promise<{ stats?: { draft: number, pendingPayment: number, active: number }, error?: string }> {
-  // Verify user is admin
-  const user = await getUser()
-  if (!user) {
-    return { error: 'Unauthorized' }
-  }
-  const adminProfile = await db()
-    .select({ role: profiles.role }) // Select only role
-    .from(profiles)
-    .where(and(
-      eq(profiles.userId, user.id),
-      eq(profiles.deleted, false)
-    ))
-    .limit(1)
-    .then(res => res[0]); // Get first result or undefined
-
-  if (!adminProfile || adminProfile.role !== 'admin') {
-    return { error: 'Unauthorized. Admin access required.' }
+// Cache invalidation helpers - call these when data changes
+export async function invalidatePaymentCache(paymentId?: string, jobId?: string) {
+  const { revalidateTag } = await import('next/cache')
+  
+  const tags = [
+    CACHE_TAGS.paymentCollection,
+    CACHE_TAGS.adminPaymentData,
+    CACHE_TAGS.unpaidJobs,
+    CACHE_TAGS.paymentStats,
+    CACHE_TAGS.jobCollection
+  ]
+  
+  if (paymentId) {
+    tags.push(CACHE_TAGS.payment(paymentId))
   }
   
-  try {
-    // Get job counts by status
-    const jobCounts = await db()
-      .select({
-        status: jobs.status,
-        count: sql<number>`count(*)`
-      })
-      .from(jobs)
-      .where(
-         // Only count relevant statuses, exclude DELETED
-         inArray(jobs.status, ['DRAFT', 'PENDING_PAYMENT', 'ACTIVE']) 
-      )
-      .groupBy(jobs.status);
-
-    // Process results into the desired structure
-    const stats = {
-      draft: 0,
-      pendingPayment: 0,
-      active: 0 // Added active count for context
-    };
-
-    for (const row of jobCounts) {
-      if (row.status === 'DRAFT') {
-        stats.draft = row.count;
-      } else if (row.status === 'PENDING_PAYMENT') {
-        stats.pendingPayment = row.count;
-      } else if (row.status === 'ACTIVE') {
-        stats.active = row.count;
-      }
-    }
-    
-    return { stats };
-
-  } catch (error) {
-    console.error('Error fetching job payment stats:', error)
-    return { error: 'Failed to fetch job payment statistics' }
+  if (jobId) {
+    tags.push(CACHE_TAGS.job(jobId))
   }
+  
+  await Promise.all(tags.map(tag => revalidateTag(tag)))
+}
+
+export async function invalidateJobCache(jobId: string) {
+  const { revalidateTag } = await import('next/cache')
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.job(jobId)),
+    revalidateTag(CACHE_TAGS.jobCollection),
+    revalidateTag(CACHE_TAGS.unpaidJobs),
+    revalidateTag(CACHE_TAGS.paymentStats),
+    revalidateTag(CACHE_TAGS.adminPaymentData)
+  ])
 } 

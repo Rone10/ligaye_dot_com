@@ -1,10 +1,10 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { 
   createCoupon as createCouponQuery,
   updateCoupon as updateCouponQuery,
-  deleteCoupon as deleteCouponQuery
+  deleteCoupon as deleteCouponQuery,
+  invalidateCouponCache
 } from './_queries'
 
 export async function createCoupon(formData: FormData) {
@@ -63,22 +63,16 @@ export async function createCoupon(formData: FormData) {
     console.log('[Server Action] createCouponQuery result:', result)
     
     if (result.success) {
-      // Try to revalidate but don't let it fail the whole operation
-      try {
-        revalidatePath('/admin/coupons')
-      } catch (revalidateError) {
-        console.error('Error revalidating path:', revalidateError)
-        // Continue anyway - the coupon was created successfully
-      }
+      // Cache invalidation is already handled in the query function
       console.log('[Server Action] Returning success')
       return { success: true, error: null }
     }
     
     console.log('[Server Action] Returning error:', result.error)
-    return { success: false, error: result.error || 'Failed to create couponssssssssss' }
+    return { success: false, error: result.error || 'Failed to create coupon' }
   } catch (error) {
     console.error('[Server Action] Caught error:', error)
-    return { success: false, error: 'Failed to create couponssssssssss222222' }
+    return { success: false, error: 'Failed to create coupon' }
   }
 }
 
@@ -97,8 +91,7 @@ export async function updateCoupon(
     const result = await updateCouponQuery(couponId, data)
     
     if (result.success) {
-      revalidatePath('/admin/coupons')
-      revalidatePath(`/admin/coupons/${couponId}`)
+      // Cache invalidation is already handled in the query function
       return { success: true }
     }
     
@@ -114,7 +107,7 @@ export async function deleteCoupon(couponId: string) {
     const result = await deleteCouponQuery(couponId)
     
     if (result.success) {
-      revalidatePath('/admin/coupons')
+      // Cache invalidation is already handled in the query function
       return { success: true }
     }
     
@@ -140,12 +133,7 @@ export async function editCoupon(couponId: string, formData: FormData) {
     const result = await updateCouponQuery(couponId, data)
     
     if (result.success) {
-      try {
-        revalidatePath('/admin/coupons')
-        revalidatePath(`/admin/coupons/${couponId}`)
-      } catch (revalidateError) {
-        console.error('Error revalidating path:', revalidateError)
-      }
+      // Cache invalidation is already handled in the query function
       return { success: true, error: null }
     }
     

@@ -1,7 +1,12 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getAdminUserProfileView, getAvailableSkills, getAllIndustries, getAllLocations } from "./_queries";
+import { 
+  getAdminUserProfileViewCached, 
+  getAvailableSkillsCached, 
+  getAllIndustriesCached, 
+  getAllLocationsCached 
+} from "./_queries";
 import { ProfileTabs } from "./_components/ProfileTabs";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +17,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const id = (await params).id;
-  const userData = await getAdminUserProfileView(id);
+  const userData = await getAdminUserProfileViewCached(id);
 
   if (!userData) {
     return {
@@ -30,17 +35,17 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
   // Get user ID from params
   const id = (await params).id;
   
-  // Fetch user profile data
-  const userData = await getAdminUserProfileView(id);
+  // Optimized parallel data fetching - fetch all required data simultaneously
+  const [userData, availableSkills, allIndustries, allLocations] = await Promise.all([
+    getAdminUserProfileViewCached(id),
+    getAvailableSkillsCached(),
+    getAllIndustriesCached(),
+    getAllLocationsCached()
+  ]);
   
   if (!userData) {
     notFound();
   }
-  
-  // Fetch available skills, industries, and locations for selections
-  const availableSkills = await getAvailableSkills();
-  const allIndustries = await getAllIndustries();
-  const allLocations = await getAllLocations();
   
   return (
     <div className="space-y-8">

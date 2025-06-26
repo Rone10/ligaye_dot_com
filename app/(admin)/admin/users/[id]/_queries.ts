@@ -11,6 +11,8 @@ import {
   locations 
 } from "@/lib/db/schema";
 import { eq, and, not, inArray } from "drizzle-orm";
+import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 import type { 
   Profile, 
   CandidateProfile, 
@@ -35,7 +37,23 @@ interface AdminUserProfileData {
   };
 }
 
-export async function getAdminUserProfileView(id: string): Promise<AdminUserProfileData | null> {
+// Cache tags for hierarchical invalidation
+const CACHE_TAGS = {
+  userProfile: (id: string) => `user-profile-${id}`,
+  userProfileDetail: (id: string) => `user-profile-detail-${id}`,
+  candidateProfile: (id: string) => `candidate-profile-${id}`,
+  employerProfile: (id: string) => `employer-profile-${id}`,
+  education: (candidateId: string) => `education-${candidateId}`,
+  experience: (candidateId: string) => `experience-${candidateId}`,
+  candidateSkills: (candidateId: string) => `candidate-skills-${candidateId}`,
+  skillsCollection: 'skills-collection',
+  industriesCollection: 'industries-collection',
+  locationsCollection: 'locations-collection',
+  adminUserData: 'admin-user-data'
+};
+
+// Internal function for admin user profile view without caching
+async function getAdminUserProfileViewInternal(id: string): Promise<AdminUserProfileData | null> {
   // Fetch the basic profile first
   const profileData = await db()
     .select()
@@ -48,7 +66,7 @@ export async function getAdminUserProfileView(id: string): Promise<AdminUserProf
   const profile = profileData[0];
   const roleSpecificData: AdminUserProfileData["roleSpecificData"] = {};
   
-  // Depending on role, fetch the appropriate related data
+  // Optimized role-specific data fetching with parallel queries
   if (profile.role === "candidate") {
     // Fetch candidate profile
     const candidateProfileData = await db()
@@ -59,55 +77,54 @@ export async function getAdminUserProfileView(id: string): Promise<AdminUserProf
     
     if (candidateProfileData.length) {
       roleSpecificData.candidateProfile = candidateProfileData[0];
+      const candidateProfileId = candidateProfileData[0].id;
       
-      // Fetch education records
-      const educationData = await db()
-        .select()
-        .from(education)
-        .where(
-          and(
-            eq(education.candidateProfileId, candidateProfileData[0].id),
-            not(eq(education.deleted, true))
+      // Wave 1: Parallel data fetching - all candidate-related data simultaneously
+      const [educationData, experienceData, candidateSkillsData] = await Promise.all([
+        db()
+          .select()
+          .from(education)
+          .where(
+            and(
+              eq(education.candidateProfileId, candidateProfileId),
+              not(eq(education.deleted, true))
+            )
           )
-        )
-        .orderBy(education.startDate);
+          .orderBy(education.startDate),
+        
+        db()
+          .select()
+          .from(experience)
+          .where(
+            and(
+              eq(experience.candidateProfileId, candidateProfileId),
+              not(eq(experience.deleted, true))
+            )
+          )
+          .orderBy(experience.startDate),
+        
+        db()
+          .select({
+            id: skills.id,
+            name: skills.name,
+            deleted: skills.deleted,
+            createdAt: skills.createdAt,
+            updatedAt: skills.updatedAt,
+            candidateSkillId: candidateSkills.id,
+          })
+          .from(candidateSkills)
+          .innerJoin(skills, eq(skills.id, candidateSkills.skillId))
+          .where(
+            and(
+              eq(candidateSkills.candidateProfileId, candidateProfileId),
+              not(eq(candidateSkills.deleted, true)),
+              not(eq(skills.deleted, true))
+            )
+          )
+      ]);
       
       roleSpecificData.education = educationData;
-      
-      // Fetch experience records
-      const experienceData = await db()
-        .select()
-        .from(experience)
-        .where(
-          and(
-            eq(experience.candidateProfileId, candidateProfileData[0].id),
-            not(eq(experience.deleted, true))
-          )
-        )
-        .orderBy(experience.startDate);
-      
       roleSpecificData.experience = experienceData;
-      
-      // Fetch skills
-      const candidateSkillsData = await db()
-        .select({
-          id: skills.id,
-          name: skills.name,
-          deleted: skills.deleted,
-          createdAt: skills.createdAt,
-          updatedAt: skills.updatedAt,
-          candidateSkillId: candidateSkills.id,
-        })
-        .from(candidateSkills)
-        .innerJoin(skills, eq(skills.id, candidateSkills.skillId))
-        .where(
-          and(
-            eq(candidateSkills.candidateProfileId, candidateProfileData[0].id),
-            not(eq(candidateSkills.deleted, true)),
-            not(eq(skills.deleted, true))
-          )
-        );
-      
       roleSpecificData.skills = candidateSkillsData;
     }
   } 
@@ -121,31 +138,33 @@ export async function getAdminUserProfileView(id: string): Promise<AdminUserProf
     
     if (employerProfileData.length) {
       roleSpecificData.employerProfile = employerProfileData[0];
+      const employer = employerProfileData[0];
       
-      // Fetch industry if applicable
-      if (employerProfileData[0].industryId) {
-        const industryData = await db()
-          .select()
-          .from(industries)
-          .where(eq(industries.id, employerProfileData[0].industryId))
-          .limit(1);
+      // Wave 1: Parallel data fetching - industry and location simultaneously
+      const [industryData, locationData] = await Promise.all([
+        employer.industryId 
+          ? db()
+              .select()
+              .from(industries)
+              .where(eq(industries.id, employer.industryId))
+              .limit(1)
+          : Promise.resolve([]),
         
-        if (industryData.length) {
-          roleSpecificData.industry = industryData[0];
-        }
+        employer.locationId 
+          ? db()
+              .select()
+              .from(locations)
+              .where(eq(locations.id, employer.locationId))
+              .limit(1)
+          : Promise.resolve([])
+      ]);
+      
+      if (industryData.length) {
+        roleSpecificData.industry = industryData[0];
       }
       
-      // Fetch location if applicable
-      if (employerProfileData[0].locationId) {
-        const locationData = await db()
-          .select()
-          .from(locations)
-          .where(eq(locations.id, employerProfileData[0].locationId))
-          .limit(1);
-        
-        if (locationData.length) {
-          roleSpecificData.location = locationData[0];
-        }
+      if (locationData.length) {
+        roleSpecificData.location = locationData[0];
       }
     }
   }
@@ -153,8 +172,8 @@ export async function getAdminUserProfileView(id: string): Promise<AdminUserProf
   return { profile, roleSpecificData };
 }
 
-// Get all available skills for selection
-export async function getAvailableSkills(): Promise<Skill[]> {
+// Internal functions for reference data without caching
+async function getAvailableSkillsInternal(): Promise<Skill[]> {
   return db()
     .select()
     .from(skills)
@@ -162,8 +181,7 @@ export async function getAvailableSkills(): Promise<Skill[]> {
     .orderBy(skills.name);
 }
 
-// Get all available industries for selection
-export async function getAllIndustries(): Promise<Industry[]> {
+async function getAllIndustriesInternal(): Promise<Industry[]> {
   return db()
     .select()
     .from(industries)
@@ -171,14 +189,78 @@ export async function getAllIndustries(): Promise<Industry[]> {
     .orderBy(industries.name);
 }
 
-// Get all available locations for selection
-export async function getAllLocations(): Promise<Location[]> {
+async function getAllLocationsInternal(): Promise<Location[]> {
   return db()
     .select()
     .from(locations)
     .where(not(eq(locations.deleted, true)))
     .orderBy(locations.region);
 }
+
+// Cached versions with on-demand invalidation
+export const getAdminUserProfileView = async (id: string): Promise<AdminUserProfileData | null> => {
+  const cachedFunction = unstable_cache(
+    async () => getAdminUserProfileViewInternal(id),
+    [`admin-user-profile-${id}`],
+    {
+      tags: [
+        CACHE_TAGS.userProfile(id),
+        CACHE_TAGS.userProfileDetail(id),
+        CACHE_TAGS.candidateProfile(id),
+        CACHE_TAGS.employerProfile(id),
+        CACHE_TAGS.adminUserData
+      ]
+      // NO revalidate property = indefinite cache until tag invalidation
+    }
+  );
+  
+  return cachedFunction();
+};
+
+export const getAvailableSkills = async (): Promise<Skill[]> => {
+  const cachedFunction = unstable_cache(
+    async () => getAvailableSkillsInternal(),
+    ['available-skills'],
+    {
+      tags: [CACHE_TAGS.skillsCollection]
+      // NO revalidate property = indefinite cache until tag invalidation
+    }
+  );
+  
+  return cachedFunction();
+};
+
+export const getAllIndustries = async (): Promise<Industry[]> => {
+  const cachedFunction = unstable_cache(
+    async () => getAllIndustriesInternal(),
+    ['all-industries'],
+    {
+      tags: [CACHE_TAGS.industriesCollection]
+      // NO revalidate property = indefinite cache until tag invalidation
+    }
+  );
+  
+  return cachedFunction();
+};
+
+export const getAllLocations = async (): Promise<Location[]> => {
+  const cachedFunction = unstable_cache(
+    async () => getAllLocationsInternal(),
+    ['all-locations'],
+    {
+      tags: [CACHE_TAGS.locationsCollection]
+      // NO revalidate property = indefinite cache until tag invalidation
+    }
+  );
+  
+  return cachedFunction();
+};
+
+// Request-level cache for repeated calls within same request
+export const getAdminUserProfileViewCached = cache(getAdminUserProfileView);
+export const getAvailableSkillsCached = cache(getAvailableSkills);
+export const getAllIndustriesCached = cache(getAllIndustries);
+export const getAllLocationsCached = cache(getAllLocations);
 
 // Update base profile
 export async function updateProfile(id: string, data: Partial<Profile>): Promise<Profile> {
@@ -192,6 +274,9 @@ export async function updateProfile(id: string, data: Partial<Profile>): Promise
     .from(profiles)
     .where(eq(profiles.id, id))
     .limit(1);
+  
+  // ON-DEMAND cache invalidation
+  await invalidateUserProfileCache(id);
   
   return updated[0];
 }
@@ -220,6 +305,9 @@ export async function updateCandidateProfile(profileId: string, data: Partial<Ca
     .where(eq(candidateProfiles.id, candidateProfileData[0].id))
     .limit(1);
   
+  // ON-DEMAND cache invalidation
+  await invalidateUserProfileCache(profileId);
+  
   return updated[0];
 }
 
@@ -247,6 +335,9 @@ export async function updateEmployerProfile(profileId: string, data: Partial<Emp
     .where(eq(employerProfiles.id, employerProfileData[0].id))
     .limit(1);
   
+  // ON-DEMAND cache invalidation
+  await invalidateUserProfileCache(profileId);
+  
   return updated[0];
 }
 
@@ -262,6 +353,17 @@ export async function addEducationRecord(candidateProfileId: string, data: Omit<
       updatedAt: new Date()
     })
     .returning();
+  
+  // Find the profile ID for cache invalidation
+  const candidateProfile = await db()
+    .select({ profileId: candidateProfiles.profileId })
+    .from(candidateProfiles)
+    .where(eq(candidateProfiles.id, candidateProfileId))
+    .limit(1);
+  
+  if (candidateProfile.length) {
+    await invalidateUserProfileCache(candidateProfile[0].profileId);
+  }
   
   return newRecord;
 }
@@ -279,16 +381,47 @@ export async function updateEducationRecord(id: string, data: Partial<Education>
     .where(eq(education.id, id))
     .limit(1);
   
+  // Find the profile ID for cache invalidation
+  const candidateProfile = await db()
+    .select({ profileId: candidateProfiles.profileId })
+    .from(candidateProfiles)
+    .where(eq(candidateProfiles.id, updated[0].candidateProfileId))
+    .limit(1);
+  
+  if (candidateProfile.length) {
+    await invalidateUserProfileCache(candidateProfile[0].profileId);
+  }
+  
   return updated[0];
 }
 
 // Delete education record (soft delete)
 export async function deleteEducationRecord(id: string): Promise<{ success: boolean }> {
   try {
+    // Get the record first for cache invalidation
+    const record = await db()
+      .select()
+      .from(education)
+      .where(eq(education.id, id))
+      .limit(1);
+    
     await db()
       .update(education)
       .set({ deleted: true, updatedAt: new Date() })
       .where(eq(education.id, id));
+    
+    // Find the profile ID for cache invalidation
+    if (record.length) {
+      const candidateProfile = await db()
+        .select({ profileId: candidateProfiles.profileId })
+        .from(candidateProfiles)
+        .where(eq(candidateProfiles.id, record[0].candidateProfileId))
+        .limit(1);
+      
+      if (candidateProfile.length) {
+        await invalidateUserProfileCache(candidateProfile[0].profileId);
+      }
+    }
     
     return { success: true };
   } catch (error) {
@@ -310,6 +443,17 @@ export async function addExperienceRecord(candidateProfileId: string, data: Omit
     })
     .returning();
   
+  // Find the profile ID for cache invalidation
+  const candidateProfile = await db()
+    .select({ profileId: candidateProfiles.profileId })
+    .from(candidateProfiles)
+    .where(eq(candidateProfiles.id, candidateProfileId))
+    .limit(1);
+  
+  if (candidateProfile.length) {
+    await invalidateUserProfileCache(candidateProfile[0].profileId);
+  }
+  
   return newRecord;
 }
 
@@ -325,15 +469,46 @@ export async function updateExperienceRecord(id: string, data: Partial<Experienc
     .where(eq(experience.id, id))
     .limit(1);
   
+  // Find the profile ID for cache invalidation
+  const candidateProfile = await db()
+    .select({ profileId: candidateProfiles.profileId })
+    .from(candidateProfiles)
+    .where(eq(candidateProfiles.id, updated[0].candidateProfileId))
+    .limit(1);
+  
+  if (candidateProfile.length) {
+    await invalidateUserProfileCache(candidateProfile[0].profileId);
+  }
+  
   return updated[0];
 }
 
 export async function deleteExperienceRecord(id: string): Promise<{ success: boolean }> {
   try {
+    // Get the record first for cache invalidation
+    const record = await db()
+      .select()
+      .from(experience)
+      .where(eq(experience.id, id))
+      .limit(1);
+    
     await db()
       .update(experience)
       .set({ deleted: true, updatedAt: new Date() })
       .where(eq(experience.id, id));
+    
+    // Find the profile ID for cache invalidation
+    if (record.length) {
+      const candidateProfile = await db()
+        .select({ profileId: candidateProfiles.profileId })
+        .from(candidateProfiles)
+        .where(eq(candidateProfiles.id, record[0].candidateProfileId))
+        .limit(1);
+      
+      if (candidateProfile.length) {
+        await invalidateUserProfileCache(candidateProfile[0].profileId);
+      }
+    }
     
     return { success: true };
   } catch (error) {
@@ -369,44 +544,69 @@ export async function updateCandidateSkills(candidateProfileId: string, skillIds
       .filter(record => skillIds.includes(record.skillId) && record.deleted)
       .map(record => record.id);
     
+    // Perform all operations in parallel where possible
+    const operations = [];
+    
     // Add new skills
     if (skillsToAdd.length > 0) {
-      await db()
-        .insert(candidateSkills)
-        .values(
-          skillsToAdd.map(skillId => ({
-            candidateProfileId,
-            skillId,
-            deleted: false,
-            createdAt: new Date(),
-          }))
-        );
+      operations.push(
+        db()
+          .insert(candidateSkills)
+          .values(
+            skillsToAdd.map(skillId => ({
+              candidateProfileId,
+              skillId,
+              deleted: false,
+              createdAt: new Date(),
+            }))
+          )
+      );
     }
     
     // Mark skills as deleted
     if (skillsToDelete.length > 0) {
-      await db()
-        .update(candidateSkills)
-        .set({ deleted: true })
-        .where(
-          and(
-            eq(candidateSkills.candidateProfileId, candidateProfileId),
-            inArray(candidateSkills.id, skillsToDelete)
+      operations.push(
+        db()
+          .update(candidateSkills)
+          .set({ deleted: true })
+          .where(
+            and(
+              eq(candidateSkills.candidateProfileId, candidateProfileId),
+              inArray(candidateSkills.id, skillsToDelete)
+            )
           )
-        );
+      );
     }
     
     // Restore deleted skills
     if (skillsToRestore.length > 0) {
-      await db()
-        .update(candidateSkills)
-        .set({ deleted: false })
-        .where(
-          and(
-            eq(candidateSkills.candidateProfileId, candidateProfileId),
-            inArray(candidateSkills.id, skillsToRestore)
+      operations.push(
+        db()
+          .update(candidateSkills)
+          .set({ deleted: false })
+          .where(
+            and(
+              eq(candidateSkills.candidateProfileId, candidateProfileId),
+              inArray(candidateSkills.id, skillsToRestore)
+            )
           )
-        );
+      );
+    }
+    
+    // Execute all operations in parallel
+    if (operations.length > 0) {
+      await Promise.all(operations);
+    }
+    
+    // Find the profile ID for cache invalidation
+    const candidateProfile = await db()
+      .select({ profileId: candidateProfiles.profileId })
+      .from(candidateProfiles)
+      .where(eq(candidateProfiles.id, candidateProfileId))
+      .limit(1);
+    
+    if (candidateProfile.length) {
+      await invalidateUserProfileCache(candidateProfile[0].profileId);
     }
     
     return { success: true };
@@ -414,4 +614,27 @@ export async function updateCandidateSkills(candidateProfileId: string, skillIds
     console.error("Error updating candidate skills:", error);
     return { success: false };
   }
+}
+
+// Cache invalidation helpers - call these when data changes
+export async function invalidateUserProfileCache(profileId: string) {
+  const { revalidateTag } = await import('next/cache');
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.userProfile(profileId)),
+    revalidateTag(CACHE_TAGS.userProfileDetail(profileId)),
+    revalidateTag(CACHE_TAGS.candidateProfile(profileId)),
+    revalidateTag(CACHE_TAGS.employerProfile(profileId)),
+    revalidateTag(CACHE_TAGS.adminUserData)
+  ]);
+}
+
+export async function invalidateReferenceDataCache() {
+  const { revalidateTag } = await import('next/cache');
+  
+  await Promise.all([
+    revalidateTag(CACHE_TAGS.skillsCollection),
+    revalidateTag(CACHE_TAGS.industriesCollection),
+    revalidateTag(CACHE_TAGS.locationsCollection)
+  ]);
 } 
