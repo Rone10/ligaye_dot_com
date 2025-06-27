@@ -10,6 +10,7 @@ import {
 import { db } from '@/lib/db'
 import { jobs } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
+import { JOB_DETAIL_CACHE_TAGS } from './_utils/cache-tags'
 
 // Update job status (e.g., mark as filled or expired)
 export async function updateJobStatus(jobId: string, status: 'ACTIVE' | 'EXPIRED' | 'FILLED' | 'DRAFT' | 'DELETED') {
@@ -43,13 +44,22 @@ export async function updateJobStatus(jobId: string, status: 'ACTIVE' | 'EXPIRED
       })
       .where(eq(jobs.id, jobId))
     
-    // Revalidate paths
+    // Invalidate specific cache tags
+    await Promise.all([
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.job(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.jobDetail(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.employerJobs(employerProfile.id)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.allJobs),
+      // Also invalidate application-related caches if job is marked as filled or deleted
+      ...(status === 'FILLED' || status === 'DELETED' ? [
+        revalidateTag(JOB_DETAIL_CACHE_TAGS.jobApplications(jobId)),
+        revalidateTag(JOB_DETAIL_CACHE_TAGS.jobApplicationStats(jobId))
+      ] : [])
+    ])
+    
+    // Also revalidate paths for immediate UI update
     revalidatePath(`/employer/jobs/${jobId}`)
     revalidatePath('/employer/jobs')
-    
-    // Revalidate cache tags
-    revalidateTag('job-detail')
-    revalidateTag('job-applications')
     
     return { success: true }
   } catch (error) {

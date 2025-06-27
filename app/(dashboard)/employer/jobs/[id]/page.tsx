@@ -33,30 +33,30 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
     redirect('/employer/profile')
   }
   
-  // Get the job details
-  const jobData = await getJobById(jobId)
+  // First, fetch job data and check ownership in parallel
+  const [jobData, isOwner] = await Promise.all([
+    getJobById(jobId),
+    checkJobOwnership(jobId, employerProfile.id)
+  ])
   
   if (!jobData) {
     redirect('/employer/jobs?error=job-not-found')
   }
   
-  // Extract job and location from joined result
-  const { job, location } = jobData
-  
-  // Check if the job belongs to this employer
-  const isOwner = await checkJobOwnership(jobId, employerProfile.id)
-  
   if (!isOwner) {
     redirect('/employer/jobs?error=unauthorized')
   }
   
-  // Fetch job skills and industries
-  const jobSkills = await getJobSkills(jobId)
-  const jobIndustries = await getJobIndustries(jobId)
+  // Extract job and location from joined result
+  const { job, location } = jobData
   
-  // Fetch application stats and recent applications
-  const applicationStats = await getApplicationStats(jobId)
-  const recentApplications = await getRecentApplications(jobId)
+  // Fetch all related data in parallel
+  const [jobSkills, jobIndustries, applicationStats, recentApplications] = await Promise.all([
+    getJobSkills(jobId),
+    getJobIndustries(jobId),
+    getApplicationStats(jobId),
+    getRecentApplications(jobId)
+  ])
   
   return (
     <div className="container max-w-7xl py-8 mx-auto space-y-8">

@@ -17,9 +17,13 @@ import { eq, and, isNull, not, count, desc } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import type { Job } from '@/lib/db/schema'
 import { unstable_cache } from 'next/cache'
+import { cache } from 'react'
+import { JOB_DETAIL_CACHE_TAGS } from './_utils/cache-tags'
 
-// Get employer profile for a user
-export async function getEmployerProfile(userId: string) {
+/**
+ * Helper to get employer profile - cached per request
+ */
+const getEmployerProfileCached = cache(async (userId: string) => {
   try {
     const result = await db()
       .select()
@@ -40,6 +44,11 @@ export async function getEmployerProfile(userId: string) {
     console.error('Error getting employer profile:', error)
     return null
   }
+})
+
+// Get employer profile for a user
+export async function getEmployerProfile(userId: string) {
+  return getEmployerProfileCached(userId)
 }
 
 /**
@@ -71,23 +80,22 @@ export async function getJobByIdData(jobId: string) {
 }
 
 /**
- * Cached version of job data
- */
-const getJobByIdCached = unstable_cache(
-  async (jobId: string) => {
-    return getJobByIdData(jobId)
-  },
-  ['job-detail'],
-  {
-    tags: ['job-detail']
-  }
-)
-
-/**
- * Main entry point for getting job data
+ * Main entry point for getting job data with on-demand caching
  */
 export async function getJobById(jobId: string) {
-  return getJobByIdCached(jobId)
+  const cachedFunction = unstable_cache(
+    async () => getJobByIdData(jobId),
+    [`job-detail-${jobId}`],
+    {
+      tags: [
+        JOB_DETAIL_CACHE_TAGS.job(jobId),
+        JOB_DETAIL_CACHE_TAGS.jobDetail(jobId),
+        JOB_DETAIL_CACHE_TAGS.jobsDetail
+      ]
+    }
+  )
+  
+  return cachedFunction()
 }
 
 // Check if job belongs to employer
@@ -136,23 +144,21 @@ export async function getJobSkillsData(jobId: string) {
 }
 
 /**
- * Cached version of job skills
- */
-const getJobSkillsCached = unstable_cache(
-  async (jobId: string) => {
-    return getJobSkillsData(jobId)
-  },
-  ['job-skills'],
-  {
-    tags: ['job-detail']
-  }
-)
-
-/**
- * Main entry point for getting job skills
+ * Main entry point for getting job skills with on-demand caching
  */
 export async function getJobSkills(jobId: string) {
-  return getJobSkillsCached(jobId)
+  const cachedFunction = unstable_cache(
+    async () => getJobSkillsData(jobId),
+    [`job-skills-${jobId}`],
+    {
+      tags: [
+        JOB_DETAIL_CACHE_TAGS.jobSkills(jobId),
+        JOB_DETAIL_CACHE_TAGS.job(jobId)
+      ]
+    }
+  )
+  
+  return cachedFunction()
 }
 
 /**
@@ -180,23 +186,21 @@ export async function getJobIndustriesData(jobId: string) {
 }
 
 /**
- * Cached version of job industries
- */
-const getJobIndustriesCached = unstable_cache(
-  async (jobId: string) => {
-    return getJobIndustriesData(jobId)
-  },
-  ['job-industries'],
-  {
-    tags: ['job-detail']
-  }
-)
-
-/**
- * Main entry point for getting job industries
+ * Main entry point for getting job industries with on-demand caching
  */
 export async function getJobIndustries(jobId: string) {
-  return getJobIndustriesCached(jobId)
+  const cachedFunction = unstable_cache(
+    async () => getJobIndustriesData(jobId),
+    [`job-industries-${jobId}`],
+    {
+      tags: [
+        JOB_DETAIL_CACHE_TAGS.jobIndustries(jobId),
+        JOB_DETAIL_CACHE_TAGS.job(jobId)
+      ]
+    }
+  )
+  
+  return cachedFunction()
 }
 
 /**
@@ -233,23 +237,22 @@ export async function getApplicationStatsData(jobId: string) {
 }
 
 /**
- * Cached version of application statistics
- */
-const getApplicationStatsCached = unstable_cache(
-  async (jobId: string) => {
-    return getApplicationStatsData(jobId)
-  },
-  ['application-stats'],
-  {
-    tags: ['job-applications']
-  }
-)
-
-/**
- * Main entry point for getting application statistics
+ * Main entry point for getting application statistics with on-demand caching
  */
 export async function getApplicationStats(jobId: string) {
-  return getApplicationStatsCached(jobId)
+  const cachedFunction = unstable_cache(
+    async () => getApplicationStatsData(jobId),
+    [`application-stats-${jobId}`],
+    {
+      tags: [
+        JOB_DETAIL_CACHE_TAGS.jobApplicationStats(jobId),
+        JOB_DETAIL_CACHE_TAGS.jobApplications(jobId),
+        JOB_DETAIL_CACHE_TAGS.allApplications
+      ]
+    }
+  )
+  
+  return cachedFunction()
 }
 
 /**
@@ -288,21 +291,20 @@ export async function getRecentApplicationsData(jobId: string, limit = 5) {
 }
 
 /**
- * Cached version of recent applications
- */
-const getRecentApplicationsCached = unstable_cache(
-  async (jobId: string, limit = 5) => {
-    return getRecentApplicationsData(jobId, limit)
-  },
-  ['recent-applications'],
-  {
-    tags: ['job-applications']
-  }
-)
-
-/**
- * Main entry point for getting recent applications
+ * Main entry point for getting recent applications with on-demand caching
  */
 export async function getRecentApplications(jobId: string, limit = 5) {
-  return getRecentApplicationsCached(jobId, limit)
+  const cachedFunction = unstable_cache(
+    async () => getRecentApplicationsData(jobId, limit),
+    [`recent-applications-${jobId}-${limit}`],
+    {
+      tags: [
+        JOB_DETAIL_CACHE_TAGS.jobRecentApplications(jobId),
+        JOB_DETAIL_CACHE_TAGS.jobApplications(jobId),
+        JOB_DETAIL_CACHE_TAGS.allApplications
+      ]
+    }
+  )
+  
+  return cachedFunction()
 } 

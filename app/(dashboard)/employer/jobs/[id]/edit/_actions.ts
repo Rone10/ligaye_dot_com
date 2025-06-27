@@ -10,6 +10,7 @@ import {
   checkJobOwnership
 } from './_queries'
 import { z } from 'zod'
+import { JOB_DETAIL_CACHE_TAGS } from '../_utils/cache-tags'
 
 export async function updateJobPosting(jobId: string, formData: z.infer<typeof jobFormSchema>) {
   try {
@@ -54,13 +55,19 @@ export async function updateJobPosting(jobId: string, formData: z.infer<typeof j
       validatedData.industryIds
     )
     
-    // Revalidate the paths
+    // Invalidate specific cache tags
+    await Promise.all([
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.job(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.jobDetail(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.jobSkills(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.jobIndustries(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.employerJobs(employerProfile.id)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.allJobs)
+    ])
+    
+    // Also revalidate paths for immediate UI update
     revalidatePath(`/employer/jobs/${jobId}`)
     revalidatePath('/employer/jobs')
-    
-    // Revalidate cache tags
-    revalidateTag('job-detail')
-    revalidateTag('job-applications')
     
     // Return success
     return { success: true, jobId }
