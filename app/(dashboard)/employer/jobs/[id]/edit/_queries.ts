@@ -13,9 +13,14 @@ import {
 } from '@/lib/db/schema'
 import { eq, and, inArray } from 'drizzle-orm'
 import type { NewJob, NewJobSkill, NewJobIndustry, Job } from '@/lib/db/schema'
+import { unstable_cache } from 'next/cache'
+import { cache } from 'react'
+import { JOB_DETAIL_CACHE_TAGS } from '../_utils/cache-tags'
 
-// Get employer profile for a user
-export async function getEmployerProfile(userId: string) {
+/**
+ * Helper to get employer profile - cached per request
+ */
+const getEmployerProfileCached = cache(async (userId: string) => {
   try {
     const result = await db()
       .select()
@@ -36,10 +41,15 @@ export async function getEmployerProfile(userId: string) {
     console.error('Error getting employer profile:', error)
     return null
   }
+})
+
+// Get employer profile for a user
+export async function getEmployerProfile(userId: string) {
+  return getEmployerProfileCached(userId)
 }
 
-// Get job by ID
-export async function getJobById(jobId: string) {
+// Internal function to get job by ID
+async function getJobByIdData(jobId: string) {
   try {
     const result = await db()
       .select()
@@ -52,6 +62,22 @@ export async function getJobById(jobId: string) {
     console.error('Error getting job:', error)
     return null
   }
+}
+
+// Get job by ID with caching
+export async function getJobById(jobId: string) {
+  const cachedFunction = unstable_cache(
+    async () => getJobByIdData(jobId),
+    [`job-edit-${jobId}`],
+    {
+      tags: [
+        JOB_DETAIL_CACHE_TAGS.job(jobId),
+        JOB_DETAIL_CACHE_TAGS.jobDetail(jobId)
+      ]
+    }
+  )
+  
+  return cachedFunction()
 }
 
 // Check if job belongs to employer
@@ -75,8 +101,8 @@ export async function checkJobOwnership(jobId: string, employerProfileId: string
   }
 }
 
-// Get job skills
-export async function getJobSkills(jobId: string) {
+// Internal function to get job skills
+async function getJobSkillsData(jobId: string) {
   try {
     const result = await db()
       .select({
@@ -97,8 +123,24 @@ export async function getJobSkills(jobId: string) {
   }
 }
 
-// Get job industries
-export async function getJobIndustries(jobId: string) {
+// Get job skills with caching
+export async function getJobSkills(jobId: string) {
+  const cachedFunction = unstable_cache(
+    async () => getJobSkillsData(jobId),
+    [`job-skills-edit-${jobId}`],
+    {
+      tags: [
+        JOB_DETAIL_CACHE_TAGS.jobSkills(jobId),
+        JOB_DETAIL_CACHE_TAGS.job(jobId)
+      ]
+    }
+  )
+  
+  return cachedFunction()
+}
+
+// Internal function to get job industries
+async function getJobIndustriesData(jobId: string) {
   try {
     const result = await db()
       .select({
@@ -119,8 +161,24 @@ export async function getJobIndustries(jobId: string) {
   }
 }
 
-// Get all locations from database
-export async function getAllLocations() {
+// Get job industries with caching
+export async function getJobIndustries(jobId: string) {
+  const cachedFunction = unstable_cache(
+    async () => getJobIndustriesData(jobId),
+    [`job-industries-edit-${jobId}`],
+    {
+      tags: [
+        JOB_DETAIL_CACHE_TAGS.jobIndustries(jobId),
+        JOB_DETAIL_CACHE_TAGS.job(jobId)
+      ]
+    }
+  )
+  
+  return cachedFunction()
+}
+
+// Internal function to get all locations
+async function getAllLocationsData() {
   try {
     return await db()
       .select({
@@ -138,8 +196,21 @@ export async function getAllLocations() {
   }
 }
 
-// Get all skills from database
-export async function getAllSkills() {
+// Get all locations with caching
+export async function getAllLocations() {
+  const cachedFunction = unstable_cache(
+    async () => getAllLocationsData(),
+    ['all-locations'],
+    {
+      tags: ['locations-collection']
+    }
+  )
+  
+  return cachedFunction()
+}
+
+// Internal function to get all skills
+async function getAllSkillsData() {
   try {
     return await db()
       .select({
@@ -155,8 +226,21 @@ export async function getAllSkills() {
   }
 }
 
-// Get all industries from database
-export async function getAllIndustries() {
+// Get all skills with caching
+export async function getAllSkills() {
+  const cachedFunction = unstable_cache(
+    async () => getAllSkillsData(),
+    ['all-skills'],
+    {
+      tags: ['skills-collection']
+    }
+  )
+  
+  return cachedFunction()
+}
+
+// Internal function to get all industries
+async function getAllIndustriesData() {
   try {
     return await db()
       .select({
@@ -170,6 +254,19 @@ export async function getAllIndustries() {
     console.error('Error fetching industries:', error)
     return []
   }
+}
+
+// Get all industries with caching
+export async function getAllIndustries() {
+  const cachedFunction = unstable_cache(
+    async () => getAllIndustriesData(),
+    ['all-industries'],
+    {
+      tags: ['industries-collection']
+    }
+  )
+  
+  return cachedFunction()
 }
 
 // Update job with related skills and industries
@@ -301,9 +398,8 @@ export async function updateJob(
   }
 }
 
-// Get location by ID for displaying in forms
-export async function getLocationById(locationId: string) {
-  'use server'
+// Internal function to get location by ID
+async function getLocationByIdData(locationId: string) {
   try {
     const result = await db()
       .select({
@@ -324,4 +420,17 @@ export async function getLocationById(locationId: string) {
     console.error('Error getting location by ID:', error)
     return null
   }
+}
+
+// Get location by ID with caching
+export async function getLocationById(locationId: string) {
+  const cachedFunction = unstable_cache(
+    async () => getLocationByIdData(locationId),
+    [`location-${locationId}`],
+    {
+      tags: [`location-${locationId}`, 'locations-collection']
+    }
+  )
+  
+  return cachedFunction()
 } 

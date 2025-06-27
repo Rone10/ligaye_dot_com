@@ -27,23 +27,25 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
     redirect('/employer/profile')
   }
   
-  // Get the job to edit
-  const job = await getJobById(jobId)
+  // First wave: Get job and check ownership in parallel
+  const [job, isOwner] = await Promise.all([
+    getJobById(jobId),
+    checkJobOwnership(jobId, employerProfile.id)
+  ])
   
   if (!job) {
     redirect('/employer/jobs?error=job-not-found')
   }
   
-  // Check if the job belongs to this employer
-  const isOwner = await checkJobOwnership(jobId, employerProfile.id)
-  
   if (!isOwner) {
     redirect('/employer/jobs?error=unauthorized')
   }
   
-  // Fetch job skills and industries
-  const jobSkills = await getJobSkills(jobId)
-  const jobIndustries = await getJobIndustries(jobId)
+  // Second wave: Fetch job skills and industries in parallel
+  const [jobSkills, jobIndustries] = await Promise.all([
+    getJobSkills(jobId),
+    getJobIndustries(jobId)
+  ])
   
   return (
     <div className="container max-w-4xl py-10 mx-auto">
