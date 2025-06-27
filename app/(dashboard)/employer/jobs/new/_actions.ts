@@ -18,6 +18,7 @@ import { eq, and } from 'drizzle-orm'
 import { createStripeCheckoutSession } from '@/lib/stripe/stripe-actions'
 import { recordCouponRedemption } from './_queries/coupon'
 import { validateCouponForJobPosting as validateCouponInternal } from './_queries/coupon'
+import { getActivePricing, calculateTotalPrice, getDefaultPricing } from '@/lib/utils/pricing'
 
 // Server action for coupon validation (to be used by client components)
 export async function validateCoupon(couponCode: string, originalAmount: number) {
@@ -134,8 +135,12 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
     
     console.log('[Action Debug] New job created with ID:', newJob.id);
     
+    // Get active pricing configuration
+    const pricingConfig = await getActivePricing()
+    const pricePerMonth = pricingConfig?.pricePerMonth || getDefaultPricing().pricePerMonth
+    
     // Calculate payment amount with coupon
-    const baseAmount = validatedData.jobDuration * 5000 // $50 in cents per month
+    const baseAmount = calculateTotalPrice(pricePerMonth, validatedData.jobDuration)
     const paymentAmount = coupon ? coupon.finalAmount : baseAmount
     const discountAmount = coupon ? coupon.discountAmount : 0
     
@@ -189,7 +194,7 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
         jobId: newJob.id,
         employerProfileId: result.employerProfileId,
         amount: 0, // Payment amount is 0 after coupon
-        currency: 'USD',
+        currency: 'GMD',
         method: validatedData.paymentMethod, // Keep the original payment method choice
         status: 'completed', // Mark as completed since coupon covers full amount
         transactionId: `COUPON_${coupon.code}_${Date.now()}`,
@@ -240,7 +245,7 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
           jobId: newJob.id,
           employerProfileId: result.employerProfileId,
           paymentAmount,
-          currency: 'USD',
+          currency: 'GMD',
           jobTitle: validatedData.title,
           jobDuration: validatedData.jobDuration,
           userId: user.id,
@@ -305,7 +310,7 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
         jobId: newJob.id,
         employerProfileId: result.employerProfileId,
         amount: paymentAmount,
-        currency: 'USD',
+        currency: 'GMD',
         method: 'cash',
         status: paymentStatus,
         transactionId: paymentAmount === 0 ? `COUPON_${coupon?.code}_${Date.now()}` : null,

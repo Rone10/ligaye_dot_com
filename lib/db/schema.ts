@@ -672,6 +672,22 @@ export const couponRedemptions = pgTable('coupon_redemptions', {
   };
 });
 
+// Pricing Configuration Table
+export const pricingConfig = pgTable('pricing_config', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  pricePerMonth: integer('price_per_month').notNull(), // Price in smallest currency unit (bututs for GMD)
+  currency: text('currency').notNull().default('GMD'),
+  active: boolean('active').default(true).notNull(),
+  createdBy: uuid('created_by').notNull().references(() => profiles.id, { onDelete: 'restrict' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    activeIdx: index('pricing_config_active_idx').on(table.active),
+    createdAtIdx: index('pricing_config_created_at_idx').on(table.createdAt),
+  };
+});
+
 
 // --- Relations ---
 
@@ -886,6 +902,13 @@ export const couponRedemptionsRelations = relations(couponRedemptions, ({ one })
   }),
 }));
 
+export const pricingConfigRelations = relations(pricingConfig, ({ one }) => ({
+  createdBy: one(profiles, {
+    fields: [pricingConfig.createdBy],
+    references: [profiles.id],
+  }),
+}));
+
 
 export const blogPosts = pgTable('blog_posts', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -1018,4 +1041,8 @@ export type NewCoupon = InferInsertModel<typeof coupons>;
 // Coupon Redemption Types
 export type CouponRedemption = InferSelectModel<typeof couponRedemptions>;
 export type NewCouponRedemption = InferInsertModel<typeof couponRedemptions>;
+
+// Pricing Config Types
+export type PricingConfig = InferSelectModel<typeof pricingConfig>;
+export type NewPricingConfig = InferInsertModel<typeof pricingConfig>;
 

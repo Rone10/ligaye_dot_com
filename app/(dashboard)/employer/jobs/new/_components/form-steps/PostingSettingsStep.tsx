@@ -1,7 +1,11 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
+import { formatPrice, calculateTotalPrice } from '@/lib/utils/pricing-client'
+import type { PricingConfig } from '@/lib/db/schema'
+import { fetchActivePricing } from '../../_actions/pricing'
 import { 
   FormField, 
   FormItem, 
@@ -33,7 +37,6 @@ import { JobFormValues } from '../../_utils/validation'
 import { applicationMethodEnum } from '@/lib/db/schema'
 import { cn } from '@/lib/utils'
 import { useCouponValidation } from '../../_hooks/useCouponValidation'
-import { useEffect, useState } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface PostingSettingsStepProps {
@@ -48,10 +51,29 @@ export default function PostingSettingsStep({ form, onPrevious, isSubmitting, on
   const [couponCode, setCouponCode] = useState('')
   const [showCouponField, setShowCouponField] = useState(false)
   const [hasValidatedCoupon, setHasValidatedCoupon] = useState(false)
+  const [pricingConfig, setPricingConfig] = useState<PricingConfig | null>(null)
+  const [loadingPricing, setLoadingPricing] = useState(true)
   const jobDuration = form.watch('jobDuration') || 1
   
-  // Calculate base price (50 USD per month in cents)
-  const basePrice = jobDuration * 5000
+  // Fetch pricing configuration
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        const pricing = await fetchActivePricing()
+        setPricingConfig(pricing)
+      } catch (error) {
+        console.error('Error fetching pricing:', error)
+      } finally {
+        setLoadingPricing(false)
+      }
+    }
+    fetchPricing()
+  }, [])
+  
+  // Calculate base price using dynamic pricing or fallback
+  const basePrice = pricingConfig 
+    ? calculateTotalPrice(pricingConfig.pricePerMonth, jobDuration)
+    : jobDuration * 350000 // Fallback to 3,500 GMD per month in bututs
   const finalPrice = validationResult?.valid ? validationResult.finalAmount || 0 : basePrice
   
   const handleCouponValidation = async () => {
@@ -419,18 +441,18 @@ export default function PostingSettingsStep({ form, onPrevious, isSubmitting, on
         </div>
         <div className="flex justify-between items-center">
           <span className="text-[#9aa3bc]">Base Price:</span>
-          <span className="font-medium text-[#1a1e2d]">${(basePrice / 100).toFixed(2)}</span>
+          <span className="font-medium text-[#1a1e2d]">{formatPrice(basePrice)}</span>
         </div>
         {validationResult?.valid && (
           <>
             <div className="flex justify-between items-center text-[#05ce91]">
               <span>Discount:</span>
-              <span className="font-medium">-${(validationResult.discountAmount! / 100).toFixed(2)}</span>
+              <span className="font-medium">-{formatPrice(validationResult.discountAmount!)}</span>
             </div>
             <div className="border-t pt-2 flex justify-between items-center">
               <span className="font-semibold text-[#1a1e2d]">Total:</span>
               <span className="font-bold text-lg text-[#1a1e2d]">
-                ${(finalPrice / 100).toFixed(2)}
+                {formatPrice(finalPrice)}
               </span>
             </div>
           </>
@@ -438,7 +460,7 @@ export default function PostingSettingsStep({ form, onPrevious, isSubmitting, on
         {!validationResult?.valid && (
           <div className="border-t pt-2 flex justify-between items-center">
             <span className="font-semibold text-[#1a1e2d]">Total:</span>
-            <span className="font-bold text-lg text-[#1a1e2d]">${(basePrice / 100).toFixed(2)}</span>
+            <span className="font-bold text-lg text-[#1a1e2d]">{formatPrice(basePrice)}</span>
           </div>
         )}
       </div>

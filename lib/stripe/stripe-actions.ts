@@ -25,7 +25,7 @@ export async function createStripeCheckoutSession({
   jobId,
   employerProfileId,
   paymentAmount,
-  currency = 'USD',
+  currency = 'GMD',
   jobTitle,
   jobDuration,
   userId,

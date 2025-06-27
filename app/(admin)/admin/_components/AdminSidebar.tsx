@@ -36,6 +36,7 @@ const adminNavItems: MainNavItem[] = [
   { href: "/admin/coupons", label: "Coupons", iconName: "Tag" },
   { href: "/admin/blog", label: "Blog", iconName: "FileText" },
   { href: "/admin/email-send", label: "Email Send", iconName: "Mail" },
+  { href: "/admin/settings", label: "Settings", iconName: "Settings" },
 ];
 
 interface SidebarHeaderProps {

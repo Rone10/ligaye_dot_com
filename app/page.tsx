@@ -340,6 +340,73 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Mobile App Coming Soon Section */}
+      <section className="py-12 px-4 md:px-8 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto">
+          <div className="glass-card p-8 md:p-12 text-center relative">
+            {/* Decorative elements */}
+            <div className="absolute -top-8 -right-8 w-24 h-24 bg-primary-blue/5 rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-secondary-green/5 rounded-full blur-xl"></div>
+            
+            <div className="relative z-10">
+              <div className="flex justify-center mb-6">
+                <div className="bg-gradient-to-r from-primary-blue to-secondary-green p-4 rounded-2xl shadow-level-2">
+                  <Image
+                    src="/apple-android.svg"
+                    alt="Mobile Apps for iOS and Android"
+                    width={80}
+                    height={80}
+                    className="filter brightness-0 invert"
+                  />
+                </div>
+              </div>
+              
+              <h2 className="text-2xl md:text-3xl font-bold text-theme-dark mb-4">
+                <span className="text-primary-blue">Mobile App</span> Coming Soon!
+              </h2>
+              
+              <p className="text-lg text-theme-gray-dark max-w-2xl mx-auto mb-6 leading-relaxed">
+                Take your job search and hiring on the go! Our mobile app for 
+                <span className="font-semibold text-theme-dark"> Android </span> and 
+                <span className="font-semibold text-theme-dark"> iOS </span> 
+                will bring Ligaye's powerful features right to your pocket.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="flex flex-col items-center">
+                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center mb-3">
+                    <Search className="text-primary-blue h-6 w-6" />
+                  </div>
+                  <h4 className="font-semibold text-theme-dark mb-1">Job Search</h4>
+                  <p className="text-sm text-theme-gray-dark text-center">Search and apply to jobs anywhere, anytime</p>
+                </div>
+                
+                <div className="flex flex-col items-center">
+                  <div className="bg-secondary-green/10 w-12 h-12 rounded-lg flex items-center justify-center mb-3">
+                    <BriefcaseIcon className="text-secondary-green h-6 w-6" />
+                  </div>
+                  <h4 className="font-semibold text-theme-dark mb-1">Manage Applications</h4>
+                  <p className="text-sm text-theme-gray-dark text-center">Track your applications on the go</p>
+                </div>
+                
+                <div className="flex flex-col items-center">
+                  <div className="bg-primary-blue/10 w-12 h-12 rounded-lg flex items-center justify-center mb-3">
+                    <Users className="text-primary-blue h-6 w-6" />
+                  </div>
+                  <h4 className="font-semibold text-theme-dark mb-1">Instant Notifications</h4>
+                  <p className="text-sm text-theme-gray-dark text-center">Get notified about new opportunities</p>
+                </div>
+              </div>
+              
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-blue/10 to-secondary-green/10 px-6 py-3 rounded-full border border-primary-blue/20">
+                <div className="w-2 h-2 bg-secondary-green rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-theme-dark">Stay tuned for updates!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <Footer />
     </div>

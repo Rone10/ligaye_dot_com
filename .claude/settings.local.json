@@ -3,7 +3,11 @@
     "allow": [
       "Bash(pnpm lint:*)",
       "Bash(npx tsc:*)",
-      "Bash(tsc --noEmit)"
+      "Bash(tsc --noEmit)",
+      "Bash(rg:*)",
+      "Bash(grep:*)",
+      "Bash(mkdir:*)",
+      "Bash(pnpm build:*)"
     ],
     "deny": []
   }
