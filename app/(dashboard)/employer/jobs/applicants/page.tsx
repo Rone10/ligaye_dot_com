@@ -1,76 +1,52 @@
-'use client'
-
-import { useState, useEffect, ChangeEvent, useMemo, useCallback, useTransition } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { getUser } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { getEmployerApplications, getApplicationCounts } from './_queries'
 import ApplicationsDataTable from './_components/ApplicationsDataTable'
+import ApplicationFilters, { ApplicationFiltersClearButton } from './_components/ApplicationFilters'
 import { Search } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import PropagateLoaderSpinner  from '@/components/loaders/propagate-loarder'
-import Link from 'next/link'
 
-// Debounce function implementation
-function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
+interface PageProps {
+  searchParams: Promise<{
+    status?: string
+    q?: string
+    sort?: 'newest' | 'oldest'
+  }>
+}
+
+export default async function EmployerApplicationsPage({ searchParams }: PageProps) {
+  // Await the searchParams
+  const params = await searchParams
   
-  return function(...args: Parameters<T>) {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
-// Application type definition based on _queries.ts
-type ApplicationStatus = 'APPLIED' | 'REVIEWING' | 'SHORTLISTED' | 'INTERVIEW_SCHEDULED' | 
-                         'INTERVIEWED' | 'OFFER_EXTENDED' | 'HIRED' | 'REJECTED' | 'WITHDRAWN'
-
-interface Application {
-  application: {
-    id: string
-    status: ApplicationStatus
-    appliedAt: Date
-    updatedAt: Date
-    coverLetterText: string | null
-    coverLetterUrl: string | null
-    resumeUrl: string | null
-    interviewDate: Date | null
+  // Check authentication
+  const user = await getUser()
+  if (!user) {
+    redirect('/sign-in')
   }
-  job: {
-    id: string
-    title: string
-  }
-  candidate: {
-    id: string
-    fullName: string
-    title: string | null
-    avatarUrl: string | null
-  }
-}
-
-interface ApplicationCounts {
-  all: number
-  applied: number
-  reviewing: number
-  shortlisted: number
-  interview: number
-  interviewed: number
-  offered: number
-  hired: number
-  rejected: number
-  withdrawn: number
-}
-
-export default function EmployerApplicationsPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const supabase = createClient()
   
-  const [isLoading, setIsLoading] = useState(true)
-  const [isPending, startTransition] = useTransition()
-  const [allApplications, setAllApplications] = useState<Application[]>([])
-  const [filteredApplications, setFilteredApplications] = useState<Application[]>([])
-  const [counts, setCounts] = useState<ApplicationCounts>({
+  // Parse filters from search params
+  const filters = {
+    status: params.status || undefined,
+    searchTerm: params.q || undefined,
+    sort: params.sort || 'newest',
+    jobId: undefined // Not used in this page but needed for the query
+  }
+  
+  // Fetch applications and counts in parallel with filters
+  const [applicationsResult, countsResult] = await Promise.all([
+    getEmployerApplications(filters),
+    getApplicationCounts()
+  ])
+  
+  // Handle errors
+  if (applicationsResult.error || countsResult.error) {
+    if (applicationsResult.error === 'Employer profile not found' || 
+        countsResult.error === 'Employer profile not found') {
+      redirect('/employer/profile')
+    }
+  }
+  
+  const applications = applicationsResult.applications || []
+  const counts = countsResult.counts || {
     all: 0,
     applied: 0,
     reviewing: 0,
@@ -81,159 +57,6 @@ export default function EmployerApplicationsPage() {
     hired: 0,
     rejected: 0,
     withdrawn: 0
-  })
-  const [searchValue, setSearchValue] = useState(searchParams.get('q') || '')
-  
-  // Parse filters from search params and memoize to prevent unnecessary rerenders
-  const filters = useMemo(() => ({
-    status: searchParams.get('status') || 'ALL',
-    searchTerm: searchParams.get('q') || '',
-    sort: (searchParams.get('sort') as 'newest' | 'oldest') || 'newest'
-  }), [searchParams]);
-  
-  // Load all applications data once
-  const loadAllData = useCallback(async () => {
-    setIsLoading(true)
-    
-    try {
-      // Fetch all applications and counts - no longer passing sort parameter
-      const [applicationsResult, countsResult] = await Promise.all([
-        getEmployerApplications(),
-        getApplicationCounts()
-      ])
-      
-      // Handle errors
-      if (applicationsResult.error || countsResult.error) {
-        if (applicationsResult.error === 'Employer profile not found' || 
-            countsResult.error === 'Employer profile not found') {
-          router.push('/employer/profile')
-          return
-        }
-      }
-      
-      setAllApplications(applicationsResult.applications || [])
-      setCounts(countsResult.counts || {
-        all: 0,
-        applied: 0,
-        reviewing: 0,
-        shortlisted: 0,
-        interview: 0,
-        interviewed: 0,
-        offered: 0,
-        hired: 0,
-        rejected: 0,
-        withdrawn: 0
-      })
-    } catch (error) {
-      console.error('Error loading data:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [router])
-  
-  // Apply client-side filtering based on URL params
-  useEffect(() => {
-    if (allApplications.length > 0) {
-      let filtered = [...allApplications]
-      
-      // Apply status filter
-      if (filters.status && filters.status !== 'ALL') {
-        filtered = filtered.filter(app => 
-          app.application.status === filters.status
-        )
-      }
-      
-      // Apply search filter
-      if (filters.searchTerm) {
-        const term = filters.searchTerm.toLowerCase()
-        filtered = filtered.filter(app =>
-          app.job.title.toLowerCase().includes(term) ||
-          app.candidate.fullName.toLowerCase().includes(term)
-        )
-      }
-      
-      // Apply client-side sorting
-      filtered = [...filtered].sort((a, b) => {
-        const dateA = new Date(a.application.appliedAt).getTime()
-        const dateB = new Date(b.application.appliedAt).getTime()
-        return filters.sort === 'newest' ? dateB - dateA : dateA - dateB
-      })
-      
-      setFilteredApplications(filtered)
-    }
-  }, [allApplications, filters.status, filters.searchTerm, filters.sort])
-  
-  useEffect(() => {
-    async function checkAuth() {
-      const { data } = await supabase.auth.getSession()
-      
-      if (!data.session) {
-        router.push('/sign-in')
-        return
-      }
-      
-      loadAllData()
-    }
-    
-    checkAuth()
-  }, [loadAllData, router, supabase])
-  
-  // Update URL without page navigation
-  const updateUrlWithFilter = useCallback((key: string, value: string | null) => {
-    startTransition(() => {
-      const newParams = new URLSearchParams(searchParams.toString())
-      
-      if (value === null || value === '') {
-        newParams.delete(key)
-      } else {
-        newParams.set(key, value)
-      }
-      
-      // Use router.replace to update URL without navigation
-      router.replace(`/employer/jobs/applicants?${newParams.toString()}`, { scroll: false })
-    })
-  }, [router, searchParams])
-  
-  // Memoize the debounced function using useMemo
-  const debouncedUpdateUrl = useMemo(
-    () => debounce((term: string) => {
-      updateUrlWithFilter('q', term || null)
-    }, 300),
-    [updateUrlWithFilter] // Recreate if updateUrlWithFilter changes
-  );
-  
-  // Handle filter changes
-  const handleStatusChange = useCallback((status: string) => {
-    updateUrlWithFilter('status', status === 'ALL' ? null : status)
-  }, [updateUrlWithFilter])
-  
-  const handleSortChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
-    updateUrlWithFilter('sort', e.target.value)
-    // No longer need to reload data from server for sorting
-  }, [updateUrlWithFilter])
-  
-  const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setSearchValue(value)
-    // Directly call the memoized debounced function
-    debouncedUpdateUrl(value)
-  }, [debouncedUpdateUrl]) // Depend on the stable debounced function
-  
-  const handleClearFilters = useCallback(() => {
-    startTransition(() => {
-      router.replace('/employer/jobs/applicants', { scroll: false })
-      setSearchValue('')
-    })
-  }, [router])
-  
-  if (isLoading || isPending) {
-    return (
-    <div className="container mx-auto py-10">
-      <div className="glass-card p-8 text-center">
-        <PropagateLoaderSpinner />
-      </div>
-    </div>
-    )
   }
   
   return (
@@ -243,145 +66,18 @@ export default function EmployerApplicationsPage() {
         <p className="text-theme-gray-dark mt-1">Manage and track candidates applying to your job postings</p>
       </div>
       
-      {/* Redesigned filter section with better styling */}
-      <div className="glass-card overflow-hidden mb-6">
-        {/* Status tabs with scrollable container */}
-        <div className="border-b border-border">
-          <div className="px-4 py-3">
-            <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
-              <button
-                onClick={() => handleStatusChange('ALL')}
-                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                  filters.status === 'ALL' 
-                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
-                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
-                }`}>
-                <span>All</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.all}</span>
-              </button>
-              <button
-                onClick={() => handleStatusChange('APPLIED')}
-                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                  filters.status === 'APPLIED' 
-                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
-                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
-                }`}>
-                <span>Applied</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.applied}</span>
-              </button>
-              <button
-                onClick={() => handleStatusChange('REVIEWING')}
-                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                  filters.status === 'REVIEWING' 
-                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
-                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
-                }`}>
-                <span>Reviewing</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.reviewing}</span>
-              </button>
-              <button
-                onClick={() => handleStatusChange('SHORTLISTED')}
-                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                  filters.status === 'SHORTLISTED' 
-                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
-                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
-                }`}>
-                <span>Shortlisted</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.shortlisted}</span>
-              </button>
-              <button
-                onClick={() => handleStatusChange('INTERVIEW_SCHEDULED')}
-                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                  filters.status === 'INTERVIEW_SCHEDULED' 
-                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
-                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
-                }`}>
-                <span>Interview</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.interview}</span>
-              </button>
-              <button
-                onClick={() => handleStatusChange('INTERVIEWED')}
-                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                  filters.status === 'INTERVIEWED' 
-                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
-                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
-                }`}>
-                <span>Interviewed</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.interviewed}</span>
-              </button>
-              <button
-                onClick={() => handleStatusChange('OFFER_EXTENDED')}
-                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                  filters.status === 'OFFER_EXTENDED' 
-                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
-                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
-                }`}>
-                <span>Offered</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.offered}</span>
-              </button>
-              <button
-                onClick={() => handleStatusChange('HIRED')}
-                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                  filters.status === 'HIRED' 
-                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
-                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
-                }`}>
-                <span>Hired</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.hired}</span>
-              </button>
-              <button
-                onClick={() => handleStatusChange('REJECTED')}
-                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                  filters.status === 'REJECTED' 
-                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
-                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
-                }`}>
-                <span>Rejected</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.rejected}</span>
-              </button>
-              <button
-                onClick={() => handleStatusChange('WITHDRAWN')}
-                className={`px-4 py-2.5 rounded-lg transition whitespace-nowrap flex items-center ${
-                  filters.status === 'WITHDRAWN' 
-                    ? 'bg-primary-blue/10 text-primary-blue font-medium border border-primary-blue/20' 
-                    : 'text-theme-gray-dark hover:bg-muted border border-transparent'
-                }`}>
-                <span>Withdrawn</span>
-                <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-background border border-border text-muted-foreground">{counts.withdrawn}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        {/* Search and filter controls */}
-        <div className="px-4 py-3 flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-            <Input
-              type="text"
-              placeholder="Search by job title or candidate name"
-              value={searchValue}
-              onChange={handleSearchChange}
-              className="pl-10 h-10 w-full"
-            />
-          </div>
-          <div className="flex gap-2">
-            <select
-              value={filters.sort}
-              onChange={handleSortChange}
-              className="border border-border h-10 rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-blue bg-background text-foreground"
-            >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
-          </div>
-        </div>
-      </div>
+      {/* Filter component that handles client-side interactions */}
+      <ApplicationFilters 
+        counts={counts} 
+        currentStatus={params.status} 
+        currentSearchTerm={params.q} 
+        currentSort={filters.sort}
+      />
       
       {/* Display applications or empty state */}
       <div className="mt-6">
-        {filteredApplications.length > 0 ? (
-          <ApplicationsDataTable applications={filteredApplications} />
+        {applications.length > 0 ? (
+          <ApplicationsDataTable applications={applications} />
         ) : (
           <div className="glass-card p-10 text-center">
             <div className="flex flex-col items-center">
@@ -390,13 +86,7 @@ export default function EmployerApplicationsPage() {
               </div>
               <h3 className="text-theme-dark font-medium text-lg mb-2">No applications found</h3>
               <p className="text-theme-gray-dark max-w-md mb-6">There are no applications matching your current filters. Try changing your search terms or filter criteria.</p>
-              <Button 
-                onClick={handleClearFilters}
-                variant="outline" 
-                className="border-border"
-              >
-                Clear all filters
-              </Button>
+              <ApplicationFiltersClearButton />
             </div>
           </div>
         )}

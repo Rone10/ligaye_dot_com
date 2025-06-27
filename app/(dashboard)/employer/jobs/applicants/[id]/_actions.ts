@@ -7,6 +7,8 @@ import { updateApplicationStatus, getApplicationDetails } from "./_queries"
 import { Resend } from 'resend'
 import { ApplicationStatusUpdatedEmail } from '@/emails/application-status-updated'
 import { format } from 'date-fns'
+import { APPLICANT_DETAIL_CACHE_TAGS } from './_utils/cache-tags'
+import { APPLICANTS_CACHE_TAGS } from '../_utils/cache-tags'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -88,15 +90,29 @@ export async function updateStatus(
         // Continue since the status was updated successfully
       }
       
-      // Revalidate related paths
+      // Invalidate all relevant cache tags
+      await Promise.all([
+        // Detail page specific tags
+        revalidateTag(APPLICANT_DETAIL_CACHE_TAGS.application(applicationId)),
+        revalidateTag(APPLICANT_DETAIL_CACHE_TAGS.applicationDetail(applicationId)),
+        revalidateTag(APPLICANT_DETAIL_CACHE_TAGS.applicationStatus(applicationId)),
+        
+        // List page tags
+        revalidateTag(APPLICANTS_CACHE_TAGS.allApplications),
+        revalidateTag(APPLICANTS_CACHE_TAGS.applicationCounts),
+        revalidateTag(APPLICANTS_CACHE_TAGS.application(applicationId)),
+        revalidateTag(APPLICANTS_CACHE_TAGS.applicationDetail(applicationId)),
+        revalidateTag(APPLICANTS_CACHE_TAGS.applicationsByStatus(validatedData.status)),
+        
+        // Interview specific tags if interview scheduled
+        ...(validatedData.status === 'INTERVIEW_SCHEDULED' ? [
+          revalidateTag(APPLICANT_DETAIL_CACHE_TAGS.applicationInterview(applicationId))
+        ] : [])
+      ])
+      
+      // Also revalidate paths for immediate UI update
       revalidatePath(`/employer/jobs/applicants/${applicationId}`)
       revalidatePath('/employer/jobs/applicants')
-      
-      // Revalidate applications cache tag
-      revalidateTag('applications')
-      revalidateTag('employer-applications')
-      revalidateTag('application-detail')
-      revalidateTag('application-counts')
     }
     
     return result

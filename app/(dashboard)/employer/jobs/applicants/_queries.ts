@@ -5,6 +5,8 @@ import { db } from '@/lib/db'
 import { applications, jobs, employerProfiles, profiles, candidateProfiles, applicationStatusEnum, education, experience } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
 import { unstable_cache } from 'next/cache'
+import { cache } from 'react'
+import { APPLICANTS_CACHE_TAGS } from './_utils/cache-tags'
 
 export interface ApplicationFilter {
   status?: string
@@ -81,53 +83,71 @@ async function getEmployerApplicationsData(employerProfileId: string, filter: Ap
 }
 
 /**
- * Cached version of employer applications
+ * Helper to get employer profile ID - cached per request
  */
-const getEmployerApplicationsCached = unstable_cache(
-  async (employerProfileId: string, filter: ApplicationFilter = {}) => {
-    return getEmployerApplicationsData(employerProfileId, filter);
-  },
-  ['employer-applications'],
-  {
-    tags: ['employer-applications']
-  }
-);
+const getEmployerProfileIdCached = cache(async (userId: string) => {
+  const result = await db()
+    .select({
+      employerProfileId: employerProfiles.id
+    })
+    .from(profiles)
+    .innerJoin(
+      employerProfiles,
+      and(
+        eq(profiles.id, employerProfiles.profileId),
+        eq(employerProfiles.deleted, false)
+      )
+    )
+    .where(and(
+      eq(profiles.userId, userId),
+      eq(profiles.deleted, false)
+    ))
+    .limit(1)
+  
+  return result[0]?.employerProfileId || null
+})
 
 // Get applications for all jobs posted by the employer
 export async function getEmployerApplications(filter: ApplicationFilter = {}) {
   try {
+    // Authentication check OUTSIDE cache scope
     const user = await getUser()
     if (!user) {
       return { error: 'Unauthorized' }
     }
     
-    // Get employer profile ID
-    const employerResult = await db()
-      .select({
-        employerProfileId: employerProfiles.id
-      })
-      .from(profiles)
-      .innerJoin(
-        employerProfiles,
-        and(
-          eq(profiles.id, employerProfiles.profileId),
-          eq(employerProfiles.deleted, false)
-        )
-      )
-      .where(and(
-        eq(profiles.userId, user.id),
-        eq(profiles.deleted, false)
-      ))
-      .limit(1)
+    // Get employer profile ID using request-level cache
+    const employerProfileId = await getEmployerProfileIdCached(user.id)
     
-    if (!employerResult.length) {
+    if (!employerProfileId) {
       return { error: 'Employer profile not found' }
     }
     
-    const employerProfileId = employerResult[0].employerProfileId
+    // Create cache key based on filter parameters
+    const cacheKey = [
+      'employer-applications',
+      employerProfileId,
+      filter.status || 'all',
+      filter.jobId || 'all',
+      filter.searchTerm || '',
+      filter.sort || 'newest'
+    ]
     
-    // Use cached function
-    const applications = await getEmployerApplicationsCached(employerProfileId, filter);
+    // Cache the data fetching function with on-demand invalidation
+    const cachedFunction = unstable_cache(
+      async () => getEmployerApplicationsData(employerProfileId, filter),
+      cacheKey,
+      {
+        tags: [
+          APPLICANTS_CACHE_TAGS.allApplications,
+          APPLICANTS_CACHE_TAGS.employerApplications(employerProfileId),
+          ...(filter.jobId ? [APPLICANTS_CACHE_TAGS.jobApplications(filter.jobId)] : []),
+          ...(filter.status ? [APPLICANTS_CACHE_TAGS.applicationsByStatus(filter.status)] : [])
+        ]
+      }
+    )
+    
+    const applications = await cachedFunction()
     
     return { applications }
   } catch (error) {
@@ -191,25 +211,28 @@ async function getApplicationByIdData(employerProfileId: string, applicationId: 
     return null;
   }
   
-  // Get candidate's education history
-  const educationData = await db()
-    .select()
-    .from(education)
-    .where(and(
-      eq(education.candidateProfileId, applicationData[0].candidate.id),
-      eq(education.deleted, false)
-    ))
-    .orderBy(desc(education.endDate))
-  
-  // Get candidate's work experience
-  const experienceData = await db()
-    .select()
-    .from(experience)
-    .where(and(
-      eq(experience.candidateProfileId, applicationData[0].candidate.id),
-      eq(experience.deleted, false)
-    ))
-    .orderBy(desc(experience.startDate))
+  // Parallel fetching of education and experience data
+  const [educationData, experienceData] = await Promise.all([
+    // Get candidate's education history
+    db()
+      .select()
+      .from(education)
+      .where(and(
+        eq(education.candidateProfileId, applicationData[0].candidate.id),
+        eq(education.deleted, false)
+      ))
+      .orderBy(desc(education.endDate)),
+    
+    // Get candidate's work experience
+    db()
+      .select()
+      .from(experience)
+      .where(and(
+        eq(experience.candidateProfileId, applicationData[0].candidate.id),
+        eq(experience.deleted, false)
+      ))
+      .orderBy(desc(experience.startDate))
+  ])
   
   // Ensure dates are properly formatted as Date objects
   const formattedEducation = educationData.map(edu => ({
@@ -234,54 +257,37 @@ async function getApplicationByIdData(employerProfileId: string, applicationId: 
   }
 }
 
-/**
- * Cached version of application by ID
- */
-const getApplicationByIdCached = unstable_cache(
-  async (employerProfileId: string, applicationId: string) => {
-    return getApplicationByIdData(employerProfileId, applicationId);
-  },
-  ['application-detail'],
-  {
-    tags: ['application-detail', 'employer-applications']
-  }
-);
 
 // Get specific application by ID
 export async function getApplicationById(applicationId: string) {
   try {
+    // Authentication check OUTSIDE cache scope
     const user = await getUser()
     if (!user) {
       return { error: 'Unauthorized' }
     }
     
-    // Get employer profile ID to verify ownership
-    const employerResult = await db()
-      .select({
-        employerProfileId: employerProfiles.id
-      })
-      .from(profiles)
-      .innerJoin(
-        employerProfiles,
-        and(
-          eq(profiles.id, employerProfiles.profileId),
-          eq(employerProfiles.deleted, false)
-        )
-      )
-      .where(and(
-        eq(profiles.userId, user.id),
-        eq(profiles.deleted, false)
-      ))
-      .limit(1)
+    // Get employer profile ID using request-level cache
+    const employerProfileId = await getEmployerProfileIdCached(user.id)
     
-    if (!employerResult.length) {
+    if (!employerProfileId) {
       return { error: 'Employer profile not found' }
     }
     
-    const employerProfileId = employerResult[0].employerProfileId
+    // Cache the data fetching function with on-demand invalidation
+    const cachedFunction = unstable_cache(
+      async () => getApplicationByIdData(employerProfileId, applicationId),
+      [`application-detail-${applicationId}`],
+      {
+        tags: [
+          APPLICANTS_CACHE_TAGS.application(applicationId),
+          APPLICANTS_CACHE_TAGS.applicationDetail(applicationId),
+          APPLICANTS_CACHE_TAGS.allApplications
+        ]
+      }
+    )
     
-    // Use cached function
-    const application = await getApplicationByIdCached(employerProfileId, applicationId);
+    const application = await cachedFunction()
     
     if (!application) {
       return { error: 'Application not found or you do not have permission to view it' }
@@ -371,54 +377,37 @@ async function getApplicationCountsData(employerProfileId: string) {
   return counts;
 }
 
-/**
- * Cached version of application counts
- */
-const getApplicationCountsCached = unstable_cache(
-  async (employerProfileId: string) => {
-    return getApplicationCountsData(employerProfileId);
-  },
-  ['application-counts'],
-  {
-    tags: ['employer-applications']
-  }
-);
 
 // Get counts of applications by status
 export async function getApplicationCounts() {
   try {
+    // Authentication check OUTSIDE cache scope
     const user = await getUser()
     if (!user) {
       return { error: 'Unauthorized' }
     }
     
-    // Get employer profile ID
-    const employerResult = await db()
-      .select({
-        employerProfileId: employerProfiles.id
-      })
-      .from(profiles)
-      .innerJoin(
-        employerProfiles,
-        and(
-          eq(profiles.id, employerProfiles.profileId),
-          eq(employerProfiles.deleted, false)
-        )
-      )
-      .where(and(
-        eq(profiles.userId, user.id),
-        eq(profiles.deleted, false)
-      ))
-      .limit(1)
+    // Get employer profile ID using request-level cache
+    const employerProfileId = await getEmployerProfileIdCached(user.id)
     
-    if (!employerResult.length) {
+    if (!employerProfileId) {
       return { error: 'Employer profile not found' }
     }
     
-    const employerProfileId = employerResult[0].employerProfileId
+    // Cache the data fetching function with on-demand invalidation
+    const cachedFunction = unstable_cache(
+      async () => getApplicationCountsData(employerProfileId),
+      [`application-counts-${employerProfileId}`],
+      {
+        tags: [
+          APPLICANTS_CACHE_TAGS.applicationCounts,
+          APPLICANTS_CACHE_TAGS.employerApplications(employerProfileId),
+          APPLICANTS_CACHE_TAGS.allApplications
+        ]
+      }
+    )
     
-    // Use cached function
-    const counts = await getApplicationCountsCached(employerProfileId);
+    const counts = await cachedFunction()
     
     return { counts }
   } catch (error) {

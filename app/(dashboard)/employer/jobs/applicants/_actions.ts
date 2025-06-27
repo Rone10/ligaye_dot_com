@@ -6,6 +6,33 @@ import { applications, jobs, employerProfiles, profiles } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { ApplicationStatus } from '@/types/application'
+import { cache } from 'react'
+import { APPLICANTS_CACHE_TAGS } from './_utils/cache-tags'
+
+/**
+ * Helper to get employer profile ID - cached per request
+ */
+const getEmployerProfileIdCached = cache(async (userId: string) => {
+  const result = await db()
+    .select({
+      employerProfileId: employerProfiles.id
+    })
+    .from(profiles)
+    .innerJoin(
+      employerProfiles,
+      and(
+        eq(profiles.id, employerProfiles.profileId),
+        eq(employerProfiles.deleted, false)
+      )
+    )
+    .where(and(
+      eq(profiles.userId, userId),
+      eq(profiles.deleted, false)
+    ))
+    .limit(1)
+  
+  return result[0]?.employerProfileId || null
+})
 
 // Update application status
 export async function updateApplicationStatus(applicationId: string, status: ApplicationStatus) {
@@ -15,35 +42,19 @@ export async function updateApplicationStatus(applicationId: string, status: App
       return { error: 'Unauthorized' }
     }
     
-    // Get employer profile ID to verify ownership
-    const employerResult = await db()
-      .select({
-        employerProfileId: employerProfiles.id
-      })
-      .from(profiles)
-      .innerJoin(
-        employerProfiles,
-        and(
-          eq(profiles.id, employerProfiles.profileId),
-          eq(employerProfiles.deleted, false)
-        )
-      )
-      .where(and(
-        eq(profiles.userId, user.id),
-        eq(profiles.deleted, false)
-      ))
-      .limit(1)
+    // Get employer profile ID using request-level cache
+    const employerProfileId = await getEmployerProfileIdCached(user.id)
     
-    if (!employerResult.length) {
+    if (!employerProfileId) {
       return { error: 'Employer profile not found' }
     }
     
-    const employerProfileId = employerResult[0].employerProfileId
-    
-    // Verify the application belongs to one of the employer's jobs
+    // Verify the application belongs to one of the employer's jobs and get job ID
     const applicationCheck = await db()
       .select({
-        id: applications.id
+        id: applications.id,
+        jobId: applications.jobId,
+        candidateProfileId: applications.candidateProfileId
       })
       .from(applications)
       .innerJoin(jobs, eq(applications.jobId, jobs.id))
@@ -58,6 +69,8 @@ export async function updateApplicationStatus(applicationId: string, status: App
       return { error: 'Application not found or you do not have permission to update it' }
     }
     
+    const { jobId, candidateProfileId } = applicationCheck[0]
+    
     // Update application status
     await db()
       .update(applications)
@@ -67,11 +80,21 @@ export async function updateApplicationStatus(applicationId: string, status: App
       })
       .where(eq(applications.id, applicationId))
     
+    // Invalidate specific cache tags
+    await Promise.all([
+      revalidateTag(APPLICANTS_CACHE_TAGS.application(applicationId)),
+      revalidateTag(APPLICANTS_CACHE_TAGS.applicationDetail(applicationId)),
+      revalidateTag(APPLICANTS_CACHE_TAGS.allApplications),
+      revalidateTag(APPLICANTS_CACHE_TAGS.applicationCounts),
+      revalidateTag(APPLICANTS_CACHE_TAGS.employerApplications(employerProfileId)),
+      revalidateTag(APPLICANTS_CACHE_TAGS.jobApplications(jobId)),
+      revalidateTag(APPLICANTS_CACHE_TAGS.candidateApplications(candidateProfileId)),
+      revalidateTag(APPLICANTS_CACHE_TAGS.applicationsByStatus(status))
+    ])
+    
+    // Also revalidate paths for immediate UI update
     revalidatePath('/employer/jobs/applicants')
     revalidatePath(`/employer/jobs/applicants/${applicationId}`)
-    revalidateTag('employer-applications')
-    revalidateTag('application-detail')
-    revalidateTag('application-counts')
     
     return { success: true }
   } catch (error) {
@@ -88,30 +111,12 @@ export async function updateApplicationNotes(applicationId: string, notes: strin
       return { error: 'Unauthorized' }
     }
     
-    // Get employer profile ID to verify ownership
-    const employerResult = await db()
-      .select({
-        employerProfileId: employerProfiles.id
-      })
-      .from(profiles)
-      .innerJoin(
-        employerProfiles,
-        and(
-          eq(profiles.id, employerProfiles.profileId),
-          eq(employerProfiles.deleted, false)
-        )
-      )
-      .where(and(
-        eq(profiles.userId, user.id),
-        eq(profiles.deleted, false)
-      ))
-      .limit(1)
+    // Get employer profile ID using request-level cache
+    const employerProfileId = await getEmployerProfileIdCached(user.id)
     
-    if (!employerResult.length) {
+    if (!employerProfileId) {
       return { error: 'Employer profile not found' }
     }
-    
-    const employerProfileId = employerResult[0].employerProfileId
     
     // Verify the application belongs to one of the employer's jobs
     const applicationCheck = await db()
@@ -140,9 +145,14 @@ export async function updateApplicationNotes(applicationId: string, notes: strin
       })
       .where(eq(applications.id, applicationId))
     
+    // Invalidate specific cache tags for notes update
+    await Promise.all([
+      revalidateTag(APPLICANTS_CACHE_TAGS.application(applicationId)),
+      revalidateTag(APPLICANTS_CACHE_TAGS.applicationDetail(applicationId))
+    ])
+    
+    // Also revalidate path for immediate UI update
     revalidatePath(`/employer/jobs/applicants/${applicationId}`)
-    revalidateTag('employer-applications')
-    revalidateTag('application-detail')
     
     return { success: true }
   } catch (error) {
@@ -159,36 +169,20 @@ export async function scheduleInterview(applicationId: string, interviewDate: Da
       return { error: 'Unauthorized' }
     }
     
-    // Get employer profile ID to verify ownership
-    const employerResult = await db()
-      .select({
-        employerProfileId: employerProfiles.id
-      })
-      .from(profiles)
-      .innerJoin(
-        employerProfiles,
-        and(
-          eq(profiles.id, employerProfiles.profileId),
-          eq(employerProfiles.deleted, false)
-        )
-      )
-      .where(and(
-        eq(profiles.userId, user.id),
-        eq(profiles.deleted, false)
-      ))
-      .limit(1)
+    // Get employer profile ID using request-level cache
+    const employerProfileId = await getEmployerProfileIdCached(user.id)
     
-    if (!employerResult.length) {
+    if (!employerProfileId) {
       return { error: 'Employer profile not found' }
     }
     
-    const employerProfileId = employerResult[0].employerProfileId
-    
-    // Verify the application belongs to one of the employer's jobs
+    // Verify the application belongs to one of the employer's jobs and get details
     const applicationCheck = await db()
       .select({
         id: applications.id,
-        status: applications.status
+        status: applications.status,
+        jobId: applications.jobId,
+        candidateProfileId: applications.candidateProfileId
       })
       .from(applications)
       .innerJoin(jobs, eq(applications.jobId, jobs.id))
@@ -203,7 +197,9 @@ export async function scheduleInterview(applicationId: string, interviewDate: Da
       return { error: 'Application not found or you do not have permission to update it' }
     }
     
-    // Update application with interview date and set status to INTERVIEW_SCHEDULED if not already
+    const { jobId, candidateProfileId } = applicationCheck[0]
+    
+    // Update application with interview date and set status to INTERVIEW_SCHEDULED
     await db()
       .update(applications)
       .set({ 
@@ -213,11 +209,21 @@ export async function scheduleInterview(applicationId: string, interviewDate: Da
       })
       .where(eq(applications.id, applicationId))
     
+    // Invalidate all relevant cache tags
+    await Promise.all([
+      revalidateTag(APPLICANTS_CACHE_TAGS.application(applicationId)),
+      revalidateTag(APPLICANTS_CACHE_TAGS.applicationDetail(applicationId)),
+      revalidateTag(APPLICANTS_CACHE_TAGS.allApplications),
+      revalidateTag(APPLICANTS_CACHE_TAGS.applicationCounts),
+      revalidateTag(APPLICANTS_CACHE_TAGS.employerApplications(employerProfileId)),
+      revalidateTag(APPLICANTS_CACHE_TAGS.jobApplications(jobId)),
+      revalidateTag(APPLICANTS_CACHE_TAGS.candidateApplications(candidateProfileId)),
+      revalidateTag(APPLICANTS_CACHE_TAGS.applicationsByStatus('INTERVIEW_SCHEDULED'))
+    ])
+    
+    // Also revalidate paths for immediate UI update
     revalidatePath('/employer/jobs/applicants')
     revalidatePath(`/employer/jobs/applicants/${applicationId}`)
-    revalidateTag('employer-applications')
-    revalidateTag('application-detail')
-    revalidateTag('application-counts')
     
     return { success: true }
   } catch (error) {
