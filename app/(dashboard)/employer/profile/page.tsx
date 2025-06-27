@@ -16,23 +16,19 @@ export default async function EmployerProfilePage({ params }: PageProps) {
   }
   // TODO: check if user is admin then grant access otherwise redirect to employer profile page
 
-
-  // check if user is employer
-  const employerProfile = await getEmployerProfile(user.id)
+  // Parallel data fetching for optimal performance
+  const [employerProfile, industries, locations] = await Promise.all([
+    getEmployerProfile(user.id),
+    getAllIndustries(),
+    getAllLocations()
+  ]);
   
   if (!employerProfile) {
     redirect('/employer/jobs/')
   }
   
-  // Fetch employer profile data
-  const profileData = await getEmployerProfile(user.id);
-  
   // Check if profile exists, if not show creation form
-  const hasProfile = !!profileData?.employerProfile;
-  
-  // Fetch all industries and locations for form
-  const industries = await getAllIndustries();
-  const locations = await getAllLocations();
+  const hasProfile = !!employerProfile?.employerProfile;
   
   return (
     <div className="container mx-auto px-4 py-8">
@@ -47,7 +43,7 @@ export default async function EmployerProfilePage({ params }: PageProps) {
       
       <div className=" backdrop-blur-lg rounded-2xl border border-gray-100 shadow-level-4 p-6">
         <EmployerProfileForm 
-          initialData={profileData || undefined} 
+          initialData={employerProfile || undefined} 
           industries={industries} 
           locations={locations} 
         />

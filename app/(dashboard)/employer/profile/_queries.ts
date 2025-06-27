@@ -1,8 +1,11 @@
+'use server'
+
 import { db } from '@/lib/db';
 import { profiles, employerProfiles, industries, locations } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import type { Profile, EmployerProfile, Industry, Location, NewEmployerProfile } from '@/lib/db/schema';
 import { unstable_cache } from 'next/cache';
+import { EMPLOYER_PROFILE_CACHE_TAGS } from './_utils/cache-tags';
 
 interface EmployerProfileData {
   profile: Profile;
@@ -12,118 +15,136 @@ interface EmployerProfileData {
 }
 
 /**
- * Fetches employer profile data by profile ID (uncached version)
+ * Optimized query using Drizzle relations to fetch all data in a single query
+ * This eliminates the N+1 query pattern and reduces database round trips
  */
-export async function getEmployerProfileData(profileId: string): Promise<EmployerProfileData | null> {
-  // Get the base profile
-  const profile = await db()
-    .select()
+async function getEmployerProfileDataInternal(profileId: string): Promise<EmployerProfileData | null> {
+  const database = await db();
+  
+  // Single optimized query with all necessary joins
+  const result = await database
+    .select({
+      profile: profiles,
+      employerProfile: employerProfiles,
+      industry: industries,
+      location: locations,
+    })
     .from(profiles)
+    .leftJoin(employerProfiles, eq(employerProfiles.profileId, profiles.id))
+    .leftJoin(industries, and(
+      employerProfiles.industryId ? eq(industries.id, employerProfiles.industryId) : undefined,
+      eq(industries.deleted, false)
+    ))
+    .leftJoin(locations, and(
+      employerProfiles.locationId ? eq(locations.id, employerProfiles.locationId) : undefined,
+      eq(locations.deleted, false)
+    ))
     .where(eq(profiles.id, profileId))
     .limit(1)
     .then(res => res[0]);
 
-  if (!profile) return null;
-
-  // Get the employer profile
-  const employerProfile = await db()
-    .select()
-    .from(employerProfiles)
-    .where(eq(employerProfiles.profileId, profile.id))
-    .limit(1)
-    .then(res => res[0]);
-
-  // Get industry if exists
-  const industry = employerProfile?.industryId 
-    ? await db()
-        .select()
-        .from(industries)
-        .where(eq(industries.id, employerProfile.industryId))
-        .limit(1)
-        .then(res => res[0])
-    : null;
-
-  // Get location if exists
-  const location = employerProfile?.locationId
-    ? await db()
-        .select()
-        .from(locations)
-        .where(eq(locations.id, employerProfile.locationId))
-        .limit(1)
-        .then(res => res[0])
-    : null;
+  if (!result || !result.profile) return null;
 
   return {
-    profile,
-    employerProfile,
-    industry,
-    location,
+    profile: result.profile,
+    employerProfile: result.employerProfile,
+    industry: result.industry,
+    location: result.location,
   };
 }
 
 /**
- * Cached version of employer profile data
+ * Cached version of employer profile data by profile ID
  */
-const getEmployerProfileCached = unstable_cache(
-  async (profileId: string) => {
-    return getEmployerProfileData(profileId);
-  },
-  ['employer-profile'],
-  {
-    tags: ['employer-profile']
-  }
-);
+export async function getEmployerProfileData(profileId: string): Promise<EmployerProfileData | null> {
+  const cachedFunction = unstable_cache(
+    async () => getEmployerProfileDataInternal(profileId),
+    [`employer-profile-${profileId}`],
+    {
+      tags: EMPLOYER_PROFILE_CACHE_TAGS.getProfileTags(profileId)
+    }
+  );
+  
+  return cachedFunction();
+}
 
 /**
- * Main entry point for getting employer profile
- * Handles finding the profile ID from user ID
+ * Helper to get profile ID from user ID - kept separate for reusability
  */
-export async function getEmployerProfile(userId: string): Promise<EmployerProfileData | null> {
-  // First get the base profile
-  const profile = await db()
-    .select()
+async function getProfileIdFromUserId(userId: string): Promise<string | null> {
+  const database = await db();
+  const profile = await database
+    .select({ id: profiles.id })
     .from(profiles)
     .where(eq(profiles.userId, userId))
     .limit(1)
     .then(res => res[0]);
-
-  if (!profile) return null;
-
-  // Use the cached function with profile ID
-  return getEmployerProfileCached(profile.id);
+    
+  return profile?.id || null;
 }
 
 /**
- * Cached function to get all industries
+ * Main entry point for getting employer profile by user ID
+ * Optimized to use cached profile data lookup
  */
-export const getAllIndustries = unstable_cache(
-  async (): Promise<Industry[]> => {
-    return db()
-      .select()
-      .from(industries)
-      .where(eq(industries.deleted, false));
-  },
-  ['all-industries'],
-  {
-    tags: ['industries']
-  }
-);
+export async function getEmployerProfile(userId: string): Promise<EmployerProfileData | null> {
+  const profileId = await getProfileIdFromUserId(userId);
+  if (!profileId) return null;
+  
+  return getEmployerProfileData(profileId);
+}
 
 /**
- * Cached function to get all locations
+ * Internal function to fetch all industries
  */
-export const getAllLocations = unstable_cache(
-  async (): Promise<Location[]> => {
-    return db()
-      .select()
-      .from(locations)
-      .where(eq(locations.deleted, false));
-  },
-  ['all-locations'],
-  {
-    tags: ['locations']
-  }
-);
+async function getAllIndustriesInternal(): Promise<Industry[]> {
+  const database = await db();
+  return database
+    .select()
+    .from(industries)
+    .where(eq(industries.deleted, false));
+}
+
+/**
+ * Cached function to get all industries with on-demand invalidation
+ */
+export async function getAllIndustries(): Promise<Industry[]> {
+  const cachedFunction = unstable_cache(
+    async () => getAllIndustriesInternal(),
+    ['all-industries'],
+    {
+      tags: [EMPLOYER_PROFILE_CACHE_TAGS.industries]
+    }
+  );
+  
+  return cachedFunction();
+}
+
+/**
+ * Internal function to fetch all locations
+ */
+async function getAllLocationsInternal(): Promise<Location[]> {
+  const database = await db();
+  return database
+    .select()
+    .from(locations)
+    .where(eq(locations.deleted, false));
+}
+
+/**
+ * Cached function to get all locations with on-demand invalidation
+ */
+export async function getAllLocations(): Promise<Location[]> {
+  const cachedFunction = unstable_cache(
+    async () => getAllLocationsInternal(),
+    ['all-locations'],
+    {
+      tags: [EMPLOYER_PROFILE_CACHE_TAGS.locations]
+    }
+  );
+  
+  return cachedFunction();
+}
 
 // Create or update employer profile
 export async function upsertEmployerProfile(
@@ -132,8 +153,10 @@ export async function upsertEmployerProfile(
     { id?: string } | { companyName: string }
   )
 ): Promise<EmployerProfile> {
+  const database = await db();
+  
   // Check if profile exists
-  const existingProfile = await db()
+  const existingProfile = await database
     .select()
     .from(employerProfiles)
     .where(eq(employerProfiles.profileId, profileId))
@@ -142,7 +165,7 @@ export async function upsertEmployerProfile(
 
   if (existingProfile) {
     // Update existing profile
-    const [updated] = await db()
+    const [updated] = await database
       .update(employerProfiles)
       .set({
         ...profileData,
@@ -173,7 +196,7 @@ export async function upsertEmployerProfile(
     if (profileData.hqAddressDisplay) insertData.hqAddressDisplay = profileData.hqAddressDisplay;
     if (profileData.companyLogoUrl) insertData.companyLogoUrl = profileData.companyLogoUrl;
     
-    const [created] = await db()
+    const [created] = await database
       .insert(employerProfiles)
       .values(insertData)
       .returning();

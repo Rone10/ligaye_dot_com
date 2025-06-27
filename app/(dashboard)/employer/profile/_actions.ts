@@ -9,6 +9,7 @@ import { eq } from 'drizzle-orm';
 import { upsertEmployerProfile } from './_queries';
 import { validateEmployerProfileData, validateLogoUpload } from './_utils/validation';
 import { ZodError } from 'zod';
+import { EMPLOYER_PROFILE_CACHE_TAGS } from './_utils/cache-tags';
 
 // Define the state shape for form submission
 type FormState = {
@@ -28,7 +29,8 @@ export async function updateEmployerProfileDetails(
     }
     
     // Check if user has a profile
-    const profile = await db()
+    const database = await db();
+    const profile = await database
       .select()
       .from(profiles)
       .where(eq(profiles.userId, user.id))
@@ -67,9 +69,20 @@ export async function updateEmployerProfileDetails(
     const result = await upsertEmployerProfile(profile.id, validatedData);
     console.log('Database update result:', result);
     
-    // Revalidate the page and cache
+    // Granular cache invalidation based on what was actually updated
+    const invalidationTags = EMPLOYER_PROFILE_CACHE_TAGS.getInvalidationTags(profile.id, user.id);
+    await Promise.all(invalidationTags.map(tag => revalidateTag(tag)));
+    
+    // Only invalidate industries/locations if they were changed
+    if (validatedData.industryId !== undefined) {
+      await revalidateTag(EMPLOYER_PROFILE_CACHE_TAGS.industries);
+    }
+    if (validatedData.locationId !== undefined) {
+      await revalidateTag(EMPLOYER_PROFILE_CACHE_TAGS.locations);
+    }
+    
+    // Revalidate the page
     revalidatePath('/employer/profile');
-    revalidateTag('employer-profile');
     
     return { success: true, message: 'Profile updated successfully' };
   } catch (error) {
@@ -98,7 +111,8 @@ export async function handleLogoUpload(formData: FormData) {
     }
     
     // Check if user has a profile
-    const profile = await db()
+    const database = await db();
+    const profile = await database
       .select()
       .from(profiles)
       .where(eq(profiles.userId, user.id))
@@ -110,7 +124,7 @@ export async function handleLogoUpload(formData: FormData) {
     }
 
     // Check if employer profile exists
-    const employerProfile = await db()
+    const employerProfile = await database
       .select()
       .from(employerProfiles)
       .where(eq(employerProfiles.profileId, profile.id))
@@ -194,9 +208,12 @@ export async function handleLogoUpload(formData: FormData) {
       companyLogoUrl: publicUrl
     });
     
-    // Revalidate the page and cache
+    // Granular cache invalidation for logo update
+    const invalidationTags = EMPLOYER_PROFILE_CACHE_TAGS.getInvalidationTags(profile.id, user.id);
+    await Promise.all(invalidationTags.map(tag => revalidateTag(tag)));
+    
+    // Revalidate the page
     revalidatePath('/employer/profile');
-    revalidateTag('employer-profile');
     
     return { success: true, url: publicUrl };
   } catch (error) {
@@ -214,7 +231,8 @@ export async function handleLogoDelete() {
     }
     
     // Check if user has a profile
-    const profile = await db()
+    const database = await db();
+    const profile = await database
       .select()
       .from(profiles)
       .where(eq(profiles.userId, user.id))
@@ -226,7 +244,7 @@ export async function handleLogoDelete() {
     }
 
     // Check if employer profile exists
-    const employerProfile = await db()
+    const employerProfile = await database
       .select()
       .from(employerProfiles)
       .where(eq(employerProfiles.profileId, profile.id))
@@ -277,9 +295,12 @@ export async function handleLogoDelete() {
       companyLogoUrl: null
     });
     
-    // Revalidate the page and cache
+    // Granular cache invalidation for logo deletion
+    const invalidationTags = EMPLOYER_PROFILE_CACHE_TAGS.getInvalidationTags(profile.id, user.id);
+    await Promise.all(invalidationTags.map(tag => revalidateTag(tag)));
+    
+    // Revalidate the page
     revalidatePath('/employer/profile');
-    revalidateTag('employer-profile');
     
     return { success: true, message: 'Logo deleted successfully' };
   } catch (error) {
