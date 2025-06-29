@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { confirmResetSchema, type ConfirmResetFormData } from '../_utils/validation'
-import { confirmPasswordReset, type ConfirmResetActionResult } from '../_actions'
+import { confirmPasswordReset, confirmPasswordResetWithSession, type ConfirmResetActionResult } from '../_actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -17,7 +17,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2 } from 'lucide-react'
 
-export function ConfirmResetForm({ resetCode }: { resetCode?: string }) {
+interface ConfirmResetFormProps {
+  resetCode?: string
+  source?: string
+  isImplicitFlow?: boolean
+}
+
+export function ConfirmResetForm({ resetCode, source, isImplicitFlow = false }: ConfirmResetFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
@@ -50,7 +56,10 @@ export function ConfirmResetForm({ resetCode }: { resetCode?: string }) {
         formData.append('resetCode', resetCode)
       }
       
-      const result = await confirmPasswordReset(formData)
+      // Use the appropriate action based on the flow type
+      const result = isImplicitFlow 
+        ? await confirmPasswordResetWithSession(formData)
+        : await confirmPasswordReset(formData)
       
       if (!result.success) {
         // Handle field-specific errors
@@ -82,10 +91,13 @@ export function ConfirmResetForm({ resetCode }: { resetCode?: string }) {
       setIsSuccess(true)
       toast.success('Your password has been reset successfully!')
       
-      // Redirect to sign in page after a short delay
-      setTimeout(() => {
-        router.push('/sign-in')
-      }, 2000)
+      // For mobile source, don't redirect automatically
+      if (source !== 'mobile') {
+        // Redirect to sign in page after a short delay
+        setTimeout(() => {
+          router.push('/sign-in')
+        }, 2000)
+      }
       
     } catch (error) {
       setFormError('An unexpected error occurred. Please try again.')
@@ -108,9 +120,18 @@ export function ConfirmResetForm({ resetCode }: { resetCode?: string }) {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <Button asChild className="bg-primary-blue hover:bg-primary-blue-light">
-            <Link href="/sign-in">Sign In</Link>
-          </Button>
+          {source === 'mobile' ? (
+            <div className="text-center space-y-4">
+              <p className="text-gray-600">You can now return to the mobile app and sign in with your new password.</p>
+              <Button className="bg-primary-blue hover:bg-primary-blue-light w-full">
+                Return to App
+              </Button>
+            </div>
+          ) : (
+            <Button asChild className="bg-primary-blue hover:bg-primary-blue-light">
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
+          )}
         </CardContent>
       </Card>
     )

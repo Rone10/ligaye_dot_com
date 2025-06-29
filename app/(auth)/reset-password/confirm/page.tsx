@@ -1,4 +1,5 @@
 import { ConfirmResetForm } from './_components/ConfirmResetForm'
+import { HashFragmentHandler } from './_components/HashFragmentHandler'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -10,6 +11,8 @@ interface PageProps {
   searchParams: Promise<{ 
     // Password reset code from email
     code?: string
+    // Source of the request (e.g., 'mobile')
+    source?: string
     // Error handling
     error?: string
     error_description?: string
@@ -19,7 +22,7 @@ interface PageProps {
 export default async function ConfirmResetPage({ searchParams }: PageProps) {
   const params = await searchParams
   console.log('params', params)
-  const { code, error, error_description } = params
+  const { code, source, error, error_description } = params
   console.log('params', params)
 
   // If there's an error in the URL, show it
@@ -49,30 +52,22 @@ export default async function ConfirmResetPage({ searchParams }: PageProps) {
     return (
       <div className="flex items-center justify-center">
         <div className="w-full max-w-md">
-          <ConfirmResetForm resetCode={code} />
+          <ConfirmResetForm resetCode={code} source={source} />
         </div>
       </div>
     )
   }
 
-  // No code - they accessed the page directly
+  // No code - check if this might be an implicit flow (hash fragment)
+  // The HashFragmentHandler will process any hash fragments on the client side
   return (
-    <div className="flex items-center justify-center">
-      <div className="w-full max-w-md">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h2 className="text-yellow-800 font-semibold">Invalid Access</h2>
-          <p className="text-yellow-600 text-sm mt-1">
-            You need to use the password reset link from your email to access this page.
-          </p>
-          <a 
-            href="/reset-password" 
-            className="text-yellow-700 underline text-sm mt-2 inline-block"
-          >
-            Request a new reset link
-          </a>
+    <HashFragmentHandler>
+      <div className="flex items-center justify-center">
+        <div className="w-full max-w-md">
+          <ConfirmResetForm source={source} isImplicitFlow={true} />
         </div>
       </div>
-    </div>
+    </HashFragmentHandler>
   )
 }
  
