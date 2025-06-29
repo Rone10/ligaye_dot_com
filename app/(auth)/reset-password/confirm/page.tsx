@@ -20,6 +20,7 @@ export default async function ConfirmResetPage({ searchParams }: PageProps) {
   const params = await searchParams
   console.log('params', params)
   const { code, error, error_description } = params
+  console.log('params', params)
 
   // If there's an error in the URL, show it
   if (error) {
