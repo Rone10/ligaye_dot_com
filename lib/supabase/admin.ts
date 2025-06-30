@@ -53,4 +53,72 @@ export async function getUserById(userId: string) {
     return null
   }
 }
+
+/**
+ * Update user metadata for a specific user
+ * 
+ * NOTE: This function requires the SUPABASE_SERVICE_ROLE_KEY to be set
+ * in environment variables.
+ */
+export async function updateUserMetadata(userId: string, metadata: Record<string, any>) {
+  try {
+    // Return null if we don't have admin access
+    if (!supabaseAdmin) {
+      console.warn('Cannot update user metadata - missing SUPABASE_SERVICE_ROLE_KEY')
+      return { success: false, error: 'Admin client not available' }
+    }
+    
+    const { data, error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      user_metadata: metadata
+    })
+    
+    if (error) {
+      console.error('Error updating user metadata:', error)
+      return { success: false, error: error.message }
+    }
+    
+    return { success: true, user: data.user }
+  } catch (error) {
+    console.error('Unexpected error in updateUserMetadata:', error)
+    return { success: false, error: 'Unexpected error occurred' }
+  }
+}
+
+/**
+ * Sync user role from database to auth metadata
+ * This function reads the role from the profiles table and updates the auth metadata
+ */
+export async function syncUserRoleToMetadata(userId: string) {
+  try {
+    if (!supabaseAdmin) {
+      console.warn('Cannot sync user role - missing SUPABASE_SERVICE_ROLE_KEY')
+      return { success: false, error: 'Admin client not available' }
+    }
+
+    // First, get the user's role from the database
+    const { data: profileData, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('deleted', false)
+      .single()
+
+    if (profileError || !profileData) {
+      console.error('Error fetching user profile:', profileError)
+      return { success: false, error: 'User profile not found' }
+    }
+
+    // Then update the user metadata with the correct role
+    const result = await updateUserMetadata(userId, { role: profileData.role })
+    
+    if (result.success) {
+      console.log(`Successfully synced role '${profileData.role}' to metadata for user ${userId}`)
+    }
+    
+    return result
+  } catch (error) {
+    console.error('Unexpected error in syncUserRoleToMetadata:', error)
+    return { success: false, error: 'Unexpected error occurred' }
+  }
+}
   
