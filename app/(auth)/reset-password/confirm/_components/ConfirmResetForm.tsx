@@ -109,44 +109,42 @@ export function ConfirmResetForm({ resetCode, source, isImplicitFlow = false }: 
   
   if (isSuccess) {
     return (
-      <Card className="w-full max-w-md mx-auto bg-white/70 backdrop-blur-lg border border-gray/30 shadow-md">
-        <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-2">
-            <CheckCircle2 className="h-12 w-12 text-green-500" />
+      <Card className="w-full max-w-md mx-auto glass-card shadow-level-2">
+        <CardHeader className="space-y-sm">
+          <div className="flex justify-center mb-md">
+            <div className="bg-secondary-green/10 p-lg rounded-full">
+              <CheckCircle2 className="h-12 w-12 text-secondary-green" />
+            </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Password Reset Complete</CardTitle>
-          <CardDescription className="text-center">
-            Your password has been reset successfully. You can now sign in with your new password.
+          <CardTitle className="text-2xl font-bold text-center text-theme-dark">Password Reset Complete</CardTitle>
+          <CardDescription className="text-center text-theme-gray-dark text-base leading-relaxed">
+            {source === 'mobile' 
+              ? 'Your password has been successfully reset. Please return to the mobile app and sign in with your new password.'
+              : 'Your password has been reset successfully. You can now sign in with your new password.'
+            }
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex justify-center">
-          {source === 'mobile' ? (
-            <div className="text-center space-y-4">
-              <p className="text-gray-600">You can now return to the mobile app and sign in with your new password.</p>
-              <Button className="bg-primary-blue hover:bg-primary-blue-light w-full">
-                Return to App
-              </Button>
-            </div>
-          ) : (
-            <Button asChild className="bg-primary-blue hover:bg-primary-blue-light">
+        {source !== 'mobile' && (
+          <CardContent className="flex justify-center pb-xl">
+            <Button asChild className="bg-primary-blue hover:bg-primary-blue-light text-white px-xl py-md rounded-md shadow-level-2 hover:shadow-level-3 duration-standard font-semibold">
               <Link href="/sign-in">Sign In</Link>
             </Button>
-          )}
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
     )
   }
   
   return (
-    <Card className="w-full max-w-md mx-auto bg-white/70 backdrop-blur-lg border border-gray/30 shadow-md">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Set New Password</CardTitle>
-        <CardDescription className="text-center">
+    <Card className="w-full max-w-md mx-auto glass-card shadow-level-2">
+      <CardHeader className="space-y-sm">
+        <CardTitle className="text-2xl font-bold text-center text-theme-dark">Set New Password</CardTitle>
+        <CardDescription className="text-center text-theme-gray-dark">
           Create a new password for your account
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-lg">
           {formError && (
             <Alert variant="destructive" className="mb-4">
               <AlertDescription>
@@ -162,49 +160,49 @@ export function ConfirmResetForm({ resetCode, source, isImplicitFlow = false }: 
             </Alert>
           )}
           
-          <div className="space-y-2">
-            <Label htmlFor="password">New Password</Label>
+          <div className="space-y-xs">
+            <Label htmlFor="password" className="text-sm font-medium text-theme-dark">New Password</Label>
             <Input
               id="password"
               type="password"
               placeholder="••••••••"
               {...register('password')}
               disabled={isLoading}
-              className={errors.password ? 'border-red-300' : ''}
+              className={`h-[46px] px-md rounded-md border ${errors.password ? 'border-red-500 focus:border-red-500' : 'border-theme-gray focus:border-primary-blue'} focus:shadow-focus duration-standard`}
             />
             {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
+              <p className="text-sm text-red-500 mt-xs">{errors.password.message}</p>
             )}
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+          <div className="space-y-xs">
+            <Label htmlFor="confirmPassword" className="text-sm font-medium text-theme-dark">Confirm New Password</Label>
             <Input
               id="confirmPassword"
               type="password"
               placeholder="••••••••"
               {...register('confirmPassword')}
               disabled={isLoading}
-              className={errors.confirmPassword ? 'border-red-300' : ''}
+              className={`h-[46px] px-md rounded-md border ${errors.confirmPassword ? 'border-red-500 focus:border-red-500' : 'border-theme-gray focus:border-primary-blue'} focus:shadow-focus duration-standard`}
             />
             {errors.confirmPassword && (
-              <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+              <p className="text-sm text-red-500 mt-xs">{errors.confirmPassword.message}</p>
             )}
           </div>
           
           <Button 
             type="submit" 
-            className="w-full bg-primary-blue hover:bg-primary-blue-light"
+            className="w-full bg-primary-blue hover:bg-primary-blue-light text-white px-xl py-md rounded-md shadow-level-2 hover:shadow-level-3 duration-standard font-semibold mt-xl"
             disabled={isLoading}
           >
             {isLoading ? 'Resetting...' : 'Reset Password'}
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="flex justify-center">
-        <p className="text-sm text-gray-dark">
+      <CardFooter className="flex justify-center pb-xl">
+        <p className="text-sm text-theme-gray-dark">
           Remember your password?{' '}
-          <Link href="/sign-in" className="text-primary-blue hover:underline">
+          <Link href="/sign-in" className="text-primary-blue hover:underline font-medium duration-standard">
             Sign In
           </Link>
         </p>
