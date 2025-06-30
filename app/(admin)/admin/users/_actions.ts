@@ -35,6 +35,7 @@ export async function softDeleteUserProfile(formData: FormData) {
   
   // Delete the profile (this already includes cache invalidation)
   const result = await deleteUserProfile(profileId);
+  await invalidateUserCache();
   
   return result;
 }
