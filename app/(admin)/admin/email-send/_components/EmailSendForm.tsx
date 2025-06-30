@@ -69,11 +69,11 @@ const templatePreviews: Record<string, { title: string; description: string; con
               🎉 EXCLUSIVE LAUNCH OFFER
             </p>
             <p style="color: #1a1e2d; font-size: 20px; font-weight: 700; margin: 0 0 8px 0; line-height: 1.4;">
-              <strong>2 MONTHS OF FREE JOB POSTING</strong><br/>
-              Valid from June 1, 2025 to July 30, 2025
+              <strong>FREE JOB POSTS FOR JULY 2025</strong><br/>
+              Use promo code: <span style="background-color: #fef3c7; padding: 2px 8px; border-radius: 4px; font-family: monospace;">LAUNCH2025</span>
             </p>
             <p style="color: #4a6cfa; font-size: 14px; font-weight: 500; margin: 0; font-style: italic;">
-              Be among the first employers to discover top talent!
+              Valid throughout July 2025 - Be among the first employers to discover top talent!
             </p>
           </div>
 
@@ -93,7 +93,7 @@ const templatePreviews: Record<string, { title: string; description: string; con
 
           <div style="text-align: center; margin: 32px 0;">
             <a href="#" style="background-color: #4a6cfa; color: #ffffff; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-size: 18px; font-weight: 600; display: inline-block;">
-              Claim Your FREE 2 Months Now
+              Claim Your FREE July Posts Now
             </a>
           </div>
 
@@ -255,7 +255,7 @@ export function EmailSendForm({ templates }: EmailSendFormProps) {
                   />
                 </FormControl>
                 <FormDescription>
-                  Suggested: "🚀 Introducing Ligaye - 2 Months FREE Job Posting for Launch Partners!"
+                  Suggested: "🚀 FREE Job Posts for July 2025 - Ligaye Launch Offer with Code LAUNCH2025"
                 </FormDescription>
                 <FormMessage />
               </FormItem>

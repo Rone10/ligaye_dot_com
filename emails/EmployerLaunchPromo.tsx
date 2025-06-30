@@ -26,7 +26,7 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
 }) => (
   <Html>
     <Head />
-    <Preview>🚀 Introducing Ligaye - 2 Months FREE Job Posting for Launch Partners!</Preview>
+    <Preview>🚀 FREE Job Posts for July 2025 - Ligaye Launch Offer with Code LAUNCH2025</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={{ marginTop: '32px' }}>
@@ -50,11 +50,11 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
         <Section style={highlightBox}>
           <Text style={highlightTitle}>🎉 EXCLUSIVE LAUNCH OFFER</Text>
           <Text style={highlightText}>
-            <strong>2 MONTHS OF FREE JOB POSTING</strong><br/>
-            Valid from June 1, 2025 to July 30, 2025
+            <strong>FREE JOB POSTS FOR JULY 2025</strong><br/>
+            Use promo code: <span style={{ backgroundColor: '#fef3c7', padding: '2px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>LAUNCH2025</span>
           </Text>
           <Text style={highlightSubtext}>
-            Be among the first employers to discover top talent!
+            Valid throughout July 2025 - Be among the first employers to discover top talent!
           </Text>
         </Section>
 
@@ -77,13 +77,13 @@ export const EmployerLaunchPromo: React.FC<Readonly<EmployerLaunchPromoProps>> =
         </Text>
 
         <Section style={{ textAlign: 'center', marginTop: '32px', marginBottom: '32px' }}>
-          <Button style={button} href={`${baseUrl}/sign-up`}>
-            Claim Your FREE 2 Months Now
+          <Button style={button} href={`${baseUrl}/sign-up?promo=LAUNCH2025`}>
+            Claim Your FREE July Posts Now
           </Button>
         </Section>
 
         <Text style={text}>
-          Don't miss this limited-time opportunity. Our launch offer is only available until July 30, 2025, and spots are filling up fast.
+          Don't miss this limited-time opportunity. Our FREE job posting offer with code <strong>LAUNCH2025</strong> is only available throughout July 2025, and spots are filling up fast.
         </Text>
 
         <Text style={text}>
