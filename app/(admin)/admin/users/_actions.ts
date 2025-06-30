@@ -69,6 +69,6 @@ export async function restoreDeletedUserProfile(formData: FormData) {
   
   // Restore the profile (this already includes cache invalidation)
   const result = await restoreUserProfile(profileId);
-  
+  await invalidateUserCache();
   return result;
 } 
