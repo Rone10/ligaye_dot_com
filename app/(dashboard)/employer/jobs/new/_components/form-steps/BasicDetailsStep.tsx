@@ -23,7 +23,6 @@ import {
 } from '@/components/ui/select'
 import { LocationSelector } from '@/components/ui/location-selector'
 import { workLocationEnum } from '@/lib/db/schema'
-import { Editor } from '@/components/RichTextEditor/editor'
 import { ArrowRight } from 'lucide-react'
 import { JobFormValues } from '../../_utils/validation'
 import type { LocationSelection } from '@/lib/types/locations'
@@ -51,7 +50,6 @@ export default function BasicDetailsStep({ form, onNext }: BasicDetailsStepProps
   const handleNext = () => {
     const basicFieldsValid = form.trigger([
       'title',
-      'description',
       'jobLanguage',
       'numberOfOpenings',
       'workLocation',
@@ -91,23 +89,6 @@ export default function BasicDetailsStep({ form, onNext }: BasicDetailsStepProps
         )}
       />
       
-      <FormField
-        control={form.control}
-        name="description"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Job Description</FormLabel>
-            <FormControl>
-              <Editor
-                value={field.value}
-                onChange={field.onChange}
-                // placeholder="Describe the job role, responsibilities, and requirements..."
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField

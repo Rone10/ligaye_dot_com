@@ -7,7 +7,10 @@ import { jobFormSchema } from './_utils/validation'
 import { 
   getEmployerProfile, 
   insertNewJob,
-  calculateExpiryDate
+  calculateExpiryDate,
+  getAllSkills,
+  getAllIndustries,
+  getAllLocations
 } from './_queries'
 import { CACHE_TAGS } from './_utils/cache-tags'
 import { db } from '@/lib/db'
@@ -19,6 +22,7 @@ import { createStripeCheckoutSession } from '@/lib/stripe/stripe-actions'
 import { recordCouponRedemption } from './_queries/coupon'
 import { validateCouponForJobPosting as validateCouponInternal } from './_queries/coupon'
 import { getActivePricing, calculateTotalPrice, getDefaultPricing } from '@/lib/utils/pricing'
+import { inngest } from '@/inngest/client'
 
 // Server action for coupon validation (to be used by client components)
 export async function validateCoupon(couponCode: string, originalAmount: number) {
@@ -363,5 +367,188 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
       return { error: 'Invalid form data. Please check your entries.' }
     }
     return { error: 'Failed to create job posting. Please try again.' }
+  }
+}
+
+// Server action to fetch context data for AI generation
+export async function fetchAIContextData() {
+  try {
+    const user = await getCachedUser()
+    if (!user) {
+      return { 
+        success: false, 
+        error: 'You must be logged in' 
+      }
+    }
+    
+    const [skills, industries, locations, employerProfile] = await Promise.all([
+      getAllSkills(),
+      getAllIndustries(),
+      getAllLocations(),
+      getEmployerProfile(user.id)
+    ])
+    
+    return {
+      success: true,
+      data: {
+        skills,
+        industries,
+        locations,
+        employerProfile: employerProfile ? {
+          companyName: employerProfile.companyName || '',
+          industryId: employerProfile.industryId || undefined
+        } : null
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching AI context data:', error)
+    return {
+      success: false,
+      error: 'Failed to fetch context data'
+    }
+  }
+}
+
+// Server action to generate job description using AI
+export async function generateJobDescription(jobDetails: {
+  title: string
+  location: string
+  experienceLevel: string
+  workLocation: string
+  jobType: string
+  industries: string[]
+  skills: string[]
+  numberOfOpenings: number
+  companyName: string
+  companyIndustry: string
+  jobLanguage: string
+  benefits: string[]
+  supplementalPay: string[]
+  educationRequirements: string
+  experienceRequirements: string
+  requestId?: string
+}) {
+  try {
+    const user = await getCachedUser()
+    if (!user) {
+      return { 
+        success: false, 
+        error: 'You must be logged in to use AI features' 
+      }
+    }
+
+    // Generate a unique request ID to track this generation
+    const requestId = jobDetails.requestId || uuidv4()
+
+    // Send event to Inngest with all the job details
+    const { ids } = await inngest.send({
+      name: "job.description.generate",
+      data: {
+        ...jobDetails,
+        requestId,
+      },
+    })
+
+    console.log('Inngest event sent with IDs:', ids)
+
+    // For development: directly call the Gemini API
+    // This is a temporary solution until proper async handling is implemented
+    try {
+      // Import Gemini SDK
+      const { GoogleGenerativeAI } = await import('@google/generative-ai')
+      
+      // Initialize Gemini
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+      
+      // Build the prompt
+      const prompt = `You are an expert HR professional creating job descriptions for the Gambian market.
+
+Generate a compelling job description for:
+
+Job Title: ${jobDetails.title}
+Company: ${jobDetails.companyName || 'Our company'}
+Location: ${jobDetails.location || 'The Gambia'} (${jobDetails.workLocation})
+Experience Level: ${jobDetails.experienceLevel || 'Not specified'}
+Job Type: ${jobDetails.jobType}
+Number of Openings: ${jobDetails.numberOfOpenings || 1}
+Industries: ${jobDetails.industries?.join(', ') || jobDetails.companyIndustry || 'Not specified'}
+Key Skills: ${jobDetails.skills?.join(', ') || 'To be determined'}
+Language: ${jobDetails.jobLanguage || 'English'}
+${jobDetails.benefits?.length ? `Benefits: ${jobDetails.benefits.join(', ')}` : ''}
+${jobDetails.supplementalPay?.length ? `Supplemental Pay: ${jobDetails.supplementalPay.join(', ')}` : ''}
+${jobDetails.educationRequirements ? `Education Requirements: ${jobDetails.educationRequirements}` : ''}
+${jobDetails.experienceRequirements ? `Experience Requirements: ${jobDetails.experienceRequirements}` : ''}
+
+Create a job description with:
+1. An engaging overview of the role
+2. 5-8 key responsibilities specific to ${jobDetails.title}
+3. What the company offers (benefits, growth)
+4. Why someone should join
+5. Tailored for the ${jobDetails.location || 'Gambian'} market
+
+IMPORTANT: Format your response as HTML with:
+- <h3> for section headings
+- <p> for paragraphs  
+- <ul> and <li> for bullet points
+- Do NOT use markdown formatting`
+      
+      // Generate content
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const text = response.text()
+      
+      console.log('Gemini API response received:', text.substring(0, 200) + '...')
+      
+      // Clean up the response if needed
+      let cleanedText = text
+      // Remove any markdown formatting that might slip through
+      cleanedText = cleanedText.replace(/^#+\s/gm, '') // Remove markdown headers
+      cleanedText = cleanedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Convert bold
+      cleanedText = cleanedText.replace(/\*(.*?)\*/g, '<em>$1</em>') // Convert italic
+      
+      // Ensure proper HTML structure if not present
+      if (!cleanedText.includes('<h3>') && !cleanedText.includes('<p>')) {
+        // Basic formatting if AI didn't follow HTML instructions
+        const sections = cleanedText.split('\n\n')
+        cleanedText = sections.map((section, index) => {
+          if (index === 0 || section.match(/^(About|Key|What|Why|Requirements|Responsibilities)/i)) {
+            const lines = section.split('\n')
+            const heading = lines[0]
+            const content = lines.slice(1).join('\n')
+            return `<h3>${heading}</h3>\n<p>${content}</p>`
+          }
+          if (section.includes('\n-') || section.includes('\n•')) {
+            const items = section.split('\n').filter(item => item.trim())
+            const listItems = items.map(item => 
+              `<li>${item.replace(/^[-•*]\s*/, '').trim()}</li>`
+            ).join('\n')
+            return `<ul>\n${listItems}\n</ul>`
+          }
+          return `<p>${section}</p>`
+        }).join('\n\n')
+      }
+      
+      return {
+        success: true,
+        description: cleanedText,
+        message: 'AI-generated job description ready!'
+      }
+      
+    } catch (aiError) {
+      console.error('Direct Gemini API error:', aiError)
+      // Fallback to Inngest result if direct API fails
+      return {
+        success: false,
+        error: 'AI generation failed. Please check your API key and try again.'
+      }
+    }
+
+  } catch (error) {
+    console.error('Error generating job description:', error)
+    return {
+      success: false,
+      error: 'Failed to generate description. Please try again.'
+    }
   }
 } 

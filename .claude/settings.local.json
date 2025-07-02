@@ -7,7 +7,10 @@
       "Bash(rg:*)",
       "Bash(grep:*)",
       "Bash(mkdir:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(pnpm add:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

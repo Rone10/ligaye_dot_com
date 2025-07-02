@@ -32,12 +32,15 @@ import {
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
 import { format } from 'date-fns'
-import { CalendarIcon, ArrowLeft, Loader2, Tag, CheckCircle, AlertCircle } from 'lucide-react'
+import { CalendarIcon, ArrowLeft, Loader2, Tag, CheckCircle, AlertCircle, Sparkles } from 'lucide-react'
 import { JobFormValues } from '../../_utils/validation'
 import { applicationMethodEnum } from '@/lib/db/schema'
 import { cn } from '@/lib/utils'
 import { useCouponValidation } from '../../_hooks/useCouponValidation'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Editor } from '@/components/RichTextEditor/editor'
+import { generateJobDescription, fetchAIContextData } from '../../_actions'
+import { useToast } from '@/hooks/use-toast'
 
 interface PostingSettingsStepProps {
   form: UseFormReturn<JobFormValues>
@@ -46,13 +49,27 @@ interface PostingSettingsStepProps {
   onCouponValidated?: (couponData: { couponId: string; code: string; discountAmount: number; finalAmount: number } | null) => void
 }
 
-export default function PostingSettingsStep({ form, onPrevious, isSubmitting, onCouponValidated }: PostingSettingsStepProps) {
+export default function PostingSettingsStep({ 
+  form, 
+  onPrevious, 
+  isSubmitting, 
+  onCouponValidated
+}: PostingSettingsStepProps) {
   const { isValidating, validationResult, validateCoupon, clearValidation } = useCouponValidation()
   const [couponCode, setCouponCode] = useState('')
   const [showCouponField, setShowCouponField] = useState(false)
   const [hasValidatedCoupon, setHasValidatedCoupon] = useState(false)
   const [pricingConfig, setPricingConfig] = useState<PricingConfig | null>(null)
   const [loadingPricing, setLoadingPricing] = useState(true)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [contextData, setContextData] = useState<{
+    skills: Array<{ id: string; name: string }>
+    industries: Array<{ id: string; name: string }>
+    locations: Array<{ id: string; region: string; district?: string | null; city?: string | null }>
+    employerProfile: { companyName: string; industryId?: string } | null
+  }>({ skills: [], industries: [], locations: [], employerProfile: null })
+  const [loadingContext, setLoadingContext] = useState(false)
+  const { toast } = useToast()
   const jobDuration = form.watch('jobDuration') || 1
   
   // Fetch pricing configuration
@@ -68,6 +85,28 @@ export default function PostingSettingsStep({ form, onPrevious, isSubmitting, on
       }
     }
     fetchPricing()
+  }, [])
+  
+  // Fetch context data for AI generation when component mounts
+  useEffect(() => {
+    const fetchContext = async () => {
+      try {
+        setLoadingContext(true)
+        
+        const result = await fetchAIContextData()
+        
+        if (result.success && result.data) {
+          setContextData(result.data)
+        } else {
+          console.error('Failed to fetch context data:', result.error)
+        }
+      } catch (error) {
+        console.error('Error fetching context data:', error)
+      } finally {
+        setLoadingContext(false)
+      }
+    }
+    fetchContext()
   }, [])
   
   // Calculate base price using dynamic pricing or fallback
@@ -129,6 +168,86 @@ export default function PostingSettingsStep({ form, onPrevious, isSubmitting, on
       validateCoupon(couponCode, basePrice)
     }
   }, [jobDuration, couponCode, hasValidatedCoupon, validationResult?.valid, validateCoupon, basePrice])
+  
+  // Handle AI generation with full context
+  const handleGenerateDescription = async () => {
+    const formValues = form.getValues()
+    
+    if (!formValues.title || formValues.title.trim().length < 3) {
+      toast({
+        title: "Missing information",
+        description: "Please complete the job title before generating a description",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsGenerating(true)
+    
+    try {
+      // Get location name from locationId
+      const selectedLocation = contextData.locations.find(loc => loc.id === formValues.locationId)
+      const locationName = selectedLocation 
+        ? [selectedLocation.city, selectedLocation.district, selectedLocation.region]
+            .filter(Boolean)
+            .join(', ')
+        : ''
+      
+      // Get selected skill names
+      const selectedSkills = formValues.skillIds
+        .map(id => contextData.skills.find(skill => skill.id === id)?.name)
+        .filter(Boolean) as string[]
+      
+      // Get selected industry names
+      const selectedIndustries = formValues.industryIds
+        .map(id => contextData.industries.find(industry => industry.id === id)?.name)
+        .filter(Boolean) as string[]
+      
+      // Get company industry name if employer profile exists
+      const companyIndustryName = contextData.employerProfile?.industryId
+        ? contextData.industries.find(ind => ind.id === contextData.employerProfile?.industryId)?.name || ''
+        : ''
+      
+      // Gather all context from the form
+      const result = await generateJobDescription({
+        title: formValues.title,
+        location: locationName,
+        experienceLevel: formValues.experienceLevel || '',
+        workLocation: formValues.workLocation,
+        jobType: formValues.jobType,
+        industries: selectedIndustries,
+        skills: selectedSkills,
+        numberOfOpenings: formValues.numberOfOpenings,
+        companyName: contextData.employerProfile?.companyName || '',
+        companyIndustry: companyIndustryName,
+        jobLanguage: formValues.jobLanguage,
+        benefits: formValues.benefits || [],
+        supplementalPay: formValues.supplementalPay || [],
+        educationRequirements: formValues.educationRequirementsRichText || '',
+        experienceRequirements: formValues.experienceRequirementsRichText || '',
+        requestId: '' // Will be generated in the action
+      })
+
+      if (result.success && result.description) {
+        form.setValue('description', result.description, { shouldDirty: true })
+        toast({
+          title: "Description generated!",
+          description: "AI has generated a job description based on all the details you provided. Feel free to edit it as needed.",
+        })
+      } else {
+        throw new Error(result.error || 'Failed to generate description')
+      }
+    } catch (error) {
+      console.error('Error generating description:', error)
+      toast({
+        title: "Generation failed",
+        description: "Unable to generate description. Please try again or write manually.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsGenerating(false)
+    }
+  }
   
   return (
     <div className="space-y-6">
@@ -229,6 +348,39 @@ export default function PostingSettingsStep({ form, onPrevious, isSubmitting, on
             </FormControl>
             <FormDescription>
               Additional instructions for applicants
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <div className="flex items-center justify-between mb-2">
+              <FormLabel>Job Description</FormLabel>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateDescription}
+                disabled={isGenerating || loadingContext}
+                className="flex items-center gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                {isGenerating ? 'Generating...' : 'Enhance with AI'}
+              </Button>
+            </div>
+            <FormControl>
+              <Editor
+                value={field.value}
+                onChange={field.onChange}
+              />
+            </FormControl>
+            <FormDescription>
+              Comprehensive job description based on all the details you've provided
             </FormDescription>
             <FormMessage />
           </FormItem>
