@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-react";
 import { useQueryState } from "nuqs";
-import { getLocations } from "../_queries";
+import { getLocationsAction } from "../_actions";
 
 interface Location {
   id: string;
@@ -33,8 +33,10 @@ export function JobFilters() {
 
   useEffect(() => {
     const fetchLocations = async () => {
-      const data = await getLocations();
-      setLocations(data);
+      const result = await getLocationsAction();
+      if (result.success && result.data) {
+        setLocations(result.data);
+      }
     };
     fetchLocations();
   }, []);

@@ -9,7 +9,7 @@ import { getUser } from "@/lib/supabase/server";
 export async function updateJobStatus(jobId: string, status: string) {
   try {
     const user = await getUser();
-    if (!user || user.role !== "admin") {
+    if (!user || user.user_metadata.role !== "admin") {
       return { success: false, error: "Unauthorized" };
     }
 
@@ -39,7 +39,7 @@ export async function updateJobStatus(jobId: string, status: string) {
 export async function deleteJob(jobId: string) {
   try {
     const user = await getUser();
-    if (!user || user.role !== "admin") {
+    if (!user || user.user_metadata.role !== "admin") {
       return { success: false, error: "Unauthorized" };
     }
 

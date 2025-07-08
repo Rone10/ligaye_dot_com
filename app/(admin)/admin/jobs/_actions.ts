@@ -5,11 +5,12 @@ import { db } from "@/lib/db";
 import { jobs } from "@/lib/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { getUser } from "@/lib/supabase/server";
+import { getLocations } from "./_queries";
 
 export async function bulkUpdateJobStatus(jobIds: string[], status: string) {
   try {
     const user = await getUser();
-    if (!user || user.role !== "admin") {
+    if (!user || user.user_metadata.role !== "admin") {
       return { success: false, error: "Unauthorized" };
     }
 
@@ -37,7 +38,7 @@ export async function bulkUpdateJobStatus(jobIds: string[], status: string) {
 export async function bulkDeleteJobs(jobIds: string[]) {
   try {
     const user = await getUser();
-    if (!user || user.role !== "admin") {
+    if (!user || user.user_metadata.role !== "admin") {
       return { success: false, error: "Unauthorized" };
     }
 
@@ -60,5 +61,15 @@ export async function bulkDeleteJobs(jobIds: string[]) {
   } catch (error) {
     console.error("Error deleting jobs:", error);
     return { success: false, error: "Failed to delete jobs" };
+  }
+}
+
+export async function getLocationsAction() {
+  try {
+    const locations = await getLocations();
+    return { success: true, data: locations };
+  } catch (error) {
+    console.error("Error fetching locations:", error);
+    return { success: false, error: "Failed to fetch locations", data: [] };
   }
 }
