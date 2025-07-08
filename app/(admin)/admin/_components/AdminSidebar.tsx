@@ -32,6 +32,7 @@ import { createClient } from '@/lib/supabase/client';
 const adminNavItems: MainNavItem[] = [
   { href: "#admin", label: "Dashboard Overview", iconName: "LayoutDashboard" },
   { href: "/admin/users", label: "Users", iconName: "Users" },
+  { href: "/admin/jobs", label: "Jobs", iconName: "Briefcase" },
   { href: "/admin/payments", label: "Payments", iconName: "CreditCard" },
   { href: "/admin/coupons", label: "Coupons", iconName: "Tag" },
   { href: "/admin/blog", label: "Blog", iconName: "FileText" },
