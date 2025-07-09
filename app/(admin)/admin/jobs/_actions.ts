@@ -14,6 +14,10 @@ export async function bulkUpdateJobStatus(jobIds: string[], status: string) {
       return { success: false, error: "Unauthorized" };
     }
 
+    if (!jobIds || jobIds.length === 0) {
+      return { success: false, error: "No jobs selected" };
+    }
+
     const database = await db();
     
     await database
@@ -40,6 +44,10 @@ export async function bulkDeleteJobs(jobIds: string[]) {
     const user = await getUser();
     if (!user || user.user_metadata.role !== "admin") {
       return { success: false, error: "Unauthorized" };
+    }
+
+    if (!jobIds || jobIds.length === 0) {
+      return { success: false, error: "No jobs selected" };
     }
 
     const database = await db();

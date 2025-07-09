@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
-import { jobs, employerProfiles, locations, profiles } from "@/lib/db/schema";
-import { eq, sql, and, or, like, desc, asc, gte, lte } from "drizzle-orm";
+import { jobs, employerProfiles, locations, profiles, applications } from "@/lib/db/schema";
+import { eq, sql, and, or, like, desc, asc, gte, lte, inArray } from "drizzle-orm";
 
 export type JobStatus = "DRAFT" | "PENDING_PAYMENT" | "ACTIVE" | "EXPIRED" | "FILLED" | "DELETED";
 
@@ -167,12 +167,12 @@ export const getAdminJobs = unstable_cache(
     const applicationCounts = jobIds.length > 0 
       ? await database
           .select({
-            jobId: sql<string>`job_id`,
+            jobId: applications.jobId,
             count: sql<number>`count(*)::int`,
           })
-          .from(sql`applications`)
-          .where(sql`job_id = ANY(${jobIds})`)
-          .groupBy(sql`job_id`)
+          .from(applications)
+          .where(inArray(applications.jobId, jobIds.length > 0 ? jobIds : ['00000000-0000-0000-0000-000000000000']))
+          .groupBy(applications.jobId)
       : [];
 
     const applicationCountMap = new Map(
@@ -280,8 +280,8 @@ export const getJobById = unstable_cache(
     // Get application count
     const applicationCount = await database
       .select({ count: sql<number>`count(*)::int` })
-      .from(sql`applications`)
-      .where(sql`job_id = ${jobId}`);
+      .from(applications)
+      .where(eq(applications.jobId, jobId));
 
     // Get skills
     const jobSkills = await database
