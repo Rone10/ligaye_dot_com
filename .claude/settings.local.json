@@ -12,7 +12,8 @@
       "Bash(find:*)",
       "Bash(ls:*)",
       "Bash(pnpm list:*)",
-      "WebFetch(domain:docs.arcjet.com)"
+      "WebFetch(domain:docs.arcjet.com)",
+      "Bash(pnpm drizzle-kit:*)"
     ],
     "deny": []
   }

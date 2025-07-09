@@ -8,6 +8,14 @@
 @import '@syncfusion/ej2-popups/styles/material.css';
 @import '@syncfusion/ej2-richtexteditor/styles/material.css';
 
+/* Reset Tailwind's list style removal for RichTextEditor */
+.e-richtexteditor ul,
+.e-richtexteditor ol {
+  list-style: revert !important;
+  margin: revert !important;
+  padding: revert !important;
+}
+
 /* Auto-grow editor content area */
 .e-richtexteditor .e-rte-content {
   min-height: 200px !important;
@@ -19,6 +27,18 @@
 .e-richtexteditor .e-content {
   min-height: 200px !important;
   height: auto !important;
+}
+
+/* Fix for typing delay - ensure content is immediately visible */
+.e-richtexteditor .e-rte-content * {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+}
+
+/* Ensure immediate rendering of typed content */
+.e-richtexteditor .e-content iframe {
+  height: 100% !important;
+  min-height: 200px !important;
 }
 
 /* Improve the content area styling */
@@ -47,37 +67,58 @@
 }
 
 /* Fix bullet list and ordered list display */
-.e-richtexteditor .e-rte-content ul {
+.e-richtexteditor .e-rte-content ul,
+.e-richtexteditor .e-content ul {
   list-style-type: disc !important;
-  margin-left: 20px !important;
-  padding-left: 10px !important;
+  list-style-position: inside !important;
+  margin-left: 0 !important;
+  padding-left: 20px !important;
 }
 
-.e-richtexteditor .e-rte-content ol {
+.e-richtexteditor .e-rte-content ol,
+.e-richtexteditor .e-content ol {
   list-style-type: decimal !important;
-  margin-left: 20px !important;
-  padding-left: 10px !important;
+  list-style-position: inside !important;
+  margin-left: 0 !important;
+  padding-left: 20px !important;
 }
 
-.e-richtexteditor .e-rte-content ul li {
+.e-richtexteditor .e-rte-content ul li,
+.e-richtexteditor .e-content ul li {
   display: list-item !important;
   list-style-type: disc !important;
+  list-style-position: inside !important;
   margin-bottom: 4px !important;
+  margin-left: 0 !important;
 }
 
-.e-richtexteditor .e-rte-content ol li {
+.e-richtexteditor .e-rte-content ol li,
+.e-richtexteditor .e-content ol li {
   display: list-item !important;
   list-style-type: decimal !important;
+  list-style-position: inside !important;
   margin-bottom: 4px !important;
+  margin-left: 0 !important;
 }
 
 /* Nested lists */
-.e-richtexteditor .e-rte-content ul ul {
+.e-richtexteditor .e-rte-content ul ul,
+.e-richtexteditor .e-content ul ul {
   list-style-type: circle !important;
+  margin-left: 20px !important;
 }
 
-.e-richtexteditor .e-rte-content ul ul ul {
+.e-richtexteditor .e-rte-content ul ul ul,
+.e-richtexteditor .e-content ul ul ul {
   list-style-type: square !important;
+  margin-left: 20px !important;
+}
+
+/* Ensure list markers are visible */
+.e-richtexteditor .e-rte-content li::marker,
+.e-richtexteditor .e-content li::marker {
+  color: inherit !important;
+  font-size: inherit !important;
 }
 
 /* Dark mode styles */
@@ -141,13 +182,19 @@
 
 /* Dark mode list styles */
 .dark-mode .e-richtexteditor .e-rte-content ul li,
-.dark .e-richtexteditor .e-rte-content ul li {
+.dark .e-richtexteditor .e-rte-content ul li,
+.dark-mode .e-richtexteditor .e-content ul li,
+.dark .e-richtexteditor .e-content ul li {
   color: hsl(0, 0%, 100%) !important;
+  list-style-type: disc !important;
 }
 
 .dark-mode .e-richtexteditor .e-rte-content ol li,
-.dark .e-richtexteditor .e-rte-content ol li {
+.dark .e-richtexteditor .e-rte-content ol li,
+.dark-mode .e-richtexteditor .e-content ol li,
+.dark .e-richtexteditor .e-content ol li {
   color: hsl(0, 0%, 100%) !important;
+  list-style-type: decimal !important;
 }
 
 /* Ensure proper text color in dark mode */

@@ -6,63 +6,63 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
   // Determine which rate limit to apply based on the route
-  let rateLimitRule;
+  // let rateLimitRule;
   
-  // API routes - stricter limits
-  if (pathname.startsWith('/api/')) {
-    // Seed routes get admin limits
-    if (pathname.startsWith('/api/seed-')) {
-      rateLimitRule = adminRateLimit;
-    } else {
-      rateLimitRule = apiRateLimit;
-    }
-  }
-  // Admin routes - very strict
-  else if (pathname.startsWith('/admin')) {
-    rateLimitRule = adminRateLimit;
-  }
-  // Auth routes - prevent brute force
-  else if (pathname.match(/^\/(sign-in|sign-up|reset-password|auth)/)) {
-    rateLimitRule = authRateLimit;
-  }
-  // Public content routes - more permissive
-  else if (pathname.match(/^\/($|jobs|tenders|about|contact|privacy|terms)/)) {
-    rateLimitRule = publicRouteRateLimit;
-  }
-  // Dashboard routes - standard limits
-  else if (pathname.match(/^\/(candidate|employer|dashboard)/)) {
-    rateLimitRule = generalRateLimit;
-  }
-  // Everything else - general limits
-  else {
-    rateLimitRule = generalRateLimit;
-  }
+  // // API routes - stricter limits
+  // if (pathname.startsWith('/api/')) {
+  //   // Seed routes get admin limits
+  //   if (pathname.startsWith('/api/seed-')) {
+  //     rateLimitRule = adminRateLimit;
+  //   } else {
+  //     rateLimitRule = apiRateLimit;
+  //   }
+  // }
+  // // Admin routes - very strict
+  // else if (pathname.startsWith('/admin')) {
+  //   rateLimitRule = adminRateLimit;
+  // }
+  // // Auth routes - prevent brute force
+  // else if (pathname.match(/^\/(sign-in|sign-up|reset-password|auth)/)) {
+  //   rateLimitRule = authRateLimit;
+  // }
+  // // Public content routes - more permissive
+  // else if (pathname.match(/^\/($|jobs|tenders|about|contact|privacy|terms)/)) {
+  //   rateLimitRule = publicRouteRateLimit;
+  // }
+  // // Dashboard routes - standard limits
+  // else if (pathname.match(/^\/(candidate|employer|dashboard)/)) {
+  //   rateLimitRule = generalRateLimit;
+  // }
+  // // Everything else - general limits
+  // else {
+  //   rateLimitRule = generalRateLimit;
+  // }
   
-  // Apply rate limiting
-  const aj = createArcjet([rateLimitRule]);
-  const decision = await aj.protect(request);
+  // // Apply rate limiting
+  // const aj = createArcjet([rateLimitRule]);
+  // const decision = await aj.protect(request);
   
-  // If rate limited, return 429 response
-  if (decision.isDenied()) {
-    // Log rate limit violation for monitoring
-    console.log(`Rate limit exceeded for IP: ${request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'} on path: ${pathname}`);
+  // // If rate limited, return 429 response
+  // if (decision.isDenied()) {
+  //   // Log rate limit violation for monitoring
+  //   console.log(`Rate limit exceeded for IP: ${request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'} on path: ${pathname}`);
     
-    return new NextResponse(
-      JSON.stringify({ 
-        error: 'Too many requests. Please try again later.',
-        retryAfter: 60
-      }),
-      { 
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'Retry-After': '60', // 60 seconds
-          'X-RateLimit-Limit': '60', // Default limit shown
-          'X-RateLimit-Reset': new Date(Date.now() + 60000).toISOString()
-        }
-      }
-    );
-  }
+  //   return new NextResponse(
+  //     JSON.stringify({ 
+  //       error: 'Too many requests. Please try again later.',
+  //       retryAfter: 60
+  //     }),
+  //     { 
+  //       status: 429,
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Retry-After': '60', // 60 seconds
+  //         'X-RateLimit-Limit': '60', // Default limit shown
+  //         'X-RateLimit-Reset': new Date(Date.now() + 60000).toISOString()
+  //       }
+  //     }
+  //   );
+  // }
   
   let supabaseResponse = NextResponse.next({
     request,

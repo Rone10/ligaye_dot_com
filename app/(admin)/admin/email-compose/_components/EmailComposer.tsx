@@ -13,8 +13,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { EmailRichTextEditor } from './EmailRichTextEditor';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
@@ -107,12 +107,15 @@ export function EmailComposer({ templates, draftId }: EmailComposerProps) {
     toast.info('Template loading will be implemented');
   };
 
-  // Convert plain text to basic HTML
-  const convertToHtml = (text: string) => {
-    return text
-      .split('\n\n')
-      .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
-      .join('\n');
+  // Handle rich text editor change
+  const handleEditorChange = (content: string) => {
+    setValue('bodyHtml', content);
+    // Extract plain text for bodyText field
+    const plainText = content
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .trim();
+    setValue('bodyText', plainText);
   };
 
   // Handle form submission
@@ -279,19 +282,15 @@ export function EmailComposer({ templates, draftId }: EmailComposerProps) {
                   <FormItem>
                     <FormLabel>Email Content</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Type your email content here..."
-                        className="min-h-[300px] font-mono"
-                        {...field}
-                        onChange={(e) => {
-                          const plainText = e.target.value;
-                          field.onChange(convertToHtml(plainText));
-                          setValue('bodyText', plainText);
-                        }}
+                      <EmailRichTextEditor
+                        value={field.value}
+                        onChange={handleEditorChange}
+                        height="auto"
+                        minHeight={300}
                       />
                     </FormControl>
                     <FormDescription>
-                      Your email will be formatted with proper HTML styling
+                      Use the editor to format your email with rich text styling
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

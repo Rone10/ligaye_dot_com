@@ -3,7 +3,7 @@
 import { Resend } from 'resend';
 import { db } from '@/lib/db';
 import { getUser } from '@/lib/supabase/server';
-import { emailDrafts } from '@/lib/db/schema';
+import { emailDrafts, profiles } from '@/lib/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { 
   individualEmailFormSchema, 
@@ -11,7 +11,7 @@ import {
   type TIndividualEmailForm,
   type TEmailDraft 
 } from './_utils/validation';
-import * as React from 'react';
+import { EmailTemplateWrapper, extractPlainText } from './_components/EmailTemplateWrapper';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = 'Ligaye <contact@ligaye.com>';
@@ -21,6 +21,23 @@ type ActionResult<T = void> = {
   message?: string;
   data?: T;
 };
+
+// Helper function to get profile ID from user
+async function getProfileId(userId: string): Promise<string | null> {
+  try {
+    const database = await db();
+    const [profile] = await database
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(eq(profiles.userId, userId))
+      .limit(1);
+    
+    return profile?.id || null;
+  } catch (error) {
+    console.error('Error getting profile ID:', error);
+    return null;
+  }
+}
 
 // Send individual email
 export async function sendIndividualEmail(
@@ -41,12 +58,17 @@ export async function sendIndividualEmail(
 
     const { recipient, subject, bodyHtml, cc, bcc } = validationResult.data;
 
+    // Wrap content with email template
+    const formattedHtml = EmailTemplateWrapper({ content: bodyHtml, previewMode: false }) as string;
+    const plainText = extractPlainText(bodyHtml);
+
     // Prepare email payload
     const emailPayload: any = {
       from: fromEmail,
       to: recipient,
       subject: subject,
-      html: bodyHtml,
+      html: formattedHtml,
+      text: plainText,
     };
 
     // Add CC if provided
@@ -70,14 +92,20 @@ export async function sendIndividualEmail(
       };
     }
 
+    // Get profile ID
+    const profileId = await getProfileId(user.id);
+    if (!profileId) {
+      return { success: false, message: 'User profile not found' };
+    }
+
     // Save to email_drafts with status 'sent'
     const database = await db();
     await database.insert(emailDrafts).values({
-      userId: user.id,
+      userId: profileId,
       recipient,
       subject,
       bodyHtml,
-      bodyText: data.bodyText || null,
+      bodyText: plainText,
       cc: cc || null,
       bcc: bcc || null,
       status: 'sent',
@@ -114,6 +142,12 @@ export async function saveDraft(
       return { success: false, message: 'Invalid draft data' };
     }
 
+    // Get profile ID
+    const profileId = await getProfileId(user.id);
+    if (!profileId) {
+      return { success: false, message: 'User profile not found' };
+    }
+
     const database = await db();
     const { id, ...draftData } = validationResult.data;
 
@@ -129,7 +163,7 @@ export async function saveDraft(
         .where(
           and(
             eq(emailDrafts.id, id),
-            eq(emailDrafts.userId, user.id),
+            eq(emailDrafts.userId, profileId),
             eq(emailDrafts.status, 'draft'),
             eq(emailDrafts.deleted, false)
           )
@@ -144,7 +178,7 @@ export async function saveDraft(
       const [newDraft] = await database
         .insert(emailDrafts)
         .values({
-          userId: user.id,
+          userId: profileId,
           recipient: draftData.recipient || '',
           subject: draftData.subject || '',
           bodyHtml: draftData.bodyHtml || '',
@@ -180,6 +214,12 @@ export async function loadDraft(
       return { success: false, message: 'Unauthorized' };
     }
 
+    // Get profile ID
+    const profileId = await getProfileId(user.id);
+    if (!profileId) {
+      return { success: false, message: 'User profile not found' };
+    }
+
     const database = await db();
     const [draft] = await database
       .select()
@@ -187,7 +227,7 @@ export async function loadDraft(
       .where(
         and(
           eq(emailDrafts.id, draftId),
-          eq(emailDrafts.userId, user.id),
+          eq(emailDrafts.userId, profileId),
           eq(emailDrafts.status, 'draft'),
           eq(emailDrafts.deleted, false)
         )
@@ -233,6 +273,12 @@ export async function getDrafts(): Promise<ActionResult<Array<{
       return { success: false, message: 'Unauthorized' };
     }
 
+    // Get profile ID
+    const profileId = await getProfileId(user.id);
+    if (!profileId) {
+      return { success: false, message: 'User profile not found' };
+    }
+
     const database = await db();
     const drafts = await database
       .select({
@@ -244,7 +290,7 @@ export async function getDrafts(): Promise<ActionResult<Array<{
       .from(emailDrafts)
       .where(
         and(
-          eq(emailDrafts.userId, user.id),
+          eq(emailDrafts.userId, profileId),
           eq(emailDrafts.status, 'draft'),
           eq(emailDrafts.deleted, false)
         )
@@ -273,6 +319,12 @@ export async function deleteDraft(draftId: string): Promise<ActionResult> {
       return { success: false, message: 'Unauthorized' };
     }
 
+    // Get profile ID
+    const profileId = await getProfileId(user.id);
+    if (!profileId) {
+      return { success: false, message: 'User profile not found' };
+    }
+
     const database = await db();
     await database
       .update(emailDrafts)
@@ -283,7 +335,7 @@ export async function deleteDraft(draftId: string): Promise<ActionResult> {
       .where(
         and(
           eq(emailDrafts.id, draftId),
-          eq(emailDrafts.userId, user.id),
+          eq(emailDrafts.userId, profileId),
           eq(emailDrafts.status, 'draft')
         )
       );

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Monitor, Smartphone, Mail, User, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { EmailTemplateWrapper } from './EmailTemplateWrapper';
 
 interface EmailPreviewProps {
   recipient: string;
@@ -16,13 +17,6 @@ interface EmailPreviewProps {
 
 export function EmailPreview({ recipient, subject, bodyHtml, cc, bcc }: EmailPreviewProps) {
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
-
-  // Generate a preview-safe HTML with basic styling
-  const previewHtml = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333;">
-      ${bodyHtml}
-    </div>
-  `;
 
   return (
     <Card className="h-full">
@@ -86,14 +80,35 @@ export function EmailPreview({ recipient, subject, bodyHtml, cc, bcc }: EmailPre
           </div>
 
           {/* Email Content */}
-          <div className="rounded-b-lg border border-t-0 bg-white p-6 min-h-[400px]">
+          <div className="rounded-b-lg border border-t-0 bg-white min-h-[400px] overflow-hidden">
+            <style jsx global>{`
+              /* Ensure list styles work in preview */
+              .email-preview-content ul {
+                list-style-type: disc !important;
+                list-style-position: inside !important;
+                padding-left: 20px !important;
+              }
+              .email-preview-content ol {
+                list-style-type: decimal !important;
+                list-style-position: inside !important;
+                padding-left: 20px !important;
+              }
+              .email-preview-content li {
+                display: list-item !important;
+              }
+              .email-preview-content ul li::marker {
+                color: inherit !important;
+              }
+              .email-preview-content ol li::marker {
+                color: inherit !important;
+              }
+            `}</style>
             {bodyHtml ? (
-              <div 
-                dangerouslySetInnerHTML={{ __html: previewHtml }}
-                className="prose prose-sm max-w-none"
-              />
+              <div className="email-preview-content">
+                <EmailTemplateWrapper content={bodyHtml} previewMode={true} />
+              </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-[350px] text-gray-400">
+              <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 p-6">
                 <FileText className="h-12 w-12 mb-2" />
                 <p>Start typing to see your email preview</p>
               </div>
