@@ -22,6 +22,59 @@ interface JobDetailsProps {
 }
 
 export function JobDetails({ job }: JobDetailsProps) {
+  // Parse HTML and extract text content for safer rendering
+  const parseJobDescription = (description: string | null | undefined) => {
+    if (!description) return '';
+    
+    // Ensure description is a string
+    const descriptionStr = typeof description === 'string' ? description : String(description);
+    
+    // Replace HTML entities first
+    let parsedText = descriptionStr
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'")
+      .replace(/&nbsp;/g, ' ');
+    
+    // Replace paragraph tags with appropriate markup
+    parsedText = parsedText
+      .replace(/<p\s*[^>]*>/g, '<div class="mb-4">')
+      .replace(/<\/p>/g, '</div>')
+      .replace(/<br\s*\/?>/g, '<br />');
+    
+    // Handle headers with proper styling
+    parsedText = parsedText
+      .replace(/<h1\s*[^>]*>(.*?)<\/h1>/g, '<div class="text-3xl font-bold mb-4">$1</div>')
+      .replace(/<h2\s*[^>]*>(.*?)<\/h2>/g, '<div class="text-2xl font-bold mb-3">$1</div>')
+      .replace(/<h3\s*[^>]*>(.*?)<\/h3>/g, '<div class="text-xl font-bold mb-2">$1</div>')
+      .replace(/<h4\s*[^>]*>(.*?)<\/h4>/g, '<div class="text-lg font-semibold mb-2">$1</div>')
+      .replace(/<h5\s*[^>]*>(.*?)<\/h5>/g, '<div class="text-base font-semibold mb-1">$1</div>')
+      .replace(/<h6\s*[^>]*>(.*?)<\/h6>/g, '<div class="text-sm font-semibold mb-1">$1</div>');
+    
+    // Preserve text formatting
+    parsedText = parsedText
+      .replace(/<strong\s*[^>]*>(.*?)<\/strong>/g, '<span class="font-bold">$1</span>')
+      .replace(/<b\s*[^>]*>(.*?)<\/b>/g, '<span class="font-bold">$1</span>')
+      .replace(/<em\s*[^>]*>(.*?)<\/em>/g, '<span class="italic">$1</span>')
+      .replace(/<i\s*[^>]*>(.*?)<\/i>/g, '<span class="italic">$1</span>')
+      .replace(/<u\s*[^>]*>(.*?)<\/u>/g, '<span class="underline">$1</span>');
+    
+    // Handle lists
+    parsedText = parsedText
+      .replace(/<ul\s*[^>]*>/g, '<div class="pl-6 mb-4 space-y-1">')
+      .replace(/<\/ul>/g, '</div>')
+      .replace(/<ol\s*[^>]*>/g, '<div class="pl-6 mb-4 space-y-1 list-decimal">')
+      .replace(/<\/ol>/g, '</div>')
+      .replace(/<li\s*[^>]*>(.*?)<\/li>/g, '<div class="flex"><span class="mr-2">•</span><span>$1</span></div>');
+    
+    // Clean up any potentially unsafe tags while keeping our safe ones
+    const safeTagsRegex = /<(?!\/?(div|span|br)(?!\w)[^>]*>)([^>]*)>/g;
+    parsedText = parsedText.replace(safeTagsRegex, '');
+    
+    return parsedText;
+  };
   const formatSalary = () => {
     if (job.salaryDisplayType === "NEGOTIABLE") return "Negotiable";
     
@@ -127,30 +180,36 @@ export function JobDetails({ job }: JobDetailsProps) {
 
             <div>
               <h4 className="font-semibold mb-2">Description</h4>
-              <div className="prose prose-sm max-w-none text-sm text-muted-foreground">
-                {job.description}
+              <div className="prose-rich-text max-w-none text-sm text-muted-foreground">
+                <div 
+                  dangerouslySetInnerHTML={{ __html: parseJobDescription(job.description) }}
+                />
               </div>
             </div>
 
-            {job.requirements && (
+            {job.educationRequirements && (
               <>
                 <Separator />
                 <div>
-                  <h4 className="font-semibold mb-2">Requirements</h4>
-                  <div className="prose prose-sm max-w-none text-sm text-muted-foreground">
-                    {job.requirements}
+                  <h4 className="font-semibold mb-2">Education Requirements</h4>
+                  <div className="prose-rich-text max-w-none text-sm text-muted-foreground">
+                    <div 
+                      dangerouslySetInnerHTML={{ __html: parseJobDescription(job.educationRequirements) }}
+                    />
                   </div>
                 </div>
               </>
             )}
 
-            {job.responsibilities && (
+            {job.experienceRequirements && (
               <>
                 <Separator />
                 <div>
-                  <h4 className="font-semibold mb-2">Responsibilities</h4>
-                  <div className="prose prose-sm max-w-none text-sm text-muted-foreground">
-                    {job.responsibilities}
+                  <h4 className="font-semibold mb-2">Experience Requirements</h4>
+                  <div className="prose-rich-text max-w-none text-sm text-muted-foreground">
+                    <div 
+                      dangerouslySetInnerHTML={{ __html: parseJobDescription(job.experienceRequirements) }}
+                    />
                   </div>
                 </div>
               </>
@@ -161,8 +220,10 @@ export function JobDetails({ job }: JobDetailsProps) {
                 <Separator />
                 <div>
                   <h4 className="font-semibold mb-2">Benefits</h4>
-                  <div className="prose prose-sm max-w-none text-sm text-muted-foreground">
-                    {job.benefits}
+                  <div className="prose-rich-text max-w-none text-sm text-muted-foreground">
+                    <div 
+                      dangerouslySetInnerHTML={{ __html: parseJobDescription(job.benefits) }}
+                    />
                   </div>
                 </div>
               </>
@@ -173,8 +234,10 @@ export function JobDetails({ job }: JobDetailsProps) {
                 <Separator />
                 <div>
                   <h4 className="font-semibold mb-2">Application Instructions</h4>
-                  <div className="prose prose-sm max-w-none text-sm text-muted-foreground">
-                    {job.applicationInstructions}
+                  <div className="prose-rich-text max-w-none text-sm text-muted-foreground">
+                    <div 
+                      dangerouslySetInnerHTML={{ __html: parseJobDescription(job.applicationInstructions) }}
+                    />
                   </div>
                 </div>
               </>
