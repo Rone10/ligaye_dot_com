@@ -11,6 +11,8 @@ import { ArrowLeft, Mail, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { getDrafts } from './_actions';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminEmailComposePage() {
   // Get available email templates
   const templates = [
