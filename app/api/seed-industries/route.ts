@@ -3,6 +3,8 @@ import { db } from '@/lib/db';
 import { sectors } from '@/lib/db/schema';
 import { eq, ilike } from 'drizzle-orm'; // Use ilike for case-insensitive comparison
 import { getUser } from '@/lib/supabase/server';
+import { adminArcjet } from '@/lib/arcjet';
+import { headers } from 'next/headers';
 
 const industryData = [
   "Agriculture & Agribusiness",
@@ -44,6 +46,20 @@ const industryData = [
 ].map(name => ({ name }));
 
 export async function POST() {
+    // Rate limiting and shield protection for admin routes
+    const request = new Request('https://ligaye.com/api/seed-industries', {
+        headers: await headers(),
+    });
+    
+    const decision = await adminArcjet.protect(request);
+    
+    if (decision.isDenied()) {
+        return NextResponse.json(
+            { error: 'Too many seed requests. Please try again later.' },
+            { status: 429 }
+        );
+    }
+    
     const user = await getUser();
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

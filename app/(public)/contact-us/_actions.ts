@@ -3,6 +3,8 @@
 import { Resend } from 'resend'
 import { type ContactFormValues } from './_utils/validation' // Use the type from validation file
 import ContactFormSubmissionEmail from '@/emails/contact-form-submission'
+import { formArcjet, emailValidation } from '@/lib/arcjet'
+import { headers } from 'next/headers'
 
 // Initialize Resend
 // Ensure RESEND_API_KEY is set in your environment variables
@@ -13,6 +15,17 @@ const recipientEmail = process.env.CONTACT_EMAIL_RECIPIENT || 'contact@ligaye.co
 const fromEmail = 'Contact Form <contact@ligaye.com>'; // Or your verified Resend domain
 
 export async function sendContactMessage(data: ContactFormValues) {
+  // Bot protection and rate limiting
+  const request = new Request('https://ligaye.com/contact', {
+    headers: await headers(),
+  });
+  
+  const decision = await formArcjet.protect(request);
+  
+  if (decision.isDenied()) {
+    return { success: false, error: "Too many contact form submissions. Please try again later." };
+  }
+
   // No need to re-validate here as the form uses zodResolver
   // The data reaching this action should already be validated.
 

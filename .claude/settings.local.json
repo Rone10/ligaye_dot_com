@@ -10,7 +10,9 @@
       "Bash(pnpm build:*)",
       "Bash(pnpm add:*)",
       "Bash(find:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(pnpm list:*)",
+      "WebFetch(domain:docs.arcjet.com)"
     ],
     "deny": []
   }

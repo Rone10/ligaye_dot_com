@@ -8,6 +8,8 @@ import type { AuthUser } from '@supabase/supabase-js'
 import { db } from '@/lib/db'
 import { profiles, candidateProfiles, employerProfiles } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
+import { authArcjet } from '@/lib/arcjet'
+import { headers } from 'next/headers'
 
 export type SignInActionResult = {
   success: boolean;
@@ -22,6 +24,20 @@ export type SignInActionResult = {
  * (dashboard or profile creation).
  */
 export async function signInUser(formData: FormData): Promise<SignInActionResult> {
+  // Rate limiting check
+  const request = new Request('https://ligaye.com/sign-in', {
+    headers: await headers(),
+  });
+  
+  const decision = await authArcjet.protect(request);
+  
+  if (decision.isDenied()) {
+    return {
+      success: false,
+      error: 'Too many sign-in attempts. Please try again later.'
+    };
+  }
+  
   let authUser: AuthUser | null = null;
 
   // --- Authentication Logic (inside try...catch) ---

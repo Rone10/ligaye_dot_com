@@ -10,6 +10,8 @@ import { v4 as uuidv4 } from "uuid"
 import { Resend } from 'resend'
 import { JobSuccessfullyAppliedEmail } from '@/emails/job-successfully-applied'
 import { format } from 'date-fns'
+import { formArcjet } from '@/lib/arcjet'
+import { headers } from 'next/headers'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -29,6 +31,17 @@ export async function submitApplication({
   profileResumeFilename
 }: ApplicationSubmissionParams) {
   try {
+    // Bot protection and rate limiting
+    const request = new Request(`https://ligaye.com/jobs/${jobId}/apply`, {
+      headers: await headers(),
+    });
+    
+    const decision = await formArcjet.protect(request);
+    
+    if (decision.isDenied()) {
+      return { success: false, error: "Too many application attempts. Please try again later." };
+    }
+    
     // Validate user authentication
     const user = await getUser()
     if (!user) {

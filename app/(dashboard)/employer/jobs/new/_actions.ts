@@ -23,6 +23,8 @@ import { recordCouponRedemption } from './_queries/coupon'
 import { validateCouponForJobPosting as validateCouponInternal } from './_queries/coupon'
 import { getActivePricing, calculateTotalPrice, getDefaultPricing } from '@/lib/utils/pricing'
 import { inngest } from '@/inngest/client'
+import { paymentArcjet } from '@/lib/arcjet'
+import { headers } from 'next/headers'
 
 // Server action for coupon validation (to be used by client components)
 export async function validateCoupon(couponCode: string, originalAmount: number) {
@@ -42,6 +44,20 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
   if (!user) {
     return { error: 'You must be logged in to post a job' }
   }
+  
+  // Payment protection for job posting
+  const request = new Request('https://ligaye.com/employer/jobs/new', {
+    headers: await headers(),
+  });
+  
+  const decision = await paymentArcjet.protect(request);
+  
+  if (decision.isDenied()) {
+    return { 
+      error: 'Too many job posting attempts. Please try again later.' 
+    };
+  }
+  
   try {
     // Extract coupon data before validation
     const { coupon, ...jobData } = formData

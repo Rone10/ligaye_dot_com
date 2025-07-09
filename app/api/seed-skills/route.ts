@@ -3,6 +3,8 @@ import { db } from '@/lib/db';
 import { skills } from '@/lib/db/schema';
 import { eq, ilike } from 'drizzle-orm';
 import { getUser } from '@/lib/supabase/server';
+import { adminArcjet } from '@/lib/arcjet';
+import { headers } from 'next/headers';
 
 const skillData = [
     "Communication", "Teamwork", "Leadership", "Time Management", "Critical Thinking",
@@ -23,6 +25,20 @@ const skillData = [
 ].map(name => ({ name })); // Format for insertion
 
 export async function POST() {
+    // Rate limiting and shield protection for admin routes
+    const request = new Request('https://ligaye.com/api/seed-skills', {
+        headers: await headers(),
+    });
+    
+    const decision = await adminArcjet.protect(request);
+    
+    if (decision.isDenied()) {
+        return NextResponse.json(
+            { error: 'Too many seed requests. Please try again later.' },
+            { status: 429 }
+        );
+    }
+    
     const user = await getUser();
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

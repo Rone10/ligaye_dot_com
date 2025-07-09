@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { requestResetSchema } from './_utils/validation'
 import { z } from 'zod'
+import { authArcjet } from '@/lib/arcjet'
+import { headers } from 'next/headers'
 
 export type RequestResetActionResult = {
   success: boolean;
@@ -15,6 +17,20 @@ export type RequestResetActionResult = {
  * This action validates the email and sends a password reset email via Supabase Auth
  */
 export async function requestPasswordReset(formData: FormData): Promise<RequestResetActionResult> {
+  // Rate limiting check
+  const request = new Request('https://ligaye.com/reset-password', {
+    headers: await headers(),
+  });
+  
+  const decision = await authArcjet.protect(request);
+  
+  if (decision.isDenied()) {
+    return {
+      success: false,
+      error: 'Too many password reset attempts. Please try again later.'
+    };
+  }
+  
   // Extract form data
   const email = formData.get('email')
 

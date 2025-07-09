@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation'
 import { createUserProfile } from './_queries'
 import { signUpSchema } from './_utils/validation'
 import { z } from 'zod'
+import { signupArcjet } from '@/lib/arcjet'
+import { headers } from 'next/headers'
 
 export type SignUpActionResult = {
   success: boolean;
@@ -24,6 +26,20 @@ export async function signUpUser(formData: FormData): Promise<SignUpActionResult
     email: formData.get('email'),
     password: formData.get('password'),
     userRole: formData.get('userRole'),
+  }
+
+  // Arcjet protection - rate limiting, bot detection, and email validation
+  const request = new Request('https://ligaye.com/sign-up', {
+    headers: await headers(),
+  });
+  
+  const decision = await signupArcjet.protect(request);
+  
+  if (decision.isDenied()) {
+    return {
+      success: false,
+      error: 'Too many sign-up attempts. Please try again later.'
+    };
   }
 
   // Validate form data

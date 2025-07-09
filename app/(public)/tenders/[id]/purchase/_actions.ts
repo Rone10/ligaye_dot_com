@@ -4,6 +4,8 @@ import stripe from '@/lib/stripe';
 import { getTenderPurchaseInfo } from './_queries';
 import { db } from '@/lib/db';
 import { tenderPayments } from '@/lib/db/schema';
+import { paymentArcjet } from '@/lib/arcjet';
+import { headers } from 'next/headers';
 
 interface PurchaseParams {
   tenderId: string;
@@ -19,6 +21,21 @@ export async function initiateDocumentPurchaseAction({
   purchaserInfo,
 }: PurchaseParams): Promise<{ success: boolean; checkoutUrl?: string; error?: string }> {
   console.log('inside initiateDocumentPurchaseAction');
+  
+  // Payment protection
+  const request = new Request(`https://ligaye.com/tenders/${tenderId}/purchase`, {
+    headers: await headers(),
+  });
+  
+  const decision = await paymentArcjet.protect(request);
+  
+  if (decision.isDenied()) {
+    return { 
+      success: false, 
+      error: 'Too many purchase attempts. Please try again later.' 
+    };
+  }
+  
   try {
     console.log('inside initiateDocumentPurchaseAction try');
     // Get tender details
