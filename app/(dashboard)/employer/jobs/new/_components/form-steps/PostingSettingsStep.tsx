@@ -361,7 +361,7 @@ export default function PostingSettingsStep({
           <FormItem>
             <div className="flex items-center justify-between mb-2">
               <FormLabel>Job Description</FormLabel>
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 size="sm"
@@ -371,7 +371,7 @@ export default function PostingSettingsStep({
               >
                 <Sparkles className="h-4 w-4" />
                 {isGenerating ? 'Generating...' : 'Enhance with AI'}
-              </Button>
+              </Button> */}
             </div>
             <FormControl>
               <Editor
