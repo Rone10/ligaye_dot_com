@@ -688,6 +688,30 @@ export const pricingConfig = pgTable('pricing_config', {
   };
 });
 
+// Email Drafts Table
+export const emailDrafts = pgTable('email_drafts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  recipient: text('recipient').notNull(), // Email address of recipient
+  subject: text('subject').notNull(),
+  bodyHtml: text('body_html').notNull(), // HTML content of email
+  bodyText: text('body_text'), // Plain text content (optional)
+  cc: text('cc'), // Comma-separated CC emails
+  bcc: text('bcc'), // Comma-separated BCC emails
+  status: text('status').notNull().default('draft'), // draft or sent
+  sentAt: timestamp('sent_at'), // When the email was sent
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  deleted: boolean('deleted').default(false).notNull(),
+}, (table) => {
+  return {
+    userIdIdx: index('email_drafts_user_id_idx').on(table.userId),
+    statusIdx: index('email_drafts_status_idx').on(table.status),
+    createdAtIdx: index('email_drafts_created_at_idx').on(table.createdAt),
+    deletedIdx: index('email_drafts_deleted_idx').on(table.deleted),
+  };
+});
+
 
 // --- Relations ---
 
@@ -708,6 +732,7 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   submittedApplications: many(applications), // Applications submitted by this profile (if candidate) - Requires adjusted relation definition
   authoredBlogPosts: many(blogPosts, { relationName: 'blogPostAuthor' }),
   couponRedemptions: many(couponRedemptions), // Coupons redeemed by this user
+  emailDrafts: many(emailDrafts), // Email drafts created by this user
 }));
 
 export const locationsRelations = relations(locations, ({ many }) => ({
@@ -909,6 +934,13 @@ export const pricingConfigRelations = relations(pricingConfig, ({ one }) => ({
   }),
 }));
 
+export const emailDraftsRelations = relations(emailDrafts, ({ one }) => ({
+  user: one(profiles, {
+    fields: [emailDrafts.userId],
+    references: [profiles.id],
+  }),
+}));
+
 
 export const blogPosts = pgTable('blog_posts', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -1045,4 +1077,8 @@ export type NewCouponRedemption = InferInsertModel<typeof couponRedemptions>;
 // Pricing Config Types
 export type PricingConfig = InferSelectModel<typeof pricingConfig>;
 export type NewPricingConfig = InferInsertModel<typeof pricingConfig>;
+
+// Email Draft Types
+export type EmailDraft = InferSelectModel<typeof emailDrafts>;
+export type NewEmailDraft = InferInsertModel<typeof emailDrafts>;
 
