@@ -70,9 +70,31 @@ export const adminRateLimit = fixedWindow({
   max: 3, // Very strict: only 3 requests per hour for seed operations
 });
 
+// Site-wide rate limiting configurations
+export const generalRateLimit = fixedWindow({
+  mode: "LIVE",
+  window: "1m",
+  max: 60, // 60 requests per minute for general browsing
+});
+
+export const apiRateLimit = fixedWindow({
+  mode: "LIVE",
+  window: "1m",
+  max: 30, // 30 requests per minute for API routes
+});
+
+export const publicRouteRateLimit = fixedWindow({
+  mode: "LIVE",
+  window: "1h",
+  max: 200, // 200 requests per hour per IP for public pages
+});
+
 // Pre-configured Arcjet instances for common use cases
 export const authArcjet = createArcjet([authRateLimit]);
 export const formArcjet = createArcjet([botProtection, fixedWindow({ mode: "LIVE", window: "1h", max: 10 })]);
 export const signupArcjet = createArcjet(signupRules);
 export const paymentArcjet = createArcjet([paymentProtection, authRateLimit]);
 export const adminArcjet = createArcjet([adminRateLimit, shield({ mode: "LIVE" })]);
+
+// Site-wide rate limiter for middleware
+export const siteWideArcjet = createArcjet([generalRateLimit]);
