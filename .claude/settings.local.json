@@ -13,7 +13,11 @@
       "Bash(ls:*)",
       "Bash(pnpm list:*)",
       "WebFetch(domain:docs.arcjet.com)",
-      "Bash(pnpm drizzle-kit:*)"
+      "Bash(pnpm drizzle-kit:*)",
+      "WebFetch(domain:sdk.vercel.ai)",
+      "WebFetch(domain:ai-sdk.dev)",
+      "WebFetch(domain:v5.ai-sdk.dev)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

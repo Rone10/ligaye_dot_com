@@ -41,6 +41,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Editor } from '@/components/RichTextEditor/editor'
 import { generateJobDescription, fetchAIContextData } from '../../_actions'
 import { useToast } from '@/hooks/use-toast'
+import { useCompletion } from 'ai/react'
 
 interface PostingSettingsStepProps {
   form: UseFormReturn<JobFormValues>
@@ -61,7 +62,6 @@ export default function PostingSettingsStep({
   const [hasValidatedCoupon, setHasValidatedCoupon] = useState(false)
   const [pricingConfig, setPricingConfig] = useState<PricingConfig | null>(null)
   const [loadingPricing, setLoadingPricing] = useState(true)
-  const [isGenerating, setIsGenerating] = useState(false)
   const [contextData, setContextData] = useState<{
     skills: Array<{ id: string; name: string }>
     industries: Array<{ id: string; name: string }>
@@ -71,6 +71,50 @@ export default function PostingSettingsStep({
   const [loadingContext, setLoadingContext] = useState(false)
   const { toast } = useToast()
   const jobDuration = form.watch('jobDuration') || 1
+  
+  // Initialize useCompletion hook for AI streaming
+  const {
+    completion,
+    complete,
+    isLoading: isGenerating,
+    stop
+  } = useCompletion({
+    api: '/api/job-description',
+    onResponse: (response) => {
+      if (!response.ok) {
+        toast({
+          title: "Generation failed",
+          description: "Unable to generate description. Please try again.",
+          variant: "destructive"
+        })
+      }
+    },
+    onError: (error) => {
+      console.error('Streaming error:', error)
+      toast({
+        title: "Generation failed",
+        description: "Unable to generate description. Please try again.",
+        variant: "destructive"
+      })
+    },
+    onFinish: () => {
+      // Update form with the completed description
+      if (completion) {
+        form.setValue('description', completion, { shouldDirty: true })
+        toast({
+          title: "Description generated!",
+          description: "AI has generated a job description. Feel free to edit it.",
+        })
+      }
+    }
+  })
+  
+  // Update the form whenever completion changes
+  useEffect(() => {
+    if (completion && completion.trim()) {
+      form.setValue('description', completion, { shouldDirty: true })
+    }
+  }, [completion, form])
   
   // Fetch pricing configuration
   useEffect(() => {
@@ -169,7 +213,7 @@ export default function PostingSettingsStep({
     }
   }, [jobDuration, couponCode, hasValidatedCoupon, validationResult?.valid, validateCoupon, basePrice])
   
-  // Handle AI generation with full context
+  // Handle AI generation with streaming
   const handleGenerateDescription = async () => {
     const formValues = form.getValues()
     
@@ -181,8 +225,6 @@ export default function PostingSettingsStep({
       })
       return
     }
-
-    setIsGenerating(true)
     
     try {
       // Get location name from locationId
@@ -208,8 +250,8 @@ export default function PostingSettingsStep({
         ? contextData.industries.find(ind => ind.id === contextData.employerProfile?.industryId)?.name || ''
         : ''
       
-      // Gather all context from the form
-      const result = await generateJobDescription({
+      // Prepare the job details for streaming
+      const jobDetails = {
         title: formValues.title,
         location: locationName,
         experienceLevel: formValues.experienceLevel || '',
@@ -224,19 +266,14 @@ export default function PostingSettingsStep({
         benefits: formValues.benefits || [],
         supplementalPay: formValues.supplementalPay || [],
         educationRequirements: formValues.educationRequirementsRichText || '',
-        experienceRequirements: formValues.experienceRequirementsRichText || '',
-        requestId: '' // Will be generated in the action
-      })
-
-      if (result.success && result.description) {
-        form.setValue('description', result.description, { shouldDirty: true })
-        toast({
-          title: "Description generated!",
-          description: "AI has generated a job description based on all the details you provided. Feel free to edit it as needed.",
-        })
-      } else {
-        throw new Error(result.error || 'Failed to generate description')
+        experienceRequirements: formValues.experienceRequirementsRichText || ''
       }
+      
+      // Start streaming completion
+      await complete('', {
+        body: jobDetails
+      })
+      
     } catch (error) {
       console.error('Error generating description:', error)
       toast({
@@ -244,8 +281,6 @@ export default function PostingSettingsStep({
         description: "Unable to generate description. Please try again or write manually.",
         variant: "destructive"
       })
-    } finally {
-      setIsGenerating(false)
     }
   }
   
@@ -361,7 +396,7 @@ export default function PostingSettingsStep({
           <FormItem>
             <div className="flex items-center justify-between mb-2">
               <FormLabel>Job Description</FormLabel>
-              {/* <Button
+              <Button
                 type="button"
                 variant="outline"
                 size="sm"
@@ -371,7 +406,7 @@ export default function PostingSettingsStep({
               >
                 <Sparkles className="h-4 w-4" />
                 {isGenerating ? 'Generating...' : 'Enhance with AI'}
-              </Button> */}
+              </Button>
             </div>
             <FormControl>
               <Editor
