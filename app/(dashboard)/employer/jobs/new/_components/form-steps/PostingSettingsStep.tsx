@@ -43,6 +43,14 @@ import { generateJobDescription, fetchAIContextData } from '../../_actions'
 import { useToast } from '@/hooks/use-toast'
 import { useCompletion } from 'ai/react'
 
+// Temporary: Allowed emails for AI feature testing
+const ALLOWED_AI_EMAILS = [
+  'devrone10@gmail.com',
+  'jallowabdul7@gmail.com',
+  'jobsin@gmail.com',
+  'jonathan@gamil.com'
+]
+
 interface PostingSettingsStepProps {
   form: UseFormReturn<JobFormValues>
   onPrevious: () => void
@@ -67,8 +75,10 @@ export default function PostingSettingsStep({
     industries: Array<{ id: string; name: string }>
     locations: Array<{ id: string; region: string; district?: string | null; city?: string | null }>
     employerProfile: { companyName: string; industryId?: string } | null
+    userEmail?: string | null
   }>({ skills: [], industries: [], locations: [], employerProfile: null })
   const [loadingContext, setLoadingContext] = useState(false)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
   const { toast } = useToast()
   const jobDuration = form.watch('jobDuration') || 1
   
@@ -178,6 +188,10 @@ export default function PostingSettingsStep({
         
         if (result.success && result.data) {
           setContextData(result.data)
+          // Set user email for AI button visibility check
+          if (result.data.userEmail) {
+            setUserEmail(result.data.userEmail)
+          }
         } else {
           console.error('Failed to fetch context data:', result.error)
         }
@@ -433,39 +447,42 @@ export default function PostingSettingsStep({
           <FormItem>
             <div className="flex items-center justify-between mb-2">
               <FormLabel>Job Description</FormLabel>
-              <div className="flex items-center gap-2">
-                {isGenerating && (
+              {/* Temporarily show AI button only for allowed emails */}
+              {userEmail && ALLOWED_AI_EMAILS.includes(userEmail) && (
+                <div className="flex items-center gap-2">
+                  {isGenerating && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => stop()}
+                      className="text-destructive"
+                    >
+                      Stop
+                    </Button>
+                  )}
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={() => stop()}
-                    className="text-destructive"
+                    onClick={handleGenerateDescription}
+                    disabled={isGenerating || loadingContext}
+                    className="flex items-center gap-2"
                   >
-                    Stop
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        Enhance with AI
+                      </>
+                    )}
                   </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleGenerateDescription}
-                  disabled={isGenerating || loadingContext}
-                  className="flex items-center gap-2"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4" />
-                      Enhance with AI
-                    </>
-                  )}
-                </Button>
-              </div>
+                </div>
+              )}
             </div>
             <FormControl>
               <Editor

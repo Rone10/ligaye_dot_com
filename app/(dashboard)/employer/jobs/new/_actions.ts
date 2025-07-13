@@ -413,7 +413,8 @@ export async function fetchAIContextData() {
         employerProfile: employerProfile ? {
           companyName: employerProfile.companyName || '',
           industryId: employerProfile.industryId || undefined
-        } : null
+        } : null,
+        userEmail: user.email || null
       }
     }
   } catch (error) {

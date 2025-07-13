@@ -17,7 +17,8 @@
       "WebFetch(domain:sdk.vercel.ai)",
       "WebFetch(domain:ai-sdk.dev)",
       "WebFetch(domain:v5.ai-sdk.dev)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(pnpm tsc:*)"
     ],
     "deny": []
   }
