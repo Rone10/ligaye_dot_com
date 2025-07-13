@@ -71,7 +71,7 @@ IMPORTANT: Format your response as HTML with:
 
     // Create the streaming response
     const result = await streamText({
-      model: google('gemini-1.5-flash'),
+      model: google('gemini-2.5-flash'),
       prompt,
       temperature: 0.7,
       maxTokens: 1500,

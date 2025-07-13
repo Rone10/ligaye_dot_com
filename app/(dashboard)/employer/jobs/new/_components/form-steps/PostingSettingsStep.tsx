@@ -98,23 +98,32 @@ export default function PostingSettingsStep({
       })
     },
     onFinish: () => {
-      // Update form with the completed description
-      if (completion) {
-        form.setValue('description', completion, { shouldDirty: true })
-        toast({
-          title: "Description generated!",
-          description: "AI has generated a job description. Feel free to edit it.",
-        })
-      }
+      // Show success toast when generation completes
+      toast({
+        title: "Description generated!",
+        description: "AI has generated a job description. Feel free to edit it.",
+      })
     }
   })
   
-  // Update the form whenever completion changes
+  // Debounced update to make streaming smoother
+  const [debouncedCompletion, setDebouncedCompletion] = useState('')
+  
   useEffect(() => {
-    if (completion && completion.trim()) {
-      form.setValue('description', completion, { shouldDirty: true })
+    // Update the debounced value with a slight delay for smoother updates
+    const timer = setTimeout(() => {
+      setDebouncedCompletion(completion)
+    }, 50) // 50ms delay for smoother visual updates
+    
+    return () => clearTimeout(timer)
+  }, [completion])
+  
+  // Update the form with debounced completion
+  useEffect(() => {
+    if (debouncedCompletion && debouncedCompletion.trim()) {
+      form.setValue('description', debouncedCompletion, { shouldDirty: true })
     }
-  }, [completion, form])
+  }, [debouncedCompletion, form])
   
   // Fetch pricing configuration
   useEffect(() => {
@@ -396,17 +405,39 @@ export default function PostingSettingsStep({
           <FormItem>
             <div className="flex items-center justify-between mb-2">
               <FormLabel>Job Description</FormLabel>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleGenerateDescription}
-                disabled={isGenerating || loadingContext}
-                className="flex items-center gap-2"
-              >
-                <Sparkles className="h-4 w-4" />
-                {isGenerating ? 'Generating...' : 'Enhance with AI'}
-              </Button>
+              <div className="flex items-center gap-2">
+                {isGenerating && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => stop()}
+                    className="text-destructive"
+                  >
+                    Stop
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateDescription}
+                  disabled={isGenerating || loadingContext}
+                  className="flex items-center gap-2"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Enhance with AI
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
             <FormControl>
               <Editor
