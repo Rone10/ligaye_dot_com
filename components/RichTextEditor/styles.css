@@ -204,3 +204,35 @@
 .dark .e-richtexteditor .e-rte-content div {
   color: hsl(0, 0%, 100%) !important;
 }
+
+/* Fix excessive spacing between paragraphs */
+.e-richtexteditor .e-rte-content p {
+  margin-bottom: 0.5em !important;
+  margin-top: 0 !important;
+}
+
+.e-richtexteditor .e-rte-content h1,
+.e-richtexteditor .e-rte-content h2,
+.e-richtexteditor .e-rte-content h3,
+.e-richtexteditor .e-rte-content h4,
+.e-richtexteditor .e-rte-content h5,
+.e-richtexteditor .e-rte-content h6 {
+  margin-top: 1em !important;
+  margin-bottom: 0.5em !important;
+}
+
+/* Compact list spacing */
+.e-richtexteditor .e-rte-content ul,
+.e-richtexteditor .e-rte-content ol {
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+}
+
+/* Remove extra spacing from first and last elements */
+.e-richtexteditor .e-rte-content > *:first-child {
+  margin-top: 0 !important;
+}
+
+.e-richtexteditor .e-rte-content > *:last-child {
+  margin-bottom: 0 !important;
+}

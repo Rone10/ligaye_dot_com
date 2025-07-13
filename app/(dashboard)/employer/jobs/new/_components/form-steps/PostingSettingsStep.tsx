@@ -106,24 +106,52 @@ export default function PostingSettingsStep({
     }
   })
   
-  // Debounced update to make streaming smoother
-  const [debouncedCompletion, setDebouncedCompletion] = useState('')
+  // Chunked streaming for smoother updates
+  const [streamBuffer, setStreamBuffer] = useState('')
+  const [lastUpdateLength, setLastUpdateLength] = useState(0)
   
   useEffect(() => {
-    // Update the debounced value with a slight delay for smoother updates
-    const timer = setTimeout(() => {
-      setDebouncedCompletion(completion)
-    }, 50) // 50ms delay for smoother visual updates
-    
-    return () => clearTimeout(timer)
-  }, [completion])
-  
-  // Update the form with debounced completion
-  useEffect(() => {
-    if (debouncedCompletion && debouncedCompletion.trim()) {
-      form.setValue('description', debouncedCompletion, { shouldDirty: true })
+    if (!completion) {
+      setStreamBuffer('')
+      setLastUpdateLength(0)
+      return
     }
-  }, [debouncedCompletion, form])
+    
+    // Only update if we have accumulated enough new characters
+    const newChars = completion.length - lastUpdateLength
+    const shouldUpdate = newChars >= 20 || // Update every 20 characters
+                        completion.endsWith('.') || // Update at sentence ends
+                        completion.endsWith('!') ||
+                        completion.endsWith('?') ||
+                        completion.endsWith('</p>') || // Update at paragraph ends
+                        completion.endsWith('</li>') || // Update at list item ends
+                        completion.endsWith('</h3>') || // Update at heading ends
+                        !isGenerating // Always update when generation is complete
+    
+    if (shouldUpdate) {
+      const timer = setTimeout(() => {
+        setStreamBuffer(completion)
+        setLastUpdateLength(completion.length)
+      }, 100) // Small delay for batching
+      
+      return () => clearTimeout(timer)
+    }
+  }, [completion, lastUpdateLength, isGenerating])
+  
+  // Update the form with chunked completion
+  useEffect(() => {
+    if (streamBuffer && streamBuffer.trim()) {
+      form.setValue('description', streamBuffer, { shouldDirty: true })
+    }
+  }, [streamBuffer, form])
+  
+  // Force final update when generation completes
+  useEffect(() => {
+    if (!isGenerating && completion && completion.trim()) {
+      // Ensure the complete content is set when generation finishes
+      form.setValue('description', completion, { shouldDirty: true })
+    }
+  }, [isGenerating, completion, form])
   
   // Fetch pricing configuration
   useEffect(() => {

@@ -60,9 +60,12 @@ Create a job description with:
 
 IMPORTANT: Format your response as HTML with:
 - <h3> for section headings
-- <p> for paragraphs  
+- <p> for paragraphs with NO extra line breaks between them
 - <ul> and <li> for bullet points
-- Do NOT use markdown formatting`
+- Do NOT use markdown formatting
+- Do NOT add empty lines or <br> tags between paragraphs
+- Keep formatting compact with single spacing
+- Each paragraph should immediately follow the previous element`
 
     // Initialize Google AI provider with API key
     const google = createGoogleGenerativeAI({
