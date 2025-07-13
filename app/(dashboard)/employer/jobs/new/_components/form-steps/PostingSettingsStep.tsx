@@ -47,7 +47,7 @@ import { useCompletion } from 'ai/react'
 const ALLOWED_AI_EMAILS = [
   'devrone10@gmail.com',
   'jallowabdul7@gmail.com',
-  'jobsin@gmail.com',
+  'jobsinbaba@gmail.com',
   'jonathan@gamil.com'
 ]
 
