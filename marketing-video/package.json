@@ -1,0 +1,33 @@
+{
+  "name": "ligaye-marketing-video",
+  "version": "1.0.0",
+  "description": "Professional marketing video for Ligaye.com job board platform",
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion bundle",
+    "render": "remotion render",
+    "render:prod": "remotion render MainVideo out/ligaye-marketing-video.mp4 --quality=100",
+    "render:gif": "remotion render MainVideo out/ligaye-marketing-video.gif",
+    "render:square": "remotion render MainVideoSquare out/ligaye-marketing-video-square.mp4",
+    "render:story": "remotion render MainVideoStory out/ligaye-marketing-video-story.mp4",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.236",
+    "@remotion/lambda": "^4.0.236",
+    "remotion": "^4.0.236",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0",
+    "tailwindcss": "^3.3.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -18,7 +18,8 @@
       "WebFetch(domain:ai-sdk.dev)",
       "WebFetch(domain:v5.ai-sdk.dev)",
       "Bash(mv:*)",
-      "Bash(pnpm tsc:*)"
+      "Bash(pnpm tsc:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }
