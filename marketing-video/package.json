@@ -3,18 +3,19 @@
   "version": "1.0.0",
   "description": "Professional marketing video for Ligaye.com job board platform",
   "scripts": {
-    "dev": "remotion studio",
+    "dev": "remotion studio src/index.ts",
     "build": "remotion bundle",
-    "render": "remotion render",
-    "render:prod": "remotion render MainVideo out/ligaye-marketing-video.mp4 --quality=100",
-    "render:gif": "remotion render MainVideo out/ligaye-marketing-video.gif",
-    "render:square": "remotion render MainVideoSquare out/ligaye-marketing-video-square.mp4",
-    "render:story": "remotion render MainVideoStory out/ligaye-marketing-video-story.mp4",
+    "render": "remotion render src/index.ts MainVideo out/ligaye-marketing-video.mp4",
+    "render:prod": "remotion render src/index.ts MainVideo out/ligaye-marketing-video.mp4 --quality=100",
+    "render:gif": "remotion render src/index.ts MainVideo out/ligaye-marketing-video.gif",
+    "render:square": "remotion render src/index.ts MainVideoSquare out/ligaye-marketing-video-square.mp4",
+    "render:story": "remotion render src/index.ts MainVideoStory out/ligaye-marketing-video-story.mp4",
     "upgrade": "remotion upgrade"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.236",
     "@remotion/lambda": "^4.0.236",
+    "@remotion/tailwind": "^4.0.236",
     "remotion": "^4.0.236",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
