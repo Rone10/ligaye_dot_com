@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BriefcaseIcon, Building2, Search, Users, User, MapPin, Target, BarChart3, CreditCard, Building } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { BriefcaseIcon, Building2, Search, Users, User, MapPin, Target, BarChart3, CreditCard, Building } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { createClient } from '@/lib/supabase/client';

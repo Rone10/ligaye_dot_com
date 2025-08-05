@@ -26,9 +26,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const id = resolvedParams.id;
   
   try {
-    const job = await getJobById(id, { skipStatusFilter: false });
+    // First, check if this is a valid UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      return {
+        title: 'Job Not Found | Ligaye.com',
+        description: 'The requested job posting could not be found.',
+      };
+    }
     
-    if (!job) {
+    // Import db and query directly to avoid notFound() call in generateMetadata
+    const { db } = await import('@/lib/db');
+    const { jobs } = await import('@/lib/db/schema');
+    const { eq } = await import('drizzle-orm');
+    
+    const database = await db();
+    const jobData = await database.query.jobs.findFirst({
+      where: eq(jobs.id, id),
+      with: {
+        company: true,
+        location: true,
+      },
+    });
+    
+    if (!jobData || !jobData.company) {
       return {
         title: 'Job Not Found | Ligaye.com',
         description: 'The requested job posting could not be found.',
@@ -36,20 +57,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
     
     return generateJobMetadata({
-      jobTitle: job.title,
-      companyName: job.company?.companyName || 'Company',
-      location: job.location ? (job.location.city || job.location.district || job.location.region) : undefined,
+      jobTitle: jobData.title,
+      companyName: jobData.company?.companyName || 'Company',
+      location: jobData.location ? (jobData.location.city || jobData.location.district || jobData.location.region) : undefined,
       salary: {
-        min: job.salaryRangeMin || undefined,
-        max: job.salaryRangeMax || undefined,
-        currency: job.salaryCurrency || 'GMD',
+        min: jobData.salaryRangeMin || undefined,
+        max: jobData.salaryRangeMax || undefined,
+        currency: jobData.salaryCurrency || 'GMD',
       },
-      jobType: job.jobType,
-      experienceLevel: job.experienceLevel || undefined,
-      description: job.description,
+      jobType: jobData.jobType,
+      experienceLevel: jobData.experienceLevel || undefined,
+      description: jobData.description,
       jobId: id,
-      publishedDate: job.publishedAt || job.createdAt,
-      updatedDate: job.updatedAt,
+      publishedDate: jobData.publishedAt ? new Date(jobData.publishedAt) : new Date(jobData.createdAt),
+      updatedDate: new Date(jobData.updatedAt),
     });
   } catch (error) {
     console.error('Error generating job metadata:', error);
@@ -110,8 +131,8 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
     } : undefined,
     jobType: job.jobType,
     experienceLevel: job.experienceLevel || undefined,
-    datePosted: job.publishedAt || job.createdAt,
-    validThrough: job.expiresAt || undefined,
+    datePosted: job.publishedAt ? new Date(job.publishedAt) : new Date(job.createdAt),
+    validThrough: job.expiresAt ? new Date(job.expiresAt) : undefined,
     applicationMethod: job.applicationMethod,
     employmentType: job.jobType ? [job.jobType] : undefined,
     workLocation: job.workLocation,

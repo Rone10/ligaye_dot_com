@@ -3,6 +3,8 @@ import { useCurrentFrame } from 'remotion';
 import { BRAND_COLORS } from '../utils/colors';
 import { useRotate, usePulse } from '../utils/animations';
 
+
+// hello
 interface AnimatedLogoProps {
   size?: number;
   showPulse?: boolean;
