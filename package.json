@@ -128,6 +128,7 @@
   },
   "devDependencies": {
     "@types/uuid": "^10.0.0",
-    "react-email": "4.0.7"
+    "react-email": "4.0.7",
+    "schema-dts": "^1.1.5"
   }
 }

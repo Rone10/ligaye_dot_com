@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { Metadata } from 'next';
 import { getJobById, getRelatedJobs, checkUserApplication, checkUserSavedJob } from './_queries';
 import JobHeader from './_components/JobHeader';
 import JobDetails from './_components/JobDetails';
@@ -8,6 +9,9 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { JobActionButton } from './_components/JobActionButton';
 import { getUser, getCachedUser } from '@/lib/supabase/server';
+import { generateJobMetadata } from '@/lib/seo/metadata';
+import { generateJobPostingSchema } from '@/lib/seo/structured-data';
+import StructuredData from '@/components/StructuredData';
 
 // Remove the time-based revalidation - rely on tags + on-demand revalidation
 // export const revalidate = 3600; 
@@ -15,6 +19,45 @@ import { getUser, getCachedUser } from '@/lib/supabase/server';
 interface PageProps {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const id = resolvedParams.id;
+  
+  try {
+    const job = await getJobById(id, { skipStatusFilter: false });
+    
+    if (!job) {
+      return {
+        title: 'Job Not Found | Ligaye.com',
+        description: 'The requested job posting could not be found.',
+      };
+    }
+    
+    return generateJobMetadata({
+      jobTitle: job.title,
+      companyName: job.company?.companyName || 'Company',
+      location: job.location ? (job.location.city || job.location.district || job.location.region) : undefined,
+      salary: {
+        min: job.salaryRangeMin || undefined,
+        max: job.salaryRangeMax || undefined,
+        currency: job.salaryCurrency || 'GMD',
+      },
+      jobType: job.jobType,
+      experienceLevel: job.experienceLevel || undefined,
+      description: job.description,
+      jobId: id,
+      publishedDate: job.publishedAt || job.createdAt,
+      updatedDate: job.updatedAt,
+    });
+  } catch (error) {
+    console.error('Error generating job metadata:', error);
+    return {
+      title: 'Job Posting | Ligaye.com',
+      description: 'View job details and apply for positions in Gambia.',
+    };
+  }
 }
 
 export default async function JobDetailPage({ params, searchParams }: PageProps) {
@@ -46,8 +89,37 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
     user ? checkUserSavedJob(id, user.id) : Promise.resolve(false)
   ]);
   
+  // Generate structured data for SEO
+  const jobPostingSchema = generateJobPostingSchema({
+    title: job.title,
+    description: job.description,
+    company: {
+      name: job.company?.companyName || 'Company',
+      website: job.company?.website || undefined,
+      description: job.company?.companyDescription || undefined,
+    },
+    location: job.location ? {
+      name: job.location.city || job.location.district || job.location.region,
+      country: 'Gambia',
+    } : undefined,
+    salary: (job.salaryRangeMin || job.salaryRangeMax) ? {
+      min: job.salaryRangeMin || undefined,
+      max: job.salaryRangeMax || undefined,
+      currency: job.salaryCurrency || 'GMD',
+      frequency: job.salaryFrequency || undefined,
+    } : undefined,
+    jobType: job.jobType,
+    experienceLevel: job.experienceLevel || undefined,
+    datePosted: job.publishedAt || job.createdAt,
+    validThrough: job.expiresAt || undefined,
+    applicationMethod: job.applicationMethod,
+    employmentType: job.jobType ? [job.jobType] : undefined,
+    workLocation: job.workLocation,
+  });
+  
   return (
     <div className="container max-w-7xl py-8 px-4 mx-auto space-y-8">
+      <StructuredData data={jobPostingSchema} />
       {/* Notice when viewing from application */}
       {fromApplication && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">

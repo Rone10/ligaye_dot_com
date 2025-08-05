@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 import { 
   getFilteredJobs, 
   getIndustriesForFilters,
@@ -8,19 +9,62 @@ import {
 import { createLoader } from 'nuqs/server';
 import { jobFiltersParsers, jobFiltersUrlKeys } from './_utils/job-filter-parsers';
 import { jobTypeEnum, workLocationEnum, experienceLevelEnum } from '@/lib/db/schema';
-import { getUser, getCachedUser } from '@/lib/supabase/server';
+import { getCachedUser } from '@/lib/supabase/server';
 import { 
   JobSearchFilters, 
   JobListWithSaving,
 } from './_components';
 import type { JobFilters as JobFiltersType } from './_utils/types';
-import Navbar from '@/components/Navbar';
+import { generateSEOMetadata } from '@/lib/seo/metadata';
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 const loadJobFilters = createLoader(jobFiltersParsers, { urlKeys: jobFiltersUrlKeys });
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const awaitedSearchParams = await searchParams;
+  const filters = await loadJobFilters(awaitedSearchParams);
+  
+  // Build dynamic title and description based on filters
+  const titleParts = ['Jobs'];
+  const descParts = ['Find your next career opportunity'];
+  
+  if (filters.search) {
+    titleParts.push(`for "${filters.search}"`);
+    descParts.push(`matching "${filters.search}"`);
+  }
+  
+  if (filters.jobType && filters.jobType !== 'all') {
+    const jobTypeFormatted = filters.jobType.replace(/_/g, ' ').toLowerCase();
+    titleParts.push(jobTypeFormatted);
+    descParts.push(`- ${jobTypeFormatted} positions`);
+  }
+  
+  if (filters.experienceLevel && filters.experienceLevel !== 'all') {
+    titleParts.push(`(${filters.experienceLevel} level)`);
+  }
+  
+  titleParts.push('in Gambia');
+  descParts.push('in Gambia. Browse thousands of job openings from top employers.');
+  
+  const title = titleParts.join(' ');
+  const description = descParts.join(' ');
+  
+  return generateSEOMetadata({
+    title,
+    description,
+    path: '/jobs',
+    keywords: [
+      'jobs in Gambia',
+      'Gambian employment',
+      'careers Gambia',
+      filters.search || '',
+      filters.jobType || '',
+    ].filter(Boolean),
+  });
+}
 
 export default async function JobsPage({ searchParams }: PageProps) {
   const awaitedSearchParams = await searchParams;

@@ -11,6 +11,8 @@ import { createClient } from '@/lib/supabase/client';
 import { useState, useEffect } from 'react';
 import RingLoaderSpinner from '@/components/loaders/ring-loader';
 import { useRouter } from 'next/navigation';
+import { generateWebSiteSchema, generateOrganizationSchema } from '@/lib/seo/structured-data';
+import StructuredData from '@/components/StructuredData';
 
 export default function LandingPage() {
   const [user, setUser] = useState<any | null>(null);
@@ -58,8 +60,13 @@ export default function LandingPage() {
     </div>;
   }
 
+  const websiteSchema = generateWebSiteSchema();
+  const organizationSchema = generateOrganizationSchema();
+
   return (
     <>
+    <StructuredData data={websiteSchema} />
+    <StructuredData data={organizationSchema} />
     <Navbar user={user} />
     <div className="flex flex-col">
       {/* Hero Section */}
