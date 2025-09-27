@@ -12,14 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -30,21 +22,27 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ChevronLeft,
   ChevronRight,
-  MoreHorizontal,
   Eye,
   Trash,
   ArrowUpDown,
-  CheckCircle,
-  Clock,
 } from "lucide-react";
 import { format } from "date-fns";
-import { JobStatusBadge } from "./JobStatusBadge";
+import { JobStatusSelect } from "./JobStatusSelect";
 import { parseAsString, useQueryState } from "nuqs";
 import { toast } from "sonner";
 import { updateJobStatus, deleteJob } from "../[id]/_actions";
+import { bulkUpdateJobStatus, bulkDeleteJobs } from "../_actions";
 
 interface Job {
   id: string;
@@ -97,6 +95,12 @@ export function JobsTable({ jobs, totalCount }: JobsTableProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
+  // State for bulk selection
+  const [selectedJobIds, setSelectedJobIds] = useState<Set<string>>(new Set());
+  const [isSelectAll, setIsSelectAll] = useState(false);
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+
   const pageNumber = parseInt(currentPage || "1");
   const pageSize = 10;
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -114,14 +118,32 @@ export function JobsTable({ jobs, totalCount }: JobsTableProps) {
     setCurrentPage(newPage.toString());
   };
 
-  const handleStatusUpdate = async (job: Job, newStatus: string) => {
-    if (job.status === newStatus) return;
+  const handleSelectAll = (checked: boolean) => {
+    setIsSelectAll(checked);
+    if (checked) {
+      setSelectedJobIds(new Set(jobs.map(job => job.id)));
+    } else {
+      setSelectedJobIds(new Set());
+    }
+  };
 
-    setIsUpdating(job.id);
+  const handleSelectJob = (jobId: string, checked: boolean) => {
+    const newSelectedIds = new Set(selectedJobIds);
+    if (checked) {
+      newSelectedIds.add(jobId);
+    } else {
+      newSelectedIds.delete(jobId);
+    }
+    setSelectedJobIds(newSelectedIds);
+    setIsSelectAll(newSelectedIds.size === jobs.length);
+  };
+
+  const handleStatusUpdate = async (jobId: string, newStatus: string) => {
+    setIsUpdating(jobId);
 
     let result;
     try {
-      result = await updateJobStatus(job.id, newStatus);
+      result = await updateJobStatus(jobId, newStatus);
     } catch (error) {
       toast.error("Failed to communicate with server");
       setIsUpdating(null);
@@ -170,6 +192,62 @@ export function JobsTable({ jobs, totalCount }: JobsTableProps) {
     }
   };
 
+  const handleBulkStatusUpdate = async (newStatus: string) => {
+    if (selectedJobIds.size === 0) return;
+
+    setIsBulkUpdating(true);
+    const jobIds = Array.from(selectedJobIds);
+
+    let result;
+    try {
+      result = await bulkUpdateJobStatus(jobIds, newStatus);
+    } catch (error) {
+      toast.error("Failed to communicate with server");
+      setIsBulkUpdating(false);
+      return;
+    }
+
+    setIsBulkUpdating(false);
+
+    if (result.success) {
+      toast.success(`${jobIds.length} job(s) updated to ${newStatus.replace("_", " ").toLowerCase()}`);
+      setSelectedJobIds(new Set());
+      setIsSelectAll(false);
+      router.refresh();
+    } else {
+      toast.error(result.error || "Failed to update jobs");
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedJobIds.size === 0) return;
+
+    setIsDeleting(true);
+    const jobIds = Array.from(selectedJobIds);
+
+    let result;
+    try {
+      result = await bulkDeleteJobs(jobIds);
+    } catch (error) {
+      toast.error("Failed to communicate with server");
+      setIsDeleting(false);
+      setShowBulkDeleteDialog(false);
+      return;
+    }
+
+    setIsDeleting(false);
+    setShowBulkDeleteDialog(false);
+
+    if (result.success) {
+      toast.success(`${jobIds.length} job(s) deleted successfully`);
+      setSelectedJobIds(new Set());
+      setIsSelectAll(false);
+      router.refresh();
+    } else {
+      toast.error(result.error || "Failed to delete jobs");
+    }
+  };
+
   const SortButton = ({ column, children }: { column: string; children: React.ReactNode }) => (
     <Button
       variant="ghost"
@@ -184,10 +262,57 @@ export function JobsTable({ jobs, totalCount }: JobsTableProps) {
 
   return (
     <div className="space-y-4">
+      {selectedJobIds.size > 0 && (
+        <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-muted">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">
+              {selectedJobIds.size} job{selectedJobIds.size > 1 ? 's' : ''} selected
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSelectedJobIds(new Set());
+                setIsSelectAll(false);
+              }}
+            >
+              Clear selection
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Select onValueChange={handleBulkStatusUpdate} disabled={isBulkUpdating}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Update status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ACTIVE">Mark as Active</SelectItem>
+                <SelectItem value="EXPIRED">Mark as Expired</SelectItem>
+                <SelectItem value="FILLED">Mark as Filled</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowBulkDeleteDialog(true)}
+              disabled={isBulkUpdating || isDeleting}
+            >
+              <Trash className="h-4 w-4 mr-1" />
+              Delete selected
+            </Button>
+          </div>
+        </div>
+      )}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">
+                <Checkbox
+                  checked={isSelectAll}
+                  onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                  aria-label="Select all jobs"
+                />
+              </TableHead>
               <TableHead>
                 <SortButton column="title">Job Title</SortButton>
               </TableHead>
@@ -195,30 +320,37 @@ export function JobsTable({ jobs, totalCount }: JobsTableProps) {
                 <SortButton column="company">Company</SortButton>
               </TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>
+              <TableHead className="hidden md:table-cell">
                 <SortButton column="location">Location</SortButton>
               </TableHead>
-              <TableHead>Work Type</TableHead>
-              <TableHead>
+              <TableHead className="hidden lg:table-cell">Work Type</TableHead>
+              <TableHead className="hidden md:table-cell">
                 <SortButton column="createdAt">Posted</SortButton>
               </TableHead>
-              <TableHead>
+              <TableHead className="hidden xl:table-cell">
                 <SortButton column="expiresAt">Expires</SortButton>
               </TableHead>
               <TableHead className="text-center">Applications</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right w-20">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {jobs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                   No jobs found
                 </TableCell>
               </TableRow>
             ) : (
               jobs.map((job) => (
-                <TableRow key={job.id}>
+                <TableRow key={job.id} className={selectedJobIds.has(job.id) ? "bg-muted/50" : ""}>
+                  <TableCell className="w-12">
+                    <Checkbox
+                      checked={selectedJobIds.has(job.id)}
+                      onCheckedChange={(checked) => handleSelectJob(job.id, !!checked)}
+                      aria-label={`Select ${job.title}`}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium max-w-xs truncate">
                     {job.title}
                   </TableCell>
@@ -226,18 +358,23 @@ export function JobsTable({ jobs, totalCount }: JobsTableProps) {
                     {job.employer?.companyName || "N/A"}
                   </TableCell>
                   <TableCell>
-                    <JobStatusBadge status={job.status} />
+                    <JobStatusSelect
+                      jobId={job.id}
+                      currentStatus={job.status}
+                      onStatusChange={handleStatusUpdate}
+                      disabled={isUpdating === job.id}
+                    />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     {job.location?.city || "Remote"}
                   </TableCell>
-                  <TableCell className="capitalize">
+                  <TableCell className="hidden lg:table-cell capitalize">
                     {job.workLocation.toLowerCase().replace("_", " ")}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     {format(new Date(job.createdAt), "MMM d, yyyy")}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden xl:table-cell">
                     {job.expiresAt
                       ? format(new Date(job.expiresAt), "MMM d, yyyy")
                       : "N/A"}
@@ -246,73 +383,29 @@ export function JobsTable({ jobs, totalCount }: JobsTableProps) {
                     {job.applicationCount}
                   </TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className="h-8 w-8 p-0"
-                          disabled={isUpdating === job.id}
-                        >
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/jobs/${job.id}`}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </Link>
-                        </DropdownMenuItem>
-
-                        <DropdownMenuSeparator />
-                        <DropdownMenuLabel>Update Status</DropdownMenuLabel>
-
-                        {job.status !== "ACTIVE" && (
-                          <DropdownMenuItem
-                            onClick={() => handleStatusUpdate(job, "ACTIVE")}
-                            disabled={isUpdating === job.id}
-                          >
-                            <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
-                            Mark as Active
-                          </DropdownMenuItem>
-                        )}
-
-                        {job.status !== "EXPIRED" && (
-                          <DropdownMenuItem
-                            onClick={() => handleStatusUpdate(job, "EXPIRED")}
-                            disabled={isUpdating === job.id}
-                          >
-                            <Clock className="mr-2 h-4 w-4 text-orange-600" />
-                            Mark as Expired
-                          </DropdownMenuItem>
-                        )}
-
-                        {job.status !== "FILLED" && (
-                          <DropdownMenuItem
-                            onClick={() => handleStatusUpdate(job, "FILLED")}
-                            disabled={isUpdating === job.id}
-                          >
-                            <CheckCircle className="mr-2 h-4 w-4 text-blue-600" />
-                            Mark as Filled
-                          </DropdownMenuItem>
-                        )}
-
-                        <DropdownMenuSeparator />
-
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteClick(job)}
-                          className="text-red-600"
-                          disabled={isUpdating === job.id}
-                        >
-                          <Trash className="mr-2 h-4 w-4" />
-                          Delete Job
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        asChild
+                      >
+                        <Link href={`/admin/jobs/${job.id}`}>
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">View {job.title}</span>
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleDeleteClick(job)}
+                        disabled={isUpdating === job.id}
+                      >
+                        <Trash className="h-4 w-4" />
+                        <span className="sr-only">Delete {job.title}</span>
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -388,6 +481,27 @@ export function JobsTable({ jobs, totalCount }: JobsTableProps) {
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Selected Jobs?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedJobIds.size} selected job{selectedJobIds.size > 1 ? 's' : ''}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDelete}
               disabled={isDeleting}
               className="bg-red-600 hover:bg-red-700"
             >

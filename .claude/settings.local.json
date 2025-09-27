@@ -19,7 +19,8 @@
       "WebFetch(domain:v5.ai-sdk.dev)",
       "Bash(mv:*)",
       "Bash(pnpm tsc:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": []
   }
