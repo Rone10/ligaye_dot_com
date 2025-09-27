@@ -688,6 +688,26 @@ export const pricingConfig = pgTable('pricing_config', {
   };
 });
 
+// System Settings Table
+export const systemSettings = pgTable('system_settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  settingKey: text('setting_key').notNull().unique(),
+  settingValue: text('setting_value').notNull(),
+  settingType: text('setting_type').notNull().default('string'), // string, boolean, number, date
+  description: text('description'),
+  isEditable: boolean('is_editable').default(true).notNull(),
+  createdBy: uuid('created_by').notNull().references(() => profiles.id, { onDelete: 'restrict' }),
+  updatedBy: uuid('updated_by').references(() => profiles.id, { onDelete: 'restrict' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    settingKeyIdx: index('system_settings_setting_key_idx').on(table.settingKey),
+    editableIdx: index('system_settings_editable_idx').on(table.isEditable),
+    createdAtIdx: index('system_settings_created_at_idx').on(table.createdAt),
+  };
+});
+
 // Email Drafts Table
 export const emailDrafts = pgTable('email_drafts', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -934,6 +954,17 @@ export const pricingConfigRelations = relations(pricingConfig, ({ one }) => ({
   }),
 }));
 
+export const systemSettingsRelations = relations(systemSettings, ({ one }) => ({
+  createdBy: one(profiles, {
+    fields: [systemSettings.createdBy],
+    references: [profiles.id],
+  }),
+  updatedBy: one(profiles, {
+    fields: [systemSettings.updatedBy],
+    references: [profiles.id],
+  }),
+}));
+
 export const emailDraftsRelations = relations(emailDrafts, ({ one }) => ({
   user: one(profiles, {
     fields: [emailDrafts.userId],
@@ -1077,6 +1108,10 @@ export type NewCouponRedemption = InferInsertModel<typeof couponRedemptions>;
 // Pricing Config Types
 export type PricingConfig = InferSelectModel<typeof pricingConfig>;
 export type NewPricingConfig = InferInsertModel<typeof pricingConfig>;
+
+// System Settings Types
+export type SystemSettings = InferSelectModel<typeof systemSettings>;
+export type NewSystemSettings = InferInsertModel<typeof systemSettings>;
 
 // Email Draft Types
 export type EmailDraft = InferSelectModel<typeof emailDrafts>;

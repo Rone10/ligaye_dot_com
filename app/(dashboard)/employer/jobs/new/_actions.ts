@@ -22,6 +22,7 @@ import { createStripeCheckoutSession } from '@/lib/stripe/stripe-actions'
 import { recordCouponRedemption } from './_queries/coupon'
 import { validateCouponForJobPosting as validateCouponInternal } from './_queries/coupon'
 import { getActivePricing, calculateTotalPrice, getDefaultPricing } from '@/lib/utils/pricing'
+import { isFreePostingActive } from '@/lib/utils/system-settings'
 import { inngest } from '@/inngest/client'
 import { paymentArcjet } from '@/lib/arcjet'
 import { headers } from 'next/headers'
@@ -154,16 +155,87 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
     )
     
     console.log('[Action Debug] New job created with ID:', newJob.id);
-    
+
+    // Check if free posting is currently active
+    const isFreePosting = await isFreePostingActive()
+    console.log('[Action Debug] Free posting active:', isFreePosting);
+
+    // If free posting is active, skip payment and activate job immediately
+    if (isFreePosting) {
+      console.log('[Action Debug] Free posting enabled - activating job immediately');
+
+      // Update job status to ACTIVE since no payment is required
+      await db()
+        .update(jobs)
+        .set({ status: 'ACTIVE' })
+        .where(eq(jobs.id, newJob.id));
+
+      // Create a payment record with free posting metadata
+      const [paymentRecord] = await db().insert(payments).values({
+        jobId: newJob.id,
+        employerProfileId: result.employerProfileId,
+        amount: 0, // Free posting
+        currency: 'GMD',
+        method: 'free', // Special method for free postings
+        status: 'completed',
+        transactionId: `FREE_POSTING_${Date.now()}`,
+        metadata: JSON.stringify({
+          jobTitle: validatedData.title,
+          duration: validatedData.jobDuration,
+          createdBy: user.id,
+          freePosting: true,
+          originalPaymentMethod: validatedData.paymentMethod,
+          freePostingTimestamp: new Date().toISOString()
+        }),
+        deleted: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning()
+
+      console.log('[Action Debug] Free posting payment record created:', paymentRecord?.id);
+
+      // Invalidate caches
+      await Promise.all([
+        revalidateTag(CACHE_TAGS.jobs),
+        revalidateTag(CACHE_TAGS.employerJobs),
+        revalidateTag('public-jobs'),
+        revalidateTag('filtered-jobs'),
+        revalidateTag('employer-dashboard'),
+        revalidateTag('employer-dashboard-stats'),
+        revalidateTag('employer-recent-jobs'),
+        revalidateTag(`employer-jobs-${result.employerProfileId}`),
+        revalidateTag('job-filters'),
+        revalidateTag('locations-for-filters'),
+        revalidateTag('industries-for-filters'),
+        revalidateTag('saved-jobs'),
+        revalidateTag('user-data'),
+        revalidateTag(`job-${newJob.id}`)
+      ])
+
+      // Revalidate paths
+      revalidatePath('/employer/jobs')
+      revalidatePath('/jobs')
+      revalidatePath('/employer')
+
+      return {
+        success: true,
+        jobId: newJob.id,
+        status: 'ACTIVE',
+        freePosting: true,
+        message: 'Job posted successfully with free posting!'
+      }
+    }
+
+    // Regular paid posting flow
     // Get active pricing configuration
     const pricingConfig = await getActivePricing()
     const pricePerMonth = pricingConfig?.pricePerMonth || getDefaultPricing().pricePerMonth
-    
+
     // Calculate payment amount with coupon
     const baseAmount = calculateTotalPrice(pricePerMonth, validatedData.jobDuration)
     const paymentAmount = coupon ? coupon.finalAmount : baseAmount
     const discountAmount = coupon ? coupon.discountAmount : 0
-    
+
     console.log('[Action Debug] Base amount (cents):', baseAmount);
     console.log('[Action Debug] Discount amount (cents):', discountAmount);
     console.log('[Action Debug] Final paymentAmount (cents):', paymentAmount);

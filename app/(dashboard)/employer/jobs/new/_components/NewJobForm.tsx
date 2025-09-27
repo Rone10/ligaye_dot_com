@@ -14,9 +14,11 @@ import RequirementsStep from './form-steps/RequirementsStep'
 import CompensationStep from './form-steps/CompensationStep'
 import PostingSettingsStep from './form-steps/PostingSettingsStep'
 
-interface NewJobFormProps {}
+interface NewJobFormProps {
+  freePostingActive?: boolean;
+}
 
-export default function NewJobForm() {
+export default function NewJobForm({ freePostingActive = false }: NewJobFormProps) {
   const router = useRouter()
   const { form, step, totalSteps, nextStep, prevStep, isSubmitting, setIsSubmitting } = useJobForm()
   const [error, setError] = useState<string | null>(null)
@@ -303,7 +305,7 @@ export default function NewJobForm() {
             {step === 1 && <BasicDetailsStep form={form} onNext={nextStep} />}
             {step === 2 && <RequirementsStep form={form} onNext={nextStep} onPrevious={prevStep} />}
             {step === 3 && <CompensationStep form={form} onNext={nextStep} onPrevious={prevStep} />}
-            {step === 4 && <PostingSettingsStep form={form} onPrevious={prevStep} isSubmitting={isSubmitting} onCouponValidated={setCouponData} />}
+            {step === 4 && <PostingSettingsStep form={form} onPrevious={prevStep} isSubmitting={isSubmitting} onCouponValidated={setCouponData} freePostingActive={freePostingActive} />}
             
             <div className="pt-4">
               <div className="flex justify-between text-sm text-muted-foreground">

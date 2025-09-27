@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { pricingConfig } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { cache } from 'react';
+import { getFreePostingStatus } from '@/lib/utils/system-settings';
 
 export const getActivePricing = cache(async () => {
   const database = await db();
@@ -23,4 +24,8 @@ export const getAllPricingHistory = cache(async () => {
     .select()
     .from(pricingConfig)
     .orderBy(desc(pricingConfig.createdAt));
+});
+
+export const getCurrentFreePostingConfig = cache(async () => {
+  return await getFreePostingStatus();
 });

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { Check, X, AlertCircle } from 'lucide-react'
+import { Check, X, AlertCircle, Gift } from 'lucide-react'
 import { 
   Table, 
   TableBody, 
@@ -202,34 +202,48 @@ export default function PaymentsTable({ payments }: PaymentsTableProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="bg-amber-50">
-                    {formatCurrency(payment.payment.amount, payment.payment.currency)}
-                  </Badge>
+                  {payment.payment.method === 'free' ? (
+                    <Badge variant="outline" className="bg-green-50 border-green-200 text-green-700">
+                      <Gift className="h-3 w-3 mr-1" />
+                      FREE
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-amber-50">
+                      {formatCurrency(payment.payment.amount, payment.payment.currency)}
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   {format(new Date(payment.payment.createdAt), 'dd MMM yyyy')}
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
-                      onClick={() => openApproveDialog(payment)}
-                    >
-                      <Check className="h-4 w-4 mr-1" />
-                      Approve
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
-                      onClick={() => openRejectDialog(payment)}
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Reject
-                    </Button>
-                  </div>
+                  {payment.payment.method === 'free' ? (
+                    <Badge className="bg-green-100 text-green-800 border-green-200">
+                      <Check className="h-3 w-3 mr-1" />
+                      Auto-Approved
+                    </Badge>
+                  ) : (
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
+                        onClick={() => openApproveDialog(payment)}
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-red-50 hover:bg-red-100 border-red-200 text-red-700"
+                        onClick={() => openRejectDialog(payment)}
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Reject
+                      </Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

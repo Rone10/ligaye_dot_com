@@ -56,13 +56,15 @@ interface PostingSettingsStepProps {
   onPrevious: () => void
   isSubmitting: boolean
   onCouponValidated?: (couponData: { couponId: string; code: string; discountAmount: number; finalAmount: number } | null) => void
+  freePostingActive?: boolean
 }
 
-export default function PostingSettingsStep({ 
-  form, 
-  onPrevious, 
-  isSubmitting, 
-  onCouponValidated
+export default function PostingSettingsStep({
+  form,
+  onPrevious,
+  isSubmitting,
+  onCouponValidated,
+  freePostingActive = false
 }: PostingSettingsStepProps) {
   const { isValidating, validationResult, validateCoupon, clearValidation } = useCouponValidation()
   const [couponCode, setCouponCode] = useState('')
@@ -697,39 +699,68 @@ export default function PostingSettingsStep({
       />
       
       {/* Price Display */}
-      <div className="bg-[#f8f9fa] rounded-lg p-4 space-y-2">
-        <div className="flex justify-between items-center">
-          <span className="text-[#9aa3bc]">Duration:</span>
-          <span className="font-medium text-[#1a1e2d]">{jobDuration} month{jobDuration > 1 ? 's' : ''}</span>
+      {freePostingActive ? (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 space-y-2">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-4 w-4 text-green-600" />
+            <span className="font-medium text-green-800">Free Posting Campaign Active!</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-green-700">Duration:</span>
+            <span className="font-medium text-green-800">{jobDuration} month{jobDuration > 1 ? 's' : ''}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-green-700">Regular Price:</span>
+            <span className="line-through text-green-600">{formatPrice(basePrice)}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-green-700">Campaign Discount:</span>
+            <span className="font-medium text-green-600">-{formatPrice(basePrice)}</span>
+          </div>
+          <div className="border-t border-green-200 pt-2 flex justify-between items-center">
+            <span className="font-semibold text-green-800">Your Price:</span>
+            <span className="font-bold text-xl text-green-600">FREE</span>
+          </div>
+          <p className="text-xs text-green-700 mt-2 italic">
+            🎉 Your job will be posted immediately at no cost!
+          </p>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-[#9aa3bc]">Base Price:</span>
-          <span className="font-medium text-[#1a1e2d]">{formatPrice(basePrice)}</span>
-        </div>
-        {validationResult?.valid && (
-          <>
-            <div className="flex justify-between items-center text-[#05ce91]">
-              <span>Discount:</span>
-              <span className="font-medium">-{formatPrice(validationResult.discountAmount!)}</span>
-            </div>
+      ) : (
+        <div className="bg-[#f8f9fa] rounded-lg p-4 space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-[#9aa3bc]">Duration:</span>
+            <span className="font-medium text-[#1a1e2d]">{jobDuration} month{jobDuration > 1 ? 's' : ''}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[#9aa3bc]">Base Price:</span>
+            <span className="font-medium text-[#1a1e2d]">{formatPrice(basePrice)}</span>
+          </div>
+          {validationResult?.valid && (
+            <>
+              <div className="flex justify-between items-center text-[#05ce91]">
+                <span>Discount:</span>
+                <span className="font-medium">-{formatPrice(validationResult.discountAmount!)}</span>
+              </div>
+              <div className="border-t pt-2 flex justify-between items-center">
+                <span className="font-semibold text-[#1a1e2d]">Total:</span>
+                <span className="font-bold text-lg text-[#1a1e2d]">
+                  {formatPrice(finalPrice)}
+                </span>
+              </div>
+            </>
+          )}
+          {!validationResult?.valid && (
             <div className="border-t pt-2 flex justify-between items-center">
               <span className="font-semibold text-[#1a1e2d]">Total:</span>
-              <span className="font-bold text-lg text-[#1a1e2d]">
-                {formatPrice(finalPrice)}
-              </span>
+              <span className="font-bold text-lg text-[#1a1e2d]">{formatPrice(basePrice)}</span>
             </div>
-          </>
-        )}
-        {!validationResult?.valid && (
-          <div className="border-t pt-2 flex justify-between items-center">
-            <span className="font-semibold text-[#1a1e2d]">Total:</span>
-            <span className="font-bold text-lg text-[#1a1e2d]">{formatPrice(basePrice)}</span>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
       
-      {/* Coupon Section */}
-      <div className="space-y-3">
+      {/* Coupon Section - Hidden during free posting */}
+      {!freePostingActive && (
+        <div className="space-y-3">
         {!showCouponField ? (
           <Button
             type="button"
@@ -817,7 +848,8 @@ export default function PostingSettingsStep({
           </div>
         )}
       </div>
-      
+      )}
+
       <div className="flex justify-between mt-8">
         <Button 
           type="button" 
