@@ -19,19 +19,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
   MoreHorizontal,
   Eye,
-  Edit,
   Trash,
   ArrowUpDown,
+  CheckCircle,
+  Clock,
 } from "lucide-react";
 import { format } from "date-fns";
 import { JobStatusBadge } from "./JobStatusBadge";
 import { parseAsString, useQueryState } from "nuqs";
+import { toast } from "sonner";
+import { updateJobStatus, deleteJob } from "../[id]/_actions";
 
 interface Job {
   id: string;
@@ -68,15 +81,21 @@ interface JobsTableProps {
 
 export function JobsTable({ jobs, totalCount }: JobsTableProps) {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useQueryState("page", 
+  const [currentPage, setCurrentPage] = useQueryState("page",
     parseAsString.withDefault("1")
   );
-  const [sortBy, setSortBy] = useQueryState("sortBy", 
+  const [sortBy, setSortBy] = useQueryState("sortBy",
     parseAsString.withDefault("createdAt")
   );
-  const [sortOrder, setSortOrder] = useQueryState("sortOrder", 
+  const [sortOrder, setSortOrder] = useQueryState("sortOrder",
     parseAsString.withDefault("desc")
   );
+
+  // State for delete dialog and operations
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
   const pageNumber = parseInt(currentPage || "1");
   const pageSize = 10;
@@ -93,6 +112,62 @@ export function JobsTable({ jobs, totalCount }: JobsTableProps) {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage.toString());
+  };
+
+  const handleStatusUpdate = async (job: Job, newStatus: string) => {
+    if (job.status === newStatus) return;
+
+    setIsUpdating(job.id);
+
+    let result;
+    try {
+      result = await updateJobStatus(job.id, newStatus);
+    } catch (error) {
+      toast.error("Failed to communicate with server");
+      setIsUpdating(null);
+      return;
+    }
+
+    setIsUpdating(null);
+
+    if (result.success) {
+      toast.success(`Job status updated to ${newStatus.replace("_", " ").toLowerCase()}`);
+      router.refresh();
+    } else {
+      toast.error(result.error || "Failed to update job status");
+    }
+  };
+
+  const handleDeleteClick = (job: Job) => {
+    setSelectedJob(job);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedJob) return;
+
+    setIsDeleting(true);
+
+    let result;
+    try {
+      result = await deleteJob(selectedJob.id);
+    } catch (error) {
+      toast.error("Failed to communicate with server");
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+      return;
+    }
+
+    setIsDeleting(false);
+    setShowDeleteDialog(false);
+    setSelectedJob(null);
+
+    if (result.success) {
+      toast.success("Job deleted successfully");
+      router.refresh();
+    } else {
+      toast.error(result.error || "Failed to delete job");
+    }
   };
 
   const SortButton = ({ column, children }: { column: string; children: React.ReactNode }) => (
@@ -173,28 +248,66 @@ export function JobsTable({ jobs, totalCount }: JobsTableProps) {
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0"
+                          disabled={isUpdating === job.id}
+                        >
                           <span className="sr-only">Open menu</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="w-48">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
+
                         <DropdownMenuItem asChild>
                           <Link href={`/admin/jobs/${job.id}`}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/jobs/${job.id}/edit`}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Job
-                          </Link>
-                        </DropdownMenuItem>
+
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuLabel>Update Status</DropdownMenuLabel>
+
+                        {job.status !== "ACTIVE" && (
+                          <DropdownMenuItem
+                            onClick={() => handleStatusUpdate(job, "ACTIVE")}
+                            disabled={isUpdating === job.id}
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+                            Mark as Active
+                          </DropdownMenuItem>
+                        )}
+
+                        {job.status !== "EXPIRED" && (
+                          <DropdownMenuItem
+                            onClick={() => handleStatusUpdate(job, "EXPIRED")}
+                            disabled={isUpdating === job.id}
+                          >
+                            <Clock className="mr-2 h-4 w-4 text-orange-600" />
+                            Mark as Expired
+                          </DropdownMenuItem>
+                        )}
+
+                        {job.status !== "FILLED" && (
+                          <DropdownMenuItem
+                            onClick={() => handleStatusUpdate(job, "FILLED")}
+                            disabled={isUpdating === job.id}
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4 text-blue-600" />
+                            Mark as Filled
+                          </DropdownMenuItem>
+                        )}
+
+                        <DropdownMenuSeparator />
+
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteClick(job)}
+                          className="text-red-600"
+                          disabled={isUpdating === job.id}
+                        >
                           <Trash className="mr-2 h-4 w-4" />
                           Delete Job
                         </DropdownMenuItem>
@@ -262,6 +375,27 @@ export function JobsTable({ jobs, totalCount }: JobsTableProps) {
           </div>
         </div>
       )}
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Job?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{selectedJob?.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
