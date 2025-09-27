@@ -1,4 +1,4 @@
-import { JobPosting, WithContext, Organization, WebSite, BreadcrumbList } from 'schema-dts';
+import { JobPosting, WithContext, Organization, WebSite, BreadcrumbList, Article, Person } from 'schema-dts';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://ligaye.com';
 
@@ -162,6 +162,113 @@ export function generateBreadcrumbSchema(items: Array<{ name: string; url: strin
       name: item.name,
       item: item.url,
     })),
+  };
+}
+
+// Article schema for blog posts
+interface ArticleData {
+  title: string;
+  description: string;
+  author: {
+    name: string;
+    email?: string;
+  };
+  datePublished: Date;
+  dateModified?: Date;
+  image?: string;
+  keywords?: string[];
+  wordCount?: number;
+  slug: string;
+}
+
+export function generateArticleSchema(data: ArticleData): WithContext<Article> {
+  const {
+    title,
+    description,
+    author,
+    datePublished,
+    dateModified,
+    image,
+    keywords,
+    wordCount,
+    slug,
+  } = data;
+
+  const articleAuthor: Person = {
+    '@type': 'Person',
+    name: author.name,
+    ...(author.email && { email: author.email }),
+  };
+
+  const schema: WithContext<Article> = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: title,
+    description,
+    author: articleAuthor,
+    datePublished: datePublished.toISOString(),
+    ...(dateModified && { dateModified: dateModified.toISOString() }),
+    publisher: {
+      '@type': 'Organization',
+      name: 'Ligaye.com',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${BASE_URL}/branding/full_logo.png`,
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${BASE_URL}/blog/${slug}`,
+    },
+    ...(image && {
+      image: {
+        '@type': 'ImageObject',
+        url: image,
+      },
+    }),
+    ...(keywords && keywords.length > 0 && { keywords: keywords.join(', ') }),
+    ...(wordCount && { wordCount }),
+  };
+
+  return schema;
+}
+
+// LocalBusiness schema for Ligaye as a Gambian business
+export function generateLocalBusinessSchema(): WithContext<Organization> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    '@id': `${BASE_URL}/#business`,
+    name: 'Ligaye.com',
+    description: "Gambia's premier job board connecting job seekers with employers",
+    url: BASE_URL,
+    logo: `${BASE_URL}/branding/full_logo.png`,
+    image: `${BASE_URL}/branding/full_logo.png`,
+    telephone: '+220 123 4567',
+    email: 'support@ligaye.com',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Banjul',
+      addressCountry: 'GM',
+      postalCode: '00220',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 13.4549,
+      longitude: -16.5790,
+    },
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '09:00',
+      closes: '17:00',
+    },
+    sameAs: [
+      'https://twitter.com/ligaye_com',
+      'https://facebook.com/ligaye',
+      'https://linkedin.com/company/ligaye',
+    ],
+    priceRange: '$$',
   };
 }
 

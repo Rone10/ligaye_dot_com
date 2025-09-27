@@ -5,10 +5,24 @@ import { Badge } from '@/components/ui/badge'
 import type { Metadata } from 'next'
 import { getUser } from '@/lib/supabase/server'
 import Navbar from '@/components/Navbar'
+import { generateSEOMetadata } from '@/lib/seo/metadata'
 
-export const metadata: Metadata = {
-  title: 'Pricing - Ligaye.com',
-  description: 'Choose the perfect plan for your hiring needs. Transparent pricing with no hidden fees.',
+export async function generateMetadata(): Promise<Metadata> {
+  return generateSEOMetadata({
+    title: 'Pricing - Post Jobs in Gambia',
+    description: 'Affordable job posting plans for employers in Gambia. Choose from Basic, Premium, or Enterprise plans. Transparent pricing with no hidden fees. Pay online or with cash.',
+    path: '/pricing',
+    keywords: [
+      'job posting pricing Gambia',
+      'employer pricing Ligaye',
+      'post jobs cost Gambia',
+      'recruitment pricing Gambia',
+      'hiring plans Gambia',
+      'job board pricing',
+      'employer packages Gambia',
+      'job advertisement costs'
+    ],
+  });
 }
 
 export default async function PricingPage() {

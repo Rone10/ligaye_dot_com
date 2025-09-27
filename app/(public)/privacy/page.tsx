@@ -2,12 +2,24 @@ import { Metadata } from 'next';
 import { Shield, Eye, Lock, Users, Database, Mail, Phone, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { generateSEOMetadata } from '@/lib/seo/metadata';
 
-export const metadata: Metadata = {
-  title: 'Privacy Policy | Ligaye.com',
-  description: 'Learn how Ligaye.com protects your privacy and handles your personal information. Our comprehensive privacy policy explains data collection, usage, and your rights.',
-  keywords: 'privacy policy, data protection, personal information, Ligaye.com, job board privacy',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return generateSEOMetadata({
+    title: 'Privacy Policy',
+    description: 'Learn how Ligaye.com protects your privacy and handles your personal information. Our comprehensive privacy policy explains data collection, usage, and your rights as a user of Gambia\'s premier job board.',
+    path: '/privacy',
+    keywords: [
+      'privacy policy Ligaye',
+      'data protection Gambia',
+      'personal information security',
+      'job board privacy',
+      'user data rights',
+      'Ligaye data policy',
+      'information security Gambia'
+    ],
+  });
+}
 
 export default function PrivacyPolicyPage() {
   return (

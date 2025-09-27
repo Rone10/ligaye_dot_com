@@ -1,8 +1,28 @@
 import React from 'react';
+import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BrainCircuit, Target, Users, Gem } from 'lucide-react';
+import { generateSEOMetadata } from '@/lib/seo/metadata';
 
 export const dynamic = 'force-static';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return generateSEOMetadata({
+    title: 'About Us - Ligaye.com',
+    description: 'Learn about Ligaye.com, Gambia\'s premier job board connecting talent with opportunity. Our mission is to build a thriving job market for everyone in The Gambia.',
+    path: '/about-us',
+    keywords: [
+      'about Ligaye',
+      'Gambian job board',
+      'employment platform Gambia',
+      'job market Gambia',
+      'careers in Gambia',
+      'hiring in Gambia',
+      'Ligaye mission',
+      'job portal Gambia'
+    ],
+  });
+}
 
 export default function AboutUsPage() {
   // Glassmorphic styles using Tailwind arbitrary values / utility classes
