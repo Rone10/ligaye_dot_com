@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/supabase/server";
+import { getUserWithProfile } from "@/lib/supabase/server";
 import AdminSidebar from "./admin/_components/AdminSidebar";
 
 export const metadata: Metadata = {
@@ -13,17 +13,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Get logged-in user
-  const user = await getUser();
-  
+  // Get logged-in user and profile
+  const { user, isAdmin } = await getUserWithProfile();
+
   // Handle unauthorized access
-  if (!user) {
+  if (!user || !isAdmin) {
     redirect('/sign-in');
-  }
-  
-  // Check if user is admin
-  if (user.user_metadata.role !== 'admin') {
-    redirect('/sign-in'); // Or maybe redirect to a different unauthorized page? For now, sign-in.
   }
   
   // New layout structure with Sidebar

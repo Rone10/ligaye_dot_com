@@ -1,6 +1,6 @@
 'use server';
 
-import { getUser } from '@/lib/supabase/server';
+import { getUserWithProfile } from '@/lib/supabase/server';
 import { updateBlogPost, getBlogPostByIdForEdit } from './_queries';
 import { ensureUniqueSlug } from '../../new/_utils/slugify';
 import { revalidatePath } from 'next/cache';
@@ -12,9 +12,9 @@ export async function updateBlogPostAction(
   formData: FormData
 ): Promise<{success: boolean, error?: string}> {
   try {
-    const user = await getUser();
-    
-    if (!user || user?.user_metadata?.role !== 'admin') {
+    const { user, isAdmin } = await getUserWithProfile();
+
+    if (!user || !isAdmin) {
       return { success: false, error: 'Unauthorized. Admin access required.' };
     }
 

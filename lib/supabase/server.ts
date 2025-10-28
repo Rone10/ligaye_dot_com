@@ -3,6 +3,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { cache } from 'react'
+import { db } from '@/lib/db'
+import { profiles } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 export async function createClient() {
   const cookieStore = await cookies()
@@ -40,6 +43,31 @@ export async function getUser() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   return user
+}
+
+/**
+ * Helper: Get the current user and their profile (if any), and determine admin status.
+ * This avoids relying solely on auth metadata and reads the canonical role from the profiles table.
+ */
+export async function getUserWithProfile() {
+  const user = await getUser()
+  if (!user) return { user: null, profile: null, isAdmin: false }
+
+  try {
+    const result = await (await db())
+      .select()
+      .from(profiles)
+      .where(eq(profiles.userId, user.id))
+      .limit(1)
+      .then(res => res[0] || null)
+
+    const isAdmin = !!result && result.role === 'admin'
+
+    return { user, profile: result, isAdmin }
+  } catch (error) {
+    console.error('Error fetching user profile in getUserWithProfile:', error)
+    return { user, profile: null, isAdmin: false }
+  }
 }
 
 /**

@@ -1,6 +1,6 @@
 'use server';
 
-import { getUser } from '@/lib/supabase/server';
+import { getUserWithProfile } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { blogPosts } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -9,9 +9,9 @@ import { redirect } from 'next/navigation';
 
 export async function deleteBlogPostFromDetailAction(postId: string): Promise<{success: boolean, error?: string}> {
   try {
-    const user = await getUser();
-    
-    if (!user || user?.user_metadata?.role !== 'admin') {
+    const { user, isAdmin } = await getUserWithProfile();
+
+    if (!user || !isAdmin) {
       return { success: false, error: 'Unauthorized. Admin access required.' };
     }
 
@@ -46,9 +46,9 @@ export async function updateBlogPostStatusAction(
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 ): Promise<{success: boolean, error?: string}> {
   try {
-    const user = await getUser();
-    
-    if (!user || user.role !== 'admin') {
+    const { user, isAdmin } = await getUserWithProfile();
+
+    if (!user || !isAdmin) {
       return { success: false, error: 'Unauthorized. Admin access required.' };
     }
 
