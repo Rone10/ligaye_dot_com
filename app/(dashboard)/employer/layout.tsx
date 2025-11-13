@@ -2,6 +2,9 @@ import { getUser } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { UnifiedSidebar } from '../_components/UnifiedSidebar'
 
+// Force dynamic rendering for all employer dashboard pages
+export const dynamic = 'force-dynamic';
+
 export default async function EmployerDashboardLayout({
   children
 }: {

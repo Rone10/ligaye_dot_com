@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: "Admin dashboard for Ligaye.com job board platform",
 };
 
+// Force dynamic rendering for all admin pages to avoid database calls during build
+export const dynamic = 'force-dynamic';
+
 export default async function AdminLayout({
   children,
 }: {

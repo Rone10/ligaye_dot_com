@@ -8,8 +8,6 @@ type Sitemap = MetadataRoute.Sitemap;
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://ligaye.com';
 
 export default async function sitemap(): Promise<Sitemap> {
-  const database = await db();
-  
   // Static pages
   const staticPages: Sitemap = [
     {
@@ -62,42 +60,51 @@ export default async function sitemap(): Promise<Sitemap> {
     },
   ];
 
-  // Fetch all active jobs
-  const activeJobs = await database
-    .select({
-      id: jobs.id,
-      updatedAt: jobs.updatedAt,
-    })
-    .from(jobs)
-    .where(eq(jobs.status, 'ACTIVE'));
+  // Try to fetch dynamic pages, but return static pages if database is unavailable
+  try {
+    const database = await db();
 
-  const jobPages: Sitemap = activeJobs.map((job) => ({
-    url: `${BASE_URL}/jobs/${job.id}`,
-    lastModified: job.updatedAt,
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }));
+    // Fetch all active jobs
+    const activeJobs = await database
+      .select({
+        id: jobs.id,
+        updatedAt: jobs.updatedAt,
+      })
+      .from(jobs)
+      .where(eq(jobs.status, 'ACTIVE'));
 
-  // Fetch all published blog posts
-  const publishedPosts = await database
-    .select({
-      slug: blogPosts.slug,
-      updatedAt: blogPosts.updatedAt,
-    })
-    .from(blogPosts)
-    .where(
-      and(
-        eq(blogPosts.status, 'PUBLISHED'),
-        eq(blogPosts.deleted, false)
-      )
-    );
+    const jobPages: Sitemap = activeJobs.map((job) => ({
+      url: `${BASE_URL}/jobs/${job.id}`,
+      lastModified: job.updatedAt,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    }));
 
-  const blogPages: Sitemap = publishedPosts.map((post) => ({
-    url: `${BASE_URL}/blog/${post.slug}`,
-    lastModified: post.updatedAt,
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  }));
+    // Fetch all published blog posts
+    const publishedPosts = await database
+      .select({
+        slug: blogPosts.slug,
+        updatedAt: blogPosts.updatedAt,
+      })
+      .from(blogPosts)
+      .where(
+        and(
+          eq(blogPosts.status, 'PUBLISHED'),
+          eq(blogPosts.deleted, false)
+        )
+      );
 
-  return [...staticPages, ...jobPages, ...blogPages];
+    const blogPages: Sitemap = publishedPosts.map((post) => ({
+      url: `${BASE_URL}/blog/${post.slug}`,
+      lastModified: post.updatedAt,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    }));
+
+    return [...staticPages, ...jobPages, ...blogPages];
+  } catch (error) {
+    console.warn('⚠️  Unable to fetch dynamic pages for sitemap, returning static pages only:', error);
+    // Return only static pages if database is unavailable
+    return staticPages;
+  }
 }

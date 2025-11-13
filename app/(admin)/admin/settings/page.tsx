@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description: 'Manage system settings and configuration',
 };
 
+// Force dynamic rendering to avoid database calls during build
+export const dynamic = 'force-dynamic';
+
 export default async function AdminSettingsPage() {
   const [activePricing, pricingHistory, freePostingConfig] = await Promise.all([
     getActivePricing(),

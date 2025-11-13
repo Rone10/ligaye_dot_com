@@ -57,7 +57,14 @@ function createSlug(text: string): string {
 
 async function generateLocationFiles() {
   console.log('🚀 Starting location file generation...');
-  
+
+  // Skip during maintenance mode
+  if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true') {
+    console.log('⏭️  Skipping location file generation (maintenance mode enabled)');
+    console.log('   Existing location files will be used if available');
+    return;
+  }
+
   try {
     // Fetch all locations from database
     console.log('📊 Fetching locations from database...');
@@ -212,7 +219,10 @@ async function generateLocationFiles() {
 
   } catch (error) {
     console.error('❌ Error generating location files:', error);
-    process.exit(1);
+    console.log('⚠️  Build will continue using existing location files if available');
+    // Don't exit with error code to prevent build failure
+    // In maintenance mode or when DB is down, we can use cached files
+    return;
   }
 }
 
