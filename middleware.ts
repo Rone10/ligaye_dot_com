@@ -4,7 +4,17 @@ import { createArcjet, generalRateLimit, apiRateLimit, publicRouteRateLimit, adm
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  
+
+  // Check for maintenance mode
+  if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true') {
+    // Allow access to the maintenance page itself to prevent redirect loop
+    if (!pathname.startsWith('/maintenance')) {
+      return NextResponse.redirect(new URL('/maintenance', request.url));
+    }
+    // If already on maintenance page, allow it
+    return NextResponse.next();
+  }
+
   // Determine which rate limit to apply based on the route
   // let rateLimitRule;
   
