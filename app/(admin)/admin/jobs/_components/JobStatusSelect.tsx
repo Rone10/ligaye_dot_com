@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle, Clock, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface JobStatusSelectProps {
   jobId: string;
@@ -21,33 +21,33 @@ interface JobStatusSelectProps {
 const statusConfig = {
   ACTIVE: {
     label: "Active",
-    className: "bg-green-100 text-green-800 hover:bg-green-200",
-    icon: CheckCircle,
+    dotColor: "bg-emerald-500",
+    className: "bg-emerald-50 text-emerald-700 border-emerald-200",
   },
   PENDING_PAYMENT: {
     label: "Pending Payment",
-    className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
-    icon: Clock,
+    dotColor: "bg-amber-500",
+    className: "bg-amber-50 text-amber-700 border-amber-200",
   },
   DRAFT: {
     label: "Draft",
-    className: "bg-gray-100 text-gray-800 hover:bg-gray-200",
-    icon: Clock,
+    dotColor: "bg-gray-400",
+    className: "bg-gray-50 text-gray-600 border-gray-200",
   },
   EXPIRED: {
     label: "Expired",
-    className: "bg-orange-100 text-orange-800 hover:bg-orange-200",
-    icon: Clock,
+    dotColor: "bg-orange-500",
+    className: "bg-orange-50 text-orange-700 border-orange-200",
   },
   FILLED: {
     label: "Filled",
-    className: "bg-blue-100 text-blue-800 hover:bg-blue-200",
-    icon: CheckCircle,
+    dotColor: "bg-blue-500",
+    className: "bg-blue-50 text-blue-700 border-blue-200",
   },
   DELETED: {
     label: "Deleted",
-    className: "bg-red-100 text-red-800 hover:bg-red-200",
-    icon: Clock,
+    dotColor: "bg-red-500",
+    className: "bg-red-50 text-red-700 border-red-200",
   },
 };
 
@@ -61,11 +61,9 @@ export function JobStatusSelect({
 
   const config = statusConfig[currentStatus as keyof typeof statusConfig] || {
     label: currentStatus,
-    className: "bg-gray-100 text-gray-800",
-    icon: Clock,
+    dotColor: "bg-gray-400",
+    className: "bg-gray-50 text-gray-600 border-gray-200",
   };
-
-  const Icon = config.icon;
 
   const handleStatusChange = async (newStatus: string) => {
     if (newStatus === currentStatus) return;
@@ -80,15 +78,15 @@ export function JobStatusSelect({
 
   if (disabled || isUpdating) {
     return (
-      <Badge className={config.className}>
+      <Badge variant="outline" className={`${config.className} rounded-full pl-2 pr-3 py-1 font-medium text-xs border`}>
         {isUpdating ? (
           <>
-            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+            <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
             Updating...
           </>
         ) : (
           <>
-            <Icon className="mr-1 h-3 w-3" />
+            <span className={`inline-block w-1.5 h-1.5 rounded-full ${config.dotColor} mr-2`} />
             {config.label}
           </>
         )}
@@ -98,28 +96,28 @@ export function JobStatusSelect({
 
   return (
     <Select value={currentStatus} onValueChange={handleStatusChange}>
-      <SelectTrigger className={`${config.className} border-none h-auto p-1 px-2 text-xs font-medium rounded-md cursor-pointer hover:opacity-80 transition-opacity`}>
-        <div className="flex items-center gap-1">
-          <Icon className="h-3 w-3" />
+      <SelectTrigger className={`${config.className} border rounded-full h-auto pl-2 pr-3 py-1 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity`}>
+        <div className="flex items-center gap-0">
+          <span className={`inline-block w-1.5 h-1.5 rounded-full ${config.dotColor} mr-2`} />
           <SelectValue />
         </div>
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="ACTIVE">
           <div className="flex items-center">
-            <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2" />
             Active
           </div>
         </SelectItem>
         <SelectItem value="EXPIRED">
           <div className="flex items-center">
-            <Clock className="mr-2 h-4 w-4 text-orange-600" />
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 mr-2" />
             Expired
           </div>
         </SelectItem>
         <SelectItem value="FILLED">
           <div className="flex items-center">
-            <CheckCircle className="mr-2 h-4 w-4 text-blue-600" />
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 mr-2" />
             Filled
           </div>
         </SelectItem>

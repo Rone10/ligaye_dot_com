@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
+import { Search, X, Plus } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { getLocationsAction } from "../_actions";
 
@@ -23,10 +23,9 @@ interface Location {
 }
 
 export function JobFilters() {
-  const router = useRouter();
   const [locations, setLocations] = useState<Location[]>([]);
   const [searchInput, setSearchInput] = useState("");
-  
+
   const [status, setStatus] = useQueryState("status");
   const [search, setSearch] = useQueryState("search");
   const [location, setLocation] = useQueryState("location");
@@ -45,9 +44,9 @@ export function JobFilters() {
     setSearchInput(search || "");
   }, [search]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearch(searchInput || null);
+  const handleSearchChange = (value: string) => {
+    setSearchInput(value);
+    setSearch(value || null);
   };
 
   const handleClearFilters = () => {
@@ -61,24 +60,27 @@ export function JobFilters() {
 
   return (
     <div className="mb-6 space-y-4">
-      <form onSubmit={handleSearch} className="flex gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
           <Input
-            placeholder="Search by job title or description..."
+            placeholder="Search jobs by title or description..."
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-9"
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="pl-10 h-11 bg-white border-gray-200 focus-visible:ring-emerald-500 focus-visible:border-emerald-500 shadow-sm"
           />
         </div>
-        <Button type="submit" variant="secondary">
-          Search
+        <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm h-11 px-5">
+          <Link href="/employer/jobs/new">
+            <Plus className="h-4 w-4 mr-2" />
+            Create New Job
+          </Link>
         </Button>
-      </form>
+      </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap items-center gap-3">
         <Select value={status || "all"} onValueChange={(value) => setStatus(value === "all" ? null : value)}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px] h-9 border-gray-200 shadow-sm bg-white">
             <SelectValue placeholder="All Statuses" />
           </SelectTrigger>
           <SelectContent>
@@ -93,7 +95,7 @@ export function JobFilters() {
         </Select>
 
         <Select value={location || "all"} onValueChange={(value) => setLocation(value === "all" ? null : value)}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-[200px] h-9 border-gray-200 shadow-sm bg-white">
             <SelectValue placeholder="All Locations" />
           </SelectTrigger>
           <SelectContent>
@@ -112,9 +114,9 @@ export function JobFilters() {
             variant="ghost"
             size="sm"
             onClick={handleClearFilters}
-            className="h-10"
+            className="h-9 text-sm text-muted-foreground hover:text-foreground"
           >
-            <X className="mr-2 h-4 w-4" />
+            <X className="mr-1.5 h-3.5 w-3.5" />
             Clear Filters
           </Button>
         )}
