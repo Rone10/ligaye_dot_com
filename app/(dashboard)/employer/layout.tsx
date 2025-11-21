@@ -1,4 +1,4 @@
-import { getUser } from '@/lib/supabase/server'
+import { getUserWithProfile } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { UnifiedSidebar } from '../_components/UnifiedSidebar'
 
@@ -10,23 +10,24 @@ export default async function EmployerDashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const user = await getUser()
-  
+  const { user, profile } = await getUserWithProfile()
+
   if (!user) {
     redirect('/sign-in')
   }
-  
-  // Only allow employer to access this page
-  const userRole = user.user_metadata?.role;
-  if (userRole !== 'employer') {
-    if (userRole === 'candidate') {
-      console.warn(`Redirecting user ${user.id} with role '${userRole}' from employer layout to /candidate`);
-      redirect('/candidate'); // Redirect non-employers away
+
+  // Only allow employer to access this page - check database profile role
+  if (profile?.role !== 'employer') {
+    if (profile?.role === 'candidate') {
+      console.warn(`Redirecting user ${user.id} with role '${profile.role}' from employer layout to /candidate`);
+      redirect('/candidate');
     }
-    if (userRole === 'admin') {
-      console.warn(`Redirecting user ${user.id} with role '${userRole}' from employer layout to /admin`);
-      redirect('/admin/users'); // Redirect non-employers away
+    if (profile?.role === 'admin') {
+      console.warn(`Redirecting user ${user.id} with role '${profile.role}' from employer layout to /admin/users`);
+      redirect('/admin/users');
     }
+    // If no profile or unrecognized role, redirect to sign-in
+    redirect('/sign-in');
   }
 
   return (
