@@ -24,7 +24,7 @@ interface ApplicationFormProps {
     id: string
     resumeUrl: string | null
     resumeFilename: string | null
-  }
+  } | null | undefined
 }
 
 export function ApplicationForm({ job, candidateProfile }: ApplicationFormProps) {
@@ -32,18 +32,37 @@ export function ApplicationForm({ job, candidateProfile }: ApplicationFormProps)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
-  
-  // Initialize form with default values
+
+  // Initialize form with default values (hooks must be called unconditionally)
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(applicationFormSchema),
     defaultValues: {
-      resumeOption: candidateProfile.resumeUrl ? "profile" : "upload",
+      resumeOption: candidateProfile?.resumeUrl ? "profile" : "upload",
       resumeFile: null,
       coverLetterOption: "none",
       coverLetterFile: null,
       coverLetterText: "",
     }
   })
+
+  // Defensive check: This should never happen due to page-level validation,
+  // but we protect against it anyway
+  if (!candidateProfile) {
+    return (
+      <Card className="p-6">
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-700">
+          <p className="font-semibold">Profile Required</p>
+          <p className="mt-1">You need to complete your candidate profile before applying for jobs.</p>
+          <Button
+            onClick={() => router.push('/candidate/profile')}
+            className="mt-4"
+          >
+            Complete Profile
+          </Button>
+        </div>
+      </Card>
+    )
+  }
   
   // Get form values for conditional rendering
   const resumeOption = form.watch("resumeOption")

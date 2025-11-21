@@ -38,7 +38,12 @@ export default async function ApplicationPage({ params }: ApplicationPageProps) 
   if (job.applicationMethod !== 'PLATFORM') {
     redirect(`/jobs/${id}?error=externalApplication`)
   }
-  
+
+  // Redirect if candidate profile doesn't exist
+  if (!candidateProfile) {
+    redirect(`/candidate/profile?error=profileIncomplete&redirect=/jobs/${id}/apply`)
+  }
+
   // Prepare job data with proper types for the form
   const jobData = {
     id: job.id,
