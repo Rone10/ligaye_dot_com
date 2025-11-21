@@ -100,8 +100,21 @@ export default function CompensationStep({ form, onNext, onPrevious }: Compensat
   }
   
   const handleNext = () => {
-    // We can just proceed since salary fields are optional
-    onNext()
+    const compensationFieldsValid = form.trigger([
+      'salaryDisplayType',
+      'salaryRangeMin',
+      'salaryRangeMax',
+      'salaryCurrency',
+      'salaryFrequency',
+      'supplementalPay',
+      'benefits'
+    ])
+
+    compensationFieldsValid.then(isValid => {
+      if (isValid) {
+        onNext()
+      }
+    })
   }
   
   return (
