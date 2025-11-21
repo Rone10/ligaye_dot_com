@@ -23,7 +23,7 @@ interface EditJobFormProps {
 
 export default function EditJobForm({ job, jobSkills, jobIndustries }: EditJobFormProps) {
   const router = useRouter()
-  const { form, step, totalSteps, nextStep, prevStep, isSubmitting, setIsSubmitting } = useJobForm(job)
+  const { form, step, totalSteps, nextStep, prevStep, isSubmitting, setIsSubmitting } = useJobForm(job, jobSkills, jobIndustries)
   const [error, setError] = useState<string | null>(null)
   
   const onSubmit = async (data: any) => {

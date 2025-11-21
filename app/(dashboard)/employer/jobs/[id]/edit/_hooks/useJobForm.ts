@@ -7,7 +7,7 @@ import { JobFormValues, jobFormSchema } from '../_utils/validation'
 import { workLocationEnum } from '@/lib/db/schema'
 import type { Job } from '@/lib/db/schema'
 
-export default function useJobForm(job?: Job, jobSkills?: {id: string, name: string}[], jobIndustries?: {id: string, name: string}[]) {
+export default function useJobForm(job?: Job, jobSkills?: {skillId: string, name?: string}[], jobIndustries?: {industryId: string, name?: string}[]) {
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -43,8 +43,8 @@ export default function useJobForm(job?: Job, jobSkills?: {id: string, name: str
     salaryDisplayType: job.salaryDisplayType || 'NEGOTIABLE' as any,
     supplementalPay: job.supplementalPay || [],
     benefits: job.benefits || [],
-    skillIds: jobSkills?.map(skill => skill.id) || [],
-    industryIds: jobIndustries?.map(industry => industry.id) || [],
+    skillIds: jobSkills?.map(skill => skill.skillId) || [],
+    industryIds: jobIndustries?.map(industry => industry.industryId) || [],
     applicationMethod: job.applicationMethod as any,
     applicationInstructions: nullToUndefined(job.applicationInstructions),
     applicationUrl: job.applicationUrl || '',
