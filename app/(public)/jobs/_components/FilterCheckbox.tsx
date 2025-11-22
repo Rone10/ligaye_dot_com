@@ -28,14 +28,14 @@ export function FilterCheckbox({
           disabled={disabled}
           className={cn(
             "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
-            "focus-visible:ring-primary"
+            "focus-visible:ring-primary border-border"
           )}
         />
         <label
           htmlFor={`filter-${label.toLowerCase().replace(/\s+/g, '-')}`}
           className={cn(
             "text-sm font-medium cursor-pointer",
-            checked ? "text-[#1a1e2d] dark:text-[#505973]" : "text-[#505973] dark:text-[#505973]",
+            checked ? "text-foreground" : "text-muted-foreground",
             disabled && "opacity-50 cursor-not-allowed"
           )}
         >
