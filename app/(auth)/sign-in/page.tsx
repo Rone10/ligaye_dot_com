@@ -12,25 +12,25 @@ export const metadata: Metadata = {
 }
 
 interface SignInPageProps {
-  searchParams: Promise<{ redirect?: string }>
+  searchParams: Promise<{ redirect?: string; message?: string }>
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
   // Check if user is already logged in
   const user = await getUser()
-  
-  // Get the redirect parameter
-  const { redirect: redirectTo } = await searchParams
-  
+
+  // Get the redirect parameter and message
+  const { redirect: redirectTo, message } = await searchParams
+
   // Redirect to the specified page or home if already authenticated
   if (user) {
     redirect(redirectTo || '/')
   }
-  
+
   return (
     <div className="flex items-center justify-center">
       <div className="w-full max-w-md">
-        <SignInForm redirectTo={redirectTo} />
+        <SignInForm redirectTo={redirectTo} successMessage={message} />
       </div>
     </div>
   )

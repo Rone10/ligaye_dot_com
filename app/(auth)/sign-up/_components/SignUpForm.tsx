@@ -16,8 +16,38 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { BriefcaseIcon, CheckCircle2, MailIcon, UserIcon } from 'lucide-react'
+import { BriefcaseIcon, CheckCircle2, MailIcon, UserIcon, Eye, EyeOff, Check, X } from 'lucide-react'
 import { Controller } from 'react-hook-form'
+
+type PasswordStrength = 'weak' | 'medium' | 'strong'
+
+interface PasswordRequirement {
+  label: string
+  met: boolean
+}
+
+function calculatePasswordStrength(password: string): {
+  strength: PasswordStrength
+  requirements: PasswordRequirement[]
+} {
+  const requirements: PasswordRequirement[] = [
+    { label: 'At least 8 characters', met: password.length >= 8 },
+    { label: 'Contains uppercase letter', met: /[A-Z]/.test(password) },
+    { label: 'Contains lowercase letter', met: /[a-z]/.test(password) },
+    { label: 'Contains number', met: /[0-9]/.test(password) },
+  ]
+
+  const metCount = requirements.filter(req => req.met).length
+
+  let strength: PasswordStrength = 'weak'
+  if (metCount === 4) {
+    strength = 'strong'
+  } else if (metCount >= 2) {
+    strength = 'medium'
+  }
+
+  return { strength, requirements }
+}
 
 export function SignUpForm() {
   const router = useRouter()
@@ -25,13 +55,15 @@ export function SignUpForm() {
   const [formError, setFormError] = useState<string | null>(null)
   const [formSuccess, setFormSuccess] = useState(false)
   const [userEmail, setUserEmail] = useState('')
-  
+  const [showPassword, setShowPassword] = useState(false)
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     setError,
     control,
+    watch,
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -42,6 +74,10 @@ export function SignUpForm() {
       userRole: 'candidate',
     },
   })
+
+  // Watch password field for strength indicator
+  const password = watch('password', '')
+  const { strength, requirements } = calculatePasswordStrength(password)
   
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true)
@@ -202,14 +238,81 @@ export function SignUpForm() {
           
           <div className="space-y-xs">
             <Label htmlFor="password" className="text-dark font-medium">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              {...register('password')}
-              disabled={isLoading}
-              className={`input-field ${errors.password ? 'border-destructive' : ''}`}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                {...register('password')}
+                disabled={isLoading}
+                className={`input-field pr-10 ${errors.password ? 'border-destructive' : ''}`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
+            {/* Password strength indicator */}
+            {password.length > 0 && (
+              <div className="space-y-2 mt-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        strength === 'weak'
+                          ? 'w-1/3 bg-red-500'
+                          : strength === 'medium'
+                          ? 'w-2/3 bg-yellow-500'
+                          : 'w-full bg-green-500'
+                      }`}
+                    />
+                  </div>
+                  <span
+                    className={`text-xs font-medium ${
+                      strength === 'weak'
+                        ? 'text-red-600'
+                        : strength === 'medium'
+                        ? 'text-yellow-600'
+                        : 'text-green-600'
+                    }`}
+                  >
+                    {strength === 'weak'
+                      ? 'Weak'
+                      : strength === 'medium'
+                      ? 'Medium'
+                      : 'Strong'}
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  {requirements.map((req, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 text-xs"
+                    >
+                      {req.met ? (
+                        <Check className="h-3 w-3 text-green-600 flex-shrink-0" />
+                      ) : (
+                        <X className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                      )}
+                      <span className={req.met ? 'text-green-700' : 'text-gray-600'}>
+                        {req.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}

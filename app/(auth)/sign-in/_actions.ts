@@ -15,6 +15,49 @@ export type SignInActionResult = {
   success: boolean;
   error?: string;
   fieldErrors?: Record<string, string[]>;
+  emailNotVerified?: boolean;
+  userEmail?: string;
+}
+
+export type ResendVerificationResult = {
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Server action to resend verification email
+ * This action allows users who haven't verified their email to request a new verification link
+ */
+export async function resendVerificationEmail(email: string): Promise<ResendVerificationResult> {
+  try {
+    const supabase = await createClient()
+
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/verify`
+      }
+    })
+
+    if (error) {
+      console.error('Resend verification email error:', error)
+      return {
+        success: false,
+        error: 'Failed to resend verification email. Please try again later.'
+      }
+    }
+
+    return {
+      success: true
+    }
+  } catch (error) {
+    console.error('Unexpected error resending verification email:', error)
+    return {
+      success: false,
+      error: 'An unexpected error occurred. Please try again.'
+    }
+  }
 }
 
 /**
@@ -55,6 +98,23 @@ export async function signInUser(formData: FormData): Promise<SignInActionResult
 
     if (authError) {
       console.error('Supabase Auth error:', authError)
+
+      // Check if the error is due to unverified email
+      const errorMessage = authError.message.toLowerCase()
+      if (
+        errorMessage.includes('email not confirmed') ||
+        errorMessage.includes('not confirmed') ||
+        errorMessage.includes('email confirmation')
+      ) {
+        return {
+          success: false,
+          error: 'Please verify your email address before signing in. Check your inbox for the verification link.',
+          emailNotVerified: true,
+          userEmail: validatedData.email
+        }
+      }
+
+      // Generic error for invalid credentials or other auth issues
       return {
         success: false,
         error: 'Invalid email or password. Please try again.'
