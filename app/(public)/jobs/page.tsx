@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { 
-  getFilteredJobs, 
+import {
+  getFilteredJobs,
   getIndustriesForFilters,
   getSavedJobIdsForUser
 } from './_queries';
@@ -10,8 +10,8 @@ import { createLoader } from 'nuqs/server';
 import { jobFiltersParsers, jobFiltersUrlKeys } from './_utils/job-filter-parsers';
 import { jobTypeEnum, workLocationEnum, experienceLevelEnum } from '@/lib/db/schema';
 import { getCachedUser } from '@/lib/supabase/server';
-import { 
-  JobSearchFilters, 
+import {
+  JobSearchFilters,
   JobListWithSaving,
 } from './_components';
 import type { JobFilters as JobFiltersType } from './_utils/types';
@@ -26,32 +26,32 @@ const loadJobFilters = createLoader(jobFiltersParsers, { urlKeys: jobFiltersUrlK
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const awaitedSearchParams = await searchParams;
   const filters = await loadJobFilters(awaitedSearchParams);
-  
+
   // Build dynamic title and description based on filters
   const titleParts = ['Jobs'];
   const descParts = ['Find your next career opportunity'];
-  
+
   if (filters.search) {
     titleParts.push(`for "${filters.search}"`);
     descParts.push(`matching "${filters.search}"`);
   }
-  
+
   if (filters.jobType && filters.jobType !== 'all') {
     const jobTypeFormatted = filters.jobType.replace(/_/g, ' ').toLowerCase();
     titleParts.push(jobTypeFormatted);
     descParts.push(`- ${jobTypeFormatted} positions`);
   }
-  
+
   if (filters.experienceLevel && filters.experienceLevel !== 'all') {
     titleParts.push(`(${filters.experienceLevel} level)`);
   }
-  
+
   titleParts.push('in Gambia');
   descParts.push('in Gambia. Browse thousands of job openings from top employers.');
-  
+
   const title = titleParts.join(' ');
   const description = descParts.join(' ');
-  
+
   return generateSEOMetadata({
     title,
     description,
@@ -75,7 +75,7 @@ export default async function JobsPage({ searchParams }: PageProps) {
     getIndustriesForFilters(), // Filter options are independent
     getCachedUser() // User authentication is independent
   ]);
-  
+
   const queryFilters: JobFiltersType = {
     search: filters.search || null,
     locationId: filters.locationId === 'all' ? null : filters.locationId,
@@ -87,7 +87,7 @@ export default async function JobsPage({ searchParams }: PageProps) {
     industryId: filters.industryId === 'all' ? null : filters.industryId,
     sortBy: filters.sortBy
   };
-  
+
   const page = filters.page;
   const pageSize = filters.pageSize;
 
@@ -98,39 +98,39 @@ export default async function JobsPage({ searchParams }: PageProps) {
   ]);
 
   const { jobs, totalCount, pageCount } = jobsResult;
-  
+
   if (page > pageCount && pageCount > 0) {
     notFound();
   }
-  
+
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-background">
       {/* <Navbar user={user} /> */}
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="mb-10 text-center">
-          <h1 className="text-4xl font-bold mb-3 text-gray-900 tracking-tight">Find Your Perfect Job</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-4xl font-bold mb-3 text-foreground tracking-tight">Find Your Perfect Job</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Browse thousands of job openings from top employers in Gambia and take the next step in your career.
           </p>
         </div>
-        
+
         {/* Grid Layout for desktop, single column for mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start">
           {/* Filter Sidebar - Desktop shows as sidebar, mobile uses slide-out */}
-          <Suspense fallback={<div className="bg-white border border-gray-200 rounded-xl p-6 h-[300px] flex items-center justify-center text-gray-500">Loading filters...</div>}>
-            <JobSearchFilters 
+          <Suspense fallback={<div className="bg-card border border-border rounded-xl p-6 h-[300px] flex items-center justify-center text-muted-foreground">Loading filters...</div>}>
+            <JobSearchFilters
               industries={industries}
             />
           </Suspense>
-          
+
           {/* Job Listings */}
           <div className="min-w-0">
-            <Suspense 
+            <Suspense
               fallback={
-                <div className="bg-white border border-gray-200 rounded-xl p-8 flex items-center justify-center h-[300px] text-gray-500">Loading jobs...</div>
+                <div className="bg-card border border-border rounded-xl p-8 flex items-center justify-center h-[300px] text-muted-foreground">Loading jobs...</div>
               }
             >
-              <JobListWithSaving 
+              <JobListWithSaving
                 jobs={jobs}
                 totalCount={totalCount}
                 currentPage={page}

@@ -29,15 +29,15 @@ export function FilterSection({
 
   return (
     <div className="rounded-[12px] overflow-hidden">
-      <div 
-        className="flex items-center justify-between p-3 cursor-pointer"
+      <div
+        className="flex items-center justify-between p-3 cursor-pointer hover:bg-muted/50 transition-colors"
         onClick={toggleExpanded}
       >
-        <h3 className="font-semibold">{title}</h3>
+        <h3 className="font-semibold text-card-foreground">{title}</h3>
         <div className="flex items-center gap-2">
           {showClear && onClear && (
             <button
-              className="hover:text-[#1a1e2d] transition-colors p-1 rounded-full"
+              className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full"
               onClick={(e) => {
                 e.stopPropagation(); // Prevent section from collapsing when clearing
                 onClear();
@@ -47,25 +47,25 @@ export function FilterSection({
               <X className="w-4 h-4" />
             </button>
           )}
-          <ChevronDown 
+          <ChevronDown
             className={cn(
-              "w-5 h-5 transition-transform duration-200",
+              "w-5 h-5 text-muted-foreground transition-transform duration-200",
               isExpanded && "transform rotate-180"
-            )} 
+            )}
           />
         </div>
       </div>
-      
-      <div 
+
+      <div
         className={cn(
           "overflow-hidden transition-all duration-300 ease-in-out",
           isExpanded ? `${maxHeight} opacity-100` : "max-h-0 opacity-0"
         )}
       >
-        <div className="p-3 pt-0 border-t border-[rgba(255,255,255,0.15)] overflow-y-auto">
+        <div className="p-3 pt-0 border-t border-border overflow-y-auto">
           {children}
         </div>
       </div>
     </div>
   );
-} 
+}
