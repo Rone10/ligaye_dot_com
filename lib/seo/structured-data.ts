@@ -4,6 +4,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://ligaye.com';
 
 interface JobPostingData {
   title: string;
+  jobId: string;
+  slug?: string;
   description: string;
   company: {
     name: string;
@@ -32,6 +34,8 @@ interface JobPostingData {
 export function generateJobPostingSchema(data: JobPostingData): WithContext<JobPosting> {
   const {
     title,
+    jobId,
+    slug,
     description,
     company,
     location,
@@ -44,6 +48,9 @@ export function generateJobPostingSchema(data: JobPostingData): WithContext<JobP
     employmentType = [],
     workLocation,
   } = data;
+
+  const jobPath = `/jobs/${slug ?? jobId}`;
+  const jobUrl = `${BASE_URL}${jobPath}`;
 
   const hiringOrganization: Organization = {
     '@type': 'Organization',
@@ -58,6 +65,7 @@ export function generateJobPostingSchema(data: JobPostingData): WithContext<JobP
     title,
     description,
     datePosted: datePosted.toISOString(),
+    url: jobUrl,
     hiringOrganization,
     ...(validThrough && { validThrough: validThrough.toISOString() }),
     ...(experienceLevel && { experienceRequirements: experienceLevel }),
@@ -106,7 +114,7 @@ export function generateJobPostingSchema(data: JobPostingData): WithContext<JobP
     schema.applicationContact = {
       '@type': 'ContactPoint',
       contactType: 'HR',
-      url: `${BASE_URL}/jobs/${title.toLowerCase().replace(/\s+/g, '-')}`,
+      url: jobUrl,
     };
   }
 

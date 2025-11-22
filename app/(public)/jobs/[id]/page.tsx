@@ -113,6 +113,8 @@ export default async function JobDetailPage({ params, searchParams }: PageProps)
   // Generate structured data for SEO
   const jobPostingSchema = generateJobPostingSchema({
     title: job.title,
+    jobId: job.id,
+    slug: job.slug || undefined,
     description: job.description,
     company: {
       name: job.company?.companyName || 'Company',
