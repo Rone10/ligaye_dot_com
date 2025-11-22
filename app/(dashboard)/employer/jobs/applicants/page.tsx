@@ -5,6 +5,10 @@ import ApplicationsDataTable from './_components/ApplicationsDataTable'
 import ApplicationFilters, { ApplicationFiltersClearButton } from './_components/ApplicationFilters'
 import { Search } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+export const fetchCache = 'force-no-store'
+
 interface PageProps {
   searchParams: Promise<{
     status?: string

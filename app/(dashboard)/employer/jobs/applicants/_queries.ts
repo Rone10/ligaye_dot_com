@@ -123,31 +123,7 @@ export async function getEmployerApplications(filter: ApplicationFilter = {}) {
       return { error: 'Employer profile not found' }
     }
     
-    // Create cache key based on filter parameters
-    const cacheKey = [
-      'employer-applications',
-      employerProfileId,
-      filter.status || 'all',
-      filter.jobId || 'all',
-      filter.searchTerm || '',
-      filter.sort || 'newest'
-    ]
-    
-    // Cache the data fetching function with on-demand invalidation
-    const cachedFunction = unstable_cache(
-      async () => getEmployerApplicationsData(employerProfileId, filter),
-      cacheKey,
-      {
-        tags: [
-          APPLICANTS_CACHE_TAGS.allApplications,
-          APPLICANTS_CACHE_TAGS.employerApplications(employerProfileId),
-          ...(filter.jobId ? [APPLICANTS_CACHE_TAGS.jobApplications(filter.jobId)] : []),
-          ...(filter.status ? [APPLICANTS_CACHE_TAGS.applicationsByStatus(filter.status)] : [])
-        ]
-      }
-    )
-    
-    const applications = await cachedFunction()
+    const applications = await getEmployerApplicationsData(employerProfileId, filter)
     
     return { applications }
   } catch (error) {
@@ -394,20 +370,7 @@ export async function getApplicationCounts() {
       return { error: 'Employer profile not found' }
     }
     
-    // Cache the data fetching function with on-demand invalidation
-    const cachedFunction = unstable_cache(
-      async () => getApplicationCountsData(employerProfileId),
-      [`application-counts-${employerProfileId}`],
-      {
-        tags: [
-          APPLICANTS_CACHE_TAGS.applicationCounts,
-          APPLICANTS_CACHE_TAGS.employerApplications(employerProfileId),
-          APPLICANTS_CACHE_TAGS.allApplications
-        ]
-      }
-    )
-    
-    const counts = await cachedFunction()
+    const counts = await getApplicationCountsData(employerProfileId)
     
     return { counts }
   } catch (error) {
