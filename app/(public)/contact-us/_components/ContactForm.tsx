@@ -82,8 +82,8 @@ export default function ContactForm() {
                             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
                                 <Phone className="h-6 w-6 text-primary" />
                             </div>
-                            <h3 className="font-semibold mb-1">Phone</h3>
-                            <p className="text-muted-foreground text-sm">+220 3139076</p>
+                            <h3 className="font-semibold text-theme-dark mb-1">Phone</h3>
+                            <p className="text-theme-gray-dark text-sm">+220 3139076</p>
                         </CardContent>
                     </Card>
 
