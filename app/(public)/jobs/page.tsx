@@ -104,36 +104,39 @@ export default async function JobsPage({ searchParams }: PageProps) {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))]">
+    <div className="min-h-screen bg-gray-50/50">
       {/* <Navbar user={user} /> */}
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 text-theme-dark text-center">Find Your Perfect Job</h1>
+      <div className="container mx-auto px-4 py-12 max-w-7xl">
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-bold mb-3 text-gray-900 tracking-tight">Find Your Perfect Job</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Browse thousands of job openings from top employers in Gambia and take the next step in your career.
+          </p>
+        </div>
         
         {/* Grid Layout for desktop, single column for mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 ">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start">
           {/* Filter Sidebar - Desktop shows as sidebar, mobile uses slide-out */}
-          <Suspense fallback={<div className=" backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] p-6 mb-8 shadow-[0_8px_32px_rgba(31,38,135,0.1)] h-[300px] flex items-center justify-center">Loading filter options...</div>}>
+          <Suspense fallback={<div className="bg-white border border-gray-200 rounded-xl p-6 h-[300px] flex items-center justify-center text-gray-500">Loading filters...</div>}>
             <JobSearchFilters 
               industries={industries}
             />
           </Suspense>
           
           {/* Job Listings */}
-          <div>
+          <div className="min-w-0">
             <Suspense 
               fallback={
-                <div className=" backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] p-6 shadow-[0_8px_32px_rgba(31,38,135,0.1)] flex items-center justify-center h-[300px]">Loading jobs...</div>
+                <div className="bg-white border border-gray-200 rounded-xl p-8 flex items-center justify-center h-[300px] text-gray-500">Loading jobs...</div>
               }
             >
-              <div className=" backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] p-6 shadow-[0_8px_32px_rgba(31,38,135,0.1)]">
-                <JobListWithSaving 
-                  jobs={jobs}
-                  totalCount={totalCount}
-                  currentPage={page}
-                  pageCount={pageCount}
-                  savedJobIds={savedJobIds}
-                />
-              </div>
+              <JobListWithSaving 
+                jobs={jobs}
+                totalCount={totalCount}
+                currentPage={page}
+                pageCount={pageCount}
+                savedJobIds={savedJobIds}
+              />
             </Suspense>
           </div>
         </div>

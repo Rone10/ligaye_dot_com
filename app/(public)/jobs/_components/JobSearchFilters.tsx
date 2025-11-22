@@ -3,10 +3,10 @@
 import { useState, useEffect, useTransition, useCallback } from 'react';
 import { useJobFilters } from '../_hooks/useJobFilters';
 import { useMediaQuery, useDebounce } from '../_hooks/';
-import { 
-  jobTypeOptions, 
-  workLocationOptions, 
-  experienceLevelOptions 
+import {
+  jobTypeOptions,
+  workLocationOptions,
+  experienceLevelOptions
 } from '../_utils/constants';
 import { Search, X, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,31 +35,31 @@ export function JobSearchFilters({ industries }: FilterProps) {
   ]);
   const [isPending, startTransition] = useTransition();
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-  
+
   // Local state for search input to provide immediate feedback
   const [searchInput, setSearchInput] = useState(filters.search || '');
-  
+
   // Debounce the search input to prevent excessive fetching
   const debouncedSearchTerm = useDebounce(searchInput, 500);
-  
+
   // --- Wrapped state update functions ---
   const handleFilterChange = useCallback((update: Parameters<typeof setFilters>[0]) => {
     startTransition(() => {
       setFilters(update);
     });
   }, [setFilters, startTransition]);
-  
+
   // Update filters when debounced search term changes
   useEffect(() => {
     if (debouncedSearchTerm !== filters.search) {
       handleFilterChange({ search: debouncedSearchTerm || null, page: 1 });
     }
   }, [debouncedSearchTerm, filters.search, handleFilterChange]);
-  
+
   // Local state for industry search
   const [industrySearchInput, setIndustrySearchInput] = useState('');
   const [includeNegotiable, setIncludeNegotiable] = useState(filters.includeNegotiable ?? true);
-  
+
   // Helper function to get the most specific location ID from selection
   const getLocationIdFromSelection = (selection: LocationSelection): string | null => {
     return selection.cityId || selection.districtId || selection.regionId || null;
@@ -89,16 +89,16 @@ export function JobSearchFilters({ industries }: FilterProps) {
     setLocationSelection({});
     handleFilterChange({ locationId: 'all', page: 1 });
   }
-  
+
   // Filtered industries based on search input
   const filteredIndustries = industrySearchInput
-    ? industries.filter(industry => 
-        industry.name.toLowerCase().includes(industrySearchInput.toLowerCase())
-      )
+    ? industries.filter(industry =>
+      industry.name.toLowerCase().includes(industrySearchInput.toLowerCase())
+    )
     : industries;
-  
+
   const isMobile = useMediaQuery('(max-width: 767px)');
-  
+
   // Sort options
   const sortOptions = [
     { value: 'newest', label: 'Newest first' },
@@ -146,7 +146,7 @@ export function JobSearchFilters({ industries }: FilterProps) {
       });
     });
   };
-  
+
   const handleSalaryRangeChange = (value: [number, number]) => {
     setSalaryRange(value);
   };
@@ -161,7 +161,7 @@ export function JobSearchFilters({ industries }: FilterProps) {
       });
     });
   };
-  
+
   const toggleMobileFilter = () => {
     setIsMobileFilterOpen(prev => !prev);
   };
@@ -170,7 +170,7 @@ export function JobSearchFilters({ industries }: FilterProps) {
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
   };
-  
+
   // Clear search immediately when clicking the X button
   const handleClearSearch = () => {
     setSearchInput('');
@@ -193,7 +193,7 @@ export function JobSearchFilters({ industries }: FilterProps) {
     };
     return counts[type] || 0;
   };
-  
+
   const getWorkLocationCount = (type: string) => {
     const counts: Record<string, number> = {
       'REMOTE': 128,
@@ -202,7 +202,7 @@ export function JobSearchFilters({ industries }: FilterProps) {
     };
     return counts[type] || 0;
   };
-  
+
   const getExperienceLevelCount = (level: string) => {
     const counts: Record<string, number> = {
       'Entry': 98,
@@ -214,7 +214,7 @@ export function JobSearchFilters({ industries }: FilterProps) {
     };
     return counts[level] || 0;
   };
-  
+
   const getIndustryCount = (id: string) => {
     // Simulated counts - would come from API in real implementation
     return Math.floor(Math.random() * 70) + 10;
@@ -224,112 +224,112 @@ export function JobSearchFilters({ industries }: FilterProps) {
   const filterContent = (
     <div className="flex flex-col h-full">
       {/* Search Input */}
-      <div className="p-5 border-b border-[rgba(255,255,255,0.5)]">
+      <div className="p-5 border-b border-gray-100">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Search className="h-4 w-4 text-[#9aa3bc]" />
+            <Search className="h-4 w-4 text-gray-400" />
           </div>
           <Input
-            className="pl-10 pr-4 py-2  border border-[rgba(255,255,255,0.5)] rounded-[10px] w-full focus:border-[#4a6cfa] focus:ring focus:ring-[rgba(74,108,250,0.15)]"
-            placeholder="Search job titles, keywords, or companies"
+            className="pl-10 pr-8 py-2 border-gray-200 rounded-lg w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 bg-gray-50/50 transition-all"
+            placeholder="Search jobs..."
             value={searchInput}
             onChange={handleSearchInputChange}
           />
           {searchInput && (
             <button
-              className="absolute inset-y-0 right-0 flex items-center pr-3"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
               onClick={handleClearSearch}
             >
-              <X className="h-4 w-4 " />
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
       </div>
 
-      <div className="p-5 space-y-6 flex-grow overflow-y-auto">
+      <div className="p-5 space-y-6 flex-grow overflow-y-auto custom-scrollbar">
         {/* Active Filters */}
         {activeFiltersCount > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {filters.jobType && filters.jobType !== 'all' && (
-              <Badge 
-                variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-100 transition-colors cursor-pointer"
                 onClick={() => handleFilterChange({ jobType: 'all', page: 1 })}
               >
                 {jobTypeOptions.find(opt => opt.value === filters.jobType)?.label}
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3 ml-0.5" />
               </Badge>
             )}
             {filters.workLocation && filters.workLocation !== 'all' && (
-              <Badge 
-                variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-100 transition-colors cursor-pointer"
                 onClick={() => handleFilterChange({ workLocation: 'all', page: 1 })}
               >
                 {workLocationOptions.find(opt => opt.value === filters.workLocation)?.label}
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3 ml-0.5" />
               </Badge>
             )}
             {filters.experienceLevel && filters.experienceLevel !== 'all' && (
-              <Badge 
-                variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-100 transition-colors cursor-pointer"
                 onClick={() => handleFilterChange({ experienceLevel: 'all', page: 1 })}
               >
                 {experienceLevelOptions.find(opt => opt.value === filters.experienceLevel)?.label}
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3 ml-0.5" />
               </Badge>
             )}
             {filters.locationId && filters.locationId !== 'all' && (
-              <Badge 
-                variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-100 transition-colors cursor-pointer"
                 onClick={handleClearLocation}
               >
                 {getLocationDisplayFromSelection(locationSelection)}
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3 ml-0.5" />
               </Badge>
             )}
             {(filters.salaryMin || (filters.salaryMax && filters.salaryMax < 1000000)) && (
-              <Badge 
-                variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-100 transition-colors cursor-pointer"
                 onClick={() => handleFilterChange({ salaryMin: null, salaryMax: null, page: 1 })}
               >
-                {filters.salaryMin && filters.salaryMax 
+                {filters.salaryMin && filters.salaryMax
                   ? `GMD ${filters.salaryMin.toLocaleString()} - ${filters.salaryMax.toLocaleString()}`
-                  : filters.salaryMin 
+                  : filters.salaryMin
                     ? `Min: GMD ${filters.salaryMin.toLocaleString()}`
                     : `Max: GMD ${filters.salaryMax!.toLocaleString()}`}
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3 ml-0.5" />
               </Badge>
             )}
             {filters.industryId && filters.industryId !== 'all' && (
-              <Badge 
-                variant="secondary" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full "
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-100 transition-colors cursor-pointer"
                 onClick={() => handleFilterChange({ industryId: 'all', page: 1 })}
               >
                 {getIndustryLabel(filters.industryId)}
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3 ml-0.5" />
               </Badge>
             )}
             {activeFiltersCount > 1 && (
-              <Badge 
-                variant="destructive" 
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer"
+              <Badge
+                variant="outline"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 border-gray-200 transition-colors cursor-pointer"
                 onClick={handleResetFilters}
               >
                 Clear All
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3 ml-0.5" />
               </Badge>
             )}
           </div>
         )}
 
         {/* Job Type Filter */}
-        <FilterSection 
-          title="Job Type" 
+        <FilterSection
+          title="Job Type"
           defaultExpanded={true}
           onClear={() => handleFilterChange({ jobType: 'all', page: 1 })}
           showClear={filters.jobType !== 'all'}
@@ -341,9 +341,9 @@ export function JobSearchFilters({ industries }: FilterProps) {
                 label={option.label}
                 count={getJobTypeCount(option.value)}
                 checked={filters.jobType === option.value}
-                onChange={() => handleFilterChange({ 
-                  jobType: filters.jobType === option.value ? 'all' : option.value as typeof jobTypeEnum.enumValues[number], 
-                  page: 1 
+                onChange={() => handleFilterChange({
+                  jobType: filters.jobType === option.value ? 'all' : option.value as typeof jobTypeEnum.enumValues[number],
+                  page: 1
                 })}
               />
             ))}
@@ -351,8 +351,8 @@ export function JobSearchFilters({ industries }: FilterProps) {
         </FilterSection>
 
         {/* Experience Level Filter */}
-        <FilterSection 
-          title="Experience Level" 
+        <FilterSection
+          title="Experience Level"
           defaultExpanded={true}
           onClear={() => handleFilterChange({ experienceLevel: 'all', page: 1 })}
           showClear={filters.experienceLevel !== 'all'}
@@ -364,9 +364,9 @@ export function JobSearchFilters({ industries }: FilterProps) {
                 label={option.label}
                 count={getExperienceLevelCount(option.value)}
                 checked={filters.experienceLevel === option.value}
-                onChange={() => handleFilterChange({ 
-                  experienceLevel: filters.experienceLevel === option.value ? 'all' : option.value as typeof experienceLevelEnum.enumValues[number], 
-                  page: 1 
+                onChange={() => handleFilterChange({
+                  experienceLevel: filters.experienceLevel === option.value ? 'all' : option.value as typeof experienceLevelEnum.enumValues[number],
+                  page: 1
                 })}
               />
             ))}
@@ -393,8 +393,8 @@ export function JobSearchFilters({ industries }: FilterProps) {
         </FilterSection> */}
 
         {/* Work Location Filter */}
-        <FilterSection 
-          title="Work Location" 
+        <FilterSection
+          title="Work Location"
           defaultExpanded={true}
           onClear={() => handleFilterChange({ workLocation: 'all', page: 1 })}
           showClear={filters.workLocation !== 'all'}
@@ -406,9 +406,9 @@ export function JobSearchFilters({ industries }: FilterProps) {
                 label={option.label}
                 count={getWorkLocationCount(option.value)}
                 checked={filters.workLocation === option.value}
-                onChange={() => handleFilterChange({ 
-                  workLocation: filters.workLocation === option.value ? 'all' : option.value as typeof workLocationEnum.enumValues[number], 
-                  page: 1 
+                onChange={() => handleFilterChange({
+                  workLocation: filters.workLocation === option.value ? 'all' : option.value as typeof workLocationEnum.enumValues[number],
+                  page: 1
                 })}
               />
             ))}
@@ -416,8 +416,8 @@ export function JobSearchFilters({ industries }: FilterProps) {
         </FilterSection>
 
         {/* Location Filter */}
-        <FilterSection 
-          title="Location" 
+        <FilterSection
+          title="Location"
           defaultExpanded={false}
           onClear={handleClearLocation}
           showClear={filters.locationId !== 'all' && filters.locationId !== null}
@@ -437,20 +437,20 @@ export function JobSearchFilters({ industries }: FilterProps) {
         </FilterSection>
 
         {/* Industry Filter */}
-        <FilterSection 
-          title="Industry" 
+        <FilterSection
+          title="Industry"
           defaultExpanded={false}
           onClear={() => handleFilterChange({ industryId: 'all', page: 1 })}
           showClear={filters.industryId !== 'all' && filters.industryId !== null}
         >
           <Input
-            className="mb-3  border border-[rgba(255,255,255,0.5)] rounded-[10px]"
+            className="mb-3 border-gray-200 rounded-lg bg-gray-50/50"
             placeholder="Search industries..."
             type="text"
             value={industrySearchInput}
             onChange={(e) => setIndustrySearchInput(e.target.value)}
           />
-          <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+          <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
             {filteredIndustries.length > 0 ? (
               filteredIndustries.map(industry => (
                 <FilterCheckbox
@@ -458,21 +458,21 @@ export function JobSearchFilters({ industries }: FilterProps) {
                   label={industry.name}
                   count={getIndustryCount(industry.id)}
                   checked={filters.industryId === industry.id}
-                  onChange={() => handleFilterChange({ 
-                    industryId: filters.industryId === industry.id ? 'all' : industry.id, 
-                    page: 1 
+                  onChange={() => handleFilterChange({
+                    industryId: filters.industryId === industry.id ? 'all' : industry.id,
+                    page: 1
                   })}
                 />
               ))
             ) : (
-              <div className="text-sm text-muted-foreground py-2">No industries match your search</div>
+              <div className="text-sm text-gray-500 py-2">No industries match your search</div>
             )}
           </div>
         </FilterSection>
 
         {/* Sort By Filter */}
-        <FilterSection 
-          title="Sort By" 
+        <FilterSection
+          title="Sort By"
           defaultExpanded={false}
           onClear={() => handleFilterChange({ sortBy: 'newest', page: 1 })}
           showClear={filters.sortBy !== 'newest'}
@@ -483,9 +483,9 @@ export function JobSearchFilters({ industries }: FilterProps) {
                 key={option.value}
                 label={option.label}
                 checked={filters.sortBy === option.value}
-                onChange={() => handleFilterChange({ 
-                  sortBy: option.value as 'newest' | 'oldest', 
-                  page: 1 
+                onChange={() => handleFilterChange({
+                  sortBy: option.value as 'newest' | 'oldest',
+                  page: 1
                 })}
               />
             ))}
@@ -495,16 +495,16 @@ export function JobSearchFilters({ industries }: FilterProps) {
 
       {/* Mobile footer actions */}
       {isMobile && (
-        <div className="border-t border-[rgba(255,255,255,0.5)] p-5 flex justify-between">
+        <div className="border-t border-gray-100 p-5 flex justify-between bg-white">
           <Button
             variant="outline"
-            className="flex-1 mr-2"
+            className="flex-1 mr-2 border-gray-200 text-gray-700 hover:bg-gray-50"
             onClick={handleResetFilters}
           >
             Clear All
           </Button>
           <Button
-            className="flex-1 bg-primary hover:bg-primary/90 text-white"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
             onClick={toggleMobileFilter}
           >
             Apply Filters
@@ -516,9 +516,9 @@ export function JobSearchFilters({ industries }: FilterProps) {
 
   // Mobile filter button
   const mobileFilterButton = isMobile && (
-    <MobileFilterToggle 
-      count={activeFiltersCount} 
-      onClick={toggleMobileFilter} 
+    <MobileFilterToggle
+      count={activeFiltersCount}
+      onClick={toggleMobileFilter}
     />
   );
 
@@ -527,38 +527,38 @@ export function JobSearchFilters({ industries }: FilterProps) {
     <>
       {/* Desktop sidebar - always visible */}
       {!isMobile && (
-        <div className={`relative  backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] shadow-[0_8px_32px_rgba(31,38,135,0.1)] transition-opacity duration-300 h-[calc(100vh-180px)] sticky top-[100px] ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+        <div className={`relative bg-white border border-gray-200 rounded-xl shadow-sm transition-opacity duration-300 h-[calc(100vh-120px)] sticky top-[100px] ${isPending ? 'opacity-70' : 'opacity-100'}`}>
           {/* Loading overlay */}
           {isPending && (
-            <div className="absolute inset-0  flex items-center justify-center z-10 rounded-[16px]">
-              <PropagateLoader color="#4a6cfa" size={15} />
+            <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-xl backdrop-blur-sm">
+              <PropagateLoader color="#3b82f6" size={10} />
             </div>
           )}
           {filterContent}
         </div>
       )}
-      
+
       {/* Mobile filter button and slide-out panel */}
       {isMobile && (
         <>
           {mobileFilterButton}
-          
+
           {/* Mobile filter overlay */}
           {isMobileFilterOpen && (
-            <div className="fixed inset-0 bg-black/50 z-40" onClick={toggleMobileFilter}></div>
+            <div className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm" onClick={toggleMobileFilter}></div>
           )}
-          
+
           {/* Mobile filter sidebar */}
-          <div 
-            className={`fixed inset-y-0 left-0 w-[85%] max-w-[350px] bg-[rgba(255,255,255,0.95)] backdrop-blur-[10px] shadow-[0_8px_32px_rgba(31,38,135,0.15)] z-50 transition-transform duration-300 ease-in-out ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          <div
+            className={`fixed inset-y-0 left-0 w-[85%] max-w-[350px] bg-white shadow-2xl z-50 transition-transform duration-300 ease-in-out ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full'}`}
           >
-            <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.5)] p-5">
-              <h2 className="font-semibold text-foreground">Filters</h2>
-              <button 
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted"
+            <div className="flex items-center justify-between border-b border-gray-100 p-5">
+              <h2 className="font-bold text-lg text-gray-900">Filters</h2>
+              <button
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
                 onClick={toggleMobileFilter}
               >
-                <X className="h-5 w-5 text-foreground" />
+                <X className="h-5 w-5 text-gray-500" />
               </button>
             </div>
             {filterContent}

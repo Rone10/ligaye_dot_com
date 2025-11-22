@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatSalaryDisplay } from '../_utils/constants';
-import { BookmarkIcon, MapPinIcon, BriefcaseIcon, ClockIcon } from 'lucide-react';
+import { BookmarkIcon, MapPinIcon, BriefcaseIcon, ClockIcon, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { JobListItem } from '../_utils/types';
@@ -19,20 +19,20 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
   const [saved, setSaved] = useState(isSaved);
   const [saving, setSaving] = useState(false);
 
-  const publishedDate = job.publishedAt 
+  const publishedDate = job.publishedAt
     ? new Date(job.publishedAt).toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      })
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    })
     : 'Recently';
 
   const handleSave = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!onSave || saving) return;
-    
+
     setSaving(true);
     try {
       await onSave(job.id);
@@ -56,21 +56,21 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
   const companyInitial = job.companyName ? job.companyName.charAt(0).toUpperCase() : 'C';
 
   return (
-    <div className=" backdrop-blur-[10px] border border-[rgba(255,255,255,0.3)] rounded-[16px] p-7 shadow-[0_8px_32px_rgba(31,38,135,0.1)] transition-all duration-300 hover:shadow-[0_15px_35px_rgba(31,38,135,0.15)] hover:translate-y-[-2px]">
+    <div className="group bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
       <div className="flex items-start gap-5">
         {/* Company Logo/Initial */}
-        <div className="flex-shrink-0 w-16 h-16 rounded-[12px] overflow-hidden flex items-center justify-center  font-semibold text-xl" 
-             style={{ 
-               backgroundColor: job.companyLogoUrl ? '#f8faff' : job.companyName?.toLowerCase().includes('google') ? '#4285F4' : 
-                               job.companyName?.toLowerCase().includes('amazon') ? '#FF9900' : '#4a6cfa'
-             }}>
+        <div className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center font-bold text-xl shadow-sm border border-gray-100"
+          style={{
+            backgroundColor: job.companyLogoUrl ? '#ffffff' : '#f3f4f6',
+            color: job.companyLogoUrl ? 'inherit' : '#6b7280'
+          }}>
           {job.companyLogoUrl ? (
-            <Image 
+            <Image
               src={job.companyLogoUrl}
               alt={`${job.companyName || 'Company'} logo`}
-              width={64}
-              height={64}
-              className="object-contain"
+              width={56}
+              height={56}
+              className="object-contain p-1"
             />
           ) : (
             companyInitial
@@ -78,66 +78,77 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
         </div>
 
         {/* Job Information */}
-        <div className="flex-grow">
-          <div className="flex justify-between items-start">
+        <div className="flex-grow min-w-0">
+          <div className="flex justify-between items-start gap-4">
             <div>
-              <h3 className="text-xl font-semibold ">
-                <Link 
+              <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors">
+                <Link
                   href={`/jobs/${job.id}`}
-                  className="hover:text-[#4a6cfa] transition-colors"
+                  className="focus:outline-none"
                 >
                   {job.title}
                 </Link>
               </h3>
-              <div className="mt-1.5  font-medium">{job.companyName} • {job.locationName || (job.workLocation === 'REMOTE' ? 'Remote' : 'Location Not Specified')}</div>
+              <div className="mt-1 flex items-center flex-wrap gap-x-3 gap-y-1 text-sm text-gray-500">
+                <span className="font-medium text-gray-700 flex items-center gap-1">
+                  <Building2 className="w-3.5 h-3.5" />
+                  {job.companyName}
+                </span>
+                <span className="flex items-center gap-1">
+                  <MapPinIcon className="w-3.5 h-3.5" />
+                  {job.locationName || (job.workLocation === 'REMOTE' ? 'Remote' : 'Location Not Specified')}
+                </span>
+              </div>
             </div>
-            
+
             {/* Save Button */}
             <button
               onClick={handleSave}
               disabled={saving}
               className={cn(
-                "flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors",
-                saved ? "text-[#4a6cfa]" : "text-[#9aa3bc] hover:text-primary-blue-light"
+                "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20",
+                saved ? "text-blue-600 bg-blue-50" : "text-gray-400 hover:text-blue-600 hover:bg-gray-50"
               )}
               aria-label={saved ? "Unsave job" : "Save job"}
             >
-              <BookmarkIcon 
+              <BookmarkIcon
                 className={cn(
-                  "w-6 h-6 transition-all",
-                  saved ? "fill-[#4a6cfa] stroke-[#4a6cfa]" : "fill-transparent"
+                  "w-5 h-5 transition-all",
+                  saved ? "fill-current" : "fill-transparent"
                 )}
               />
             </button>
           </div>
 
           {/* Tags */}
-          <div className="mt-5 flex flex-wrap gap-2">
-            <span className="inline-block px-3.5 py-1.5 rounded-full text-xs font-medium bg-[rgba(74,108,250,0.1)] text-[#4a6cfa]">
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+              <BriefcaseIcon className="w-3 h-3 mr-1" />
               {job.workLocation === 'REMOTE' ? 'Remote' : job.workLocation === 'HYBRID' ? 'Hybrid' : 'On-site'}
             </span>
-            <span className="inline-block px-3.5 py-1.5 rounded-full text-xs font-medium bg-[rgba(74,108,250,0.1)] text-[#4a6cfa]">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+              <ClockIcon className="w-3 h-3 mr-1" />
               {job.jobType.replace(/_/g, ' ')}
             </span>
-            <span className="inline-block px-3.5 py-1.5 rounded-full text-xs font-medium bg-[rgba(74,108,250,0.1)] text-[#4a6cfa]">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
               {job.title.includes('Senior') ? 'Senior Level' : job.title.includes('Junior') ? 'Junior Level' : job.title.includes('Mid') ? 'Mid Level' : 'Any Level'}
             </span>
           </div>
 
           {/* Salary and Details */}
-          <div className="mt-6 flex flex-wrap justify-between items-center gap-3">
-            <div>
-              <div className="">
-                <span className="font-semibold  text-base">{salaryDisplay}</span>
+          <div className="mt-5 pt-4 border-t border-gray-100 flex flex-wrap justify-between items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+              <div className="font-bold text-gray-900 text-base">
+                {salaryDisplay}
               </div>
-              <div className="text-sm  mt-1.5">
+              <div className="text-xs text-gray-500 font-medium">
                 Posted {publishedDate}
               </div>
             </div>
-            <Link href={`/jobs/${job.id}/apply`} passHref>
-                      <Button className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-[10px] font-semibold text-base">
-          Apply Now
-        </Button>
+            <Link href={`/jobs/${job.id}/apply`} passHref className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-sm transition-all hover:shadow-md">
+                Apply Now
+              </Button>
             </Link>
           </div>
         </div>
