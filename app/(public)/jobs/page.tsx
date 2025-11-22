@@ -104,35 +104,33 @@ export default async function JobsPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50/50">
       {/* <Navbar user={user} /> */}
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">
-            Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Perfect Job</span>
-          </h1>
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Browse jobs in The Gambia and take the next step in your career.
+      <div className="container mx-auto px-4 py-12 max-w-7xl">
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-bold mb-3 text-gray-900 tracking-tight">Find Your Perfect Job</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Browse thousands of job openings from top employers in Gambia and take the next step in your career.
           </p>
         </div>
-
+        
         {/* Grid Layout for desktop, single column for mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start">
           {/* Filter Sidebar - Desktop shows as sidebar, mobile uses slide-out */}
-          <Suspense fallback={<div className="bg-card border border-border rounded-xl p-6 h-[300px] flex items-center justify-center text-muted-foreground">Loading filters...</div>}>
-            <JobSearchFilters
+          <Suspense fallback={<div className="bg-white border border-gray-200 rounded-xl p-6 h-[300px] flex items-center justify-center text-gray-500">Loading filters...</div>}>
+            <JobSearchFilters 
               industries={industries}
             />
           </Suspense>
 
           {/* Job Listings */}
           <div className="min-w-0">
-            <Suspense
+            <Suspense 
               fallback={
-                <div className="bg-card border border-border rounded-xl p-8 flex items-center justify-center h-[300px] text-muted-foreground">Loading jobs...</div>
+                <div className="bg-white border border-gray-200 rounded-xl p-8 flex items-center justify-center h-[300px] text-gray-500">Loading jobs...</div>
               }
             >
-              <JobListWithSaving
+              <JobListWithSaving 
                 jobs={jobs}
                 totalCount={totalCount}
                 currentPage={page}
