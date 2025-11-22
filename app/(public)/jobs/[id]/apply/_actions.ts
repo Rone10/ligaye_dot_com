@@ -214,6 +214,9 @@ export async function submitApplication({
 
       await Promise.all(tagsToRevalidate)
 
+      // Ensure employer applicants page is re-rendered after cache invalidation
+      revalidatePath('/employer/jobs/applicants')
+
       await Promise.all([
         invalidateApplicationsList(user.id),
         invalidateApplicationsCollection(),
