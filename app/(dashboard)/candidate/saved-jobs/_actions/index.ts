@@ -10,6 +10,7 @@ import {
   invalidateJobSavedCheck,
   invalidateSavedJobsCollection 
 } from '../_queries'
+import { invalidateCandidateSavedJobs as invalidateDashboardSavedJobs } from '../../_queries'
 
 /**
  * Save a job for the current logged-in user
@@ -71,7 +72,8 @@ export async function saveJob(jobId: string) {
     await Promise.all([
       invalidateSavedJobs(user.id),
       invalidateJobSavedCheck(user.id, jobId),
-      invalidateSavedJobsCollection()
+      invalidateSavedJobsCollection(),
+      invalidateDashboardSavedJobs(user.id)
     ])
     
     revalidatePath('/candidate/saved-jobs')
@@ -121,7 +123,8 @@ export async function unsaveJob(jobId: string) {
     await Promise.all([
       invalidateSavedJobs(user.id),
       invalidateJobSavedCheck(user.id, jobId),
-      invalidateSavedJobsCollection()
+      invalidateSavedJobsCollection(),
+      invalidateDashboardSavedJobs(user.id)
     ])
     
     revalidatePath('/candidate/saved-jobs')

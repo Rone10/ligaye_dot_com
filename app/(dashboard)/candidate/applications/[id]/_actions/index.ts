@@ -4,7 +4,15 @@ import { db } from '@/lib/db'
 import { eq, and } from 'drizzle-orm'
 import { applications, candidateProfiles, profiles } from '@/lib/db/schema'
 import { getUser } from '@/lib/supabase/server'
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
+import {
+  invalidateCandidateApplications as invalidateDashboardApplications,
+  invalidateCandidateDashboard
+} from '@/app/(dashboard)/candidate/_queries'
+import {
+  invalidateCandidateApplications as invalidateApplicationsList,
+  invalidateApplication
+} from '@/app/(dashboard)/candidate/applications/_queries'
 
 /**
  * Withdraws a job application
@@ -61,12 +69,15 @@ export async function withdrawApplication(applicationId: string) {
       })
       .where(eq(applications.id, applicationId))
     
-    // Revalidate the applications pages
+    // Revalidate the applications pages and caches
     revalidatePath('/candidate/applications')
     revalidatePath(`/candidate/applications/${applicationId}`)
-    
-    // Revalidate the applications cache tag
-    revalidateTag('applications')
+    await Promise.all([
+      invalidateApplicationsList(user.id),
+      invalidateApplication(applicationId, user.id),
+      invalidateDashboardApplications(user.id),
+      invalidateCandidateDashboard(user.id)
+    ])
     
     return { success: true }
   } catch (error) {

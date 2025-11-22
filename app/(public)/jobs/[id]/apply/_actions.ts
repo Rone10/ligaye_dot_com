@@ -15,6 +15,14 @@ import { headers } from 'next/headers'
 import { JOB_DETAIL_CACHE_TAGS } from '@/app/(dashboard)/employer/jobs/[id]/_utils/cache-tags'
 import { APPLICANTS_CACHE_TAGS } from '@/app/(dashboard)/employer/jobs/applicants/_utils/cache-tags'
 import { EMPLOYER_DASHBOARD_CACHE_TAGS } from '@/app/(dashboard)/employer/_utils/cache-tags'
+import { 
+  invalidateCandidateApplications as invalidateDashboardApplications,
+  invalidateCandidateDashboard
+} from '@/app/(dashboard)/candidate/_queries'
+import {
+  invalidateCandidateApplications as invalidateApplicationsList,
+  invalidateApplicationsCollection
+} from '@/app/(dashboard)/candidate/applications/_queries'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -205,6 +213,13 @@ export async function submitApplication({
       }
 
       await Promise.all(tagsToRevalidate)
+
+      await Promise.all([
+        invalidateApplicationsList(user.id),
+        invalidateApplicationsCollection(),
+        invalidateDashboardApplications(user.id),
+        invalidateCandidateDashboard(user.id)
+      ])
     }
     
     // Revalidate related paths
@@ -212,9 +227,6 @@ export async function submitApplication({
     revalidatePath('/applications')
     revalidatePath('/dashboard/applications')
     revalidatePath('/candidate/applications')
-    
-    // Revalidate applications cache tag
-    revalidateTag('applications')
     
     return result
   } catch (error) {
