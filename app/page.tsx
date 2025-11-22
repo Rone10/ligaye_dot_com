@@ -14,12 +14,11 @@ import { db } from '@/lib/db';
 import { employerProfiles, jobs } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import CompanyMarquee from './_components/CompanyMarquee';
-import TopJobsSection from './_components/TopJobsSection';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSEOMetadata({
     title: "Job Search | Ligaye",
-    description: "Find your dream job or hire top talent in The Gambia. Ligaye connects job seekers with employers across all industries.",
+    description: "Find your dream job or hire top talent in The Gambia. Ligaye.com connects job seekers with employers across all industries.",
     keywords: [
       'jobs in Gambia',
       'Gambian jobs',
@@ -62,14 +61,11 @@ export default async function LandingPage() {
       <StructuredData data={organizationSchema} />
       <StructuredData data={localBusinessSchema} />
       <Navbar user={user} />
-      <div className="flex flex-col min-h-screen bg-background transition-colors duration-300">
+      <div className="flex flex-col min-h-screen bg-white dark:bg-background transition-colors duration-300">
         <main className="flex-grow flex flex-col items-center pt-16 pb-12 px-4">
           {/* Logo Section */}
-          {/* Hero Text Section */}
-          <div className="mb-8 text-center animate-appear">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
-              Where Talent Meets <span className="text-primary">Opportunity</span>
-            </h1>
+          <div className="mb-8">
+            <Image src="/logo.PNG" alt="Ligaye Logo" width={200} height={120} priority className="dark:brightness-0 dark:invert" />
           </div>
 
           {/* Search Section */}
@@ -82,8 +78,6 @@ export default async function LandingPage() {
             <CompanyMarquee companies={companies} />
           </div>
 
-          {/* Top Jobs Section */}
-          <TopJobsSection />
 
 
 
