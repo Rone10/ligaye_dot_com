@@ -122,16 +122,17 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
 
           {/* Tags */}
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-              <BriefcaseIcon className="w-3 h-3 mr-1" />
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-700 dark:text-blue-300 border-2 border-blue-500/40 dark:border-blue-400/50 shadow-sm">
+              <BriefcaseIcon className="w-3.5 h-3.5 mr-1.5" />
               {job.workLocation === 'REMOTE' ? 'Remote' : job.workLocation === 'HYBRID' ? 'Hybrid' : 'On-site'}
             </span>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground border border-border">
-              <ClockIcon className="w-3 h-3 mr-1" />
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-500/20 text-green-700 dark:text-green-300 border-2 border-green-500/40 dark:border-green-400/50 shadow-sm">
+              <ClockIcon className="w-3.5 h-3.5 mr-1.5" />
               {job.jobType.replace(/_/g, ' ')}
             </span>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-muted text-muted-foreground border border-border">
-              {job.title.includes('Senior') ? 'Senior Level' : job.title.includes('Junior') ? 'Junior Level' : job.title.includes('Mid') ? 'Mid Level' : 'Any Level'}
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-500/20 text-purple-700 dark:text-purple-300 border-2 border-purple-500/40 dark:border-purple-400/50 shadow-sm">
+              <MapPinIcon className="w-3.5 h-3.5 mr-1.5" />
+              {job.locationName || (job.workLocation === 'REMOTE' ? 'Remote' : 'Location Not Specified')}
             </span>
           </div>
 
