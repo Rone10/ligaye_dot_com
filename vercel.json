@@ -3,6 +3,7 @@
     "deploymentEnabled": {
       "main": true,
       "staging": true,
+      "joe-joe": true,
       "ui-test-branch": true
     }
   }
