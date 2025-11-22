@@ -67,10 +67,10 @@ export default function UpdateStatusForm({
       
       if (result.success) {
         setSuccess(true)
-        // Redirect after 2 seconds
+        const detailPath = `/employer/jobs/applicants/${applicationId}`
+        router.refresh()
         setTimeout(() => {
-          router.push(`/dashboard/employer/jobs/applicants/${applicationId}`)
-          router.refresh()
+          router.replace(detailPath)
         }, 2000)
       } else {
         setError(result.error || "Failed to update status")

@@ -11,6 +11,7 @@ import { db } from '@/lib/db'
 import { jobs } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { JOB_DETAIL_CACHE_TAGS } from './_utils/cache-tags'
+import { EMPLOYER_DASHBOARD_CACHE_TAGS } from '../../_utils/cache-tags'
 
 // Update job status (e.g., mark as filled or expired)
 export async function updateJobStatus(jobId: string, status: 'ACTIVE' | 'EXPIRED' | 'FILLED' | 'DRAFT' | 'DELETED') {
@@ -50,6 +51,8 @@ export async function updateJobStatus(jobId: string, status: 'ACTIVE' | 'EXPIRED
       revalidateTag(JOB_DETAIL_CACHE_TAGS.jobDetail(jobId)),
       revalidateTag(JOB_DETAIL_CACHE_TAGS.employerJobs(employerProfile.id)),
       revalidateTag(JOB_DETAIL_CACHE_TAGS.allJobs),
+      revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.stats(employerProfile.id)),
+      revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.recentJobs(employerProfile.id)),
       // Also invalidate application-related caches if job is marked as filled or deleted
       ...(status === 'FILLED' || status === 'DELETED' ? [
         revalidateTag(JOB_DETAIL_CACHE_TAGS.jobApplications(jobId)),

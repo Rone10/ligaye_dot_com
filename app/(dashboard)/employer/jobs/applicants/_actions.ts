@@ -8,6 +8,8 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { ApplicationStatus } from '@/types/application'
 import { cache } from 'react'
 import { APPLICANTS_CACHE_TAGS } from './_utils/cache-tags'
+import { JOB_DETAIL_CACHE_TAGS } from '@/app/(dashboard)/employer/jobs/[id]/_utils/cache-tags'
+import { EMPLOYER_DASHBOARD_CACHE_TAGS } from '@/app/(dashboard)/employer/_utils/cache-tags'
 
 /**
  * Helper to get employer profile ID - cached per request
@@ -89,7 +91,13 @@ export async function updateApplicationStatus(applicationId: string, status: App
       revalidateTag(APPLICANTS_CACHE_TAGS.employerApplications(employerProfileId)),
       revalidateTag(APPLICANTS_CACHE_TAGS.jobApplications(jobId)),
       revalidateTag(APPLICANTS_CACHE_TAGS.candidateApplications(candidateProfileId)),
-      revalidateTag(APPLICANTS_CACHE_TAGS.applicationsByStatus(status))
+      revalidateTag(APPLICANTS_CACHE_TAGS.applicationsByStatus(status)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.jobApplications(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.jobApplicationStats(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.jobRecentApplications(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.allApplications),
+      revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.stats(employerProfileId)),
+      revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.recentApplications(employerProfileId))
     ])
     
     // Also revalidate paths for immediate UI update
@@ -218,7 +226,13 @@ export async function scheduleInterview(applicationId: string, interviewDate: Da
       revalidateTag(APPLICANTS_CACHE_TAGS.employerApplications(employerProfileId)),
       revalidateTag(APPLICANTS_CACHE_TAGS.jobApplications(jobId)),
       revalidateTag(APPLICANTS_CACHE_TAGS.candidateApplications(candidateProfileId)),
-      revalidateTag(APPLICANTS_CACHE_TAGS.applicationsByStatus('INTERVIEW_SCHEDULED'))
+      revalidateTag(APPLICANTS_CACHE_TAGS.applicationsByStatus('INTERVIEW_SCHEDULED')),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.jobApplications(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.jobApplicationStats(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.jobRecentApplications(jobId)),
+      revalidateTag(JOB_DETAIL_CACHE_TAGS.allApplications),
+      revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.stats(employerProfileId)),
+      revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.recentApplications(employerProfileId))
     ])
     
     // Also revalidate paths for immediate UI update

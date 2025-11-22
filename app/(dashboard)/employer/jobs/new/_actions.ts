@@ -26,6 +26,7 @@ import { isFreePostingActive } from '@/lib/utils/system-settings'
 import { inngest } from '@/inngest/client'
 import { paymentArcjet } from '@/lib/arcjet'
 import { headers } from 'next/headers'
+import { EMPLOYER_DASHBOARD_CACHE_TAGS } from '../../_utils/cache-tags'
 
 // Server action for coupon validation (to be used by client components)
 export async function validateCoupon(couponCode: string, originalAmount: number) {
@@ -200,9 +201,8 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
         revalidateTag(CACHE_TAGS.employerJobs),
         revalidateTag('public-jobs'),
         revalidateTag('filtered-jobs'),
-        revalidateTag('employer-dashboard'),
-        revalidateTag('employer-dashboard-stats'),
-        revalidateTag('employer-recent-jobs'),
+        revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.stats(result.employerProfileId)),
+        revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.recentJobs(result.employerProfileId)),
         revalidateTag(`employer-jobs-${result.employerProfileId}`),
         revalidateTag('job-filters'),
         revalidateTag('locations-for-filters'),
@@ -243,26 +243,18 @@ export async function createJobPosting(formData: z.infer<typeof jobFormSchema> &
     
     // Invalidate caches related to jobs with specific tags
     await Promise.all([
-      // Core job caches
       revalidateTag(CACHE_TAGS.jobs),
       revalidateTag(CACHE_TAGS.employerJobs),
       revalidateTag('public-jobs'),
       revalidateTag('filtered-jobs'),
-      
-      // Employer-specific caches
-      revalidateTag('employer-dashboard'),
-      revalidateTag('employer-dashboard-stats'),
-      revalidateTag('employer-recent-jobs'),
+      revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.stats(result.employerProfileId)),
+      revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.recentJobs(result.employerProfileId)),
       revalidateTag(`employer-jobs-${result.employerProfileId}`),
-      
-      // Public job listing caches
       revalidateTag('job-filters'),
       revalidateTag('locations-for-filters'),
       revalidateTag('industries-for-filters'),
       revalidateTag('saved-jobs'),
       revalidateTag('user-data'),
-      
-      // Job-specific cache
       revalidateTag(`job-${newJob.id}`)
     ])
     

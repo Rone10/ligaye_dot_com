@@ -9,6 +9,8 @@ import { ApplicationStatusUpdatedEmail } from '@/emails/application-status-updat
 import { format } from 'date-fns'
 import { APPLICANT_DETAIL_CACHE_TAGS } from './_utils/cache-tags'
 import { APPLICANTS_CACHE_TAGS } from '../_utils/cache-tags'
+import { JOB_DETAIL_CACHE_TAGS } from '@/app/(dashboard)/employer/jobs/[id]/_utils/cache-tags'
+import { EMPLOYER_DASHBOARD_CACHE_TAGS } from '@/app/(dashboard)/employer/_utils/cache-tags'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -33,11 +35,12 @@ export async function updateStatus(
     
     // Update application status
     const result = await updateApplicationStatus(applicationId, validatedData)
+    let applicationDetails: Awaited<ReturnType<typeof getApplicationDetails>> | null = null
     
     if (result.success) {
       try {
         // Get application details including candidate email
-        const applicationDetails = await getApplicationDetails(applicationId)
+        applicationDetails = await getApplicationDetails(applicationId)
         
         if (applicationDetails && applicationDetails.candidateEmail) {
           // Format interview date if provided
@@ -91,24 +94,37 @@ export async function updateStatus(
       }
       
       // Invalidate all relevant cache tags
+      const additionalJobTags: Promise<void>[] = []
+      const enqueue = (promise: Promise<void> | void) => additionalJobTags.push(Promise.resolve(promise))
+
+      if (applicationDetails?.jobId) {
+        enqueue(revalidateTag(APPLICANTS_CACHE_TAGS.jobApplications(applicationDetails.jobId)))
+        enqueue(revalidateTag(JOB_DETAIL_CACHE_TAGS.jobApplications(applicationDetails.jobId)))
+        enqueue(revalidateTag(JOB_DETAIL_CACHE_TAGS.jobApplicationStats(applicationDetails.jobId)))
+        enqueue(revalidateTag(JOB_DETAIL_CACHE_TAGS.jobRecentApplications(applicationDetails.jobId)))
+        enqueue(revalidateTag(JOB_DETAIL_CACHE_TAGS.allApplications))
+      }
+
+      if (applicationDetails?.companyId) {
+        enqueue(revalidateTag(APPLICANTS_CACHE_TAGS.employerApplications(applicationDetails.companyId)))
+        enqueue(revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.stats(applicationDetails.companyId)))
+        enqueue(revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.recentApplications(applicationDetails.companyId)))
+      }
+
       await Promise.all([
-        // Detail page specific tags
         revalidateTag(APPLICANT_DETAIL_CACHE_TAGS.application(applicationId)),
         revalidateTag(APPLICANT_DETAIL_CACHE_TAGS.applicationDetail(applicationId)),
         revalidateTag(APPLICANT_DETAIL_CACHE_TAGS.applicationStatus(applicationId)),
-        
-        // List page tags
         revalidateTag(APPLICANTS_CACHE_TAGS.allApplications),
         revalidateTag(APPLICANTS_CACHE_TAGS.applicationCounts),
         revalidateTag(APPLICANTS_CACHE_TAGS.application(applicationId)),
         revalidateTag(APPLICANTS_CACHE_TAGS.applicationDetail(applicationId)),
         revalidateTag(APPLICANTS_CACHE_TAGS.applicationsByStatus(validatedData.status)),
-        
-        // Interview specific tags if interview scheduled
         ...(validatedData.status === 'INTERVIEW_SCHEDULED' ? [
           revalidateTag(APPLICANT_DETAIL_CACHE_TAGS.applicationInterview(applicationId))
-        ] : [])
-      ])
+        ] : []),
+        ...additionalJobTags
+      ].map(p => Promise.resolve(p)))
       
       // Also revalidate paths for immediate UI update
       revalidatePath(`/employer/jobs/applicants/${applicationId}`)

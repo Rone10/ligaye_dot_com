@@ -12,6 +12,9 @@ import { JobSuccessfullyAppliedEmail } from '@/emails/job-successfully-applied'
 import { format } from 'date-fns'
 import { formArcjet } from '@/lib/arcjet'
 import { headers } from 'next/headers'
+import { JOB_DETAIL_CACHE_TAGS } from '@/app/(dashboard)/employer/jobs/[id]/_utils/cache-tags'
+import { APPLICANTS_CACHE_TAGS } from '@/app/(dashboard)/employer/jobs/applicants/_utils/cache-tags'
+import { EMPLOYER_DASHBOARD_CACHE_TAGS } from '@/app/(dashboard)/employer/_utils/cache-tags'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -141,11 +144,13 @@ export async function submitApplication({
     // Insert application record
     const result = await insertApplication(applicationData)
     
+    let jobDetails: Awaited<ReturnType<typeof getJobDetails>> | null = null
+
     // If the application was successful, send confirmation email to the candidate
     if (result.success) {
       try {
         // Get job details and company name
-        const jobDetails = await getJobDetails(jobId)
+        jobDetails = await getJobDetails(jobId)
         
         if (jobDetails && user.email) {
           // Format the application date
@@ -177,6 +182,29 @@ export async function submitApplication({
         console.error("Error sending confirmation email:", emailError)
         // Application was still successful, so continue
       }
+    }
+
+    if (result.success) {
+      const tagsToRevalidate: Array<Promise<void>> = [
+        Promise.resolve(revalidateTag(JOB_DETAIL_CACHE_TAGS.jobApplications(jobId))),
+        Promise.resolve(revalidateTag(JOB_DETAIL_CACHE_TAGS.jobApplicationStats(jobId))),
+        Promise.resolve(revalidateTag(JOB_DETAIL_CACHE_TAGS.jobRecentApplications(jobId))),
+        Promise.resolve(revalidateTag(JOB_DETAIL_CACHE_TAGS.allApplications)),
+        Promise.resolve(revalidateTag(APPLICANTS_CACHE_TAGS.allApplications)),
+        Promise.resolve(revalidateTag(APPLICANTS_CACHE_TAGS.applicationCounts)),
+        Promise.resolve(revalidateTag(APPLICANTS_CACHE_TAGS.jobApplications(jobId))),
+        Promise.resolve(revalidateTag(APPLICANTS_CACHE_TAGS.applicationsByStatus('APPLIED'))),
+      ]
+
+      if (jobDetails?.companyId) {
+        tagsToRevalidate.push(
+          Promise.resolve(revalidateTag(APPLICANTS_CACHE_TAGS.employerApplications(jobDetails.companyId))),
+          Promise.resolve(revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.stats(jobDetails.companyId))),
+          Promise.resolve(revalidateTag(EMPLOYER_DASHBOARD_CACHE_TAGS.recentApplications(jobDetails.companyId))),
+        )
+      }
+
+      await Promise.all(tagsToRevalidate)
     }
     
     // Revalidate related paths
