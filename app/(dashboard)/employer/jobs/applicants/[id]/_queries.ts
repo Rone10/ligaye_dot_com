@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server"
 import { getUserById } from "@/lib/supabase/admin"
 import { unstable_cache } from 'next/cache'
 import { APPLICANT_DETAIL_CACHE_TAGS } from './_utils/cache-tags'
+import { APPLICANTS_CACHE_TAGS } from '../_utils/cache-tags'
 // Internal function to get application details (no auth check)
 async function getApplicationDetailsInternal(applicationId: string) {
   // Get the application and join with profiles to get userId
@@ -58,7 +59,8 @@ export async function getApplicationDetails(applicationId: string) {
       {
         tags: [
           APPLICANT_DETAIL_CACHE_TAGS.application(applicationId),
-          APPLICANT_DETAIL_CACHE_TAGS.applicationDetail(applicationId)
+          APPLICANT_DETAIL_CACHE_TAGS.applicationDetail(applicationId),
+          APPLICANTS_CACHE_TAGS.allApplications
         ]
       }
     )
@@ -78,7 +80,10 @@ export async function getApplicationDetails(applicationId: string) {
         async () => getCandidateEmailInternal(applicationData.candidateUserId!),
         [`candidate-email-${applicationData.candidateUserId}`],
         {
-          tags: [APPLICANT_DETAIL_CACHE_TAGS.applicationEmail(applicationId)]
+          tags: [
+            APPLICANT_DETAIL_CACHE_TAGS.applicationEmail(applicationId),
+            APPLICANTS_CACHE_TAGS.allApplications
+          ]
         }
       )
       

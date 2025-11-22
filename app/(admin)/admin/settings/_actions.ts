@@ -4,10 +4,17 @@ import { db } from '@/lib/db';
 import { pricingConfig, profiles, systemSettings } from '@/lib/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import { getUser } from '@/lib/supabase/server';
-import { revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { PRICING_CACHE_TAG } from '@/lib/utils/pricing';
 import { validatePrice } from '@/lib/utils/pricing-client';
 import { FREE_POSTING_SETTINGS, SYSTEM_SETTINGS_CACHE_TAG, serializeSettingValue } from '@/lib/utils/system-settings';
+import { APPLICANTS_CACHE_TAGS } from '@/app/(dashboard)/employer/jobs/applicants/_utils/cache-tags';
+import { JOB_DETAIL_CACHE_TAGS } from '@/app/(dashboard)/employer/jobs/[id]/_utils/cache-tags';
+import { EMPLOYER_PROFILE_CACHE_TAGS } from '@/app/(dashboard)/employer/profile/_utils/cache-tags';
+import { CANDIDATE_CACHE_TAGS } from '@/app/(dashboard)/candidate/_queries';
+import { APPLICATIONS_CACHE_TAGS } from '@/app/(dashboard)/candidate/applications/_queries';
+import { PROFILE_CACHE_TAGS } from '@/app/(dashboard)/candidate/profile/_queries';
+import { SAVED_JOBS_CACHE_TAGS } from '@/app/(dashboard)/candidate/saved-jobs/_queries';
 
 export async function updatePricing(priceInDalasi: number) {
   try {
@@ -247,5 +254,100 @@ export async function updateFreePostingSettings(settings: FreePostingSettingsInp
   } catch (error) {
     console.error('Error updating free posting settings:', error);
     return { success: false, error: 'Failed to update free posting settings' };
+  }
+}
+
+const GLOBAL_CACHE_TAGS = [
+  PRICING_CACHE_TAG,
+  SYSTEM_SETTINGS_CACHE_TAG,
+  'admin-pricing',
+  'admin-user-data',
+  'users-collection',
+  'candidate-profiles-collection',
+  'employer-profiles-collection',
+  'admin-blog-data',
+  'blog-posts-collection',
+  'admin-coupon-data',
+  'coupons-collection',
+  'coupon-stats',
+  'coupon-redemptions',
+  'admin-payment-data',
+  'payments-collection',
+  'unpaid-jobs',
+  'payment-stats',
+  'admin-jobs-stats',
+  'admin-jobs',
+  'admin-job-detail',
+  'jobs-collection',
+  'applications-collection',
+  'locations',
+  'skills',
+  'industries',
+  'jobs',
+  'employer-jobs',
+  APPLICANTS_CACHE_TAGS.allApplications,
+  APPLICANTS_CACHE_TAGS.applicationCounts,
+  JOB_DETAIL_CACHE_TAGS.allJobs,
+  JOB_DETAIL_CACHE_TAGS.allApplications,
+  JOB_DETAIL_CACHE_TAGS.jobsDetail,
+  EMPLOYER_PROFILE_CACHE_TAGS.allProfiles,
+  EMPLOYER_PROFILE_CACHE_TAGS.industries,
+  EMPLOYER_PROFILE_CACHE_TAGS.locations,
+  CANDIDATE_CACHE_TAGS.candidateCollection,
+  APPLICATIONS_CACHE_TAGS.applicationsCollection,
+  SAVED_JOBS_CACHE_TAGS.savedJobsCollection,
+  PROFILE_CACHE_TAGS.availableSkills,
+  PROFILE_CACHE_TAGS.profileCollection
+] as const;
+
+const GLOBAL_REVALIDATE_PATHS = [
+  '/',
+  '/jobs',
+  '/employer',
+  '/employer/jobs',
+  '/employer/jobs/applicants',
+  '/employer/profile',
+  '/candidate',
+  '/candidate/applications',
+  '/candidate/saved-jobs',
+  '/candidate/profile',
+  '/admin',
+  '/admin/settings',
+  '/admin/jobs',
+  '/admin/users',
+  '/admin/payments',
+  '/admin/coupons',
+  '/admin/blog'
+] as const;
+
+export async function purgeAllCaches() {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const database = await db();
+    const profile = await database
+      .select({ id: profiles.id, role: profiles.role })
+      .from(profiles)
+      .where(eq(profiles.userId, user.id))
+      .limit(1);
+
+    if (!profile[0] || profile[0].role !== 'admin') {
+      return { success: false, error: 'Admin access required' };
+    }
+
+    const uniqueTags = Array.from(new Set(GLOBAL_CACHE_TAGS));
+    await Promise.all(uniqueTags.map(tag => revalidateTag(tag)));
+
+    await Promise.all(
+      GLOBAL_REVALIDATE_PATHS.map(path => Promise.resolve(revalidatePath(path)))
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error purging caches:', error);
+    return { success: false, error: 'Failed to purge caches' };
   }
 }

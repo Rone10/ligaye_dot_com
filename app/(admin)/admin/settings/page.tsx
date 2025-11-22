@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { PricingForm } from './_components/PricingForm';
 import { PricingHistory } from './_components/PricingHistory';
 import { FreePostingForm } from './_components/FreePostingForm';
+import { CachePurgeCard } from './_components/CachePurgeCard';
 import { getActivePricing, getAllPricingHistory, getCurrentFreePostingConfig } from './_queries';
 
 export const metadata: Metadata = {
@@ -29,6 +30,12 @@ export default async function AdminSettingsPage() {
       </div>
 
       <div className="space-y-8">
+        {/* Cache Management Section */}
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Maintenance</h2>
+          <CachePurgeCard />
+        </div>
+
         {/* Campaign Settings Section */}
         <div>
           <h2 className="text-2xl font-semibold mb-4">Campaign Settings</h2>
