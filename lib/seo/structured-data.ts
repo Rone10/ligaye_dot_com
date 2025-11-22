@@ -244,7 +244,7 @@ export function generateLocalBusinessSchema(): WithContext<Organization> {
     url: BASE_URL,
     logo: `${BASE_URL}/branding/full_logo.png`,
     image: `${BASE_URL}/branding/full_logo.png`,
-    telephone: '+220 123 4567',
+    telephone: '+220 3139076',
     email: 'support@ligaye.com',
     address: {
       '@type': 'PostalAddress',
