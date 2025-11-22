@@ -86,7 +86,7 @@ export default function ContactForm() {
                                 <Phone className="h-6 w-6 text-primary-blue" />
                             </div>
                             <h3 className="font-semibold text-theme-dark mb-1">Phone</h3>
-                            <p className="text-theme-gray-dark text-sm">+220 123 4567</p>
+                            <p className="text-theme-gray-dark text-sm">+220 3139076</p>
                         </CardContent>
                     </Card>
 
