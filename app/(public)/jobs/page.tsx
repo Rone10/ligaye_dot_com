@@ -106,10 +106,12 @@ export default async function JobsPage({ searchParams }: PageProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* <Navbar user={user} /> */}
-      <div className="container mx-auto px-4 py-12 max-w-7xl">
-        <div className="mb-10 text-center">
-          <h1 className="text-4xl font-bold mb-3 text-foreground tracking-tight">Find Your Perfect Job</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">
+            Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Perfect Job</span>
+          </h1>
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
             Browse thousands of job openings from top employers in Gambia and take the next step in your career.
           </p>
         </div>
