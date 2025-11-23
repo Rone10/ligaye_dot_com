@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Ligaye.com - Gambia\'s Premier Job Board',
+  title: 'Ligaye - Gambia\'s Premier Job Board',
   description: 'Find your dream job or hire the perfect candidate in The Gambia',
 };
 

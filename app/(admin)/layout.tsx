@@ -4,8 +4,8 @@ import { getUserWithProfile } from "@/lib/supabase/server";
 import AdminSidebar from "./admin/_components/AdminSidebar";
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard - Ligaye.com",
-  description: "Admin dashboard for Ligaye.com job board platform",
+  title: "Admin Dashboard - Ligaye",
+  description: "Admin dashboard for Ligaye job board platform",
 };
 
 // Force dynamic rendering for all admin pages to avoid database calls during build
@@ -23,7 +23,7 @@ export default async function AdminLayout({
   if (!user || !isAdmin) {
     redirect('/sign-in');
   }
-  
+
   // New layout structure with Sidebar
   return (
     <div className="h-screen flex overflow-hidden bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))]">

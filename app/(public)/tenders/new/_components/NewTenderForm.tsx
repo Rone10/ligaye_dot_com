@@ -451,7 +451,7 @@ export function NewTenderForm({ sectors }: NewTenderFormProps) {
                                     <li className="flex items-start">
                                       <span className="text-primary-blue mr-xs mt-xxs flex-shrink-0">•</span>
                                       <span>
-                                        <strong className="text-theme-dark">10% Platform Commission:</strong> Ligaye.com will retain 10% of every document sale as a platform commission fee.
+                                        <strong className="text-theme-dark">10% Platform Commission:</strong> Ligaye will retain 10% of every document sale as a platform commission fee.
                                       </span>
                                     </li>
                                     <li className="flex items-start">
@@ -474,7 +474,7 @@ export function NewTenderForm({ sectors }: NewTenderFormProps) {
                                     </li>
                                   </ul>
                                   <p className="mt-sm text-xs text-theme-gray-dark italic">
-                                    Example: If a document is sold for GMD 100, you will receive GMD 90 and Ligaye.com will retain GMD 10 as commission.
+                                    Example: If a document is sold for GMD 100, you will receive GMD 90 and Ligaye will retain GMD 10 as commission.
                                   </p>
                                 </div>
                               </div>

@@ -7,8 +7,8 @@ import { getUser } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Sign Up - Ligaye.com',
-  description: 'Create an account on Ligaye.com to find or post jobs in Gambia',
+  title: 'Sign Up - Ligaye',
+  description: 'Create an account on Ligaye to find or post jobs in Gambia',
 }
 
 export default async function SignUpPage() {

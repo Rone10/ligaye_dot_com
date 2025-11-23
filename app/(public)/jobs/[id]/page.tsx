@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(id)) {
       return {
-        title: 'Job Not Found | Ligaye.com',
+        title: 'Job Not Found | Ligaye',
         description: 'The requested job posting could not be found.',
       };
     }
@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     
     if (!jobData || !jobData.company) {
       return {
-        title: 'Job Not Found | Ligaye.com',
+        title: 'Job Not Found | Ligaye',
         description: 'The requested job posting could not be found.',
       };
     }
@@ -75,7 +75,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   } catch (error) {
     console.error('Error generating job metadata:', error);
     return {
-      title: 'Job Posting | Ligaye.com',
+      title: 'Job Posting | Ligaye',
       description: 'View job details and apply for positions in Gambia.',
     };
   }

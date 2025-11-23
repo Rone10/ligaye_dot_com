@@ -16,7 +16,7 @@ export default function Footer() {
         </div>
 
         <div className="text-sm text-gray-500 dark:text-gray-500 whitespace-nowrap">
-          <p>&copy; {currentYear} Ligaye.com. All rights reserved.</p>
+          <p>&copy; {currentYear} Ligaye. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -97,13 +97,13 @@ export function SidebarNav({ mainNavItems, groupNavItems, additionalNavItems = [
                           "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200 ease-in-out",
                           pathname === item.href
                             ? "bg-primary-blue text-white"
-                            : "text-theme-gray-dark hover:bg-primary-blue/10 hover:text-theme-dark",
+                            : "text-black dark:text-white hover:bg-primary-blue/10 hover:text-black dark:hover:text-white",
                           !isSidebarExpanded && "justify-center"
                         )}
                       >
                         {IconComponent && <IconComponent className="h-5 w-5 shrink-0" />}
                         {isSidebarExpanded && (
-                           <span className="flex-1">{item.label}</span>
+                          <span className="flex-1">{item.label}</span>
                         )}
                         {isSidebarExpanded && item.badgeCount && (
                           <Badge className="ml-auto rounded-full px-1.5 py-0 text-[10px] font-semibold">
@@ -131,7 +131,7 @@ export function SidebarNav({ mainNavItems, groupNavItems, additionalNavItems = [
         <div>
           {/* Separator line between MENU and GROUP */}
           <div className="mx-2 my-4 border-t border-theme-gray"></div>
-          
+
           <h3 className="mb-2 px-2 text-xs font-semibold uppercase text-muted-foreground">
             Group
           </h3>
@@ -147,8 +147,8 @@ export function SidebarNav({ mainNavItems, groupNavItems, additionalNavItems = [
                           "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200 ease-in-out",
                           pathname === item.href
                             ? "bg-primary-blue text-white"
-                            : "text-theme-gray-dark hover:bg-primary-blue/10 hover:text-theme-dark",
-                           !isSidebarExpanded && "justify-center"
+                            : "text-black dark:text-white hover:bg-primary-blue/10 hover:text-black dark:hover:text-white",
+                          !isSidebarExpanded && "justify-center"
                         )}
                       >
                         <span className="flex h-5 w-5 shrink-0 items-center justify-center">
@@ -162,11 +162,11 @@ export function SidebarNav({ mainNavItems, groupNavItems, additionalNavItems = [
                         )}
                       </Link>
                     </TooltipTrigger>
-                     {!isSidebarExpanded && (
-                        <TooltipContent side="right">
-                          <p>{item.label}</p>
-                        </TooltipContent>
-                      )}
+                    {!isSidebarExpanded && (
+                      <TooltipContent side="right">
+                        <p>{item.label}</p>
+                      </TooltipContent>
+                    )}
                   </Tooltip>
                 </TooltipProvider>
               </li>
@@ -180,7 +180,7 @@ export function SidebarNav({ mainNavItems, groupNavItems, additionalNavItems = [
         <div>
           {/* Separator line */}
           <div className="mx-2 my-4 border-t border-theme-gray"></div>
-          
+
           <ul className="space-y-0.5">
             {additionalNavItems.map((item) => {
               const IconComponent = iconMap[item.iconName];
@@ -195,13 +195,13 @@ export function SidebarNav({ mainNavItems, groupNavItems, additionalNavItems = [
                             "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200 ease-in-out",
                             pathname === item.href
                               ? "bg-primary-blue text-white"
-                              : "text-theme-gray-dark hover:bg-primary-blue/10 hover:text-theme-dark",
+                              : "text-black dark:text-white hover:bg-primary-blue/10 hover:text-black dark:hover:text-white",
                             !isSidebarExpanded && "justify-center"
                           )}
                         >
                           {IconComponent && <IconComponent className="h-5 w-5 shrink-0" />}
                           {isSidebarExpanded && (
-                             <span className="flex-1">{item.label}</span>
+                            <span className="flex-1">{item.label}</span>
                           )}
                           {isSidebarExpanded && item.badgeCount && (
                             <Badge className="ml-auto rounded-full px-1.5 py-0 text-[10px] font-semibold">

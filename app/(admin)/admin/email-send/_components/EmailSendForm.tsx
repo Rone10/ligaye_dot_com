@@ -49,7 +49,7 @@ const templatePreviews: Record<string, { title: string; description: string; con
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8faff; padding: 20px 0;">
         <div style="background-color: #ffffff; border: 1px solid #e1e5f2; border-radius: 12px; margin: 0 auto; padding: 40px 30px; max-width: 600px;">
                       <div style="text-align: center; margin: 32px 0;">
-              <img src="/logo.PNG" alt="Ligaye.com" style="width: 400px; height: 300px; object-fit: contain; margin: 0 auto; display: block;" />
+              <img src="/logo.PNG" alt="Ligaye" style="width: 400px; height: 300px; object-fit: contain; margin: 0 auto; display: block;" />
             </div>
           
           <h1 style="color: #1a1e2d; font-size: 28px; font-weight: 700; text-align: center; margin: 30px 0 20px 0; line-height: 1.3;">
