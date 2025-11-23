@@ -25,7 +25,7 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="pt-6 md:pt-16 pb-12">
+      <section className="pt-4 md:pt-12 pb-6">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
 
@@ -398,49 +398,6 @@ export default function PrivacyPolicyPage() {
                 <Link href="/contact-us">
                   <Button>Get in touch</Button>
                 </Link>
-                {/* <div className="text-gray-dark space-y-4">
-                  <p>
-                    If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div className="flex items-start gap-3">
-                      <Mail className="text-primary-blue h-5 w-5 mt-1" />
-                      <div>
-                        <p className="font-semibold text-dark">Email</p>
-                        <p className="text-sm">privacy@ligaye.com</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <Phone className="text-primary-blue h-5 w-5 mt-1" />
-                      <div>
-                        <p className="font-semibold text-dark">Phone</p>
-                        <p className="text-sm">+220 XXX XXXX</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <MapPin className="text-primary-blue h-5 w-5 mt-1" />
-                      <div>
-                        <p className="font-semibold text-dark">Address</p>
-                        <p className="text-sm">Banjul, The Gambia</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <Users className="text-primary-blue h-5 w-5 mt-1" />
-                      <div>
-                        <p className="font-semibold text-dark">Data Protection Officer</p>
-                        <p className="text-sm">dpo@ligaye.com</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p className="mt-6 text-sm">
-                    We will respond to your inquiry within 30 days of receipt. For urgent privacy concerns, please mark your communication as "Urgent Privacy Matter."
-                  </p>
-                </div> */}
               </div>
             </div>
 

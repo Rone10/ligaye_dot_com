@@ -38,7 +38,7 @@ export default function Navbar({ user }: NavbarProps) {
 
   const getLinkClass = (path: string) => {
     const isActive = path === '/' ? pathname === '/' : pathname?.startsWith(path);
-    return `text-base font-bold transition-colors ${isActive
+    return `text-base font-medium transition-colors ${isActive
       ? 'text-primary'
       : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white'
       }`;
@@ -88,16 +88,16 @@ export default function Navbar({ user }: NavbarProps) {
               <Link href={getDashboardLink()} className={getLinkClass(getDashboardLink())}>
                 Dashboard
               </Link>
-              <button onClick={handleLogout} className="text-base font-bold text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white">
+              <button onClick={handleLogout} className="text-base font-medium text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white">
                 Sign out
               </button>
-              <Link href="/employer/jobs/new" className="text-base bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-bold">
+              <Link href="/employer/jobs/new" className="text-base bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium">
                 Post a Job
               </Link>
             </div>
           ) : (
             <div className="hidden md:flex items-center gap-4">
-              <Link href="/sign-in" className="text-base text-blue-600 dark:text-blue-400 font-bold hover:underline">
+              <Link href="/sign-in" className="text-base text-blue-600 dark:text-blue-400 font-medium hover:underline">
                 Sign in
               </Link>
               <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
@@ -128,12 +128,12 @@ export default function Navbar({ user }: NavbarProps) {
             <div className="border-t border-border pt-4">
               {user ? (
                 <>
-                  <Link href={getDashboardLink()} className="block text-blue-600 dark:text-blue-400 font-bold py-2">Dashboard</Link>
+                  <Link href={getDashboardLink()} className="block text-blue-600 dark:text-blue-400 font-medium py-2">Dashboard</Link>
                   <button onClick={handleLogout} className="block text-gray-700 dark:text-gray-300 font-medium py-2 w-full text-left">Sign out</button>
                 </>
               ) : (
                 <>
-                  <Link href="/sign-in" className="block text-blue-600 dark:text-blue-400 font-bold py-2">Sign in</Link>
+                  <Link href="/sign-in" className="block text-blue-600 dark:text-blue-400 font-medium py-2">Sign in</Link>
                   <Link href="/sign-up" className="block text-gray-700 dark:text-gray-300 font-medium py-2">Create Account</Link>
                 </>
               )}
