@@ -18,7 +18,7 @@ import CompanyMarquee from './_components/CompanyMarquee';
 export async function generateMetadata(): Promise<Metadata> {
   return generateSEOMetadata({
     title: "Job Search | Ligaye",
-    description: "Find your dream job or hire top talent in The Gambia. Ligaye.com connects job seekers with employers across all industries.",
+    description: "Find your dream job or hire top talent in The Gambia. Ligaye connects job seekers with employers across all industries.",
     keywords: [
       'jobs in Gambia',
       'Gambian jobs',
