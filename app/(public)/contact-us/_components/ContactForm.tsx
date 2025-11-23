@@ -38,7 +38,7 @@ export default function ContactForm() {
         try {
             const result = await sendContactMessage(values);
             setSubmitStatus(result);
-            
+
             if (result.success) {
                 form.reset();
             }
@@ -52,57 +52,54 @@ export default function ContactForm() {
         }
     }
 
-    const glassmorphicCardClass =
-        'bg-white/70 dark:bg-black/60 backdrop-blur-lg border border-white/30 dark:border-black/40 rounded-2xl shadow-lg';
-
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))] py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
+        <div className="min-h-screen bg-background">
+            <div className="container mx-auto px-4 py-8 max-w-4xl">
                 {/* Header Section */}
-                <section className="text-center mb-12">
-                    <h1 className="text-4xl sm:text-5xl font-bold text-primary-blue mb-4">
-                        Contact Us
+                <div className="mb-8 text-center">
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Contact</span> Us
                     </h1>
-                    <p className="text-lg text-theme-gray-dark max-w-2xl mx-auto">
+                    <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
                         Have a question or feedback? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
                     </p>
-                </section>
+                </div>
 
                 {/* Contact Information Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                    <Card className={glassmorphicCardClass}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <Card className="bg-card border border-border rounded-xl">
                         <CardContent className="p-6 text-center">
-                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-blue/10 mb-4">
-                                <Mail className="h-6 w-6 text-primary-blue" />
+                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
+                                <Mail className="h-6 w-6 text-primary" />
                             </div>
-                            <h3 className="font-semibold text-theme-dark mb-1">Email</h3>
-                            <p className="text-theme-gray-dark text-sm">support@ligaye.com</p>
+                            <h3 className="font-semibold mb-1">Email</h3>
+                            <p className="text-muted-foreground text-sm">support@ligaye.com</p>
                         </CardContent>
                     </Card>
 
-                    <Card className={glassmorphicCardClass}>
+                    <Card className="bg-card border border-border rounded-xl">
                         <CardContent className="p-6 text-center">
-                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-blue/10 mb-4">
-                                <Phone className="h-6 w-6 text-primary-blue" />
+                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
+                                <Phone className="h-6 w-6 text-primary" />
                             </div>
-                            <h3 className="font-semibold text-theme-dark mb-1">Phone</h3>
-                            <p className="text-theme-gray-dark text-sm">+220 3139076</p>
+                            <h3 className="font-semibold mb-1">Phone</h3>
+                            <p className="text-muted-foreground text-sm">+220 3139076</p>
                         </CardContent>
                     </Card>
 
-                    <Card className={glassmorphicCardClass}>
+                    <Card className="bg-card border border-border rounded-xl">
                         <CardContent className="p-6 text-center">
-                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-blue/10 mb-4">
-                                <MapPin className="h-6 w-6 text-primary-blue" />
+                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
+                                <MapPin className="h-6 w-6 text-primary" />
                             </div>
-                            <h3 className="font-semibold text-theme-dark mb-1">Location</h3>
-                            <p className="text-theme-gray-dark text-sm">Banjul, The Gambia</p>
+                            <h3 className="font-semibold mb-1">Location</h3>
+                            <p className="text-muted-foreground text-sm">Banjul, The Gambia</p>
                         </CardContent>
                     </Card>
                 </div>
 
                 {/* Contact Form */}
-                <Card className={glassmorphicCardClass}>
+                <Card className="bg-card border border-border rounded-xl">
                     <CardHeader>
                         <CardTitle className="text-2xl text-center">Send us a Message</CardTitle>
                     </CardHeader>
@@ -117,10 +114,9 @@ export default function ContactForm() {
                                             <FormItem>
                                                 <FormLabel>Name</FormLabel>
                                                 <FormControl>
-                                                    <Input 
-                                                        placeholder="Your name" 
+                                                    <Input
+                                                        placeholder="Your name"
                                                         {...field}
-                                                        className="bg-white/50 dark:bg-black/50 backdrop-blur-sm"
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -135,11 +131,10 @@ export default function ContactForm() {
                                             <FormItem>
                                                 <FormLabel>Email</FormLabel>
                                                 <FormControl>
-                                                    <Input 
-                                                        type="email" 
-                                                        placeholder="your@email.com" 
+                                                    <Input
+                                                        type="email"
+                                                        placeholder="your@email.com"
                                                         {...field}
-                                                        className="bg-white/50 dark:bg-black/50 backdrop-blur-sm"
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -155,10 +150,9 @@ export default function ContactForm() {
                                         <FormItem>
                                             <FormLabel>Subject</FormLabel>
                                             <FormControl>
-                                                <Input 
-                                                    placeholder="What is this about?" 
+                                                <Input
+                                                    placeholder="What is this about?"
                                                     {...field}
-                                                    className="bg-white/50 dark:bg-black/50 backdrop-blur-sm"
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -175,7 +169,7 @@ export default function ContactForm() {
                                             <FormControl>
                                                 <Textarea
                                                     placeholder="Your message..."
-                                                    className="min-h-[150px] bg-white/50 dark:bg-black/50 backdrop-blur-sm"
+                                                    className="min-h-[150px]"
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -186,13 +180,12 @@ export default function ContactForm() {
 
                                 {/* Status Messages */}
                                 {submitStatus && (
-                                    <div className={`p-4 rounded-lg ${
-                                        submitStatus.success 
-                                            ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' 
-                                            : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-                                    }`}>
-                                        {submitStatus.success 
-                                            ? submitStatus.message 
+                                    <div className={`p-4 rounded-lg ${submitStatus.success
+                                        ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                        : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                                        }`}>
+                                        {submitStatus.success
+                                            ? submitStatus.message
                                             : submitStatus.error
                                         }
                                     </div>
@@ -201,7 +194,7 @@ export default function ContactForm() {
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full bg-primary-blue hover:bg-primary-blue-light text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300"
+                                    className="w-full"
                                 >
                                     {isSubmitting ? "Sending..." : "Send Message"}
                                 </Button>
