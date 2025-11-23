@@ -66,7 +66,7 @@ export default async function LandingPage() {
           {/* Logo Section */}
           {/* Hero Text Section */}
           <div className="mb-8 text-center animate-appear">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
               Where Talent Meets <span className="text-primary">Opportunity</span>
             </h1>
           </div>
