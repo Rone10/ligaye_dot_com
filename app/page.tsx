@@ -61,11 +61,14 @@ export default async function LandingPage() {
       <StructuredData data={organizationSchema} />
       <StructuredData data={localBusinessSchema} />
       <Navbar user={user} />
-      <div className="flex flex-col min-h-screen bg-white dark:bg-background transition-colors duration-300">
+      <div className="flex flex-col min-h-screen bg-background transition-colors duration-300">
         <main className="flex-grow flex flex-col items-center pt-16 pb-12 px-4">
           {/* Logo Section */}
-          <div className="mb-8">
-            <Image src="/logo.PNG" alt="Ligaye Logo" width={200} height={120} priority className="dark:brightness-0 dark:invert" />
+          {/* Hero Text Section */}
+          <div className="mb-8 text-center animate-appear">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
+              Where Talent Meets <span className="text-primary">Opportunity</span>
+            </h1>
           </div>
 
           {/* Search Section */}
