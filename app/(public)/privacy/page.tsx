@@ -7,7 +7,7 @@ import { generateSEOMetadata } from '@/lib/seo/metadata';
 export async function generateMetadata(): Promise<Metadata> {
   return generateSEOMetadata({
     title: 'Privacy Policy',
-    description: 'Learn how Ligaye.com protects your privacy and handles your personal information. Our comprehensive privacy policy explains data collection, usage, and your rights as a user of Gambia\'s premier job board.',
+    description: 'Learn how Ligaye protects your privacy and handles your personal information. Our comprehensive privacy policy explains data collection, usage, and your rights as a user of Gambia\'s premier job board.',
     path: '/privacy',
     keywords: [
       'privacy policy Ligaye',
@@ -353,7 +353,7 @@ export default function PrivacyPolicyPage() {
               <div className="bg-muted/50 p-6 rounded-lg border border-border">
                 <div className="text-foreground space-y-4">
                   <p>
-                    While Ligaye.com primarily serves the Gambian market, our hosting and service providers may be located in other countries. When we transfer your personal information internationally, we ensure appropriate safeguards are in place to protect your data in accordance with applicable data protection laws.
+                    While Ligaye primarily serves the Gambian market, our hosting and service providers may be located in other countries. When we transfer your personal information internationally, we ensure appropriate safeguards are in place to protect your data in accordance with applicable data protection laws.
                   </p>
                   <p>
                     These safeguards may include standard contractual clauses, adequacy decisions, or other legally recognized transfer mechanisms.

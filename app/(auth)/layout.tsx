@@ -21,23 +21,23 @@ export default async function AuthLayout({
             <div className="relative h-12 w-32">
               {/* Replace with your actual logo */}
               <div className="flex items-center justify-center">
-                <h1 className="text-4xl font-bold text-primary-blue">Ligaye.com</h1>
+                <h1 className="text-4xl font-bold text-primary-blue">Ligaye</h1>
               </div>
             </div>
           </Link>
         </header>
-        
+
         {/* Main content */}
         <main className="mt-12 mb-20">
           {children}
         </main>
-        
+
         {/* Footer */}
         <div className="mt-12">
           <Footer />
         </div>
       </div>
-      
+
       {/* Toast notifications */}
       {/* <Toaster position="top-center" richColors /> */}
     </div>

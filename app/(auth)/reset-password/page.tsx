@@ -4,8 +4,8 @@ import { redirect } from 'next/navigation'
 import { getUser } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Reset Password - Ligaye.com',
-  description: 'Reset your password for Ligaye.com',
+  title: 'Reset Password - Ligaye',
+  description: 'Reset your password for Ligaye',
 }
 
 export default async function ResetPasswordPage() {

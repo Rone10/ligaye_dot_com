@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: "Manage Users - Ligaye Admin",
-  description: "Manage all users on the Ligaye.com platform",
+  description: "Manage all users on the Ligaye platform",
 };
 
 export default async function UsersPage() {
@@ -23,17 +23,17 @@ export default async function UsersPage() {
   ]);
 
   // console.log('users', users)
-  
+
   // Count total, active, and deleted users
   const totalUsers = users.length;
   const activeUsers = users.filter(user => !user.deleted).length;
   const deletedUsers = users.filter(user => user.deleted).length;
-  
+
   // Count by role
   const candidateCount = users.filter(user => user.role === "candidate").length;
   const employerCount = users.filter(user => user.role === "employer").length;
   const adminCount = users.filter(user => user.role === "admin").length;
-  
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -48,7 +48,7 @@ export default async function UsersPage() {
           </Button>
         </form>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardContent className="p-6">
@@ -56,21 +56,21 @@ export default async function UsersPage() {
             <div className="text-sm text-muted-foreground">Total Users</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-6">
             <div className="text-xl font-bold text-secondary-green">{activeUsers}</div>
             <div className="text-sm text-muted-foreground">Active</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-6">
             <div className="text-xl font-bold text-destructive">{deletedUsers}</div>
             <div className="text-sm text-muted-foreground">Deleted</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-6">
             <div className="text-xl font-bold text-theme-dark">{adminCount}</div>
@@ -78,7 +78,7 @@ export default async function UsersPage() {
           </CardContent>
         </Card>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardContent className="p-6">
@@ -99,7 +99,7 @@ export default async function UsersPage() {
           </CardContent>
         </Card>
       </div>
-      
+
       <div>
         <UsersTable users={users} currentUser={currentUser} />
       </div>

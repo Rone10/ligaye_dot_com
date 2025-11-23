@@ -3,8 +3,8 @@ import { HashFragmentHandler } from './_components/HashFragmentHandler'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Set New Password - Ligaye.com',
-  description: 'Set a new password for your Ligaye.com account',
+  title: 'Set New Password - Ligaye',
+  description: 'Set a new password for your Ligaye account',
 }
 
 interface PageProps {

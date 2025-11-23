@@ -19,7 +19,7 @@ export default function CTASection({ user }: CTASectionProps) {
             
             <p className="text-theme-gray-dark max-w-2xl mx-auto">Manage your job postings and discover qualified candidates from your employer dashboard.</p>
             
-            <p className="text-theme-gray-dark max-w-2xl mx-auto">Whether you&apos;re looking for your next opportunity or seeking talented professionals, Ligaye.com has you covered.</p>
+            <p className="text-theme-gray-dark max-w-2xl mx-auto">Whether you&apos;re looking for your next opportunity or seeking talented professionals, Ligaye has you covered.</p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

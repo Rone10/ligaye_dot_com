@@ -42,7 +42,7 @@ export const applicationMethodLabels: Record<string, string> = {
   WEBSITE: 'Apply on Company Website',
   PHONE: 'Apply via Phone',
   IN_PERSON: 'Apply in Person',
-  PLATFORM: 'Apply on Ligaye.com'
+  PLATFORM: 'Apply on Ligaye'
 };
 
 // Display labels for salary frequencies

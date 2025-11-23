@@ -7,8 +7,8 @@ import { getUser } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Sign In - Ligaye.com',
-  description: 'Sign in to your Ligaye.com account',
+  title: 'Sign In - Ligaye',
+  description: 'Sign in to your Ligaye account',
 }
 
 interface SignInPageProps {

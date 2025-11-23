@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarNav, type MainNavItem } from "./SidebarNav";
 import { SidebarThemeToggle } from "./SidebarThemeToggle";
@@ -12,7 +13,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
-  Sparkles,
   PanelLeft,
   PanelRight,
   LogOut,
@@ -74,13 +74,29 @@ interface SidebarHeaderProps {
 
 function SidebarHeader({ isExpanded, onToggle, userRole, isMobileOpen, onMobileClose }: SidebarHeaderProps) {
   const title = userRole === 'candidate' ? 'Candidate Portal' : 'Employer Portal';
-  
+
   return (
     <div className={cn("flex h-16 shrink-0 items-center border-b px-3", isExpanded ? "justify-between" : "justify-center")}>
       {isExpanded && (
-        <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-theme-dark">
-          <Sparkles className="h-7 w-7 text-primary-blue" />
-          <span>{title}</span>
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/logo.PNG"
+            alt="Ligaye Logo"
+            width={100}
+            height={40}
+            className="object-contain dark:brightness-0 dark:invert"
+          />
+        </Link>
+      )}
+      {!isExpanded && (
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo.PNG"
+            alt="Ligaye"
+            width={32}
+            height={32}
+            className="object-contain dark:brightness-0 dark:invert"
+          />
         </Link>
       )}
       <div className="flex items-center">
@@ -93,11 +109,11 @@ function SidebarHeader({ isExpanded, onToggle, userRole, isMobileOpen, onMobileC
         >
           <X className="h-5 w-5 text-theme-dark" />
         </Button>
-        
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={onToggle} 
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggle}
           className="hidden md:flex rounded-lg hover:bg-primary-blue/10 ml-auto"
         >
           {isExpanded ? <PanelLeft className="h-5 w-5" /> : <PanelRight className="h-5 w-5" />}
@@ -116,17 +132,17 @@ interface SidebarUserProfileProps {
 }
 
 function SidebarUserProfile({ isSidebarExpanded, userData, loading, onLogout }: SidebarUserProfileProps) {
-  const userName = userData?.user_metadata?.full_name || 
-                   userData?.user_metadata?.name || 
-                   userData?.email?.split('@')[0] || 
-                   'User';
-  
+  const userName = userData?.user_metadata?.full_name ||
+    userData?.user_metadata?.name ||
+    userData?.email?.split('@')[0] ||
+    'User';
+
   const userEmail = userData?.email || '';
   const fullName = userData?.user_metadata?.first_name + ' ' + userData?.user_metadata?.last_name;
-  
+
   const getInitials = () => {
     if (!userName) return 'U';
-    
+
     const initials = userData?.user_metadata?.first_name?.charAt(0) + userData?.user_metadata?.last_name?.charAt(0);
     return initials || userName.substring(0, 2).toUpperCase();
   };
@@ -195,9 +211,9 @@ function SidebarUserProfile({ isSidebarExpanded, userData, loading, onLogout }: 
       <TooltipProvider delayDuration={100}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onLogout}
               className="ml-auto shrink-0 rounded-lg hover:bg-primary-blue/10"
             >
@@ -235,7 +251,7 @@ export function UnifiedSidebar({ userRole }: UnifiedSidebarProps) {
         setLoading(false);
       }
     };
-    
+
     fetchUserData();
   }, []);
 
@@ -270,10 +286,10 @@ export function UnifiedSidebar({ userRole }: UnifiedSidebarProps) {
       >
         <Menu className="h-5 w-5 text-white" />
       </Button>
-      
+
       {/* Overlay */}
       {isMobileOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsMobileOpen(false)}
           aria-hidden="true"
@@ -288,33 +304,33 @@ export function UnifiedSidebar({ userRole }: UnifiedSidebarProps) {
           isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-      <SidebarHeader 
-        isExpanded={isExpanded} 
-        onToggle={toggleSidebar} 
-        userRole={userRole}
-        isMobileOpen={isMobileOpen}
-        onMobileClose={() => setIsMobileOpen(false)}
-      />
-      
-      <ScrollArea className="flex-1 py-2">
-        <SidebarNav 
-          mainNavItems={navItems} 
-          groupNavItems={[]} 
-          additionalNavItems={additionalNavItems}
-          isSidebarExpanded={isExpanded} 
+        <SidebarHeader
+          isExpanded={isExpanded}
+          onToggle={toggleSidebar}
+          userRole={userRole}
+          isMobileOpen={isMobileOpen}
+          onMobileClose={() => setIsMobileOpen(false)}
         />
-      </ScrollArea>
-      
-      <div className={cn("mt-auto space-y-2 border-t border-theme-gray/30 p-2", !isExpanded && "items-center flex flex-col")}>
-        <SidebarThemeToggle isSidebarExpanded={isExpanded} />
-        <SidebarUserProfile 
-          isSidebarExpanded={isExpanded} 
-          userData={userData}
-          loading={loading}
-          onLogout={handleLogout}
-        />
-      </div>
-    </aside>
+
+        <ScrollArea className="flex-1 py-2">
+          <SidebarNav
+            mainNavItems={navItems}
+            groupNavItems={[]}
+            additionalNavItems={additionalNavItems}
+            isSidebarExpanded={isExpanded}
+          />
+        </ScrollArea>
+
+        <div className={cn("mt-auto space-y-2 border-t border-theme-gray/30 p-2", !isExpanded && "items-center flex flex-col")}>
+          <SidebarThemeToggle isSidebarExpanded={isExpanded} />
+          <SidebarUserProfile
+            isSidebarExpanded={isExpanded}
+            userData={userData}
+            loading={loading}
+            onLogout={handleLogout}
+          />
+        </div>
+      </aside>
     </>
   );
 } 

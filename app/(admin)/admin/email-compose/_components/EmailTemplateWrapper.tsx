@@ -51,8 +51,8 @@ const emailStyles = {
 };
 
 export function EmailTemplateWrapper({ content, previewMode = false }: EmailTemplateWrapperProps) {
-  const logoUrl = previewMode 
-    ? '/branding/full_logo.png' 
+  const logoUrl = previewMode
+    ? '/branding/full_logo.png'
     : 'https://ligaye.com/branding/full_logo.png';
 
   // Process the content to ensure proper styling
@@ -87,13 +87,13 @@ export function EmailTemplateWrapper({ content, previewMode = false }: EmailTemp
         
         <div style="${Object.entries(emailStyles.footer).map(([k, v]) => `${k.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${v}`).join('; ')}">
           <p style="${Object.entries(emailStyles.footerText).map(([k, v]) => `${k.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${v}`).join('; ')}">
-            This email was sent by Ligaye.com
+            This email was sent by Ligaye
           </p>
           <p style="${Object.entries(emailStyles.footerText).map(([k, v]) => `${k.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${v}`).join('; ')}">
             Ligaye - Where Talent Meets Opportunity
           </p>
           <p style="${Object.entries(emailStyles.footerText).map(([k, v]) => `${k.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${v}`).join('; ')}">
-            © ${new Date().getFullYear()} Ligaye.com. All rights reserved.
+            © ${new Date().getFullYear()} Ligaye. All rights reserved.
           </p>
         </div>
       </div>

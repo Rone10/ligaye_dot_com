@@ -4,13 +4,13 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { 
-  LayoutDashboard, 
-  Briefcase, 
-  FileText, 
-  User2, 
-  BookmarkIcon, 
-  Menu, 
+import {
+  LayoutDashboard,
+  Briefcase,
+  FileText,
+  User2,
+  BookmarkIcon,
+  Menu,
   X,
   LogOut,
   Search,
@@ -62,7 +62,7 @@ export default function CandidateSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const sidebarRef = useRef<HTMLDivElement>(null)
-  
+
   // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
@@ -76,25 +76,25 @@ export default function CandidateSidebar() {
         setLoading(false)
       }
     }
-    
+
     fetchUserData()
   }, [])
-  
+
   // Get user name and initials for avatar
-  const userName = userData?.user_metadata?.first_name || 
-                   userData?.user_metadata?.name || 
-                   userData?.email?.split('@')[0] || 
-                   'Candidate'
-  
+  const userName = userData?.user_metadata?.first_name ||
+    userData?.user_metadata?.name ||
+    userData?.email?.split('@')[0] ||
+    'Candidate'
+
   const userEmail = userData?.email || ''
-  
+
   const getInitials = () => {
     if (!userName) return 'CN'
-    
+
     const initials = userData?.user_metadata?.first_name?.charAt(0) + userData?.user_metadata?.last_name?.charAt(0)
     return initials || userName.substring(0, 2).toUpperCase()
   }
-  
+
   // Close sidebar when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -102,22 +102,22 @@ export default function CandidateSidebar() {
         setIsOpen(false)
       }
     }
-    
+
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isOpen])
-  
+
   // Close sidebar on route change
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
-  
+
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/')
   }
-  
+
   return (
     <>
       {/* Mobile menu button */}
@@ -130,18 +130,18 @@ export default function CandidateSidebar() {
       >
         <Menu className="h-5 w-5" />
       </Button>
-      
+
       {/* Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
         />
       )}
-      
+
       {/* Sidebar */}
-      <div 
+      <div
         ref={sidebarRef}
         className={`
           fixed inset-y-0 left-0 z-40
@@ -156,7 +156,7 @@ export default function CandidateSidebar() {
         <div className="flex flex-col h-full p-4">
           {/* Title & mobile close button */}
           <div className="flex items-center justify-between py-2 px-2">
-            {!isCollapsed && <h2 className="text-xl font-bold text-[#1a1e2d]">Candidate Portal</h2>}
+            {!isCollapsed && <h2 className="text-xl font-bold text-black">Candidate Portal</h2>}
             <div className="flex items-center">
               <Button
                 variant="ghost"
@@ -165,9 +165,9 @@ export default function CandidateSidebar() {
                 onClick={() => setIsOpen(false)}
                 aria-label="Close menu"
               >
-                <X className="h-5 w-5 text-[#1a1e2d]" />
+                <X className="h-5 w-5 text-black" />
               </Button>
-              
+
               {/* Collapse toggle button - only visible on desktop */}
               <Button
                 variant="ghost"
@@ -177,14 +177,14 @@ export default function CandidateSidebar() {
                 aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
                 {isCollapsed ? (
-                  <ChevronRight className="h-5 w-5 text-[#1a1e2d]" />
+                  <ChevronRight className="h-5 w-5 text-black" />
                 ) : (
-                  <ChevronLeft className="h-5 w-5 text-[#1a1e2d]" />
+                  <ChevronLeft className="h-5 w-5 text-black" />
                 )}
               </Button>
             </div>
           </div>
-          
+
           {/* User profile section */}
           <div className={`mt-4 mb-6 p-4 rounded-lg bg-[#4a6cfa]/5 border border-[#4a6cfa]/10 ${isCollapsed ? 'flex justify-center' : ''}`}>
             {loading ? (
@@ -207,21 +207,21 @@ export default function CandidateSidebar() {
                 </Avatar>
                 {!isCollapsed && (
                   <div>
-                    <p className="text-sm font-medium text-[#1a1e2d] line-clamp-1">{userName}</p>
+                    <p className="text-sm font-medium text-black line-clamp-1">{userName}</p>
                     <p className="text-xs text-muted-foreground line-clamp-1">{userEmail}</p>
                   </div>
                 )}
               </div>
             )}
           </div>
-          
+
           {/* Navigation */}
           <nav className="space-y-2 flex-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href
-              
+
               return (
-                <Link 
+                <Link
                   key={item.href}
                   href={item.href}
                   className={`
@@ -229,24 +229,24 @@ export default function CandidateSidebar() {
                     rounded-md transition-all duration-300
                     hover:bg-[#4a6cfa]/10 hover:translate-y-[-2px]
                     ${isCollapsed ? 'justify-center' : ''}
-                    ${isActive 
-                      ? 'bg-[#4a6cfa]/10 text-[#4a6cfa] font-semibold shadow-sm' 
-                      : 'text-[#1a1e2d]'}
+                    ${isActive
+                      ? 'bg-[#4a6cfa]/10 text-[#4a6cfa] font-semibold shadow-sm'
+                      : 'text-black font-medium'}
                   `}
                   title={isCollapsed ? item.name : ''}
                 >
-                  <item.icon className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'}`} />
+                  <item.icon className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'} ${isActive ? 'text-[#4a6cfa]' : 'text-black'}`} />
                   {!isCollapsed && item.name}
                 </Link>
               )
             })}
           </nav>
-          
+
           {/* Logout button */}
           <div className="mt-auto pt-4 border-t border-[rgba(0,0,0,0.1)]">
             <Button
               variant="outline"
-              className={`w-full ${isCollapsed ? 'justify-center p-2' : 'justify-start'} text-[#1a1e2d] hover:bg-[#4a6cfa]/10 hover:text-[#4a6cfa]`}
+              className={`w-full ${isCollapsed ? 'justify-center p-2' : 'justify-start'} text-black hover:bg-[#4a6cfa]/10 hover:text-[#4a6cfa]`}
               onClick={handleLogout}
               title={isCollapsed ? "Logout" : ''}
             >
