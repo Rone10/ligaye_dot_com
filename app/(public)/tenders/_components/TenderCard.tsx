@@ -3,21 +3,15 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { 
-  Building2, 
-  MapPin, 
-  Calendar, 
-  DollarSign, 
-  ExternalLink,
-  Briefcase,
+import {
+  Building2,
+  MapPin,
+  Calendar,
   Award,
   FileText,
-  Eye,
-  Edit,
-  Trash2
+  Briefcase
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { cn, formatCurrency } from '@/lib/utils';
 import type { TenderWithRelations } from '../_queries';
 
@@ -29,21 +23,6 @@ interface TenderCardProps {
 
 export function TenderCard({ tender, currentUserId, onDelete }: TenderCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PUBLISHED':
-        return 'bg-secondary-green/10 text-secondary-green border-secondary-green/20';
-      case 'DRAFT':
-        return 'bg-theme-gray/10 text-theme-gray-dark border-theme-gray/20';
-      case 'CLOSED':
-        return 'bg-red-500/10 text-red-600 border-red-500/20';
-      case 'CANCELLED':
-        return 'bg-orange-500/10 text-orange-600 border-orange-500/20';
-      default:
-        return 'bg-theme-gray/10 text-theme-gray-dark border-theme-gray/20';
-    }
-  };
 
   const getTenderTypeLabel = (type: string) => {
     return type === 'TENDER' ? 'Tender' : 'Public Notice';
@@ -67,118 +46,92 @@ export function TenderCard({ tender, currentUserId, onDelete }: TenderCardProps)
     return format(new Date(createdAt), 'dd MMM yyyy');
   };
 
-  const canUserEdit = () => {
-    return currentUserId && tender.userId === currentUserId;
-  };
-
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!onDelete || isDeleting) return;
-    
-    setIsDeleting(true);
-    try {
-      await onDelete(tender.id);
-    } catch (error) {
-      console.error('Error deleting tender:', error);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   const TenderTypeIcon = getTenderTypeIcon(tender.tenderType);
   const organizationInitial = tender.organizationName ? tender.organizationName.charAt(0).toUpperCase() : 'O';
 
   return (
-    <div className="glass-card p-xl rounded-xl shadow-level-2 hover:shadow-level-3 duration-standard hover:translate-y-[-2px] group">
-      <div className="flex items-start gap-lg">
+    <div className="group bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+      <div className="flex items-start gap-5">
         {/* Organization Icon */}
-        <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden flex items-center justify-center bg-primary-blue/10 text-primary-blue font-semibold text-xl">
-          <div className="p-sm bg-primary-blue/10 rounded-lg">
-            <TenderTypeIcon className="h-8 w-8 text-primary-blue" />
-          </div>
+        <div className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center font-bold text-xl shadow-sm border border-border bg-primary/10 text-primary">
+          <TenderTypeIcon className="h-7 w-7" />
         </div>
 
         {/* Tender Information */}
-        <div className="flex-grow space-y-md">
-          <div className="flex justify-between items-start gap-md">
-            <div className="space-y-xs">
-              <h3 className="text-xl font-semibold text-theme-dark leading-tight">
-                <Link 
+        <div className="flex-grow min-w-0">
+          <div className="flex justify-between items-start gap-4">
+            <div>
+              <h3 className="text-lg font-bold text-card-foreground leading-tight group-hover:text-primary transition-colors">
+                <Link
                   href={`/tenders/${tender.id}`}
-                  className="hover:text-primary-blue duration-standard"
+                  className="focus:outline-none"
                 >
                   {tender.title}
                 </Link>
               </h3>
-              <div className="flex items-center gap-sm text-theme-gray-dark">
-                <Building2 className="h-4 w-4" />
-                <span className="font-medium">{tender.organizationName}</span>
+              <div className="mt-1 flex items-center flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground flex items-center gap-1">
+                  <Building2 className="w-3.5 h-3.5" />
+                  {tender.organizationName}
+                </span>
+                {tender.location && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5" />
+                    {formatLocation(tender.location)}
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Tags and Info */}
-          <div className="flex flex-wrap gap-sm">
-            {/* Tender Type Badge (replaces the status badge) */}
-            <span className="inline-block px-md py-xs rounded-full text-xs font-medium bg-primary-blue/10 text-primary-blue border border-primary-blue/20">
+          {/* Tags */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-700 dark:text-blue-300 border-2 border-blue-500/40 dark:border-blue-400/50 shadow-sm">
+              <TenderTypeIcon className="w-3.5 h-3.5 mr-1.5" />
               {getTenderTypeLabel(tender.tenderType)}
             </span>
             {tender.sector && (
-              <span className="inline-flex items-center gap-xs px-md py-xs rounded-full text-xs font-medium bg-secondary-green/10 text-secondary-green border border-secondary-green/20">
-                <Briefcase className="h-3 w-3" />
+              <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-500/20 text-green-700 dark:text-green-300 border-2 border-green-500/40 dark:border-green-400/50 shadow-sm">
+                <Briefcase className="w-3.5 h-3.5 mr-1.5" />
                 {tender.sector.name}
               </span>
             )}
-            {tender.location && (
-              <span className="inline-flex items-center gap-xs px-md py-xs rounded-full text-xs font-medium bg-theme-gray/20 text-theme-gray-dark">
-                <MapPin className="h-3 w-3" />
-                {formatLocation(tender.location)}
+            {tender.status && (
+              <span className={cn(
+                "inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold border-2 shadow-sm",
+                tender.status === 'PUBLISHED' ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40 dark:border-emerald-400/50" :
+                  tender.status === 'CLOSED' ? "bg-red-500/20 text-red-700 dark:text-red-300 border-red-500/40 dark:border-red-400/50" :
+                    "bg-gray-500/20 text-gray-700 dark:text-gray-300 border-gray-500/40 dark:border-gray-400/50"
+              )}>
+                {tender.status}
               </span>
             )}
           </div>
 
-          {/* Details Row - Now shows deadline, budget, and posted date */}
-          <div className="flex flex-wrap justify-between items-center gap-md pt-sm">
-            <div className="flex flex-wrap gap-lg">
-              {tender.deadline && (
-                <div className="flex items-center gap-xs text-sm text-theme-gray-dark">
-                  <Calendar className="h-4 w-4" />
-                  <span>Deadline: <span className="font-medium text-theme-dark">{formatDeadline(tender.deadline)}</span></span>
-                </div>
-              )}
+          {/* Details Row */}
+          <div className="mt-5 pt-4 border-t border-border flex flex-wrap justify-between items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
               {tender.budgetRange && (
-                <div className="flex items-center gap-xs text-sm text-theme-gray-dark">
-                  {/* <DollarSign className="h-4 w-4" /> */}
-                  <span>Budget: <span className="font-medium text-theme-dark">{formatCurrency(Number(tender.budgetRange), 'GMD')}</span></span>
+                <div className="font-bold text-card-foreground text-base">
+                  {formatCurrency(Number(tender.budgetRange), 'GMD')}
                 </div>
               )}
-              <div className="text-sm text-theme-gray-dark">
+              {tender.deadline && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground font-medium">
+                  <Calendar className="h-3.5 w-3.5" />
+                  Deadline: {formatDeadline(tender.deadline)}
+                </div>
+              )}
+              <div className="text-xs text-muted-foreground font-medium">
                 Posted {formatPostedDate(tender.createdAt)}
               </div>
             </div>
 
-            {/* Action Buttons - Only show edit/delete for owners */}
-            {/* {canUserEdit() && (
-              <div className="flex items-center gap-xs">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/tenders/${tender.id}/edit`} className="gap-xs">
-                    <Edit className="h-4 w-4" />
-                  </Link>
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="gap-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            )} */}
+            <Link href={`/tenders/${tender.id}`} passHref className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-lg font-semibold text-sm shadow-sm transition-all hover:shadow-md">
+                View Details
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

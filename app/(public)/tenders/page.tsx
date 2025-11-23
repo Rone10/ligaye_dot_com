@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { Plus, FileText } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getUser } from '@/lib/supabase/server';
 import { getTenders, getTendersCount, getSectorsForFilter } from './_queries';
@@ -19,7 +19,7 @@ interface PageProps {
 
 export default async function TendersPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  
+
   // Parse search params
   const page = parseInt(params.page || '1', 10);
   const limit = parseInt(params.limit || '10', 10);
@@ -33,9 +33,6 @@ export default async function TendersPage({ searchParams }: PageProps) {
   // Get current user (for showing create button and edit/delete actions)
   const user = await getUser();
 
-  // // get user profile
-  // const profile = await getUserProfile(user?.id || '');
-
   // Fetch data in parallel
   const [tenders, totalCount, sectors] = await Promise.all([
     getTenders({ page, limit, filters }),
@@ -44,51 +41,48 @@ export default async function TendersPage({ searchParams }: PageProps) {
   ]);
 
   return (
-    <div className="min-h-screen bg-gradient-bg">
-      <div className="container mx-auto max-w-7xl px-md sm:px-lg md:px-xl lg:px-2xl py-xl">
-        {/* Enhanced Header */}
-        <div className="text-center space-y-lg mb-2xl">
-          <div className="space-y-md">
-            {/* <div className="flex justify-center">
-              <div className="p-lg bg-primary-blue/10 rounded-xl">
-                <FileText className="h-12 w-12 text-primary-blue" />
-              </div>
-            </div> */}
-            <h1 className="text-4xl lg:text-5xl font-bold text-theme-dark">Tenders</h1>
-            <p className="text-xl text-theme-gray-dark max-w-2xl mx-auto leading-relaxed">
-              Discover procurement opportunities and tender listings
-            </p>
-          </div>
-          
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">
+            Find <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Tenders</span>
+          </h1>
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+            Discover procurement opportunities and tender listings from various organizations.
+          </p>
+
           {user && user.user_metadata.role === 'employer' && (
-            <Button asChild className="shadow-level-2 hover:shadow-level-3 duration-standard">
-              <Link href="/tenders/new" className="gap-xs">
-                <Plus className="h-4 w-4" />
-                Submit New Tenders
-              </Link>
-            </Button>
+            <div className="mt-6">
+              <Button asChild className="shadow-sm hover:shadow-md transition-all">
+                <Link href="/tenders/new" className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Submit New Tender
+                </Link>
+              </Button>
+            </div>
           )}
         </div>
 
         {/* Tenders Page Content */}
         <Suspense fallback={
-          <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-xl">
+          <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-8">
             {/* Filter Sidebar Loading */}
-            <div className="lg:sticky lg:top-xl lg:h-fit">
-              <div className="glass-card p-xl rounded-xl shadow-level-2 h-[400px] flex items-center justify-center">
-                <div className="text-center space-y-sm">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-blue mx-auto"></div>
-                  <p className="text-theme-gray-dark">Loading filters...</p>
+            <div className="lg:sticky lg:top-8 lg:h-fit">
+              <div className="bg-card border border-border rounded-xl p-6 h-[400px] flex items-center justify-center">
+                <div className="text-center space-y-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="text-muted-foreground">Loading filters...</p>
                 </div>
               </div>
             </div>
-            
+
             {/* Tender Listings Loading */}
-            <div className="space-y-xl">
-              <div className="glass-card p-2xl rounded-xl shadow-level-2 flex items-center justify-center h-[400px]">
-                <div className="text-center space-y-sm">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue mx-auto"></div>
-                  <p className="text-theme-gray-dark text-lg">Loading tenders...</p>
+            <div className="space-y-8">
+              <div className="bg-card border border-border rounded-xl p-8 flex items-center justify-center h-[400px]">
+                <div className="text-center space-y-2">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                  <p className="text-muted-foreground text-lg">Loading tenders...</p>
                 </div>
               </div>
             </div>
@@ -106,4 +100,4 @@ export default async function TendersPage({ searchParams }: PageProps) {
       </div>
     </div>
   );
-} 
+}

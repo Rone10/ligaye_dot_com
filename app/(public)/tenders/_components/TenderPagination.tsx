@@ -1,0 +1,170 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useQueryState } from 'nuqs';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+
+interface TenderPaginationProps {
+    currentPage: number;
+    totalPages: number;
+}
+
+export function TenderPagination({ currentPage, totalPages }: TenderPaginationProps) {
+    const [page, setPage] = useQueryState('page');
+    const [limit, setLimit] = useQueryState('limit');
+
+    // Calculate which page buttons to show
+    const [visiblePages, setVisiblePages] = useState<(number | null)[]>([]);
+
+    useEffect(() => {
+        // Logic to determine which page numbers to show
+        const calculateVisiblePages = () => {
+            const pages: (number | null)[] = [];
+
+            // Always show first page
+            pages.push(1);
+
+            // Show dots if there's a gap after page 1
+            if (currentPage > 3) {
+                pages.push(null); // represents dots
+            }
+
+            // Show pages around current page
+            let start = Math.max(2, currentPage - 1);
+            let end = Math.min(totalPages - 1, currentPage + 1);
+
+            // Adjust start and end to always show 3 pages if possible
+            if (start === 2 && totalPages > 4) {
+                end = Math.min(4, totalPages - 1);
+            }
+            if (end === totalPages - 1 && totalPages > 4) {
+                start = Math.max(2, totalPages - 3);
+            }
+
+            // Add the range of pages
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+
+            // Show dots if there's a gap before the last page
+            if (currentPage < totalPages - 2) {
+                pages.push(null); // represents dots
+            }
+
+            // Always show last page if more than 1 page
+            if (totalPages > 1) {
+                pages.push(totalPages);
+            }
+
+            return pages;
+        };
+
+        setVisiblePages(calculateVisiblePages());
+    }, [currentPage, totalPages]);
+
+    const handlePageChange = (newPage: number) => {
+        // Scroll to top of page
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Update URL state
+        setPage(newPage.toString());
+    };
+
+    return (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+            {/* Mobile: Stacked, Desktop: Spread */}
+
+            {/* Spacer for centering pagination on desktop */}
+            <div className="hidden sm:block flex-1" />
+
+            <nav aria-label="Pagination" className="flex justify-center">
+                <ul className="flex items-center space-x-2">
+                    {/* Previous Page Button */}
+                    <li>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            disabled={currentPage === 1}
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            aria-label="Previous page"
+                            className="h-9 w-9 rounded-md"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                    </li>
+
+                    {/* Page Numbers */}
+                    {visiblePages.map((p: number | null, index: number) =>
+                        p === null ? (
+                            <li key={`dots-${index}`} className="px-2">
+                                <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
+                            </li>
+                        ) : (
+                            <li key={p}>
+                                <Button
+                                    variant={p === currentPage ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => handlePageChange(p)}
+                                    className={`h-9 w-9 rounded-md ${p === currentPage
+                                        ? "bg-primary hover:bg-primary/90 text-primary-foreground"
+                                        : "text-foreground hover:bg-muted"
+                                        }`}
+                                    aria-current={p === currentPage ? "page" : undefined}
+                                >
+                                    {p}
+                                </Button>
+                            </li>
+                        )
+                    )}
+
+                    {/* Next Page Button */}
+                    <li>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            disabled={currentPage === totalPages}
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            aria-label="Next page"
+                            className="h-9 w-9 rounded-md"
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </li>
+                </ul>
+            </nav>
+
+            {/* Page Size Selector */}
+            <div className="flex-1 flex justify-end w-full sm:w-auto">
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">Rows per page</span>
+                    <Select
+                        value={limit || '10'}
+                        onValueChange={(value: string) => {
+                            setLimit(value);
+                            setPage('1');
+                        }}
+                    >
+                        <SelectTrigger className="h-8 w-[70px]">
+                            <SelectValue placeholder={limit || '10'} />
+                        </SelectTrigger>
+                        <SelectContent side="top">
+                            {[10, 20, 50, 100].map((size) => (
+                                <SelectItem key={size} value={size.toString()}>
+                                    {size}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+        </div>
+    );
+}

@@ -27,17 +27,17 @@ export function TendersPageClient({
   const [isFiltering, setIsFiltering] = useState(false);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-xl">
+    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start">
       {/* Filter Sidebar */}
-      <div className="lg:sticky lg:top-xl lg:h-fit">
-        <TenderFilters 
-          sectors={sectors} 
+      <div className="lg:sticky lg:top-8 lg:h-fit">
+        <TenderFilters
+          sectors={sectors}
           onFilteringChange={setIsFiltering}
         />
       </div>
-      
+
       {/* Tender Listings */}
-      <div className="space-y-xl">
+      <div className="space-y-6 min-w-0">
         <TenderList
           tenders={tenders}
           totalCount={totalCount}
