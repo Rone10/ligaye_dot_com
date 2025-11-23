@@ -34,7 +34,7 @@ export default function CompanyMarquee({ companies }: CompanyMarqueeProps) {
     }
 
     return (
-        <div className="w-full overflow-hidden bg-white dark:bg-background py-8">
+        <div className="w-full overflow-hidden bg-background py-8">
             <div className="max-w-7xl mx-auto px-4 mb-6 text-center">
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Trusted by top companies hiring now
@@ -66,8 +66,8 @@ export default function CompanyMarquee({ companies }: CompanyMarqueeProps) {
                 </div>
 
                 {/* Gradient masks for smooth fade edges */}
-                <div className="absolute top-0 left-0 w-20 h-full bg-gradient-to-r from-white dark:from-background to-transparent z-10"></div>
-                <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-white dark:from-background to-transparent z-10"></div>
+                <div className="absolute top-0 left-0 w-20 h-full bg-gradient-to-r from-background to-transparent z-10"></div>
+                <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-background to-transparent z-10"></div>
             </div>
         </div>
     );
