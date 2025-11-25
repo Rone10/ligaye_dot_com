@@ -14,6 +14,7 @@ import { db } from '@/lib/db';
 import { employerProfiles, jobs } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import CompanyMarquee from './_components/CompanyMarquee';
+import TopJobsSection from './_components/TopJobsSection';
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSEOMetadata({
@@ -81,6 +82,8 @@ export default async function LandingPage() {
             <CompanyMarquee companies={companies} />
           </div>
 
+          {/* Top Jobs Section */}
+          <TopJobsSection />
 
 
 
