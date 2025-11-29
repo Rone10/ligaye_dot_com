@@ -102,7 +102,7 @@ export default function Navbar({ user }: NavbarProps) {
               </Link>
               <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
               <Link href="/sign-up" className={getLinkClass('/sign-up')}>
-                Create Account
+                Sign up
               </Link>
             </div>
           )}

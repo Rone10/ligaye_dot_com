@@ -11,6 +11,9 @@ export const signUpSchema = z.object({
   userRole: z.enum(['candidate', 'employer'], {
     required_error: "Please select your account type",
   }),
+  termsAccepted: z.boolean().refine((val) => val === true, {
+    message: "You must accept the terms and conditions",
+  }),
 })
 
 export type SignUpFormData = z.infer<typeof signUpSchema> 

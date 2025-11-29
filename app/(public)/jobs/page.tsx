@@ -112,7 +112,7 @@ export default async function JobsPage({ searchParams }: PageProps) {
             Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Perfect Job</span>
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Browse thousands of job openings from top employers in Gambia and take the next step in your career.
+            Browse jobs in The Gambia and take the next step in your career.
           </p>
         </div>
 
