@@ -26,15 +26,16 @@ export async function signUpUser(formData: FormData): Promise<SignUpActionResult
     email: formData.get('email'),
     password: formData.get('password'),
     userRole: formData.get('userRole'),
+    termsAccepted: formData.get('termsAccepted') === 'true',
   }
 
   // Arcjet protection - rate limiting, bot detection, and email validation
   const request = new Request('https://ligaye.com/sign-up', {
     headers: await headers(),
   });
-  
+
   const decision = await signupArcjet.protect(request);
-  
+
   if (decision.isDenied()) {
     return {
       success: false,
@@ -45,10 +46,10 @@ export async function signUpUser(formData: FormData): Promise<SignUpActionResult
   // Validate form data
   try {
     const validatedData = signUpSchema.parse(data)
-    
+
     // Create Supabase client
     const supabase = await createClient()
-    
+
     // Attempt to sign up the user with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: validatedData.email,
@@ -62,24 +63,24 @@ export async function signUpUser(formData: FormData): Promise<SignUpActionResult
         },
       },
     })
-    
+
     // Handle Supabase Auth errors
     if (authError) {
       console.error('Supabase Auth error:', authError)
-      return { 
-        success: false, 
-        error: authError.message 
+      return {
+        success: false,
+        error: authError.message
       }
     }
-    
+
     // Ensure user was created
     if (!authData.user) {
-      return { 
-        success: false, 
-        error: 'Failed to create user account.' 
+      return {
+        success: false,
+        error: 'Failed to create user account.'
       }
     }
-    
+
     // Create user profile in our database
     const fullName = `${validatedData.firstName} ${validatedData.lastName}`.trim()
     const profileResult = await createUserProfile(
@@ -87,7 +88,7 @@ export async function signUpUser(formData: FormData): Promise<SignUpActionResult
       fullName,
       validatedData.userRole // Use selected role
     )
-    
+
     // Handle profile creation errors
     if (!profileResult.success) {
       console.error('Profile creation error:', profileResult.error)
@@ -96,15 +97,15 @@ export async function signUpUser(formData: FormData): Promise<SignUpActionResult
         error: 'Account created but profile setup failed. Please contact support.'
       }
     }
-    
+
     // Success - return result
     return { success: true }
-    
+
   } catch (error) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
       const fieldErrors: Record<string, string[]> = {}
-      
+
       for (const issue of error.errors) {
         const field = issue.path[0] as string
         if (!fieldErrors[field]) {
@@ -112,13 +113,13 @@ export async function signUpUser(formData: FormData): Promise<SignUpActionResult
         }
         fieldErrors[field].push(issue.message)
       }
-      
+
       return {
         success: false,
         fieldErrors
       }
     }
-    
+
     // Handle other errors
     console.error('Sign-up error:', error)
     return {

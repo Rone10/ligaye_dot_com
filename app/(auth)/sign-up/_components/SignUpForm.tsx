@@ -18,6 +18,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { BriefcaseIcon, CheckCircle2, MailIcon, UserIcon, Eye, EyeOff, Check, X } from 'lucide-react'
 import { Controller } from 'react-hook-form'
+import { Checkbox } from '@/components/ui/checkbox'
 
 type PasswordStrength = 'weak' | 'medium' | 'strong'
 
@@ -72,6 +73,7 @@ export function SignUpForm() {
       email: '',
       password: '',
       userRole: 'candidate',
+      termsAccepted: false,
     },
   })
 
@@ -82,7 +84,7 @@ export function SignUpForm() {
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true)
     setFormError(null)
-    
+
     try {
       const formData = new FormData()
       formData.append('firstName', data.firstName)
@@ -90,9 +92,10 @@ export function SignUpForm() {
       formData.append('email', data.email)
       formData.append('password', data.password)
       formData.append('userRole', data.userRole)
-      
+      formData.append('termsAccepted', String(data.termsAccepted))
+
       const result = await signUpUser(formData)
-      
+
       if (!result.success) {
         // Handle field-specific errors
         if (result.fieldErrors) {
@@ -103,22 +106,22 @@ export function SignUpForm() {
             })
           })
         }
-        
+
         // Handle general error
         if (result.error) {
           setFormError(result.error)
         }
-        
+
         return
       }
-      
+
       // Store email for the success message
       setUserEmail(data.email)
-      
+
       // Handle success
       setFormSuccess(true)
       toast.success('Account created! Please check your email to verify your account.')
-      
+
     } catch (error) {
       setFormError('An unexpected error occurred. Please try again.')
       console.error('Form submission error:', error)
@@ -126,7 +129,7 @@ export function SignUpForm() {
       setIsLoading(false)
     }
   }
-  
+
   if (formSuccess) {
     return (
       <Card className="glass-card w-full max-w-md mx-auto shadow-level-2 animate-appear-zoom">
@@ -154,12 +157,12 @@ export function SignUpForm() {
               </p>
             </div>
           </div>
-          
+
           <div className="text-center">
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               className="button-primary w-full"
-              onClick={() => router.push('/sign-in')} 
+              onClick={() => router.push('/sign-in')}
             >
               Continue to Sign In
             </Button>
@@ -174,7 +177,7 @@ export function SignUpForm() {
       </Card>
     )
   }
-  
+
   return (
     <Card className="glass-card w-full max-w-md mx-auto shadow-level-2 animate-appear-zoom">
       <CardHeader className="space-y-1">
@@ -190,7 +193,7 @@ export function SignUpForm() {
               <AlertDescription>{formError}</AlertDescription>
             </Alert>
           )}
-          
+
           <div className="grid grid-cols-2 gap-md">
             <div className="space-y-xs">
               <Label htmlFor="firstName" className="text-dark font-medium">First Name</Label>
@@ -205,7 +208,7 @@ export function SignUpForm() {
                 <p className="text-sm text-destructive">{errors.firstName.message}</p>
               )}
             </div>
-            
+
             <div className="space-y-xs">
               <Label htmlFor="lastName" className="text-dark font-medium">Last Name</Label>
               <Input
@@ -220,7 +223,7 @@ export function SignUpForm() {
               )}
             </div>
           </div>
-          
+
           <div className="space-y-xs">
             <Label htmlFor="email" className="text-dark font-medium">Email</Label>
             <Input
@@ -235,7 +238,7 @@ export function SignUpForm() {
               <p className="text-sm text-destructive">{errors.email.message}</p>
             )}
           </div>
-          
+
           <div className="space-y-xs">
             <Label htmlFor="password" className="text-dark font-medium">Password</Label>
             <div className="relative">
@@ -317,14 +320,14 @@ export function SignUpForm() {
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
           </div>
-          
+
           <div className="space-y-sm">
             <Label className="text-dark font-medium">Account Type</Label>
             <Controller
               name="userRole"
               control={control}
               render={({ field }) => (
-                <RadioGroup 
+                <RadioGroup
                   defaultValue={field.value}
                   className="grid grid-cols-2 gap-md pt-xs"
                   onValueChange={field.onChange}
@@ -345,7 +348,7 @@ export function SignUpForm() {
                       <span className="text-base font-medium">Job Seeker</span>
                     </Label>
                   </div>
-                  
+
                   <div>
                     <RadioGroupItem
                       value="employer"
@@ -368,9 +371,35 @@ export function SignUpForm() {
               <p className="text-sm text-destructive">{errors.userRole.message}</p>
             )}
           </div>
-          
-          <Button 
-            type="submit" 
+
+          <div className="flex items-start space-x-2 pt-2">
+            <Controller
+              name="termsAccepted"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  id="terms"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isLoading}
+                />
+              )}
+            />
+            <div className="grid gap-1.5 leading-none">
+              <Label
+                htmlFor="terms"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                By signing up, I agree to the <Link href="/terms" className="text-primary-blue hover:underline">Terms of Use</Link> of Ligaye.
+              </Label>
+              {errors.termsAccepted && (
+                <p className="text-sm text-destructive">{errors.termsAccepted.message}</p>
+              )}
+            </div>
+          </div>
+
+          <Button
+            type="submit"
             className="button-primary w-full"
             disabled={isLoading}
           >
