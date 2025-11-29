@@ -15,18 +15,6 @@ export default async function AuthLayout({
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--bg-gradient-from))] to-[hsl(var(--bg-gradient-to))]">
       <Navbar user={user} />
       <div className="container mx-auto px-4 py-8">
-        {/* Header with logo */}
-        <header className="mb-8 mt-4">
-          <Link href="/" className="flex justify-center">
-            <div className="relative h-12 w-32">
-              {/* Replace with your actual logo */}
-              <div className="flex items-center justify-center">
-                <h1 className="text-4xl font-bold text-primary-blue">Ligaye</h1>
-              </div>
-            </div>
-          </Link>
-        </header>
-
         {/* Main content */}
         <main className="mb-20">
           {children}
