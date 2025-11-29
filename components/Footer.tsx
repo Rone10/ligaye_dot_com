@@ -13,7 +13,9 @@ export default function Footer() {
           <Link href="/pricing" className="hover:underline">Pricing</Link>
           <Link href="/contact-us" className="hover:underline">Support</Link>
           <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
+          <Link href="/terms" className="hover:underline">Terms of Use</Link>
         </div>
+
 
         <div className="text-sm text-gray-500 dark:text-gray-500 whitespace-nowrap">
           <p>&copy; {currentYear} Ligaye. All rights reserved.</p>
