@@ -30,6 +30,7 @@ export interface PaginationState {
 export interface JobListItem {
   id: string;
   title: string;
+  companyId: string;
   companyName: string | null;
   companyLogoUrl: string | null;
   locationName: string | null;

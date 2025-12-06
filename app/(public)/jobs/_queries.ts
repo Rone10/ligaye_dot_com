@@ -244,6 +244,7 @@ async function getFilteredJobsData(
       // Job data
       id: jobs.id,
       title: jobs.title,
+      companyId: jobs.companyId,
       companyName: employerProfiles.companyName,
       companyLogoUrl: employerProfiles.companyLogoUrl,
       locationName: locations.city,
@@ -277,6 +278,7 @@ async function getFilteredJobsData(
   const processedJobs = results.map(job => ({
     id: job.id,
     title: job.title,
+    companyId: job.companyId,
     companyName: job.companyName,
     companyLogoUrl: job.companyLogoUrl,
     locationName: job.locationName,

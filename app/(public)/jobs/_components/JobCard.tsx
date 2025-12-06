@@ -59,23 +59,47 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
     <div className="group bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
       <div className="flex items-start gap-5">
         {/* Company Logo/Initial */}
-        <div className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center font-bold text-xl shadow-sm border border-border"
-          style={{
-            backgroundColor: job.companyLogoUrl ? '#ffffff' : 'hsl(var(--muted))',
-            color: job.companyLogoUrl ? 'inherit' : 'hsl(var(--muted-foreground))'
-          }}>
-          {job.companyLogoUrl ? (
-            <Image
-              src={job.companyLogoUrl}
-              alt={`${job.companyName || 'Company'} logo`}
-              width={56}
-              height={56}
-              className="object-contain p-1"
-            />
-          ) : (
-            <span>{companyInitial}</span>
-          )}
-        </div>
+        {job.companyId ? (
+          <Link
+            href={`/companies/${job.companyId}`}
+            className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center font-bold text-xl shadow-sm border border-border transition-transform hover:scale-105"
+            style={{
+              backgroundColor: job.companyLogoUrl ? '#ffffff' : 'hsl(var(--muted))',
+              color: job.companyLogoUrl ? 'inherit' : 'hsl(var(--muted-foreground))'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {job.companyLogoUrl ? (
+              <Image
+                src={job.companyLogoUrl}
+                alt={`${job.companyName || 'Company'} logo`}
+                width={56}
+                height={56}
+                className="object-contain p-1"
+              />
+            ) : (
+              <span>{companyInitial}</span>
+            )}
+          </Link>
+        ) : (
+          <div className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center font-bold text-xl shadow-sm border border-border"
+            style={{
+              backgroundColor: job.companyLogoUrl ? '#ffffff' : 'hsl(var(--muted))',
+              color: job.companyLogoUrl ? 'inherit' : 'hsl(var(--muted-foreground))'
+            }}>
+            {job.companyLogoUrl ? (
+              <Image
+                src={job.companyLogoUrl}
+                alt={`${job.companyName || 'Company'} logo`}
+                width={56}
+                height={56}
+                className="object-contain p-1"
+              />
+            ) : (
+              <span>{companyInitial}</span>
+            )}
+          </div>
+        )}
 
         {/* Job Information */}
         <div className="flex-grow min-w-0">
@@ -90,10 +114,21 @@ export function JobCard({ job, onSave, isSaved = false }: JobCardProps) {
                 </Link>
               </h3>
               <div className="mt-1 flex items-center flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                <span className="font-medium text-foreground flex items-center gap-1">
-                  <Building2 className="w-3.5 h-3.5" />
-                  {job.companyName}
-                </span>
+                {job.companyId ? (
+                  <Link
+                    href={`/companies/${job.companyId}`}
+                    className="font-medium text-foreground flex items-center gap-1 hover:text-primary-blue transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Building2 className="w-3.5 h-3.5" />
+                    {job.companyName}
+                  </Link>
+                ) : (
+                  <span className="font-medium text-foreground flex items-center gap-1">
+                    <Building2 className="w-3.5 h-3.5" />
+                    {job.companyName}
+                  </span>
+                )}
                 <span className="flex items-center gap-1">
                   <MapPinIcon className="w-3.5 h-3.5" />
                   {job.locationName || (job.workLocation === 'REMOTE' ? 'Remote' : 'Location Not Specified')}

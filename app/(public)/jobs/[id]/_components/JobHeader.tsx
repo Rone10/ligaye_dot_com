@@ -131,25 +131,56 @@ export default function JobHeader({ job, hasApplied = false, isSaved = false, fr
           </div>
           
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-muted rounded-full flex-shrink-0 overflow-hidden">
-              {job.company?.companyLogoUrl ? (
-                <Image 
-                  src={job.company.companyLogoUrl} 
-                  alt={job.company.companyName || 'Company logo'} 
-                  className="w-full h-full object-cover" 
-                  width={40}
-                  height={40}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                  {job.company?.companyName?.charAt(0) || 'C'}
+            {job.company?.id ? (
+              <Link 
+                href={`/companies/${job.company.id}`}
+                className="flex items-center group"
+              >
+                <div className="w-10 h-10 bg-muted rounded-full flex-shrink-0 overflow-hidden transition-transform group-hover:scale-105">
+                  {job.company?.companyLogoUrl ? (
+                    <Image 
+                      src={job.company.companyLogoUrl} 
+                      alt={job.company.companyName || 'Company logo'} 
+                      className="w-full h-full object-cover" 
+                      width={40}
+                      height={40}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      {job.company?.companyName?.charAt(0) || 'C'}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div className="ml-3">
-              <h2 className="text-lg font-semibold text-theme-dark">{job.company?.companyName}</h2>
-              <p className="text-theme-gray-dark">{locationDisplay}</p>
-            </div>
+                <div className="ml-3">
+                  <h2 className="text-lg font-semibold text-theme-dark group-hover:text-primary-blue transition-colors">
+                    {job.company?.companyName}
+                  </h2>
+                  <p className="text-theme-gray-dark">{locationDisplay}</p>
+                </div>
+              </Link>
+            ) : (
+              <>
+                <div className="w-10 h-10 bg-muted rounded-full flex-shrink-0 overflow-hidden">
+                  {job.company?.companyLogoUrl ? (
+                    <Image 
+                      src={job.company.companyLogoUrl} 
+                      alt={job.company.companyName || 'Company logo'} 
+                      className="w-full h-full object-cover" 
+                      width={40}
+                      height={40}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      {job.company?.companyName?.charAt(0) || 'C'}
+                    </div>
+                  )}
+                </div>
+                <div className="ml-3">
+                  <h2 className="text-lg font-semibold text-theme-dark">{job.company?.companyName}</h2>
+                  <p className="text-theme-gray-dark">{locationDisplay}</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
         
