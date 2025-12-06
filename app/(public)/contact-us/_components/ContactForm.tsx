@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail } from "lucide-react";
 import { contactFormSchema, type ContactFormValues } from "../_utils/validation";
 import { sendContactMessage } from "../_actions";
 
@@ -60,40 +60,27 @@ export default function ContactForm() {
                     <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Contact</span> Us
                     </h1>
-                    <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+                    <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
                         Have a question or feedback? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
                     </p>
-                </div>
-
-                {/* Contact Information Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <Card className="bg-card border border-border rounded-xl">
-                        <CardContent className="p-6 text-center">
-                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
-                                <Mail className="h-6 w-6 text-primary" />
+                    
+                    {/* Contact Information */}
+                    <Card className="bg-card border border-border rounded-xl inline-block">
+                        <CardContent className="p-4 md:p-6">
+                            <div className="flex items-center gap-3 md:gap-4">
+                                <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 flex-shrink-0">
+                                    <Mail className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                                </div>
+                                <div className="text-left">
+                                    <h3 className="font-semibold text-sm md:text-base mb-0.5">Email Us</h3>
+                                    <a 
+                                        href="mailto:support@ligaye.com" 
+                                        className="text-muted-foreground text-sm md:text-base hover:text-primary transition-colors"
+                                    >
+                                        support@ligaye.com
+                                    </a>
+                                </div>
                             </div>
-                            <h3 className="font-semibold mb-1">Email</h3>
-                            <p className="text-muted-foreground text-sm">support@ligaye.com</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-card border border-border rounded-xl">
-                        <CardContent className="p-6 text-center">
-                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
-                                <Phone className="h-6 w-6 text-primary" />
-                            </div>
-                            <h3 className="font-semibold mb-1">Phone</h3>
-                            <p className="text-muted-foreground text-sm">+220 3139076</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-card border border-border rounded-xl">
-                        <CardContent className="p-6 text-center">
-                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
-                                <MapPin className="h-6 w-6 text-primary" />
-                            </div>
-                            <h3 className="font-semibold mb-1">Location</h3>
-                            <p className="text-muted-foreground text-sm">Banjul, The Gambia</p>
                         </CardContent>
                     </Card>
                 </div>

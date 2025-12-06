@@ -244,19 +244,7 @@ export function generateLocalBusinessSchema(): WithContext<Organization> {
     url: BASE_URL,
     logo: `${BASE_URL}/branding/full_logo.png`,
     image: `${BASE_URL}/branding/full_logo.png`,
-    telephone: '+220 3139076',
     email: 'support@ligaye.com',
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'Banjul',
-      addressCountry: 'GM',
-      postalCode: '00220',
-    },
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: 13.4549,
-      longitude: -16.5790,
-    },
     openingHoursSpecification: {
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
