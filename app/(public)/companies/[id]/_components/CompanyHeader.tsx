@@ -50,25 +50,25 @@ export default function CompanyHeader({ company }: CompanyHeaderProps) {
             {company.companyName}
           </h1>
           
-          <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-foreground">
             {company.industry && (
               <div className="flex items-center gap-1.5">
                 <Building2 className="h-4 w-4" />
-                <span>{company.industry.name}</span>
+                <span className="text-foreground">{company.industry.name}</span>
               </div>
             )}
             
             {locationDisplay && locationDisplay !== 'Location not specified' && (
               <div className="flex items-center gap-1.5">
                 <MapPin className="h-4 w-4" />
-                <span>{locationDisplay}</span>
+                <span className="text-foreground">{locationDisplay}</span>
               </div>
             )}
             
             {company.companySize && (
               <div className="flex items-center gap-1.5">
                 <Users className="h-4 w-4" />
-                <span>{company.companySize} employees</span>
+                <span className="text-foreground">{company.companySize} employees</span>
               </div>
             )}
             

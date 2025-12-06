@@ -23,12 +23,12 @@ export default function CompanyInfo({ company }: CompanyInfoProps) {
       <CardContent className="p-6 space-y-6">
         {company.companyDescription ? (
           <div className="prose max-w-none">
-            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+            <p className="text-foreground whitespace-pre-wrap">
               {company.companyDescription}
             </p>
           </div>
         ) : (
-          <p className="text-gray-500 italic">No company description available</p>
+          <p className="text-foreground italic">No company description available</p>
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
@@ -36,8 +36,8 @@ export default function CompanyInfo({ company }: CompanyInfoProps) {
             <div className="flex items-start gap-3">
               <Building2 className="h-5 w-5 text-primary-blue mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Industry</p>
-                <p className="text-base font-semibold">{company.industry.name}</p>
+                <p className="text-sm font-medium text-foreground">Industry</p>
+                <p className="text-base font-semibold text-foreground">{company.industry.name}</p>
               </div>
             </div>
           )}
@@ -46,8 +46,8 @@ export default function CompanyInfo({ company }: CompanyInfoProps) {
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 text-primary-blue mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Location</p>
-                <p className="text-base font-semibold">{locationDisplay}</p>
+                <p className="text-sm font-medium text-foreground">Location</p>
+                <p className="text-base font-semibold text-foreground">{locationDisplay}</p>
               </div>
             </div>
           )}
@@ -56,8 +56,8 @@ export default function CompanyInfo({ company }: CompanyInfoProps) {
             <div className="flex items-start gap-3">
               <Users className="h-5 w-5 text-primary-blue mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Company Size</p>
-                <p className="text-base font-semibold">{company.companySize} employees</p>
+                <p className="text-sm font-medium text-foreground">Company Size</p>
+                <p className="text-base font-semibold text-foreground">{company.companySize} employees</p>
               </div>
             </div>
           )}
@@ -66,7 +66,7 @@ export default function CompanyInfo({ company }: CompanyInfoProps) {
             <div className="flex items-start gap-3">
               <Globe className="h-5 w-5 text-primary-blue mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Website</p>
+                <p className="text-sm font-medium text-foreground">Website</p>
                 <a
                   href={company.website}
                   target="_blank"
