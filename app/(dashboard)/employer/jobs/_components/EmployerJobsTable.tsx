@@ -138,9 +138,11 @@ export default function EmployerJobsTable({ jobs }: EmployerJobsTableProps) {
             
             return (
               <TableRow key={job.id}>
-                <Link href={`/employer/jobs/${job.id}`}>
-                <TableCell className="font-medium">{job.title}</TableCell>
-                </Link>
+                <TableCell className="font-medium">
+                  <Link href={`/employer/jobs/${job.id}`} className="hover:underline">
+                    {job.title}
+                  </Link>
+                </TableCell>
                 <TableCell>
                   <Badge 
                     variant={statusBadge.variant}
@@ -155,12 +157,24 @@ export default function EmployerJobsTable({ jobs }: EmployerJobsTableProps) {
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   {job.publishedAt 
-                    ? formatDistance(new Date(job.publishedAt), new Date(), { addSuffix: true })
+                    ? (() => {
+                        const publishedDate = new Date(job.publishedAt)
+                        if (isNaN(publishedDate.getTime())) {
+                          return 'Invalid date'
+                        }
+                        return formatDistance(publishedDate, new Date(), { addSuffix: true })
+                      })()
                     : 'Not published'}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   {job.expiresAt 
-                    ? format(new Date(job.expiresAt), 'dd MMM yyyy')
+                    ? (() => {
+                        const expiresDate = new Date(job.expiresAt)
+                        if (isNaN(expiresDate.getTime())) {
+                          return 'Invalid date'
+                        }
+                        return format(expiresDate, 'dd MMM yyyy')
+                      })()
                     : 'N/A'}
                 </TableCell>
                 <TableCell className="text-right">
