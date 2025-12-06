@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { formatDistance } from 'date-fns'
+import { useSearchParams } from 'next/navigation'
 import { 
   Table, 
   TableBody, 
@@ -50,6 +51,25 @@ interface ApplicationsDataTableProps {
 }
 
 export default function ApplicationsDataTable({ applications }: ApplicationsDataTableProps) {
+  const searchParams = useSearchParams()
+  
+  // Build query string from current search params to preserve filters
+  const buildQueryString = () => {
+    const params = new URLSearchParams()
+    const status = searchParams.get('status')
+    const q = searchParams.get('q')
+    const sort = searchParams.get('sort')
+    
+    if (status) params.set('status', status)
+    if (q) params.set('q', q)
+    if (sort) params.set('sort', sort)
+    
+    const queryString = params.toString()
+    return queryString ? `?${queryString}` : ''
+  }
+  
+  const queryString = buildQueryString()
+  
   if (!applications.length) {
     return null; // Empty state is handled in the parent component
   }
@@ -86,7 +106,7 @@ export default function ApplicationsDataTable({ applications }: ApplicationsData
                 <TableRow key={item.application.id} className="hover:bg-blue-50 transition-colors">
                   <TableCell>
                     <Link 
-                      href={`/employer/jobs/applicants/${item.application.id}`}
+                      href={`/employer/jobs/applicants/${item.application.id}${queryString}`}
                       className="flex items-center gap-3 hover:underline group"
                     >
                       <Avatar className="h-10 w-10 border border-gray-200">

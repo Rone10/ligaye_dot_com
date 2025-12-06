@@ -51,10 +51,16 @@ interface PageParams {
 
 interface PageProps {
   params: Promise<PageParams>
+  searchParams: Promise<{
+    status?: string
+    q?: string
+    sort?: string
+  }>
 }
 
-export default async function ApplicationDetailPage({ params }: PageProps) {
+export default async function ApplicationDetailPage({ params, searchParams }: PageProps) {
   const { id: applicationId } = await params
+  const searchParamsData = await searchParams
   const user = await getUser()
   
   if (!user) {
@@ -185,10 +191,23 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     experience: formattedExperience
   };
   
+  // Build query string from search params to preserve filters
+  const buildBackLinkQueryString = () => {
+    const params = new URLSearchParams()
+    if (searchParamsData.status) params.set('status', searchParamsData.status)
+    if (searchParamsData.q) params.set('q', searchParamsData.q)
+    if (searchParamsData.sort) params.set('sort', searchParamsData.sort)
+    
+    const queryString = params.toString()
+    return queryString ? `?${queryString}` : ''
+  }
+  
+  const backLinkQueryString = buildBackLinkQueryString()
+  
   return (
     <div className="container mx-auto py-10">
       <div className="mb-8">
-        <Link href="/employer/jobs/applicants">
+        <Link href={`/employer/jobs/applicants${backLinkQueryString}`}>
           <Button variant="ghost" className="mb-4">
             <ChevronLeft className="mr-2 h-4 w-4" />
             Back to Applications
