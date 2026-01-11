@@ -2,7 +2,9 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
 import { getUser } from '@/lib/supabase/server';
+import { formArcjet } from '@/lib/arcjet';
 import { newTenderSchema, type NewTenderSchemaType } from './_utils/validation';
 import { insertTender, createTenderWithDocuments, saveTenderDocumentMetadata } from './_queries';
 import { uploadTenderDocument } from '@/lib/utils/file-upload';
@@ -18,6 +20,15 @@ export async function createTenderAction(formData: NewTenderSchemaType): Promise
   error?: string;
 }> {
   try {
+    // Rate limiting and bot protection
+    const request = new Request('https://ligaye.com/tenders/new', {
+      headers: await headers(),
+    });
+    const decision = await formArcjet.protect(request);
+    if (decision.isDenied()) {
+      return { success: false, error: 'Too many tender creation attempts. Please try again later.' };
+    }
+
     // Get current user from Supabase Auth
     const user = await getUser();
     if (!user || user.user_metadata.role !== 'employer') {
@@ -48,6 +59,15 @@ export async function createTenderWithDocumentsAction(
   formData: FormData
 ): Promise<{ success: boolean; tenderId?: string; error?: string }> {
   try {
+    // Rate limiting and bot protection
+    const request = new Request('https://ligaye.com/tenders/new', {
+      headers: await headers(),
+    });
+    const decision = await formArcjet.protect(request);
+    if (decision.isDenied()) {
+      return { success: false, error: 'Too many tender creation attempts. Please try again later.' };
+    }
+
     // Get authenticated user
     const user = await getUser();
     if (!user || user.user_metadata.role !== 'employer') {
