@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { createArcjet, publicRouteRateLimit } from '@/lib/arcjet'
+import { createArcjet, publicRouteRateLimit, aggressiveBotProtection } from '@/lib/arcjet'
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -20,11 +20,32 @@ export async function middleware(request: NextRequest) {
   const isPublicRoute = pathname.match(/^\/($|jobs|tenders|about|contact-us|privacy|terms)/);
 
   if (isPublicRoute) {
-    const aj = createArcjet([publicRouteRateLimit]);
+    // Combine bot protection with rate limiting for public routes
+    const aj = createArcjet([aggressiveBotProtection, publicRouteRateLimit]);
     const decision = await aj.protect(request);
 
+    // Block detected bots that aren't in allow list
     if (decision.isDenied()) {
-      console.log(`Rate limit exceeded for IP: ${request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'} on path: ${pathname}`);
+      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+      const userAgent = request.headers.get('user-agent') || 'unknown';
+      
+      // Check if it's a bot denial or rate limit denial
+      const isBot = decision.reason.isBot?.();
+      
+      if (isBot) {
+        console.log(`Bot blocked - IP: ${ip}, UA: ${userAgent}, path: ${pathname}`);
+        return new NextResponse(
+          'Access denied',
+          {
+            status: 403,
+            headers: {
+              'Content-Type': 'text/plain',
+            }
+          }
+        );
+      }
+      
+      console.log(`Rate limit exceeded for IP: ${ip} on path: ${pathname}`);
 
       return new NextResponse(
         JSON.stringify({

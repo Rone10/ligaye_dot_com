@@ -1,8 +1,71 @@
 # Ligaye.com Robots.txt
-# Allow all search engines to crawl the site
+# Optimized for bot traffic control
 
+# Block aggressive/malicious bots first
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: MegaIndex
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+# Rules for all other bots (including legitimate search engines)
 User-agent: *
 Allow: /
+Allow: /jobs
+Allow: /jobs/*
+Allow: /tenders
+Allow: /blog
+Allow: /blog/*
+Allow: /about-us
+Allow: /contact-us
+Allow: /pricing
+Allow: /privacy
+Allow: /terms
 
 # Disallow admin and dashboard areas
 Disallow: /admin/
@@ -16,6 +79,9 @@ Disallow: /update-password
 
 # Disallow API routes
 Disallow: /api/
+
+# Add crawl delay to slow down bots (in seconds)
+Crawl-delay: 10
 
 # Sitemap location
 Sitemap: https://ligaye.com/sitemap.xml

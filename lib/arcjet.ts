@@ -29,6 +29,16 @@ export const botProtection = detectBot({
   allow: [], // Block all detected bots
 });
 
+// Rule 2b: Aggressive bot protection for public pages - allow only legitimate search engines
+export const aggressiveBotProtection = detectBot({
+  mode: "LIVE",
+  // Only allow legitimate search engine bots
+  allow: [
+    "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc.
+    "CATEGORY:PREVIEW",       // Link preview bots (Slack, Discord, etc.)
+  ],
+});
+
 // Rule 3: Email validation
 export const emailValidation = validateEmail({
   mode: "LIVE",
